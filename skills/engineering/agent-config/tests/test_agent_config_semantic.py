@@ -35,6 +35,22 @@ from candidate_selector import select_configuration
 from agent_config import agent_config_recommend
 
 
+def fresh_host_and_profile() -> tuple[dict, dict]:
+    """Canonical multi-model fixtures with Host evidence stamped now (the planner rejects stale evidence)."""
+    fixtures = Path(__file__).resolve().parent / "fixtures"
+    host = json.loads((fixtures / "case-a-tiered-single-pass.json").read_text())
+    confirmed_profile = json.loads((fixtures / "profile-multi-model.json").read_text())
+    now = datetime.now(timezone.utc).isoformat()
+    host["workspace"] = confirmed_profile["scope"]["workspace"]
+    host["observed_at"] = now
+    for model in host["available_models"]:
+        model["evidence"]["observed_at"] = now
+    for capability in host["capabilities"].values():
+        if capability.get("evidence"):
+            capability["evidence"]["observed_at"] = now
+    return host, confirmed_profile
+
+
 class AgentConfigSemanticTest(unittest.TestCase):
     def test_effort_resolution_safety(self) -> None:
         """Verify effort policy resolves strictly to host-supported values and never literal 'max'."""
@@ -536,17 +552,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         failing_client = MagicMock()
         failing_client.system_one.side_effect = RuntimeError("Simulated API failure")
 
-        fixtures = Path(__file__).resolve().parent / "fixtures"
-        host = json.loads((fixtures / "case-a-tiered-single-pass.json").read_text())
-        confirmed_profile = json.loads((fixtures / "profile-multi-model.json").read_text())
-        now = datetime.now(timezone.utc).isoformat()
-        host["workspace"] = confirmed_profile["scope"]["workspace"]
-        host["observed_at"] = now
-        for model in host["available_models"]:
-            model["evidence"]["observed_at"] = now
-        for capability in host["capabilities"].values():
-            if capability.get("evidence"):
-                capability["evidence"]["observed_at"] = now
+        host, confirmed_profile = fresh_host_and_profile()
         task = TaskCharacteristics(
             title="Critical bug",
             description="Fix critical vulnerability",
@@ -569,17 +575,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
     def test_profile_effort_does_not_leak_into_caller_task(self) -> None:
         """The Profile effort policy applies to one plan; the caller's task stays unchanged."""
-        fixtures = Path(__file__).resolve().parent / "fixtures"
-        host = json.loads((fixtures / "case-a-tiered-single-pass.json").read_text())
-        confirmed_profile = json.loads((fixtures / "profile-multi-model.json").read_text())
-        now = datetime.now(timezone.utc).isoformat()
-        host["workspace"] = confirmed_profile["scope"]["workspace"]
-        host["observed_at"] = now
-        for model in host["available_models"]:
-            model["evidence"]["observed_at"] = now
-        for capability in host["capabilities"].values():
-            if capability.get("evidence"):
-                capability["evidence"]["observed_at"] = now
+        host, confirmed_profile = fresh_host_and_profile()
         task = TaskCharacteristics(title="Fix typo", difficulty="routine", difficulty_source="explicit-user")
 
         first = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_jev=False)
