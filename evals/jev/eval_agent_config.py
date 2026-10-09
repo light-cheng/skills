@@ -20,9 +20,11 @@ Covers representative scenarios specified in Section 35 of SPEC:
 
 from __future__ import annotations
 
+import copy
 import json
 import sys
 from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -34,10 +36,88 @@ if str(AGENT_CONFIG_SCRIPTS) not in sys.path:
 from agent_config_models import (
     AbstractTaskProfile,
     AgentConfigResult,
-    HostCapabilities,
     TaskCharacteristics,
 )
 from agent_config import agent_config_recommend
+
+# Canonical Host evidence and user-confirmed Profiles, in the shape the companion
+# returns (see skills/engineering/agent-config/references/host-evidence-schema.md
+# and profile-schema.md). Timestamps are stamped at evaluation time because the
+# planner rejects Host evidence older than 24 hours.
+HOST_ID = "eval-host"
+ADAPTER_ID = "eval-adapter"
+WORKSPACE = "/eval/workspace"
+MULTI_MODELS = ["model-alpha", "model-beta", "model-gamma"]
+
+
+def _host(
+    models: List[str],
+    effort: tuple = ("low", "medium", "high"),
+    selector: str = "available",
+) -> Dict[str, Any]:
+    evidence = {"kind": "host-runtime", "locator": "eval fixture"}
+    capabilities: Dict[str, Any] = {
+        "model_selection": {
+            "state": selector,
+            "scopes": ["current-session", "new-session", "per-agent"] if selector == "available" else [],
+            "evidence": evidence,
+        },
+        "reasoning": {"state": "available" if effort else "unavailable", "evidence": evidence},
+        "subagents": {"state": "available", "evidence": evidence},
+    }
+    return {
+        "host_id": HOST_ID,
+        "adapter_id": ADAPTER_ID,
+        "workspace": WORKSPACE,
+        "available_models": [{"id": m, "state": "available", "evidence": evidence} for m in models],
+        "supported_effort_values": list(effort),
+        "capabilities": capabilities,
+    }
+
+
+def _profile_base(mode: str) -> Dict[str, Any]:
+    return {
+        "profile_version": 1,
+        "host": {"id": HOST_ID, "adapter": ADAPTER_ID},
+        "scope": {"type": "project", "workspace": WORKSPACE},
+        "model_mode": mode,
+    }
+
+
+def _multi_profile(effort: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    efforts = {
+        "routine": {"value": "low"},
+        "standard": {"value": "medium"},
+        "high": {"policy": "highest-supported"},
+        "review": {"policy": "highest-supported"},
+    }
+    models = {"routine": "model-alpha", "standard": "model-beta", "high": "model-gamma", "review": "model-gamma"}
+    profile = _profile_base("multi")
+    profile["tiers"] = {
+        tier: {"model": model, "source": "user-confirmed", "effort": dict(effort or efforts[tier])}
+        for tier, model in models.items()
+    }
+    return profile
+
+
+def _single_profile(model: str, effort: Dict[str, str]) -> Dict[str, Any]:
+    profile = _profile_base("single")
+    profile["single_model"] = {"model": model, "execution_effort": dict(effort), "review_effort": dict(effort)}
+    return profile
+
+
+MULTI_PROFILE = _multi_profile()
+
+
+def _active_session(model: str, now: str) -> Dict[str, Any]:
+    return {
+        "host_id": HOST_ID,
+        "adapter_id": ADAPTER_ID,
+        "workspace": WORKSPACE,
+        "model": model,
+        "observed_at": now,
+        "evidence": {"kind": "host-runtime", "locator": "eval fixture", "observed_at": now},
+    }
 
 
 @dataclass
@@ -64,10 +144,12 @@ class AgentConfigScenario:
     """Runtime scenario specification separating inputs from ground truth."""
     id: str
     name: str
-    host: HostCapabilities
+    host: Dict[str, Any]  # Canonical Host evidence without timestamps
     task: TaskCharacteristics  # Runtime input (never contains ground truth)
     approval: str  # "unknown", "approved", "declined"
     expected: AgentConfigExpected  # Evaluator-only ground truth
+    profile: Dict[str, Any] = field(default_factory=dict)  # Canonical user-confirmed Profile
+    active_model: Optional[str] = None  # Model the current session is verified to run
     notes: str = ""
 
     @property
@@ -119,12 +201,8 @@ SCENARIOS: List[AgentConfigScenario] = [
     AgentConfigScenario(
         id="AC-01",
         name="Routine documentation edit",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Fix typo in README",
             description="Fix spelling error in installation section",
@@ -134,9 +212,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="routine",
-            expected_model="gpt-4o-mini",
+            expected_model="model-alpha",
             expected_topology="Case C",
             expected_readiness="READY",
+            expected_resolved_effort="low",
             expected_min_complexity=0.0,
             expected_max_complexity=0.5,
             expected_complexity_tier="routine",
@@ -144,17 +223,14 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=0.8,
             expected_reasoning_level="low",
         ),
-        notes="Routine task maps to routine tier (gpt-4o-mini).",
+        notes="Multi-model Profile: routine tier model and the routine tier's confirmed effort.",
     ),
     AgentConfigScenario(
         id="AC-02",
         name="Small bug fix",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=_single_profile("model-beta", {"policy": "standard"}),
+        active_model="model-beta",
         task=TaskCharacteristics(
             title="Fix off-by-one error in pagination",
             description="Page index starts at 0 instead of 1",
@@ -164,9 +240,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="standard",
-            expected_model="claude-3-5-sonnet",
+            expected_model="model-beta",
             expected_topology="Case A",
             expected_readiness="READY",
+            expected_resolved_effort="medium",
             expected_min_complexity=0.5,
             expected_max_complexity=1.5,
             expected_complexity_tier="standard",
@@ -174,17 +251,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=1.5,
             expected_reasoning_level=None,
         ),
-        notes="Standard bug fix stays on active standard model.",
+        notes="Single-model Profile on a selectable Host: the verified session already runs the Profile model.",
     ),
     AgentConfigScenario(
         id="AC-03",
         name="Standard feature implementation",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Add CSV export endpoint",
             description="Add export to CSV with standard schema",
@@ -194,9 +267,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="standard",
-            expected_model="claude-3-5-sonnet",
-            expected_topology="Case A",
+            expected_model="model-beta",
+            expected_topology="Case C",
             expected_readiness="READY",
+            expected_resolved_effort="medium",
             expected_min_complexity=0.5,
             expected_max_complexity=1.5,
             expected_complexity_tier="standard",
@@ -204,18 +278,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=1.5,
             expected_reasoning_level="medium",
         ),
-        notes="Standard feature maps to standard tier.",
+        notes="Multi-model Profile: standard tier model and effort.",
     ),
     AgentConfigScenario(
         id="AC-04",
         name="Large refactor",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-            supported_effort=["low", "medium", "high"],
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Refactor core storage engine",
             description="Decompose monolithic storage class into pluggable backend adapters",
@@ -225,7 +294,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case C",
             expected_readiness="READY",
             expected_resolved_effort="high",
@@ -236,18 +305,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Large refactor requires high tier and high reasoning.",
+        notes="High tier model; the Profile's highest-supported effort resolves to the Host's top value.",
     ),
     AgentConfigScenario(
         id="AC-05",
         name="Security-critical change",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-            supported_effort=["low", "medium", "high"],
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Fix authentication token forgery vulnerability",
             description="Harden JWT signature verification and constant-time comparison",
@@ -257,7 +321,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case C",
             expected_readiness="READY",
             expected_resolved_effort="high",
@@ -268,18 +332,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Security critical task requires high tier.",
+        notes="Security-critical work maps to the high tier.",
     ),
     AgentConfigScenario(
         id="AC-06",
         name="Complex concurrency work",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-            supported_effort=["low", "medium", "high"],
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Implement lock-free queue with memory barriers",
             description="High-throughput cross-thread message passing queue",
@@ -289,7 +348,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case C",
             expected_readiness="READY",
             expected_resolved_effort="high",
@@ -300,18 +359,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Concurrency invariants require high reasoning effort.",
+        notes="Concurrency work maps to the high tier.",
     ),
     AgentConfigScenario(
         id="AC-07",
         name="Cost-sensitive complex work",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-            supported_effort=["low", "medium", "high"],
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Complex algorithm optimization",
             description="Optimize graph traversal algorithms",
@@ -322,7 +376,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case C",
             expected_readiness="READY",
             expected_resolved_effort="high",
@@ -338,12 +392,8 @@ SCENARIOS: List[AgentConfigScenario] = [
     AgentConfigScenario(
         id="AC-08",
         name="Latency-sensitive routine work",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="claude-3-5-sonnet",
-            available_models=["gpt-4o-mini", "claude-3-5-sonnet", "o3-mini"],
-            profile_tiers={"routine": "gpt-4o-mini", "standard": "claude-3-5-sonnet", "high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Quick lint fix",
             description="Run linter and fix whitespace",
@@ -354,9 +404,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="routine",
-            expected_model="gpt-4o-mini",
+            expected_model="model-alpha",
             expected_topology="Case C",
             expected_readiness="READY",
+            expected_resolved_effort="low",
             expected_min_complexity=0.0,
             expected_max_complexity=0.5,
             expected_complexity_tier="routine",
@@ -364,16 +415,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=0.8,
             expected_reasoning_level="low",
         ),
-        notes="Fast turnaround on routine tier.",
+        notes="Latency-sensitive routine work stays on the routine tier.",
     ),
     AgentConfigScenario(
         id="AC-09",
         name="Fixed-model harness",
-        host=HostCapabilities(
-            has_model_selector=False,
-            active_model="fixed-sonnet",
-            available_models=["fixed-sonnet"],
-        ),
+        host=_host(["model-fixed"], effort=(), selector="unavailable"),
+        profile=_single_profile("model-fixed", {"policy": "default"}),
         task=TaskCharacteristics(
             title="Complex database migration",
             description="Schema migration across database cluster with zero downtime",
@@ -383,9 +431,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="fixed-sonnet",
+            expected_model="model-fixed",
             expected_topology="Case A",
             expected_readiness="READY",
+            expected_resolved_effort=None,
             expected_min_complexity=1.5,
             expected_max_complexity=3.0,
             expected_complexity_tier="high",
@@ -393,18 +442,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Fixed harness gracefully preserves active model.",
+        notes="Fixed-model Host with one evidenced model and no reasoning control keeps that model.",
     ),
     AgentConfigScenario(
         id="AC-10",
         name="Multi-model decomposed harness",
-        host=HostCapabilities(
-            has_model_selector=True,
-            per_agent_config=True,
-            active_model="gpt-4o",
-            available_models=["gpt-4o", "o3-mini"],
-            profile_tiers={"standard": "gpt-4o", "high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
         task=TaskCharacteristics(
             title="Full authentication subsystem",
             description="Decomposed task with formal tickets for OAuth, session, and RBAC",
@@ -416,9 +460,10 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case D",
             expected_readiness="READY",
+            expected_resolved_effort="high",
             expected_min_complexity=1.5,
             expected_max_complexity=3.0,
             expected_complexity_tier="high",
@@ -426,18 +471,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Decomposed multi-model task with verified tickets owns complexity in code.",
+        notes="Decomposed multi-model work with verified tickets and per-agent selection uses Case D.",
     ),
     AgentConfigScenario(
         id="AC-11",
         name="Host with no effort selector",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="gpt-4o",
-            supported_effort=[],  # No effort selector
-            available_models=["gpt-4o", "o3-mini"],
-            profile_tiers={"high": "o3-mini"},
-        ),
+        host=_host(MULTI_MODELS, effort=()),
+        profile=_multi_profile(effort={"policy": "default"}),
         task=TaskCharacteristics(
             title="Complex compiler backend optimization",
             description="Instruction scheduling and register allocation pass",
@@ -447,7 +487,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="approved",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="o3-mini",
+            expected_model="model-gamma",
             expected_topology="Case C",
             expected_readiness="READY",
             expected_resolved_effort=None,
@@ -458,17 +498,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Effort resolution gracefully omitted when host has no effort selector.",
+        notes="No confirmed reasoning control: effort is omitted, the Profile keeps Host default.",
     ),
     AgentConfigScenario(
         id="AC-12",
-        name="Limited effort selector bounds Jev output",
-        host=HostCapabilities(
-            active_model="model-x",
-            available_models=["model-x"],
-            supported_effort=["low", "medium"],  # 'high' not supported
-            profile_tiers={"high": "model-x"},
-        ),
+        name="Limited effort inventory bounds Profile effort",
+        host=_host(["model-x"], effort=("low", "medium"), selector="unavailable"),
+        profile=_single_profile("model-x", {"policy": "highest-supported"}),
         task=TaskCharacteristics(
             title="Architectural subsystem rework",
             description="Refactor core event dispatching pipeline",
@@ -489,17 +525,13 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="Host bounds Jev 'high' to nearest verified level 'medium'.",
+        notes="Host inventory bounds the Profile's highest-supported effort to 'medium'.",
     ),
     AgentConfigScenario(
         id="AC-13",
-        name="User explicitly requests high effort (overrides Jev)",
-        host=HostCapabilities(
-            active_model="model-x",
-            available_models=["model-x"],
-            supported_effort=["low", "medium", "high"],
-            profile_tiers={"routine": "model-x"},
-        ),
+        name="User explicitly requests high effort (overrides Profile)",
+        host=_host(["model-x"], selector="unavailable"),
+        profile=_single_profile("model-x", {"policy": "lowest-supported"}),
         task=TaskCharacteristics(
             title="Routine doc update with explicit effort",
             description="Update contributor guidelines",
@@ -521,17 +553,14 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=0.8,
             expected_reasoning_level="low",
         ),
-        notes="Explicit user reasoning policy and explicit difficulty are code-owned; skips Jev.",
+        notes="Explicit user reasoning policy overrides the Profile effort; explicit difficulty skips Jev.",
     ),
     AgentConfigScenario(
         id="AC-14",
         name="User rejects configuration change preview",
-        host=HostCapabilities(
-            has_model_selector=True,
-            active_model="active-stay",
-            available_models=["active-stay", "tier-high"],
-            profile_tiers={"high": "tier-high"},
-        ),
+        host=_host(MULTI_MODELS),
+        profile=MULTI_PROFILE,
+        active_model="model-alpha",
         task=TaskCharacteristics(
             title="Complex kernel module patch",
             description="Memory management patch in device driver",
@@ -541,7 +570,7 @@ SCENARIOS: List[AgentConfigScenario] = [
         approval="declined",
         expected=AgentConfigExpected(
             expected_tier="high",
-            expected_model="active-stay",
+            expected_model="model-alpha",
             expected_topology="Case A",
             expected_readiness="READY",
             expected_resolved_effort=None,
@@ -552,7 +581,7 @@ SCENARIOS: List[AgentConfigScenario] = [
             expected_max_reasoning=2.0,
             expected_reasoning_level="high",
         ),
-        notes="User declined preview -> safely retains active model.",
+        notes="User declined the preview: keep the verified current-session model in the main session.",
     ),
 ]
 
@@ -617,11 +646,16 @@ def validate_fixture_isolation(scenarios: Optional[List[AgentConfigScenario]] = 
 
 def evaluate_scenario(scenario: AgentConfigScenario, client: Optional[Any] = None) -> Dict[str, Any]:
     """Evaluate one agent-config scenario separating config correctness from semantic quality."""
+    now = datetime.now(timezone.utc).isoformat()
+    host = copy.deepcopy(scenario.host)
+    host["observed_at"] = now
     res = agent_config_recommend(
-        host=scenario.host,
-        task=scenario.task,
+        host=host,
+        task=asdict(scenario.task),  # The planner mutates task objects; pass a fresh copy.
         approval=scenario.approval,
         client=client,
+        profile=copy.deepcopy(scenario.profile),
+        active_session=_active_session(scenario.active_model, now) if scenario.active_model else None,
     )
 
     readiness_ok = res.readiness == scenario.expected.expected_readiness
@@ -631,7 +665,7 @@ def evaluate_scenario(scenario: AgentConfigScenario, client: Optional[Any] = Non
     tier_ok = res.abstract_profile.recommended_tier == scenario.expected.expected_tier if res.abstract_profile else True
 
     # Candidate safety invariant: selected_model must be in valid candidates (or active_model)
-    valid_candidates = scenario.host.available_models or [scenario.host.active_model]
+    valid_candidates = [m["id"] for m in scenario.host["available_models"]]
     candidate_safe = res.execution_config.model in valid_candidates if res.execution_config else True
 
     config_correctness_passed = readiness_ok and topology_ok and model_ok and effort_ok and tier_ok and candidate_safe
