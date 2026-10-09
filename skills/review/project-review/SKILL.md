@@ -64,7 +64,9 @@ Use one of three modes; details are in
 
 Default maximum is three rounds. Record durable state under
 `.project-review/`; see [WORKFLOW.md](references/WORKFLOW.md) for the exact
-state tree and resume rules.
+state tree and resume rules. When the acceptance source is a tracker ticket,
+resolve it after `PASS` and comment the blocker after `FAIL` or `BLOCKED`
+([Ticket closeout](references/WORKFLOW.md#ticket-closeout)).
 
 ## References
 

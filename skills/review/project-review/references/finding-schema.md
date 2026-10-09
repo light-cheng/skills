@@ -21,7 +21,7 @@ identity system.
 # Finding Registry
 
 ## Finding F-001
-- First recorded: round-01
+- First recorded: round-01 | implementation report (<ticket path>, <original ID>)
 - Status: pending | confirmed | rejected | duplicate | out-of-scope | resolved
 - Severity: Critical | High | Medium | Low
 - Related acceptance criterion: AC-<n> or <none with reason>

@@ -13,7 +13,8 @@ hands it to review.
 ## Core loop
 
 1. **Pin one work item.** Resolve exactly one ticket, Spec section, or explicit
-   conversation slice and record it as the target.
+   conversation slice and record it as the target. For a tracker ticket, set
+   `Status: claimed` before changing any other file.
 2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
    read its tracker, domain-context, and review-profile fields. Then skim only
    the named glossary, ADRs, and files the item touches; record source locations.
@@ -30,8 +31,12 @@ hands it to review.
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).
 5. **Hand to `review-loop`** with the matching reviewer: `light-code-review` for
-   code, `generic-review` or a domain reviewer for non-code. Report evidence
-   and stop.
+   code, `generic-review` or a domain reviewer for non-code.
+6. **Write the implementation report and stop.** For a tracker ticket, append
+   the report under the ticket's `## Comments`: scope, fixed point, verification
+   results, and the findings `review-loop` left open
+   ([WORKFLOW.md §7](references/WORKFLOW.md#7-write-the-implementation-report)).
+   `project-review` reads it in a later session.
 
 ## Composition
 

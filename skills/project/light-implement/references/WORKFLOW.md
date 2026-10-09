@@ -44,16 +44,18 @@ When `$light-implement` is passed a ticket path:
 2. Verify the ticket is `ready-for-agent` (treat `open` as its alias when the
    caller scanned an unblocked frontier) and that every blocker listed in
    `Blocked by` is `resolved`. If not ready or blocked, report `BLOCKED` and
-   stop — do not jump to a different ticket.
+   stop — do not jump to a different ticket. A `claimed` ticket is in progress
+   in another run: report `BLOCKED` unless the user confirms that this run
+   resumes that claim (for example after a `project-review` `FAIL`).
 3. Treat the ticket body as the bounded Spec for this run. Do not re-slice it,
    merge other tickets, or broaden its acceptance.
-4. The run works in a single independent context and produces one bounded diff
-   (or one non-code artifact) attributable to that ticket only. Traceable issue
-   state (`Status: claimed / resolved`, appending `## Answer`) is not this
-   Skill's side-effect; the caller or tracker workflow updates the file after
-   `project-review` reaches a verdict. Early `Claim` before work is a recommended
-   external step for concurrent sessions but not a required side-effect of this
-   Skill.
+4. Claim the ticket before changing any other file: set `**Status:** claimed`
+   and save. It tells concurrent sessions to skip the ticket and tells a plan
+   view that the work is in progress. `project-review` resolves the ticket
+   after a `PASS`. The claim and the implementation report (step 7) are the
+   only tracker writes this Skill makes.
+5. The run works in a single independent context and produces one bounded diff
+   (or one non-code artifact) attributable to that ticket only.
 
 For a small Spec slice or conversation slice, record the scope string and
 limit the diff to that slice. Any gap that makes the scope ambiguous is a
@@ -215,6 +217,37 @@ Select the reviewer implied by the artifact and call it through `review-loop`:
 Do not copy the reviewer's rubric or the acceptance/state machine into this
 file; call those Skills via their public protocols.
 
+### 7. Write the implementation report
+
+For a tracker ticket, append one report under the ticket's `## Comments` when
+the run ends, whether it handed off to review or stopped `BLOCKED` after the
+claim. Earlier reports stay; the newest one is current. `project-review` and a
+plan view read this report, so a fresh session can continue from the file
+alone.
+
+```markdown
+### Implementation report — <YYYY-MM-DD>
+- Outcome: handed to review | BLOCKED: <gap and smallest unblock>
+- Fixed point: <full commit SHA the change is reviewed against>
+- Candidate: <full commit SHA of the committed change, or artifact path>
+- Implementation scope: <repository-relative literal paths this run changed>
+- Verification:
+  - `<exact command or observation>` → <observed result>
+- Review: review-loop <rounds run>/<limit>, <converged | limit reached | not run: reason>
+- Remaining findings:
+  - <F-###> · <severity> · <location> · <problem> · <reason>
+- Limitations: <unavailable dependencies, environments, untestable paths, or none>
+```
+
+Write `none` for an empty list; leave no field out. Copy each remaining
+finding from the last `review-loop` report with its original ID and fields,
+so the next review can recheck it. A non-code item records its artifact
+path in `Candidate:`, its render or schema observation under
+`Verification:`, and `Fixed point: none` when it has no commit base.
+
+For a Spec slice or conversation slice there is no ticket file. Return the
+same fields to the caller in the handoff.
+
 ## Boundaries
 
 - One item per run. A new ticket needs a fresh `$light-implement` invocation in a
@@ -225,13 +258,14 @@ file; call those Skills via their public protocols.
   are composition targets, not text to duplicate. Call them per their
   instructions.
 - This Skill commits its bounded change to the current branch (mirroring the
-  Matt baseline) but does not push, publish, or claim the ticket resolved.
-  Upstream ticket-closure semantics belong to the tracker/workflow caller.
+  Matt baseline) but does not push or publish. It claims the ticket and
+  reports on it; `project-review` resolves it.
 
 ## Handoff options
 
-- On a verified diff/artifact, invoke `review-loop` and return this item's
-  status, evidence, and outstanding findings to the caller. The caller owns
+- On a verified diff/artifact, invoke `review-loop`, write the implementation
+  report, and return this item's status, evidence, and outstanding findings to
+  the caller. The caller owns
   any remaining authorized work; this handoff does not complete the larger
   request. A new ticket still requires a fresh `$light-implement` invocation in a
   fresh context, and review limits and approval gates still apply.

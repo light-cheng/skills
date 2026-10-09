@@ -12,6 +12,8 @@
 - `light-implement`：`AgentConfigResult` 的处理改为指向 `references/WORKFLOW.md`，不在 `SKILL.md` 里重复。
 - 测试：`tests/test_composition.py` 不再断言关键词，改为检查组合图——目标存在、Skill 只调用可由模型调用的能力、路由名称真实、公开示例不用旧名。
 - README：Matt Port 改为 12 个（含 `project-retro`），旧名 `implement` 改为 `light-implement`，对齐快速上手注释。
+- 工单生命周期：`light-implement` 改文件前先写 `Status: claimed`；`project-review` 在 `PASS` 后把工单标为 resolved（`FAIL`/`BLOCKED` 时在评论里写明阻塞原因）。此前没有任何 Skill 负责 resolve，被阻塞的工单永远进不了 frontier。
+- 实现报告：`light-implement` 在已认领的工单下追加实现报告（范围、fixed point、验证、审查剩余 findings）。`project-review` 重跑其中的验证，并把未解决的 findings 作为 `Previous findings` 读入，换新会话后实现阶段的 findings 也能进入终审。
 
 - `manuscript-ops`：按文稿管理需求选择路线，单独确定内容审阅；保留旧 Project 快照，修复普通文档与提取来源登记，提供可选的宿主决策 MCP 判断。本地回归和独立验收证据与发布、全局安装事实分别记录。
 - `release-workflow`：增加双语固定树快照、当前 main 和 Release 正文的版本与状态检查；绑定外部观察及最终 main CI，明确区分本地模拟。没有发布新版本或全局部署。

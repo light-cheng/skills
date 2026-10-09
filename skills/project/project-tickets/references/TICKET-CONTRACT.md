@@ -71,8 +71,9 @@ Per the configured `docs/agents/issue-tracker.md` contract:
 |-----------|-------------------------|
 | `Blocked by:` near top | The edge set. Unblocked when every listed `NN` file is `resolved`. |
 | **Frontier** | Scan `.scratch/<feature>/issues/` for files that are `ready-for-agent` or `open`, unblocked, and not `claimed`; first by number wins. Independent frontier tickets are parallelizable. |
-| **Claim** | Before any work, set `**Status:** claimed` and save so concurrent sessions skip it. |
-| **Resolve** | Append `## Answer` with the verification pointer, set `**Status:** resolved`, and (when the effort maintains a map) append a gist+link to the map's `Decisions so far` or to the SPEC evidence section. |
+| **Claim** | `light-implement` sets `**Status:** claimed` and saves before any work so concurrent sessions skip it. |
+| **Report** | When its run ends, `light-implement` appends `### Implementation report — <date>` under `## Comments` with scope, fixed point, verification, and remaining findings. The newest report is current. |
+| **Resolve** | After a `PASS`, `project-review` appends `## Answer` with the verdict pointer, sets `**Status:** resolved`, and (when the effort maintains a map) appends a gist+link to the map's `Decisions so far`. |
 
 Alias rule: `ready-for-agent` means "open and unclaimed" for frontier
 purposes. Claiming rewrites it to `claimed`; resolving rewrites it to

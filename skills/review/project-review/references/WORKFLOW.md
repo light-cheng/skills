@@ -116,11 +116,15 @@ available round, and a writable new round directory.
 
 1. **Collect Producer evidence.** Record scope, commands or observations,
    inputs, outputs, limitations, and an accurate evidence label using
-   [evidence-protocol.md](evidence-protocol.md).
+   [evidence-protocol.md](evidence-protocol.md). When the acceptance source is
+   a ticket, start from the newest implementation report under its
+   `## Comments` ([Implementation report intake](#implementation-report-intake)).
 2. **Invoke reviewers via `review-loop`.** Resolve the reviewer(s) for the
    bounded packet (`generic-review` for ordinary artifacts, `light-code-review`
    for software diff, domain reviewer when justified) and call them through
    `review-loop` (`resolve reviewer → invoke reviewer → receive findings`).
+   Pass the registry's current records as `Previous findings`; in round 1 these
+   include the findings imported from the implementation report.
    A reviewer result is a candidate, not an instruction; its lightweight shape
    follows `review-loop`'s public reviewer contract.
 3. **Validate every candidate.** Assign or reuse its stable Finding ID, then
@@ -146,6 +150,27 @@ available round, and a writable new round directory.
    then apply the verdict and stopping rules in
    [stopping-rules.md](stopping-rules.md).
 
+### Implementation report intake
+
+`light-implement` appends an implementation report to the ticket it claimed.
+In round 1, read the newest report and use it this way:
+
+- **Scope and fixed point:** compare `Fixed point:` and `Implementation scope:`
+  with the Charter. A mismatch is a baseline conflict: return `BLOCKED` rather
+  than picking one.
+- **Verification:** re-run each listed command or observation and record what
+  this round observes. The report is the Producer's account, not evidence of
+  a pass; a command that cannot be re-run is recorded as missing evidence.
+- **Remaining findings:** record each one in `findings.md` as `pending`, with
+  `First recorded: implementation report (<ticket path>, <original ID>)` and
+  the next unused registry ID. Validate it like any other candidate. This
+  carries every finding the implementation stage left open into the final
+  verdict.
+
+A report with `Outcome: BLOCKED` means the item was not handed to review:
+return `BLOCKED` with that gap. No report on a claimed ticket is missing
+Producer evidence; collect it directly and record the gap.
+
 ### Safe closeout ordering
 
 To prevent intermediate or transient records from exposing stale verdicts as
@@ -162,6 +187,22 @@ authoritative, closeout must follow a fail-safe write sequence:
 This sequence ensures that while review is active or transitioning, `state.md`
 remains in an active status (or Round mismatch during transition), failing
 closed rather than prematurely accepting an incomplete or prior-round verdict.
+
+### Ticket closeout
+
+When the frozen acceptance source is one or more tickets on the local-markdown
+tracker, update each of those tickets after `state.md` is terminal:
+
+- `PASS`: append `## Answer` with the `verdict.md` path, Charter revision, and
+  Round, then set `**Status:** resolved`. When the effort keeps a `map.md`,
+  append a gist and link to its `Decisions so far`. This opens the tickets
+  that were blocked by it.
+- `FAIL` or `BLOCKED`: keep `**Status:** claimed` and append one line under
+  `## Comments` that links `verdict.md` and names the blocker. The ticket
+  stays out of the frontier until the Producer resumes it.
+
+These are the only tracker writes this Skill makes. Leave the ticket body and
+every other ticket unchanged.
 
 ### Software specialist boundary
 

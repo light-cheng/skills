@@ -10,7 +10,8 @@
 
 1. Read `02-session-middleware.md` (`What to build: add stateless session
    middleware at the API seam`) and its parent Spec section. Confirm
-   `Blocked by: 01` is resolved and `Status: ready-for-agent`.
+   `Blocked by: 01` is resolved and `Status: ready-for-agent`, then set
+   `Status: claimed`.
 2. Inspect `CONTEXT.md` (vocabulary), `docs/adr/0007-session.md` if present,
    and the existing API seam. Record the seam as `POST /api/session → auth
    service → session store`.
@@ -25,8 +26,26 @@
    `review-loop` evidence.
 6. Invoke `review-loop` (software Profile) with the frozen fixed point and
    approved Spec; it delegates Standards + Spec to `light-code-review` and collects
-   behavioral evidence. `light-implement` stops after the handoff. It does not
-   decide the final `PASS` and does not edit the ticket file.
+   behavioral evidence. `review-loop` reaches its limit with one finding open.
+7. Append the implementation report under the ticket's `## Comments`:
+
+   ```markdown
+   ### Implementation report — 2026-10-10
+   - Outcome: handed to review
+   - Fixed point: 3f9c2a1e0b7d4c5f8a6e2d1b9c0f7a3e5d4b2c18
+   - Candidate: 8b1e4d7a2c9f0e3b6a5d8c1f4e7b0a3d6c9f2e15
+   - Implementation scope: src/auth/middleware.ts, tests/auth/middleware.test.ts
+   - Verification:
+     - `npm test -- tests/auth` → 6 passed, 0 failed
+   - Review: review-loop 3/3, limit reached
+   - Remaining findings:
+     - F-002 · medium · src/auth/middleware.ts:41 · clock skew not tolerated · Spec allows 30 s skew
+   - Limitations: none
+   ```
+
+   `light-implement` stops here. It does not decide the final `PASS`;
+   `project-review` reads this report, rechecks F-002, and resolves the ticket
+   after a `PASS`.
 
 ## Example 2 — Complex multi-unit task with routing offer: user accepts
 
