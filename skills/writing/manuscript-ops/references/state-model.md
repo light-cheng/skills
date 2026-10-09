@@ -219,3 +219,12 @@ Host-native capabilities must exactly match a hash-bound platform snapshot
 interpreted through the canonical capability map. Final
 LifecycleState records and active final/publish receipts must match exactly,
 cover every Brief deliverable path, and be entirely `READY`.
+
+## Routing policy compatibility
+
+New RoutingSnapshot records include `routing_policy: needs-v2`, task-grounded
+dimensions/triggers, `required_review_axes`, `needs_initialization`, and the
+optional `semantic_result`, `semantic_policy`, `semantic_judgment`. The validator
+replays the same policy and bounded model decision. Unversioned snapshots use
+`score-v1`; their Profile, receipts, hashes and approval remain unchanged.
+Do not migrate an approved Project merely to apply the new task default.

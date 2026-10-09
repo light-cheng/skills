@@ -192,8 +192,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 
 ### manuscript-ops
 
-- **作用：** 从小笔记到多语言多格式交付的文稿工程治理。
-- **什么时候用：** 需要对文稿范围、风险评估、批次处理、审查与多格式导出交付进行统一治理时。
+- **作用：** 完成短篇写作和必要检查，并按实际需要管理多批次或锁定版本文稿。
+- **什么时候用：** 笔记、SOP、报告需要改写与检查，或文稿确实需要工程管理时。
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/writing/manuscript-ops/](skills/writing/manuscript-ops)
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
@@ -282,7 +282,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 
 ### release-workflow
 
-- **作用：** 发布已完成项目——同步文档、执行质量门、打 tag、发布。
+- **作用：** 准备、验证和证明 Skills 发布，核对版本快照、当前状态及发布正文。
 - **什么时候用：** 项目已通过 `project-review` 验收，准备执行版本发布、Tag 创建与收据证明时。
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/release-workflow/](skills/project/release-workflow)

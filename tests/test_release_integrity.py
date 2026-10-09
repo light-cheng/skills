@@ -38,6 +38,51 @@ from verify_release_integrity import (
 )
 
 
+def write_public_release_fixture(root: Path, tag: str = "v9.9.9", *, attested: bool = False) -> None:
+    """Complete public artifacts for tests that exercise a future lifecycle CLI gate."""
+    from release_context import PUBLIC_RELEASE_DOCS
+    packages = sorted(root.glob("skills/*/*/SKILL.md"))
+    for path in PUBLIC_RELEASE_DOCS:
+        destination = root / path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        prefix = "evidence/releases" if path.startswith("docs/") else "docs/evidence/releases"
+        text = (f"# Skills\n\n**Release snapshot:** `{tag}`\n\n"
+                f"[Release Manifest]({prefix}/{tag}/RELEASE_MANIFEST.md) records preparation facts.\n"
+                "Observed installation and publication facts are in the receipt on main.\n")
+        if attested:
+            text += f"\nCurrent stable release: `{tag}`.\n"
+        if path.startswith("CATALOG"):
+            for package in packages:
+                name = package.parent.name
+                text += f"\n### {name}\n\n"
+                if "zh-CN" in path:
+                    text += ("- **作用：** Fixture.\n- **什么时候用：** Fixture.\n"
+                             "- **调用方式：** Model-invoked.\n"
+                             f"- **包位置：** {package.parent.relative_to(root)}\n- **状态：** 第一方已准入。\n")
+                else:
+                    text += ("- **Purpose:** Fixture.\n- **When to use:** Fixture.\n"
+                             "- **Invocation:** Model-invoked.\n"
+                             f"- **Package:** {package.parent.relative_to(root)}\n- **Status:** Admitted first-party.\n")
+        destination.write_text(text, encoding="utf-8")
+    for category in {package.parent.parent for package in packages}:
+        names = sorted(package.parent.name for package in packages if package.parent.parent == category)
+        text = "# Category\n\n" + "\n".join(f"[{name}]({name}/SKILL.md)" for name in names) + "\n"
+        for suffix in ("", ".zh-CN"):
+            (category / f"README{suffix}.md").write_text(text, encoding="utf-8")
+    release_dir = root / "docs/evidence/releases" / tag
+    for suffix in ("", ".zh-CN"):
+        manifest = release_dir / f"RELEASE_MANIFEST{suffix}.md"
+        if manifest.is_file() and "Preparation snapshot" not in manifest.read_text(encoding="utf-8"):
+            manifest.write_text(manifest.read_text(encoding="utf-8") + "\n**Preparation snapshot:** PREPARED; external gates were pending at preparation.\n", encoding="utf-8")
+        other = ".zh-CN" if not suffix else ""
+        (release_dir / f"RELEASE_NOTES{suffix}.md").write_text(
+            f"# {tag} — Fixture release\n\n**Release snapshot:** `{tag}`\n\n"
+            f"[Other language](RELEASE_NOTES{other}.md) · [Release Manifest](RELEASE_MANIFEST.md)\n"
+            "Verification: preparation facts are in the Manifest; observed facts are in the receipt on main.\n",
+            encoding="utf-8",
+        )
+
+
 class ReleaseIntegrityTests(unittest.TestCase):
     def test_admitted_package_count_is_36(self) -> None:
         """Exactly 36 admitted Skill packages must be counted under skills/*/*."""
@@ -973,6 +1018,7 @@ class ReceiptStrictValidationTests(unittest.TestCase):
                 "--tag", "v0.2.4",
                 "--release-commit", commit_a,
                 "--stage", "attested",
+                "--mode", "historical",
             ],
             cwd=self.tmp_root,
             capture_output=True,
@@ -1013,6 +1059,8 @@ class ReceiptStrictValidationTests(unittest.TestCase):
             (rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(manifest_zh, encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.md").write_text("# Notes", encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# 说明", encoding="utf-8")
+
+            write_public_release_fixture(tmp_root)
 
             # Commit A: candidate commit
             subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
@@ -1061,6 +1109,7 @@ class ReceiptStrictValidationTests(unittest.TestCase):
             (rel_dir / "RELEASE_RECEIPT.md").write_text(en_receipt, encoding="utf-8")
             (rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(zh_receipt, encoding="utf-8")
 
+            write_public_release_fixture(tmp_root, attested=True)
             subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "docs(release): attest v9.9.9 publication"], cwd=tmp_root, capture_output=True, check=True)
             commit_b = resolve_commit_sha("HEAD", cwd=tmp_root)
@@ -1168,6 +1217,8 @@ class ReleaseWorkflowSequenceTests(unittest.TestCase):
             (rel_dir / "RELEASE_NOTES.md").write_text("# Notes", encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# 说明", encoding="utf-8")
 
+            write_public_release_fixture(tmp_root)
+
             # Assert working tree is dirty
             proc_diff = subprocess.run(["git", "status", "--porcelain"], cwd=tmp_root, capture_output=True, text=True)
             self.assertTrue(proc_diff.stdout.strip())
@@ -1242,6 +1293,7 @@ class ReleaseWorkflowSequenceTests(unittest.TestCase):
             (rel_dir / "RELEASE_NOTES.md").write_text("# Notes", encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# 说明", encoding="utf-8")
 
+            write_public_release_fixture(tmp_root)
             subprocess.run(["git", "add", "."], cwd=tmp_root, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "release: prepare v9.9.9"], cwd=tmp_root, capture_output=True, check=True)
             candidate_a = resolve_commit_sha("HEAD", cwd=tmp_root)
@@ -1349,10 +1401,12 @@ class ReleaseWorkflowSequenceTests(unittest.TestCase):
     def test_workflow_contract_skill_md_action_order(self) -> None:
         """Contract test for release-workflow/SKILL.md ensuring correct action sequence."""
         skill_text = (ROOT / "skills" / "project" / "release-workflow" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("references/RELEASE-STAGES.md", skill_text)
+        skill_text = (ROOT / "skills/project/release-workflow/references/RELEASE-STAGES.md").read_text(encoding="utf-8")
 
         # 1. Stage PREPARED: git commit candidate must appear BEFORE verify_release_integrity --stage prepared
         idx_prep_commit = skill_text.find('git commit -m "release: prepare vX.Y.Z"')
-        idx_prep_verify = skill_text.find("--stage prepared")
+        idx_prep_verify = skill_text.find("python3 scripts/verify_release_integrity.py")
         self.assertNotEqual(idx_prep_commit, -1, "Missing candidate commit in SKILL.md")
         self.assertNotEqual(idx_prep_verify, -1, "Missing verify --stage prepared in SKILL.md")
         self.assertLess(
@@ -1734,6 +1788,8 @@ class RemoteTagPreflightTests(unittest.TestCase):
     def test_skill_md_canonical_preflight_command_checks_remote(self) -> None:
         """release-workflow/SKILL.md must execute preflight without --skip-remote."""
         skill_text = (ROOT / "skills" / "project" / "release-workflow" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("references/RELEASE-STAGES.md", skill_text)
+        skill_text = (ROOT / "skills/project/release-workflow/references/RELEASE-STAGES.md").read_text(encoding="utf-8")
         self.assertIn("check_release_tag_preflight.py", skill_text)
         self.assertNotIn("--skip-remote", skill_text)
 
@@ -2021,6 +2077,7 @@ class ReceiptGitObjectDriftTests(unittest.TestCase):
         (self.rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
         (self.rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
 
+        write_public_release_fixture(self.tmp_root)
         subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
         subprocess.run(["git", "commit", "-m", "candidate A"], cwd=self.tmp_root, capture_output=True, check=True)
         self.candidate_a = resolve_commit_sha("HEAD", cwd=self.tmp_root)
@@ -2048,6 +2105,7 @@ class ReceiptGitObjectDriftTests(unittest.TestCase):
         )
         (self.rel_dir / "RELEASE_RECEIPT.md").write_text(self.receipt_en_1, encoding="utf-8")
         (self.rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(self.receipt_zh_1, encoding="utf-8")
+        write_public_release_fixture(self.tmp_root, attested=True)
         subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
         subprocess.run(["git", "commit", "-m", "commit B: add 2nd pkg and receipt saying 1"], cwd=self.tmp_root, capture_output=True, check=True)
         self.commit_b_1 = resolve_commit_sha("HEAD", cwd=self.tmp_root)
@@ -2322,6 +2380,8 @@ class TaggedSnapshotVerificationTests(unittest.TestCase):
         (self.rel_dir / "RELEASE_NOTES.md").write_text("# Notes\n", encoding="utf-8")
         (self.rel_dir / "RELEASE_NOTES.zh-CN.md").write_text("# Notes\n", encoding="utf-8")
 
+        write_public_release_fixture(self.tmp_root)
+
         # Candidate A: Manifest + Notes only, no Receipt
         subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
         subprocess.run(["git", "commit", "-m", "candidate A"], cwd=self.tmp_root, capture_output=True, check=True)
@@ -2509,6 +2569,8 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             (rel_dir / "RELEASE_NOTES.md").write_text(notes_en, encoding="utf-8")
             (rel_dir / "RELEASE_NOTES.zh-CN.md").write_text(notes_zh, encoding="utf-8")
 
+            write_public_release_fixture(work_dir)
+
             # Candidate commit A
             subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "release: prepare v9.9.9"], cwd=work_dir, capture_output=True, check=True)
@@ -2668,6 +2730,8 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             (rel_dir / "RELEASE_RECEIPT.md").write_text(receipt_en, encoding="utf-8")
             (rel_dir / "RELEASE_RECEIPT.zh-CN.md").write_text(receipt_zh, encoding="utf-8")
 
+            write_public_release_fixture(work_dir, attested=True)
+
             # Commit attestation to main as Commit B
             subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "docs(release): attest v9.9.9 publication"], cwd=work_dir, capture_output=True, check=True)
@@ -2714,6 +2778,7 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             extra_pkg_dir = work_dir / "skills" / "general" / "extra-package"
             extra_pkg_dir.mkdir(parents=True)
             (extra_pkg_dir / "SKILL.md").write_text("# Extra Package\n", encoding="utf-8")
+            write_public_release_fixture(work_dir, attested=True)
             subprocess.run(["git", "add", "."], cwd=work_dir, capture_output=True, check=True)
             subprocess.run(["git", "commit", "-m", "feat: post-release drift package 37"], cwd=work_dir, capture_output=True, check=True)
 

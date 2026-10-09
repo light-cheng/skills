@@ -1,61 +1,56 @@
-# Routing
+# Writing routes
 
-## Six dimensions
+## Current policy: needs-v2
 
-Score each dimension `0`, `1`, or `2`. A missing answer is `unknown`; use an
-effective score of `1`, record it, and do not silently turn it into zero.
+Classify the current deliverable, source relationships, output purpose and real
+management requirements. Workspace size, a delay caused by earlier blocked work,
+one writer delegation, independent content review and a QA-only PDF do not
+create a manuscript lifecycle requirement.
 
-| Dimension | 0 | 1 | 2 |
-|---|---|---|---|
-| Scale | one bounded item | several sections or a medium report | book/manual, many sections, or cross-session volume |
-| Source complexity | one trusted source | several sources with simple precedence | conflicting, mixed-authority, multimodal, or evidence-heavy sources |
-| Risk | ordinary prose | material factual/reputational impact | safety, privacy, legal/regulatory, medical, financial, or other high-stakes facts |
-| Output complexity | one text-native output | one styled output or several simple outputs | multilingual, locked derivative, or several layout-sensitive outputs |
-| Collaboration | one writer and one user review | several reviewers or a handoff | multi-thread independent review or several owners |
-| Reproducibility | direct edit is acceptable | repeatable generation is useful | deterministic regeneration, hashes, gates, and archived evidence are required |
+| Route | Use when | Finish |
+| --- | --- | --- |
+| Quick | A bounded low-risk text edit with clear meaning | Edit, run relevant checks, deliver and return |
+| Structured | A bounded rewrite/report needing source, content, image or format review | Keep a compact brief, write the whole document, review and render as required, deliver and return |
+| Project | Explicitly requested, or actual long/batched resumable work, locked derivatives or reproducible interdependent editions | Use the approved Project lifecycle and its gates |
 
-## Hard triggers
+Safety/privacy/legal and other high-stakes facts require corresponding content
+review and factual evidence. They alone do not require Project. Shortness cannot
+waive needed content review. Material unknowns require the corresponding source
+or user decision; unrelated uncertainty never becomes an initialization gate.
 
-Select `Project` regardless of total when any trigger is true:
+The six dimensions remain explanatory evidence, scored `0`, `1`, `2` or unknown.
+They do not force Project by their total. Do not derive manuscript scale from
+repository file count. True lifecycle triggers select Project; risk and reviewer
+count select checks. Derive triggers from the original task, not overhead the
+Skill itself introduced. Explicit task facts outrank a model preference.
 
-- the user explicitly requests the Project route;
-- work must continue across sessions;
-- the manuscript is large enough that a single coherent review is unsafe;
-- facts carry high safety, privacy, legal, regulatory, medical, or financial risk;
-- a locked source will produce translations or other derived editions;
-- several formats must be reproducibly generated and visually checked;
-- independent multi-thread acceptance is required.
+## Assessor input and output
 
-Unknown hard-trigger facts remain visible in `unknowns` and select `Project`
-until evidence resolves them. Ask only when the answer is required to continue
-safely; do not convert an unresolved trigger to false.
+Use `assets/templates/routing-input.json`. `task.scope` is `bounded`, `long-form`
+or `unknown`; `task.lifecycle_required` records a real management requirement.
+Dimensions carry their task-grounded evidence. Deliverables distinguish
+`purpose: deliverable` from `purpose: qa`. Risk axes use the canonical manuscript
+axis IDs; several formats or sources can still be a bounded Structured task.
 
-## Decision rule
+The read-only assessor returns route, required review axes, initialization need,
+unknowns, reasons and the next action. It may inspect an existing directory but
+never creates it; a new authorized output directory is not a missing project.
+It never starts another Skill or decides the content is accepted.
 
-1. Sum effective dimension scores.
-2. Apply hard triggers; a true or unresolved hard-trigger fact selects
-   `Project`.
-3. Use `Quick` for `0-3`, `Structured` for `4-7`, and `Project` for `8-12`.
-4. If an unknown leaves the effective total exactly `3` or `7`, route upward.
-5. Record the evidence and reason. Do not score from prose intuition alone.
+## Existing state: score-v1
 
-## Routing evidence
-
-Repository evidence may include file count, total bytes, extensions, existing
-instructions, source manifests, output folders, scripts, version-control
-markers, prior review records, and user-provided facts. A filename is a clue,
-not proof of authority, privacy, language, or content.
-
-Use `scripts/assess_project.py` to create a read-only snapshot. Its automatic
-inspection intentionally leaves intent and risk unknown unless an answers file
-supplies them.
+Unversioned snapshots retain the original scoring and hard-trigger semantics
+when replaying their approved Profile and gates. Explicit `routing_policy:
+score-v1` is available for diagnosis. New tasks use `needs-v2`. Do not rewrite an
+existing Project snapshot, receipt or hash because the new task default differs.
+A scope change produces a traceable successor under its applicable authority.
 
 ## Examples
 
-| Scenario | Expected route | Reason |
-|---|---|---|
-| Correct one paragraph in a Markdown note | Quick | bounded, low-risk, one output |
-| Write a sourced departmental report | Structured | multiple sources, outline, review |
-| Rebuild a long technical manual | Project | scale, sources, layout, reproducibility |
-| Polish a short safety notice | Project | high-risk hard trigger |
-| Create locked Chinese and English DOCX/PDF editions | Project | language, derivation, multi-format hard triggers |
+| Task | Route and checks |
+| --- | --- |
+| Correct spelling in one supplied paragraph | Quick; content check |
+| Rewrite a short high-voltage training memo from confirmed material into DOCX | Structured; source/safety, image and real render checks |
+| Write a sourced departmental report | Structured; source, content and selected format checks |
+| Resume a long manual with accepted batches and review gates | Project; preserve existing state |
+| Produce locked translations and interdependent editions | Project; source lock and derivative gates |

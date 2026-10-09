@@ -248,3 +248,7 @@ Structural validation, a source-checkout scan, and an unexecuted command are not
 ## Released-source verification runner
 
 The manual [release-installation workflow](../.github/workflows/release-installation.yml) runs [verify_release_installation.py](../scripts/verify_release_installation.py) on a fresh hosted Linux user environment. After the protected tag exists, dispatch it with that tag and its full candidate commit. It tests native Codex global scope, pinned/default whole collections for the declared Codex and Claude Code targets, and representative single Skills. It validates source identities and every intended package file, preserves command logs/manifests, rejects pre-existing global destinations, and does not override HOME/CODEX_HOME. This is installation evidence, not Linux Codex runtime evidence; the actual hosted result belongs in the post-publication receipt.
+
+## Version identity in documentation
+
+Read the version snapshot for its package content and the current main Receipt for observed installation/publication facts. An unqualified source follows the default branch, while a fixed tag identifies an immutable tree. The [release document gate](../skills/project/release-workflow/references/DOCUMENT-STATE.md) checks both languages and the actual source/destination manifests. A local copy or simulated install is not actual released-source verification.

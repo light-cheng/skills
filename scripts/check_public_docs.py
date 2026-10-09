@@ -25,6 +25,8 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from release_context import PUBLIC_RELEASE_DOCS, STAGES, ReleaseContext, check_release_documents, confirmed_stable, infer_document_context
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Implementation-only anti-pattern signatures forbidden on the public surface
@@ -386,7 +388,7 @@ def check_catalog_parity(repo_root: Path = REPO_ROOT) -> list[str]:
     return errors
 
 
-def run_checks(repo_root: Path = REPO_ROOT) -> PublicDocCheckResult:
+def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = None) -> PublicDocCheckResult:
     """Execute all public doc checks."""
     errors: list[str] = []
     errors.extend(check_catalog_inventory(repo_root))
@@ -395,12 +397,24 @@ def run_checks(repo_root: Path = REPO_ROOT) -> PublicDocCheckResult:
     errors.extend(check_release_link_labels(repo_root))
     errors.extend(check_readme_facts(repo_root))
     errors.extend(check_catalog_parity(repo_root))
+    documents = {path: (repo_root / path).read_text(encoding="utf-8")
+                 for path in PUBLIC_RELEASE_DOCS if (repo_root / path).is_file()}
+    for path in (repo_root / "docs/evidence/releases").glob("*/*.md"):
+        documents[path.relative_to(repo_root).as_posix()] = path.read_text(encoding="utf-8")
+    if context is None:
+        context = infer_document_context(documents)
+    if context is not None:
+        files = {path.relative_to(repo_root).as_posix() for path in repo_root.rglob("*") if ".git" not in path.parts and (path.is_file() or path.is_dir())}
+        errors.extend(check_release_documents(documents, context, files))
     return PublicDocCheckResult(passed=len(errors) == 0, errors=errors)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check public documentation quality and anti-patterns.")
     parser.add_argument("--root", default=str(REPO_ROOT), help="Repository root path.")
+    parser.add_argument("--tag", help="Target version for an explicit release snapshot check.")
+    parser.add_argument("--stage", choices=STAGES, default="prepared", help="Stage for --tag; without --tag infer snapshot/current view from Manifest and verified Receipts.")
+    parser.add_argument("--mode", choices=["current", "historical"], default="current")
     args = parser.parse_args()
 
     repo_root = Path(args.root).resolve()
@@ -408,7 +422,14 @@ def main() -> int:
     print(f"Repository Root: {repo_root}")
     print("------------------------------------------")
 
-    result = run_checks(repo_root)
+    context = ReleaseContext(args.tag, args.stage, mode=args.mode) if args.tag else None
+    if context and context.stage == "attested":
+        records = {p.relative_to(repo_root).as_posix(): p.read_text(encoding="utf-8")
+                   for p in (repo_root / "docs/evidence/releases").glob("*/RELEASE_RECEIPT*.md")}
+        stable, source = confirmed_stable(records)
+        context = ReleaseContext(args.tag, args.stage, mode=args.mode, current_stable=stable, evidence_source=source,
+                                 install_verified=stable == args.tag, published=stable == args.tag)
+    result = run_checks(repo_root, context)
     if result.passed:
         print("RESULT: PASS — Public documentation structural and terminology checks passed.")
         return 0

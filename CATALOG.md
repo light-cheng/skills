@@ -192,8 +192,8 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### manuscript-ops
 
-- **Purpose:** Route and govern manuscript engineering from notes to multilingual, multi-format deliverables.
-- **When to use:** Manuscript scope, risk, batches, reviews, or formats need governing.
+- **Purpose:** Complete bounded writing with relevant checks, or manage batched/locked manuscript editions.
+- **When to use:** Notes, SOPs and reports need writing/checks, or actual manuscript lifecycle management is required.
 - **Invocation:** Model-invoked; manual entry point is supported.
 - **Package:** [skills/writing/manuscript-ops/](skills/writing/manuscript-ops)
 - **Status:** Admitted first-party; PRESERVE — NO REWRITE.
@@ -282,7 +282,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### release-workflow
 
-- **Purpose:** Publish a completed project — synchronize docs, run quality gates, tag, and release.
+- **Purpose:** Prepare, verify and attest a Skills release, including snapshot, current-state and Release-body semantics.
 - **When to use:** Project has passed `project-review` and is ready to publish.
 - **Invocation:** Model-invoked (or manual entry where supported).
 - **Package:** [skills/project/release-workflow/](skills/project/release-workflow)

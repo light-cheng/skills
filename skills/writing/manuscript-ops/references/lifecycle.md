@@ -1,5 +1,8 @@
 # Manuscript lifecycle
 
+This lifecycle and its fixed gates apply only to Project. Quick and Structured
+finish after their task-specific content/format checks and delivery.
+
 ## Semantic layers
 
 1. **Authoritative sources** — permitted evidence for factual claims.
@@ -66,7 +69,7 @@ comma-separated subset of `factual`, `context`, `style`, and `incoming`;
 
 ## Writer and reviewer boundaries
 
-The main thread is the only body writer. Reviewers remain read-only and return
+The assigned writer is the only body writer for this manuscript; that writer may be a delegated agent. Reviewers remain read-only and return
 findings against a frozen snapshot. The main thread validates findings, repairs
 confirmed issues, regenerates outputs, and freezes a successor snapshot.
 

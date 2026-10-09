@@ -1,0 +1,1906 @@
+{
+  "policy": "needs-v2",
+  "cases": [
+    {
+      "id": "case-01",
+      "split": "calibration",
+      "state": {
+        "request": "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "修正已提供的一段便签中的错字，不改事实，输出 Markdown。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-02",
+      "split": "calibration",
+      "state": {
+        "request": "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          },
+          "risk": {
+            "score": 2,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": true,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [
+            "safety-privacy-legal"
+          ],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 2,
+          "evidence": [
+            "将两段高压射线设备维护备忘录改写为一份图文 DOCX。原稿、手册与技术含义已确认，只改表达。PDF 仅排版检查，不做文稿工程。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "format-layout",
+        "images",
+        "intent-structure",
+        "reader-accessibility",
+        "safety-privacy-legal"
+      ]
+    },
+    {
+      "id": "case-03",
+      "split": "calibration",
+      "state": {
+        "request": "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 2,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": true,
+          "large_volume": true,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "long-form",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "编写长篇技术手册，分十个批次跨多周推进，保存可恢复状态和每批审阅记录。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-04",
+      "split": "calibration",
+      "state": {
+        "request": "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "给已有低风险短文换一个更清楚的标题，其余文字不动。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-05",
+      "split": "calibration",
+      "state": {
+        "request": "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 1,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "从三个已经提供的部门材料写一份报告，核对来源和数据，交付一次性 DOCX。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility"
+      ]
+    },
+    {
+      "id": "case-06",
+      "split": "calibration",
+      "state": {
+        "request": "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          },
+          "output_complexity": {
+            "score": 2,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": true,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "先锁定中文主稿，再由锁稿生成英语译本和两种正式排版版本，保持各版的可追溯关系。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-07",
+      "split": "calibration",
+      "state": {
+        "request": "把提供的两项日常待办改成编号列表，不添加内容。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "把提供的两项日常待办改成编号列表，不添加内容。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "把提供的两项日常待办改成编号列表，不添加内容。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-08",
+      "split": "calibration",
+      "state": {
+        "request": "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          },
+          "risk": {
+            "score": 2,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": true,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [
+            "safety-privacy-legal"
+          ],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "改写一页含员工隐私的内部通知，读者和权限已明确，保留隐私检查，完成后交付一份文本。不要求工程初始化。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "intent-structure",
+        "reader-accessibility",
+        "safety-privacy-legal"
+      ]
+    },
+    {
+      "id": "case-09",
+      "split": "held-out",
+      "state": {
+        "request": "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": true,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "用户明确要求把这份短手册按 Project 文稿工程管理，建立其基线与后续门禁。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-10",
+      "split": "held-out",
+      "state": {
+        "request": "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "统一现有便签的一处标点和空格，直接返回修正后的文字。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-11",
+      "split": "held-out",
+      "state": {
+        "request": "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          },
+          "risk": {
+            "score": 2,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": true,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [
+            "safety-privacy-legal"
+          ],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "润色一张已经批准含义的设备安全提示卡，保留警示和术语，做内容安全审阅；只有这张卡。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "intent-structure",
+        "reader-accessibility",
+        "safety-privacy-legal"
+      ]
+    },
+    {
+      "id": "case-12",
+      "split": "held-out",
+      "state": {
+        "request": "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 2,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          },
+          "output_complexity": {
+            "score": 2,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": true,
+          "high_risk_facts": false,
+          "locked_derivatives": true,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "long-form",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "维护一套四种语言的长期手册，译本只来自锁定源，跨批次更新相互依赖的版次。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-13",
+      "split": "held-out",
+      "state": {
+        "request": "删掉已提供日常说明中重复的一句话，保持原意。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "删掉已提供日常说明中重复的一句话，保持原意。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "删掉已提供日常说明中重复的一句话，保持原意。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-14",
+      "split": "held-out",
+      "state": {
+        "request": "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          },
+          "source_complexity": {
+            "score": 2,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "写一份短报告，两份来源对一个数字有冲突，需要核对或向用户澄清这个数字；没有长期文稿管理需求。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "intent-structure",
+        "reader-accessibility"
+      ]
+    },
+    {
+      "id": "case-15",
+      "split": "held-out",
+      "state": {
+        "request": "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 2,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": true,
+          "cross_session": false,
+          "large_volume": true,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "long-form",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "继续现有已经批准的书稿 Project，接着完成尚未审阅的下一批章节，不更改已封门批次。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-16",
+      "split": "held-out",
+      "state": {
+        "request": "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "把低风险短段落中的三句话调整顺序，使表述更清楚。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-17",
+      "split": "held-out",
+      "state": {
+        "request": "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 2,
+          "evidence": [
+            "由指定子代理将一份确认好的短训练说明做成 DOCX，父代理检查。含两幅图，需要真实渲染；一次交付，没有锁定版本。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "format-layout",
+        "images",
+        "intent-structure",
+        "reader-accessibility"
+      ]
+    },
+    {
+      "id": "case-18",
+      "split": "held-out",
+      "state": {
+        "request": "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 1,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          },
+          "risk": {
+            "score": 1,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          },
+          "output_complexity": {
+            "score": 2,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": true,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "为出版物生成可重复构建、相互依赖的 EPUB、PDF 与印刷版；先冻结源和每版规则并按批次验收。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-19",
+      "split": "held-out",
+      "state": {
+        "request": "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "修正一句已经确认含义的中文拼写错误，直接输出一句话。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-20",
+      "split": "held-out",
+      "state": {
+        "request": "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          },
+          "risk": {
+            "score": 2,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": true,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [
+            "safety-privacy-legal"
+          ],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "改写一页财务说明，所有数值由给定来源核对，不新增投资建议；单份报告交付，不要求文稿工程。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "intent-structure",
+        "reader-accessibility",
+        "safety-privacy-legal"
+      ]
+    },
+    {
+      "id": "case-21",
+      "split": "held-out",
+      "state": {
+        "request": "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 2,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          },
+          "output_complexity": {
+            "score": 1,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": true,
+          "large_volume": true,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "long-form",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "组织跨会话的十二章教材生产，多个章节互相依赖，需要恢复状态与阶段性锁定。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    },
+    {
+      "id": "case-22",
+      "split": "held-out",
+      "state": {
+        "request": "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+      },
+      "expected_route": "Quick",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          },
+          "source_complexity": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": false,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "整理一份生活记录成一个简短表格，信息齐全、没有敏感或高风险内容，纯 Markdown 一次交付。"
+          ]
+        }
+      },
+      "expected_review_axes": []
+    },
+    {
+      "id": "case-23",
+      "split": "held-out",
+      "state": {
+        "request": "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+      },
+      "expected_route": "Structured",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 0,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          },
+          "risk": {
+            "score": 2,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          },
+          "output_complexity": {
+            "score": 0,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": false,
+          "high_risk_facts": true,
+          "locked_derivatives": false,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "bounded",
+          "operation": "rewrite",
+          "lifecycle_required": false,
+          "risk_axes": [
+            "safety-privacy-legal"
+          ],
+          "deliverables": [
+            {
+              "format": "markdown",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "改写一篇涉及法律含义的短通知，范围和资料已定；核对来源和适当的内容审阅，单份交付。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "factual-sources",
+        "intent-structure",
+        "reader-accessibility",
+        "safety-privacy-legal"
+      ]
+    },
+    {
+      "id": "case-24",
+      "split": "held-out",
+      "state": {
+        "request": "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+      },
+      "expected_route": "Project",
+      "answers": {
+        "dimensions": {
+          "scale": {
+            "score": 2,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          },
+          "source_complexity": {
+            "score": 1,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          },
+          "risk": {
+            "score": 0,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          },
+          "output_complexity": {
+            "score": 2,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          },
+          "collaboration": {
+            "score": 0,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          },
+          "reproducibility": {
+            "score": 0,
+            "evidence": [
+              "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+            ]
+          }
+        },
+        "hard_triggers": {
+          "explicit_project": false,
+          "cross_session": false,
+          "large_volume": true,
+          "high_risk_facts": false,
+          "locked_derivatives": true,
+          "reproducible_multi_format": false,
+          "independent_multi_thread_acceptance": false
+        },
+        "task": {
+          "scope": "long-form",
+          "operation": "rewrite",
+          "lifecycle_required": true,
+          "risk_axes": [],
+          "deliverables": [
+            {
+              "format": "docx",
+              "purpose": "deliverable"
+            }
+          ],
+          "image_count": 0,
+          "evidence": [
+            "处理长期多卷文稿，将已接受的来源与主稿锁定，生成相互依赖的语言版本，并能恢复各批工作。"
+          ]
+        }
+      },
+      "expected_review_axes": [
+        "compatibility-round-trip",
+        "factual-sources",
+        "format-layout",
+        "intent-structure",
+        "reader-accessibility",
+        "reproducibility-recovery",
+        "safety-privacy-legal",
+        "terminology-localization"
+      ]
+    }
+  ],
+  "expectations_revision": 2
+}

@@ -6,6 +6,9 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- `manuscript-ops`: route bounded writing separately from content risk, preserve old Project snapshots, accept document sources and bound extraction lineage, and expose optional Host decision-MCP interpretation. Record local regression and independent acceptance evidence separately from release and global installation facts.
+- `release-workflow`: validate fixed-tree snapshot/current-main/Release-body version and state semantics in both languages; bind external observations and final-main CI, with explicitly labeled local simulation. No release or global deployment is claimed.
+
 - `release-workflow`: Validate finalized staged artifacts and receipt/archive links before every push; bind candidate and final attestation CI to exact commits, wait for success, and disclose failed attempts and historical file badges. Use one final commit/push per coherent same-stage repair, gathering review and all affected artifacts first; keep candidate/receipt stages and genuine post-push failures distinct. Preserve release history and notification settings.
 
 ## 0.2.7 — 2026-10-07

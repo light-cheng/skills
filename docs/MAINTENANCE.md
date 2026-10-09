@@ -79,3 +79,7 @@ At closeout, record final repository location, released versions/tags, verified 
 ## Validation entry points after categorization
 
 From the repository root, run `python3 -m pytest -q`. For standalone frozen package test scripts, use `PYTHONPATH=tests python3 <test-path>`; CI sets the same `PYTHONPATH=tests`. This preserves frozen file bytes while resolving the shared helpers after adding a category level.
+
+## Release document views
+
+A frozen version snapshot describes its own content. Current main identifies the stable version from confirmed bilingual Receipts. A Manifest records preparation-time history. Use the common [document-state contract](../skills/project/release-workflow/references/DOCUMENT-STATE.md) and fixed-tree stage gates; historical audits preserve their original scope. Installation/publication facts and final-main CI remain distinct from local simulation.

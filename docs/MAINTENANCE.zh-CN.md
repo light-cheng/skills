@@ -69,3 +69,7 @@
 ## 分类目录的验证入口
 
 从仓库根目录运行 `python3 -m pytest -q`。单独运行冻结包中的测试脚本时，使用 `PYTHONPATH=tests python3 <test-path>`；CI 同样设置 `PYTHONPATH=tests`。这保留冻结文件内容，同时让增加分类层后的脚本找到共享辅助模块。
+
+## 发布文档的语境
+
+冻结版本快照说明自身内容，当前 main 按已确认的双语收据说明稳定版本，发布清单保留准备时历史。使用共同的[文档状态契约](../skills/project/release-workflow/references/DOCUMENT-STATE.md)和固定树阶段检查；历史复核保持原范围。实际安装、发布和最终 main CI 与本地模拟分别记录。

@@ -1,36 +1,44 @@
-# `manuscript-ops` 使用指南
+# manuscript-ops 使用指南
 
 [英文指南](../../skills/manuscript-ops.md)
 
-完整行为契约见 [skills/writing/manuscript-ops/SKILL.md](../../../skills/writing/manuscript-ops/SKILL.md)。
+[包内契约](../../../skills/writing/manuscript-ops/SKILL.md)决定技能行为。
 
-## 解决什么问题
+## 根据文稿任务选路线
 
-`manuscript-ops` 管理从笔记、结构化报告到多语言、多格式交付物的文稿工程。它持续保存 source authority、用户决定、可复现生成、review evidence、format QA、锁版和 resume boundary。
+这个技能用于笔记、SOP、报告和文稿工程。范围明确的写作任务可以直接交付整稿。内容风险决定需要哪些审阅；实际文稿管理需求决定是否初始化工程。
 
-## 何时使用 / 不使用
+| 路线 | 工作 | 完成条件 |
+| --- | --- | --- |
+| Quick | 明确、低风险的文本修改 | 修改、检查后交付 |
+| Structured | 需要来源、图文或格式检查的短篇改写和报告 | 完成整稿及适用的审阅、渲染检查后交付 |
+| Project | 用户明确要求文稿工程，或需要可恢复批次、锁定版本及派生管理 | 按已有文稿工程门禁推进 |
 
-当 manuscript、manual、book、多语言版本或格式风险较高的文稿需要 source、batch、review 或 production 治理时使用。它不是通用 task router、静默 project initializer、自动 workflow manager，也不替代 `project-review` 的最终 verdict 机制。
+短篇安全说明通常走 Structured，并保留来源与安全审阅。一次委派、多个参考文件和仅用于排版检查的 PDF 不构成工程初始化需求。规模以本次文稿判断。未知信息保持可见，只澄清会影响工作的决定或资料。
 
-它是 `model-invoked`，host 允许时也可手动进入：
+它是 model-invoked 能力；宿主支持时也可明确选择：
 
 ```text
 $manuscript-ops
 $manuscript-ops resume
 ```
 
-## 前置条件、输入和输出
+## 输入和检查
 
-先解析准确的 project root，读取适用规则和状态，检查 formats/sources/capabilities；内置工具要求 Python 3.11+。输入包括六维 routing、source register、Manuscript Brief、Project Profile、format set、验收轴和已有 state。输出包括 routing snapshot、显式 handoff、可恢复 state、source/batch/format 记录、review evidence 和 production QA。
+给出用途、读者、材料权威、交付物、获准的输出位置和已确认决定。Quick、Structured 不要求项目脚手架、Project Profile、审阅章程、Jujutsu 或门禁收据。指定子代理可以担任文稿写作者；审阅者保持只读，调用方在阶段返回后继续已授权工作。
 
-## Handoff、成功和 `BLOCKED`
+[格式与来源契约](../../../skills/writing/manuscript-ops/references/formats.md)说明普通文档、旧 DOC 转换及有哈希绑定的提取关系。DOCX 等排版敏感输出必须实际渲染并检查页面。未执行的检查如实标明，文件可解析不表示排版已通过。
 
-Project route 先按需要选择一个 discovery handoff：单会话决策用 `clarify`，多会话不确定性用 `decision-map`，随后停止。`clarify` 是用户入口，底层的 model-invoked 能力是 `socratic`；二者是同一澄清能力，不是两个用户步骤。只有用户显式 resume 才能继续。初始化前需用户显式选择 `project-init`，review 前需批准的 `project-review` Charter。root、dependency、brief、capability、证据或真实渲染/round-trip proof 缺失时返回 `BLOCKED`，不能把语法有效当成视觉验收。
+## 可选决策工具
 
-## 组合和最终权威
+宿主已有结构化决策 MCP 时，可以帮助理解任务范围和来源关系。[语义判断契约](../../../skills/writing/manuscript-ops/references/semantic-routing.md)规定输入、可选结果和经评测确定的置信策略。建议不能覆盖明确的工程需求或必需审阅；工具缺失、异常或不确定时，当前 Agent 按证据判断，不要求额外部署。
 
-标准治理路径为 `manuscript-ops` → `clarify`/`decision-map` → `project-init` → `project-review init` → production → `project-review` manuscript review（经 `review-loop` 收敛）。每个 user-invoked handoff 和 resume 都由用户控制。`project-review` 拥有 generic findings、独立性、state 和最终 `PASS`/`FAIL`/`BLOCKED`；`manuscript-ops` 只提供文稿证据边界并消费 verdict。到 handoff 或最终 verdict 即停止。
+新评估使用 `needs-v2`。旧的未标版本 Project 快照按 `score-v1` 复核，保留批准与收据。只有使用内置脚本时才需要 Python 3.11+。
 
-## 安装与发现验证
+## 工程路线与安装
 
-使用 `npx skills add LightDevCoder/skills --skill manuscript-ops` 安装，刷新 host，在不依赖 source checkout 的情况下验证 `assets/`、`references/`、`scripts/` 等完整资源。先运行 capability/dependency/state 检查，再把 format 结果标为 verified。
+只有 Project 读取[完整工程流程](../../../skills/writing/manuscript-ops/references/project-route.md)。它复用获准状态，保留 user-invoked 交接边界，采用 `project-review` 的最终判定。尚不支持的版本保证应准确说明，不能把普通快照说成门禁通过。
+
+Project 采用独立的 `PASS`、`FAIL` 或 `BLOCKED` 判定。确实缺少必需依赖时，返回 `BLOCKED` 并写明具体步骤与恢复条件；调用方收到阶段结果后处理剩余任务，不能把这个停止当成整个任务已经完成。
+
+安装方法见[安装指南](../../INSTALLATION.zh-CN.md)。检查完整包并做隔离调用；源文件扫描只能证明结构。main 上的本地修复不等于已发布标签或全局部署。

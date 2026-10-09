@@ -22,6 +22,9 @@ import os
 import re
 import subprocess
 import sys
+import tarfile
+import tempfile
+from dataclasses import replace
 from pathlib import Path
 from typing import NamedTuple
 
@@ -38,6 +41,11 @@ from check_release_tag_preflight import (
     RemoteTagStatus,
     resolve_annotated_tag_identity,
     resolve_remote_tag,
+)
+from release_context import (
+    STAGES, ReleaseContext, apply_observations, check_release_documents,
+    confirmed_stable, document_links, legacy_snapshot, validate_ci_observation,
+    validate_document, validate_observation_kind, validate_publication_observation, version_key,
 )
 
 
@@ -307,8 +315,9 @@ def check_github_release_navigation(
     tag: str,
     repo: str = "LightDevCoder/skills",
     cwd: Path = REPO_ROOT,
+    context: ReleaseContext | None = None,
 ) -> VerificationResult:
-    """Verify that published GitHub Release body does not contain bare relative links that 404."""
+    """Check observed publication identity, body meaning and full navigation URLs."""
     version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
     if version_match:
         major, minor, patch = map(int, version_match.groups())
@@ -320,7 +329,7 @@ def check_github_release_navigation(
             )
 
     proc = subprocess.run(
-        ["gh", "release", "view", tag, "--repo", repo, "--json", "body"],
+        ["gh", "release", "view", tag, "--repo", repo, "--json", "body,tagName,isDraft,isPrerelease,publishedAt,url"],
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -336,6 +345,8 @@ def check_github_release_navigation(
     try:
         data = json.loads(proc.stdout)
         body = data.get("body", "")
+        if not isinstance(body, str) or not body.strip():
+            raise ValueError("published Release body must be nonempty text")
     except Exception as e:
         return VerificationResult(
             passed=False,
@@ -362,6 +373,14 @@ def check_github_release_navigation(
                 "All release body navigation links must use full repository URLs."
             ),
         )
+
+    source = f"GitHub Release {tag}"
+    errors = validate_publication_observation(data, tag, source)
+    body_context = replace(context or ReleaseContext(tag, "attested"), published=not errors, evidence_source=source)
+    errors.extend(validate_document(body, source, "release-body", body_context))
+    errors.extend(document_links(body, source, body_context, set()))
+    if errors:
+        return VerificationResult(False, "RELEASE_BODY_INCONSISTENT", "; ".join(errors))
 
     return VerificationResult(
         passed=True,
@@ -525,8 +544,64 @@ def check_receipt_absence_in_candidate(
     )
 
 
-def check_public_candidate_docs(repo_root: Path = REPO_ROOT) -> VerificationResult:
+def extract_git_archive(archive: tarfile.TarFile, destination: Path) -> None:
+    """Extract regular Git tree entries safely on supported Python versions, including 3.9."""
+    root = destination.resolve()
+    def inside(path: Path) -> bool:
+        try:
+            path.resolve().relative_to(root)
+            return True
+        except ValueError:
+            return False
+    for member in archive:
+        target = root / member.name
+        if Path(member.name).is_absolute() or not inside(target):
+            raise ValueError(f"archive entry outside export: {member.name}")
+        if member.issym():
+            if Path(member.linkname).is_absolute() or not inside(target.parent / member.linkname):
+                raise ValueError(f"archive link outside export: {member.name}")
+        elif not (member.isfile() or member.isdir()):
+            raise ValueError(f"unsupported Git archive entry: {member.name}")
+        archive.extract(member, path=root, set_attrs=False)
+
+
+def check_public_candidate_docs(
+    repo_root: Path = REPO_ROOT,
+    context: ReleaseContext | None = None,
+) -> VerificationResult:
     """Verify that public documentation is internally consistent during candidate stages."""
+    if context is not None:
+        if not context.revision:
+            return VerificationResult(False, "PUBLIC_DOCS_ERROR", "No fixed Git tree supplied for release document verification.")
+        if legacy_snapshot(context):
+            return VerificationResult(True, "HISTORICAL_SNAPSHOT", f"{context.revision}: frozen pre-semantic-gate public prose retained; no current-main downgrade required.")
+        with tempfile.TemporaryDirectory(prefix="release-doc-tree-") as temporary:
+            exported = Path(temporary) / "exported"
+            exported.mkdir()
+            archive = Path(temporary) / "tree.tar"
+            code, _, error = run_git(["archive", f"--output={archive}", context.revision], cwd=repo_root)
+            if code:
+                return VerificationResult(False, "PUBLIC_DOCS_ERROR", f"Cannot export {context.revision}: {error}")
+            try:
+                with tarfile.open(archive) as tree:
+                    extract_git_archive(tree, exported)
+            except (tarfile.TarError, ValueError, OSError) as error:
+                return VerificationResult(False, "PUBLIC_DOCS_ERROR", f"Cannot safely export {context.revision}: {error}")
+            documents = {path.relative_to(exported).as_posix(): path.read_text(encoding="utf-8")
+                         for path in exported.rglob("*.md")}
+            if context.stage == "attested" and context.mode == "current":
+                stable, source = confirmed_stable(documents)
+                context = replace(context, current_stable=stable, evidence_source=source,
+                                  install_verified=stable == context.target, published=stable == context.target)
+            files = {path.relative_to(exported).as_posix() for path in exported.rglob("*") if path.is_file() or path.is_dir()}
+            errors = check_release_documents(documents, context, files)
+            if errors:
+                return VerificationResult(False, "PUBLIC_DOCS_INCONSISTENT", "; ".join(errors))
+            import check_public_docs
+            result = check_public_docs.run_checks(exported, context=context)
+            if not result.passed:
+                return VerificationResult(False, "PUBLIC_DOCS_INCONSISTENT", "; ".join(result.errors))
+            return VerificationResult(True, "PASS", f"Public release objects in {context.revision} verified for {context.stage}/{context.mode}.")
     if (repo_root / "CATALOG.md").is_file() and (repo_root / "README.md").is_file():
         scripts_dir = repo_root / "scripts"
         if str(scripts_dir) not in sys.path:
@@ -1036,10 +1111,15 @@ def main() -> int:
     parser.add_argument("--tag", help="Release tag to verify (e.g. v0.2.3). Default: latest candidate tag.")
     parser.add_argument("--release-commit", "--commit", dest="release_commit", default=None,
                         help="Release candidate / tag target commit SHA. (Default: HEAD for prepared/candidate/tagged stages).")
-    parser.add_argument("--stage", choices=["auto", "prepared", "candidate", "tagged", "attested"], default="auto",
+    parser.add_argument("--stage", choices=["auto", "candidate", *STAGES], default="auto",
                         help="Lifecycle stage to verify (default: auto).")
+    parser.add_argument("--mode", choices=["current", "historical"], default="current",
+                        help="Current release gate or immutable historical tag re-audit; historical mode cannot prepare a candidate.")
     parser.add_argument("--check-remote", action="store_true", help="Also query git remote for tag status.")
     parser.add_argument("--allow-dirty", action="store_true", help="Allow uncommitted tracked changes.")
+    parser.add_argument("--observations", type=Path, help="Recorded CI/install/publication JSON observations.")
+    parser.add_argument("--simulate", action="store_true", help="Accept explicitly marked test-double observations; never reports production PASS.")
+    parser.add_argument("--final-ci", type=Path, help="Recorded CI for final main HEAD after pushing; kept outside the Receipt to avoid self-reference.")
 
     args = parser.parse_args()
     repo_root = get_repo_root(args.root)
@@ -1058,6 +1138,11 @@ def main() -> int:
         else:
             stage = "prepared"
 
+    if args.mode == "historical" and stage in ("prepared", "candidate", "ci_verified"):
+        parser.error("historical mode requires an existing tag; it cannot prepare or promote a candidate")
+    if args.final_ci and stage != "attested":
+        parser.error("--final-ci checks the final main attestation commit and requires stage=attested")
+
     # Resolve candidate commit ref according to stage contract
     if stage == "attested":
         if args.release_commit:
@@ -1073,7 +1158,7 @@ def main() -> int:
             else:
                 candidate_ref = "UNKNOWN"
                 candidate_sha = None
-    elif stage == "tagged":
+    elif stage in ("tagged", "install_verified", "published"):
         if args.release_commit:
             candidate_ref = args.release_commit
             candidate_sha = resolve_commit_sha(candidate_ref, cwd=repo_root)
@@ -1098,6 +1183,53 @@ def main() -> int:
     print("--------------------------------")
 
     all_passed = True
+    try:
+        context = ReleaseContext(tag, "prepared" if stage == "candidate" else stage, candidate_sha, args.mode)
+    except ValueError as error:
+        # Keep tag-object diagnostics at the boundary before release-document syntax.
+        if candidate_sha and stage in ("tagged", "install_verified", "published", "attested"):
+            identity = check_tag_immutability(tag, candidate_sha, stage="tagged", cwd=repo_root)
+            if not identity.passed:
+                print(f"[{identity.status}] Tag Identity: {identity.message}")
+                return 1
+        print(f"[RELEASE_CONTEXT] {error}")
+        return 1
+    if args.observations:
+        try:
+            observations = json.loads(args.observations.read_text(encoding="utf-8"))
+            if not isinstance(observations, dict):
+                raise ValueError("observations must be a JSON object")
+            context, errors = apply_observations(context, observations, candidate_sha or "UNKNOWN",
+                                                 str(args.observations), simulate=args.simulate,
+                                                 package_count=get_admitted_package_count(repo_root, revision=candidate_sha) if candidate_sha else None)
+        except (OSError, ValueError) as error:
+            errors = [f"[OBSERVATION_ERROR] {error}"]
+        for error in errors:
+            print(error)
+        if errors:
+            all_passed = False
+    elif stage in ("ci_verified", "install_verified", "published"):
+        print(f"[EXTERNAL_FACTS_UNOBSERVED] {stage.upper()} requires recorded observations via --observations.")
+        all_passed = False
+    if args.final_ci:
+        try:
+            final_ci = json.loads(args.final_ci.read_text(encoding="utf-8"))
+            if not isinstance(final_ci, dict):
+                raise ValueError("final CI must be a JSON object")
+            final_sha = resolve_commit_sha("HEAD", cwd=repo_root) or "UNKNOWN"
+            errors = validate_observation_kind(final_ci, str(args.final_ci), simulate=args.simulate)
+            errors.extend(validate_ci_observation(final_ci, final_sha, str(args.final_ci)))
+            if final_ci.get("kind") == "test-double":
+                context = replace(context, simulated=True)
+            for error in errors:
+                print(error)
+            if errors:
+                all_passed = False
+            else:
+                print(f"[PASS] Final Main CI: exact {final_sha}, completed, success; source={args.final_ci}")
+        except (OSError, ValueError) as error:
+            print(f"[FINAL_CI_ERROR] {error}")
+            all_passed = False
 
     # 1. Working tree check (always run against current working tree / HEAD)
     if not args.allow_dirty:
@@ -1114,7 +1246,7 @@ def main() -> int:
         all_passed = False
 
     # 3. Stage-specific checks:
-    if stage in ("prepared", "candidate"):
+    if stage in ("prepared", "candidate", "ci_verified"):
         # In prepared/candidate stage, HEAD must match supplied candidate commit
         head_sha = resolve_commit_sha("HEAD", cwd=repo_root)
         if candidate_sha and head_sha and head_sha != candidate_sha:
@@ -1122,7 +1254,7 @@ def main() -> int:
             all_passed = False
 
         if candidate_sha:
-            res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage=stage, cwd=repo_root)
+            res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage="prepared", cwd=repo_root)
             print(f"[{res_tag.status}] Tag Status: {res_tag.message}")
             if not res_tag.passed:
                 all_passed = False
@@ -1147,12 +1279,12 @@ def main() -> int:
         if not res_notes.passed:
             all_passed = False
 
-        res_docs = check_public_candidate_docs(repo_root=repo_root)
+        res_docs = check_public_candidate_docs(repo_root=repo_root, context=context)
         print(f"[{res_docs.status}] Public Candidate Docs: {res_docs.message}")
         if not res_docs.passed:
             all_passed = False
 
-    elif stage == "tagged":
+    elif stage in ("tagged", "install_verified", "published"):
         if candidate_sha:
             res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage="tagged", cwd=repo_root)
             print(f"[{res_tag.status}] Tag Immutability: {res_tag.message}")
@@ -1181,6 +1313,11 @@ def main() -> int:
         if not res_notes.passed:
             all_passed = False
 
+        res_docs = check_public_candidate_docs(repo_root=repo_root, context=replace(context, revision=tag_ref))
+        print(f"[{res_docs.status}] Tagged Public Snapshot: {res_docs.message}")
+        if not res_docs.passed:
+            all_passed = False
+
     elif stage == "attested":
         if candidate_sha:
             res_tag = check_tag_immutability(tag, candidate_sha, check_remote=args.check_remote, stage="attested", cwd=repo_root)
@@ -1206,12 +1343,6 @@ def main() -> int:
         if not res_notes.passed:
             all_passed = False
 
-        if args.check_remote:
-            res_rel_body = check_github_release_navigation(tag, repo="LightDevCoder/skills", cwd=repo_root)
-            print(f"[{res_rel_body.status}] GitHub Release Navigation: {res_rel_body.message}")
-            if not res_rel_body.passed:
-                all_passed = False
-
         # Release receipt is verified from committed HEAD (receipt_revision)
         # against the immutable candidate/tag snapshot (release_revision)
         head_sha = resolve_commit_sha("HEAD", cwd=repo_root)
@@ -1227,9 +1358,32 @@ def main() -> int:
         if not res_receipt.passed:
             all_passed = False
 
+        if args.check_remote:
+            res_rel_body = check_github_release_navigation(
+                tag, repo="LightDevCoder/skills", cwd=repo_root,
+                context=replace(context, install_verified=res_receipt.passed),
+            )
+            print(f"[{res_rel_body.status}] GitHub Release Body: {res_rel_body.message}")
+            if not res_rel_body.passed:
+                all_passed = False
+
+        # Frozen pre-gate tags keep their original prose; current main is checked
+        # against the latest verified Receipt, never downgraded to an older tag.
+        snapshot_mode = "historical" if version_key(tag) <= (0, 2, 7) else args.mode
+        res_snapshot = check_public_candidate_docs(repo_root, ReleaseContext(tag, "tagged", tag_ref, snapshot_mode))
+        print(f"[{res_snapshot.status}] Immutable Public Snapshot: {res_snapshot.message}")
+        if not res_snapshot.passed:
+            all_passed = False
+        if args.mode == "current":
+            res_docs = check_public_candidate_docs(repo_root, ReleaseContext(tag, "attested", head_sha))
+            print(f"[{res_docs.status}] Current Main Publication: {res_docs.message}")
+            if not res_docs.passed:
+                all_passed = False
+
     print("--------------------------------")
     if all_passed:
-        print("RESULT: PASS — Release integrity verified.")
+        print("RESULT: SIMULATED_PASS — Local release rehearsal only; external facts are test doubles." if context.simulated
+              else "RESULT: PASS — Release integrity verified.")
         return 0
     else:
         print("RESULT: FAIL — Release integrity violation detected.")
