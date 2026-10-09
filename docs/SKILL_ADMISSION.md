@@ -2,7 +2,7 @@
 
 [中文准入契约](SKILL_ADMISSION.zh-CN.md)
 
-This document is the admission and evidence contract for a first-party Skill. It applies before a package is added to `skills/` and whenever a change alters the package's behavior, invocation boundary, dependencies, resources, or ownership claim.
+This document is the admission and evidence contract for a first-party Skill. It applies before a package is added to `skills/` and to any change that [review policy](REVIEW_POLICY.md#how-much-review-a-change-needs) classifies as full review. Everyday changes to an admitted package do not repeat admission.
 
 ## Reuse-before-invention decision
 

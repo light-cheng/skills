@@ -14,24 +14,25 @@ This policy assigns review responsibilities and evidence requirements for first-
 
 Do not put final project acceptance back into `review-loop`. A reviewer finding never becomes a project verdict without the acceptance owner's judgment.
 
-## Review triggers
+## How much review a change needs
 
-Use this policy for:
+Pick the lightest row that fits. When unsure, use the next heavier row.
 
-- a new Skill admission;
-- a change to a Skill's behavior, trigger, invocation type, boundary, dependency, resource, or attribution;
-- any runtime executable script, shared test infrastructure, or installer behavior change;
-- a rename, deprecation, or removal that changes discovery, installation, or migration behavior; and
-- a release candidate containing any of the above.
+| Change | What you do | What you skip |
+| --- | --- | --- |
+| **Everyday change**: wording, examples, references, or behavior of an admitted package, with the same invocation type, dependencies, attribution and install surface, and no new or changed executable script | Run the package tests and the full suite locally. The owner tries the change in real use. Add a `CHANGELOG.md` line. | Charter, Critic, frozen baseline, evidence directory, independent Evaluator. |
+| **Documentation only**: README, catalog, guides, governance docs | Run `python scripts/check_public_docs.py` and the full suite; check links and the English/Chinese pair. | Everything above. |
+| **Full review**: new admission; a change to invocation type, dependency, attribution or install surface; any executable script, shared test infrastructure or installer change; rename, deprecation or removal | Follow the profile table below. | Nothing. |
+| **Release candidate** | Package-level acceptance for any full-review change it contains, plus the release gate in [maintenance](MAINTENANCE.md). | Nothing. |
 
-Documentation-only governance changes still require link, scope, and cross-reference inspection. They do not substitute for the future package-level `project-review` (via `review-loop`) acceptance that an admitted Skill requires.
+An everyday change that turns out to touch a script, invocation type or dependency moves to full review. The owner's trial is real use, not a substitute for a failing test. Release and published-install verification are never skipped.
 
 ## Profile selection and specialist review
 
 | Change | Required final acceptance | Additional specialist evidence |
 | --- | --- | --- |
 | Eligible low-risk prompt-only Skill | One fresh independent Evaluator using the fast track in [admission](SKILL_ADMISSION.md) | Structure/metadata, isolated copy/discovery, deterministic positive/negative contract tests, explicit-use/non-trigger observations, synchronized docs. No separate Critic or `light-code-review`. |
-| New or materially changed first-party Skill | `project-review` or `review-loop` with the `agent-skill` Profile (project-level vs package-level) | Structural, fresh-install, behavioral, invocation, and attribution evidence. |
+| New first-party Skill, or a full-review change to one | `project-review` or `review-loop` with the `agent-skill` Profile (project-level vs package-level) | Structural, fresh-install, behavioral, invocation, and attribution evidence. |
 | Skill with executable scripts | `project-review` or `review-loop` with `agent-skill` Profile | Focused automated + negative tests, adversarial/mutation fixtures where appropriate, and `light-code-review` findings. |
 | Software artifact inside a Skill | `project-review` owns the verdict; `review-loop` is its engine | `light-code-review` supplies Standards/Spec findings. |
 | Manuscript or specification artifact | `project-review` selects `manuscript` or `specification` Profile; `review-loop` drives convergence | Artifact-specific evidence and specialist findings. |

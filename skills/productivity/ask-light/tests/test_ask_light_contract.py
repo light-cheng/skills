@@ -60,7 +60,9 @@ class AskLightContractTest(unittest.TestCase):
     def test_skill_contract_enforces_model_led_hybrid_advisor_boundaries(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         contract = (ROOT / "references" / "discovery-contract.md").read_text(encoding="utf-8")
-        combined = skill + "\n" + contract
+        # The contract may live in SKILL.md or any of its references (progressive disclosure).
+        references = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ROOT / "references").glob("*.md")))
+        combined = skill + "\n" + references
 
         # 1. Python is evidence/validation authority, not semantic recommendation authority
         self.assertIn("Code establishes trustworthy facts", combined)

@@ -23,11 +23,9 @@ hands it to review.
    invoke `agent-config` or proceed directly. If the user explicitly requested
    routing, invoke `agent-config` directly; if the user declined or disabled
    routing, or for bounded solo work, proceed directly without blocking.
-   When `agent-config` is invoked, consume the `AgentConfigResult`:
-   - `readiness === "READY"`: consume `execution_config` and execute bounded slice.
-   - `readiness === "NEED_INPUT"`: profile missing / setup needed. Apply the optional-routing fallback below; setup still requires its own authorization.
-   - `readiness === "NEED_PROJECT_TICKETS"`: decomposed task without tickets -> recommend explicit `$project-tickets` and halt implementation (never batch-execute un-ticketed tasks).
-   - `readiness === "BLOCKED"` or `"UNSUPPORTED"`: stop the rejected route. Continue only if the optional-routing fallback below is evidenced; otherwise halt implementation with the diagnostic reason.
+   When `agent-config` returns, follow its `readiness` as described in
+   [WORKFLOW.md §3E](references/WORKFLOW.md#e-agentconfigresult-consumption-rules).
+   `NEED_PROJECT_TICKETS` always halts: recommend `$project-tickets` and stop.
 4. **Execute the bounded slice, then verify.** Use `light-tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).

@@ -2,7 +2,7 @@
 
 [English admission contract](SKILL_ADMISSION.md)
 
-本契约适用于新包进入 `skills/` 前，以及改变行为、invocation boundary、dependency、resource 或 ownership claim 的变更。
+本契约适用于新包进入 `skills/` 前，以及 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 判定为完整审查的改动。已准入包的日常改动不重复准入。
 
 ## Reuse-before-invention 与 ownership gate
 

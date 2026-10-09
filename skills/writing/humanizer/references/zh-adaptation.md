@@ -1,12 +1,12 @@
 # Chinese adaptation (中文适配层)
 
 Read this file whenever the text to humanize is Chinese or contains Chinese
-spans. It adapts the pattern book in `SKILL.md` to Chinese. The core rules —
+spans. It adapts the pattern book in `patterns.md` to Chinese. The core rules —
 keep every claim, never invent facts, match the voice — are
 language-independent and always apply, and the rewrite process and output
 modes are unchanged.
 
-Pattern numbers below refer to the English pattern book in `SKILL.md`.
+Pattern numbers below refer to the English pattern book in `patterns.md`.
 
 ## 1. Rule overrides for Chinese
 

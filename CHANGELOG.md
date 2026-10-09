@@ -6,6 +6,13 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Maintenance: add review weights. Everyday changes to an admitted package need only local tests and the owner's real use; full review stays for new admissions, invocation/dependency/attribution changes, executable scripts and releases. Rewrite `AGENTS.md` in short, direct sentences with every rule kept, and add a writing-style rule.
+- `humanizer`: move the pattern book (§1–§35) and false-positive checks unchanged to `references/patterns.md`; `SKILL.md` keeps the rewrite rules and process.
+- `ask-light`: move the decision principles and evidence-reading guide unchanged to `references/routing-judgment.md`.
+- `light-implement`: point to `references/WORKFLOW.md` for `AgentConfigResult` handling instead of repeating it in `SKILL.md`.
+- Tests: replace keyword checks in `tests/test_composition.py` with composition-graph checks — targets exist, a Skill only calls model-invoked capabilities, routing names are real, and public examples use current names.
+- README: list 12 approved Matt Ports including `project-retro`, replace the retired `implement` name with `light-implement`, and align Quick Start comments.
+
 - `manuscript-ops`: route bounded writing separately from content risk, preserve old Project snapshots, accept document sources and bound extraction lineage, and expose optional Host decision-MCP interpretation. Record local regression and independent acceptance evidence separately from release and global installation facts.
 - `release-workflow`: validate fixed-tree snapshot/current-main/Release-body version and state semantics in both languages; bind external observations and final-main CI, with explicitly labeled local simulation. No release or global deployment is claimed.
 

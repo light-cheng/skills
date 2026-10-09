@@ -6,6 +6,13 @@
 
 ## 未发布
 
+- 维护流程：增加审查分量。已准入包的日常改动只需本地测试和所有者真实使用；完整审查只用于新准入、调用方式/依赖/attribution 变化、可执行脚本和发布。`AGENTS.md` 改用短句和主动语态，保留全部规则，并新增写作风格规则。
+- `humanizer`：模式清单（§1–§35）和误报检查原样移到 `references/patterns.md`；`SKILL.md` 保留改写规则和流程。
+- `ask-light`：决策原则和证据读法原样移到 `references/routing-judgment.md`。
+- `light-implement`：`AgentConfigResult` 的处理改为指向 `references/WORKFLOW.md`，不在 `SKILL.md` 里重复。
+- 测试：`tests/test_composition.py` 不再断言关键词，改为检查组合图——目标存在、Skill 只调用可由模型调用的能力、路由名称真实、公开示例不用旧名。
+- README：Matt Port 改为 12 个（含 `project-retro`），旧名 `implement` 改为 `light-implement`，对齐快速上手注释。
+
 - `manuscript-ops`：按文稿管理需求选择路线，单独确定内容审阅；保留旧 Project 快照，修复普通文档与提取来源登记，提供可选的宿主决策 MCP 判断。本地回归和独立验收证据与发布、全局安装事实分别记录。
 - `release-workflow`：增加双语固定树快照、当前 main 和 Release 正文的版本与状态检查；绑定外部观察及最终 main CI，明确区分本地模拟。没有发布新版本或全局部署。
 

@@ -112,7 +112,7 @@ $ask-light next        # 根据当前上下文推荐合适的 Skill
 $project-init          # 初始化项目基础结构与任务跟踪
 $clarify               # 通过针对性提问澄清模糊需求
 $project-clarify       # 结合已有代码与文档澄清项目决策
-$light-implement             # 执行明确的开发任务并完成验证
+$light-implement       # 执行明确的开发任务并完成验证
 $project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
@@ -148,11 +148,11 @@ project-retro（Agent 评估摩擦信号）
 常用单项任务路径：
 
 ```text
-clarify                          # 独立需求澄清与共识确认
-implement                        # 直接执行明确的任务
-light-diagnosing-bugs → light-implement      # 定位疑难问题并完成修复
-release-workflow                 # 仅执行发布流程
-$ask-light                       # 任务不确定时获取路由建议
+clarify                                  # 独立需求澄清与共识确认
+light-implement                          # 直接执行明确的任务
+light-diagnosing-bugs → light-implement  # 定位疑难问题并完成修复
+release-workflow                         # 仅执行发布流程
+$ask-light                               # 任务不确定时获取路由建议
 ```
 
 完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows)。
@@ -191,7 +191,7 @@ $ask-light workflow
 | 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
-经批准的 Matt Port（共 11 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
+经批准的 Matt Port（共 12 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`、`project-retro`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
 改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md) 中保留。
 

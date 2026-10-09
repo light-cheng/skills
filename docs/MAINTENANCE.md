@@ -32,9 +32,9 @@ For every **add / update / rename / deprecation / removal / port / adapt**:
 
 1. Re-check ownership and reuse-before-invention in [Skill admission](SKILL_ADMISSION.md) — approved Matt PORTs (SPEC §14) are architecture-authorized when they carry `ATTRIBUTION.md` and no runtime dependency.
 2. Preserve package boundary, invocation direction, and required attribution.
-3. Classify as eligible low-risk prompt-only fast track or full path; collect only the evidence that route requires.
-4. Apply the review trigger in [review policy](REVIEW_POLICY.md) — `review-loop` is the engine, `project-review` owns final acceptance.
-5. Synchronize README, catalog, installation guide, governance links, affected composition examples, discovery/composition tests, attribution records, and changelog together.
+3. Pick the review weight in [review policy](REVIEW_POLICY.md#how-much-review-a-change-needs): everyday change, documentation only, full review, or a release. Collect only the evidence that weight requires. For full review, `review-loop` is the engine and `project-review` owns final acceptance.
+4. For a new admission, classify it as the prompt-only fast track or the full path in [Skill admission](SKILL_ADMISSION.md).
+5. Update only the surfaces the change affects: README, catalog, installation guide, governance links, composition examples, discovery/composition tests, attribution records, and changelog.
 6. Prepare an unreleased changelog entry. Do not claim a version, tag, or verified release command until the release gate passes.
 
 ## Synchronization matrix

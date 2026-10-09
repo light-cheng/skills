@@ -112,7 +112,7 @@ $ask-light next        # Suggest the next appropriate Skill from current context
 $project-init          # Bootstrap project workspace and task tracker settings
 $clarify               # Clarify requirements through targeted questions
 $project-clarify       # Clarify project decisions using repository context
-$light-implement             # Execute a ready ticket with verification
+$light-implement       # Execute a ready ticket with verification
 $project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
@@ -148,11 +148,11 @@ project-retro (agent evaluates friction)
 Direct paths for common tasks:
 
 ```text
-clarify                          # Standalone brainstorming and clarification
-implement                        # Implement a well-defined ticket directly
-light-diagnosing-bugs → light-implement      # Diagnose an issue, then apply the fix
-release-workflow                 # Publish an approved release
-$ask-light                       # Route unclear tasks to the right Skill
+clarify                                  # Standalone brainstorming and clarification
+light-implement                          # Implement a well-defined ticket directly
+light-diagnosing-bugs → light-implement  # Diagnose an issue, then apply the fix
+release-workflow                         # Publish an approved release
+$ask-light                               # Route unclear tasks to the right Skill
 ```
 
 See [docs/workflows/](docs/workflows) for full workflow guides.
@@ -191,7 +191,7 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 | Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
-Approved Matt Ports (11 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
+Approved Matt Ports (12 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
 Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md).
 

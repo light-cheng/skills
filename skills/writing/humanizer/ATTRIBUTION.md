@@ -29,13 +29,17 @@ were applied:
    `short_description`/`default_prompt` for the bilingual scope and set
    `policy.allow_implicit_invocation: true` (model-invoked).
 5. Added this `ATTRIBUTION.md`.
-6. No runtime dependency on `https://github.com/blader/humanizer` or
+6. Progressive disclosure (2026-10-10): the numbered pattern book (§1–§35)
+   and the false-positive checks moved unchanged from `SKILL.md` to
+   `references/patterns.md`; `SKILL.md` keeps the rewrite rules, voice
+   guidance, output modes and rewrite process.
+7. No runtime dependency on `https://github.com/blader/humanizer` or
    `https://github.com/op7418/Humanizer-zh` remains; the package is
    self-contained.
 
 Verification: `SKILL.md` frontmatter `name: humanizer` matches the package
 directory; `agents/openai.yaml` is valid; all pattern sections and examples
-outside the numbered changes above are carried from the pinned upstream
+(now in `references/patterns.md`) outside the numbered changes above are carried from the pinned upstream
 revision unchanged.
 
 ## MIT notice (blader/humanizer)

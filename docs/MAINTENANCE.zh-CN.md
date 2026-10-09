@@ -22,9 +22,9 @@
 
 1. 先执行 [Skill 准入](SKILL_ADMISSION.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
 2. 保留包边界、invocation direction、attribution 与必要资源。
-3. 判断是否符合低风险纯提示型快速通道，否则走完整路径；只收集对应路线要求的 evidence。
-4. 执行[审查策略](REVIEW_POLICY.md) 的 review trigger——`review-loop` 为引擎，`project-review` 拥有最终验收。
-5. 同步 README、目录、安装说明、治理链接、受影响组合示例、discovery/composition 测试、attribution 与 changelog。
+3. 按 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 选审查分量：日常改动、仅文档、完整审查或发布；只收集该分量要求的证据。完整审查时 `review-loop` 为引擎，`project-review` 拥有最终验收。
+4. 新准入再判断走低风险纯提示型快速通道还是完整路径，见 [Skill 准入](SKILL_ADMISSION.zh-CN.md)。
+5. 只更新受改动影响的部分：README、目录、安装说明、治理链接、组合示例、discovery/composition 测试、attribution 与 changelog。
 6. 先写未发布变更记录；未通过真实 release gate 前不宣称版本/tag/已验证命令。
 
 ## 同步矩阵
