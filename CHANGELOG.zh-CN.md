@@ -15,6 +15,7 @@
 - 工单生命周期：`light-implement` 改文件前先写 `Status: claimed`；`project-review` 在 `PASS` 后把工单标为 resolved（`FAIL`/`BLOCKED` 时在评论里写明阻塞原因）。此前没有任何 Skill 负责 resolve，被阻塞的工单永远进不了 frontier。
 - 实现报告：`light-implement` 在已认领的工单下追加实现报告（范围、fixed point、验证、审查剩余 findings）。`project-review` 重跑其中的验证，并把未解决的 findings 作为 `Previous findings` 读入，换新会话后实现阶段的 findings 也能进入终审。
 - Jev 评测：`evals/jev` 的 fixture 仍用旧名 `implement`，已修正；agent-config 的 14 个场景改写为规范 Host 证据加用户确认的 Profile，重新检查配置正确性（model、topology、effort）。effort 标注改为跟随 Profile 确认的 effort 策略，并受 Host 支持值约束。
+- `agent-config`：`agent_config_recommend` 不再把 Profile 的 effort 写进调用方传入的任务对象，同一任务再规划时不会沿用上一次的 effort。
 
 - `manuscript-ops`：按文稿管理需求选择路线，单独确定内容审阅；保留旧 Project 快照，修复普通文档与提取来源登记，提供可选的宿主决策 MCP 判断。本地回归和独立验收证据与发布、全局安装事实分别记录。
 - `release-workflow`：增加双语固定树快照、当前 main 和 Release 正文的版本与状态检查；绑定外部观察及最终 main CI，明确区分本地模拟。没有发布新版本或全局部署。

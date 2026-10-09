@@ -62,7 +62,8 @@ def agent_config_recommend(
     if not isinstance(task, (dict, TaskCharacteristics)):
         return AgentConfigResult(readiness="NEED_INPUT", mode="plan-only",
                                  justification="Task characteristics must be an object.")
-    task_obj = TaskCharacteristics.from_dict(task) if isinstance(task, dict) else task
+    # Copy the caller's task: Profile effort below applies to this plan only.
+    task_obj = TaskCharacteristics.from_dict(task if isinstance(task, dict) else task.model_dump())
     if task_obj.reasoning_policy is not None and not isinstance(task_obj.reasoning_policy, str):
         return AgentConfigResult(readiness="NEED_INPUT", mode="plan-only",
                                  justification="Task reasoning policy must be a string.")

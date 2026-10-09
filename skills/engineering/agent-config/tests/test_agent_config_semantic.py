@@ -567,6 +567,30 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(res.execution_config.model, "model-gamma")
                 self.assertTrue(res.fallback_used)
 
+    def test_profile_effort_does_not_leak_into_caller_task(self) -> None:
+        """The Profile effort policy applies to one plan; the caller's task stays unchanged."""
+        fixtures = Path(__file__).resolve().parent / "fixtures"
+        host = json.loads((fixtures / "case-a-tiered-single-pass.json").read_text())
+        confirmed_profile = json.loads((fixtures / "profile-multi-model.json").read_text())
+        now = datetime.now(timezone.utc).isoformat()
+        host["workspace"] = confirmed_profile["scope"]["workspace"]
+        host["observed_at"] = now
+        for model in host["available_models"]:
+            model["evidence"]["observed_at"] = now
+        for capability in host["capabilities"].values():
+            if capability.get("evidence"):
+                capability["evidence"]["observed_at"] = now
+        task = TaskCharacteristics(title="Fix typo", difficulty="routine", difficulty_source="explicit-user")
+
+        first = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_jev=False)
+        self.assertIsNone(task.reasoning_policy)
+
+        task.difficulty = "high"
+        second = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_jev=False)
+        self.assertEqual(first.execution_config.resolved_effort, "low")
+        self.assertEqual(second.execution_config.model, "model-gamma")
+        self.assertEqual(second.execution_config.resolved_effort, "high")
+
     def test_downgrade_policy_rejects_marginal_confidence_downgrade(self) -> None:
         """Verify downgrade from baseline standard to routine is rejected when evidence is marginal."""
         mock_score_comp = MagicMock()
