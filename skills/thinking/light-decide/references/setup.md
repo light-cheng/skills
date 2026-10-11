@@ -48,9 +48,9 @@ Name categories and the trade-off. Do not install anything.
 ## 4. Steps only a person can do
 
 Getting a key, signing in to a dashboard, or approving a large download are
-the user's steps. Offer `light-wizard` for them, by name, and wait for the
-user to start it or agree. Never start it yourself. Without it, give the steps
-as a short numbered list.
+the user's steps. Offer `light-wizard` for them, by name. Call it only after
+the user says yes. When it is unavailable or declined, give the steps as a
+short numbered list.
 
 ## 5. Record the result
 
