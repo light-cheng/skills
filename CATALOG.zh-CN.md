@@ -419,3 +419,15 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布；自带视觉系统（`assets/`）。
 - **证据：** [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md)、[references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md)、[ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-html-plan/`。
+
+## 来源状态边界
+
+| 状态 | 放在哪里 | 目录中的处理 |
+| --- | --- | --- |
+| 第一方 | 本仓库 | 准入后列在上面。 |
+| 已批准的 Port（Matt） | 本仓库，附 `ATTRIBUTION.md` | 列在上面；自足，运行时不依赖 Matt。 |
+| 直接使用上游 | 原上游仓库 | 作为依赖提及；不原样复制到这里。 |
+| 修改过的第三方 | `skills-3rdParty` | fork 准入后列在那个私有仓库的来源目录里。 |
+| 已弃用或归档 | 已发布的迁移记录 | 列出替代项和迁移说明。 |
+
+同步规则见[维护](docs/MAINTENANCE.zh-CN.md)，所有权门槛见[准入](docs/SKILL_ADMISSION.zh-CN.md)。
