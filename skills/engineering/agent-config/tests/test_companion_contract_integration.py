@@ -20,11 +20,10 @@ FIXTURES = ROOT / "tests" / "fixtures"
 
 
 def find_companion_repo() -> Path | None:
-    candidates = [
-        Path(os.environ.get("AGENT_CONFIG_COMPANION_PATH", "")),
-        Path(__file__).resolve().parent.parent.parent.parent.parent / "agent-config",
-        Path("/Users/light/Documents/Projects/Configurations/agent-config"),
-    ]
+    parents = Path(__file__).resolve().parents
+    candidates = [Path(os.environ.get("AGENT_CONFIG_COMPANION_PATH", ""))]
+    if len(parents) > 5:
+        candidates.append(parents[5] / "agent-config")  # sibling checkout of this repository
     for c in candidates:
         if c.is_dir() and (c / "schemas").is_dir():
             return c
