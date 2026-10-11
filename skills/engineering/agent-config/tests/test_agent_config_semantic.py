@@ -33,6 +33,35 @@ from abstract_profiler import (
 )
 from candidate_selector import select_configuration
 from agent_config import agent_config_recommend
+from types import SimpleNamespace
+
+LOCAL_ENV = {"TYPESAFE_BASE_URL": "http://127.0.0.1:8001"}
+CALIBRATED = {
+    "version": 1,
+    "backends": {
+        "local-decider": {
+            "names": ["127.0.0.1:8001"],
+            "data": "on-device",
+            "questions": {
+                qid: {"min_confidence": 0.5, "calibration": "test fixture"}
+                for qid in ("agent-config/task-complexity", "agent-config/reasoning-need")
+            },
+        }
+    },
+}
+
+
+def score_ans(score: float, conf: float, levels: int) -> SimpleNamespace:
+    """A typed Score answer whose bin level holds `conf` and the other levels share the rest."""
+    level = max(0, min(levels - 1, int(score + 0.5)))
+    rest = (1.0 - conf) / (levels - 1)
+    probs = {f"L{i}": (conf if i == level else rest) for i in range(levels)}
+    return SimpleNamespace(score=score, confidence=conf, probabilities=probs)
+
+
+def calibrated_source():
+    """Use the local test endpoint and a calibrated policy file."""
+    return patch("decision_source.load_policy", return_value=CALIBRATED)
 
 
 def fresh_host_and_profile() -> tuple[dict, dict]:
@@ -191,13 +220,9 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
     def test_mock_jev_abstract_profiler(self) -> None:
         """Verify abstract task profiling via mock Jev System One Score primitives."""
-        mock_score_comp = MagicMock()
-        mock_score_comp.score = 2.2  # maps to high / critical
-        mock_score_comp.confidence = 0.92
+        mock_score_comp = score_ans(2.2, 0.92, 4)
 
-        mock_score_reas = MagicMock()
-        mock_score_reas.score = 1.9  # maps to high
-        mock_score_reas.confidence = 0.88
+        mock_score_reas = score_ans(1.9, 0.88, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -210,7 +235,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
         task = TaskCharacteristics(title="Complex refactor", description="Deep concurrency rework", difficulty="high")
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
                 self.assertEqual(prof.recommended_tier, "high")
@@ -295,13 +320,9 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
     def test_independent_per_dimension_confidence_fallback(self) -> None:
         """P1 (Sections 27-29): High-confidence complexity is retained when reasoning falls back."""
-        mock_score_comp = MagicMock()
-        mock_score_comp.score = 2.2  # high
-        mock_score_comp.confidence = 0.95  # High confidence -> keep Jev
+        mock_score_comp = score_ans(2.2, 0.95, 4)
 
-        mock_score_reas = MagicMock()
-        mock_score_reas.score = 1.8
-        mock_score_reas.confidence = 0.35  # Low confidence (<0.50) -> fallback reasoning only
+        mock_score_reas = score_ans(1.8, 0.35, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -313,7 +334,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
 
         task = TaskCharacteristics(title="Complex feature", description="Refactor with low reasoning certainty", difficulty="standard")
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
@@ -321,7 +342,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.recommended_tier, "high")
                 self.assertEqual(prof.complexity_level, "high")
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
-                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
 
                 # Reasoning fell back to deterministic baseline for standard (medium)
                 self.assertEqual(prof.reasoning_need, "medium")
@@ -332,19 +353,23 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertIn("reasoning", reason)
 
     def test_score_discretization_boundaries(self) -> None:
-        """P1 (Section 30): Explicit boundary validation for Score discretization mapping."""
-        task = TaskCharacteristics(difficulty="standard")
+        """P1 (Section 30): Explicit boundary validation for Score discretization mapping.
+
+        The baseline is routine/low, so every candidate is a hold or an upgrade and
+        the downgrade margin rule does not interfere with the bin edges.
+        """
+        task = TaskCharacteristics(difficulty="routine")
 
         def make_mock_client(comp_score: float, reas_score: float):
             resp = MagicMock()
-            s_comp = MagicMock(score=comp_score, confidence=0.99)
-            s_reas = MagicMock(score=reas_score, confidence=0.99)
+            s_comp = score_ans(comp_score, 0.99, 4)
+            s_reas = score_ans(reas_score, 0.99, 3)
             resp.scores = {"task_complexity": s_comp, "reasoning_need": s_reas}
             client = MagicMock()
             client.system_one.return_value = resp
             return client
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 # Boundary 0.49 vs 0.50 for complexity
                 p_under, _, _, _ = extract_abstract_task_profile(task, client=make_mock_client(0.49, 0.49))
@@ -376,7 +401,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         """P1 (Section 15, 18, 41): Authoritative difficulty skips Jev complexity query; consumed by code."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
-        mock_resp.scores = {"reasoning_need": MagicMock(score=1.8, confidence=0.95)}
+        mock_resp.scores = {"reasoning_need": score_ans(1.8, 0.95, 3)}
         mock_client.system_one.return_value = mock_resp
 
         task = TaskCharacteristics(
@@ -387,7 +412,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             reasoning_policy=None,  # Reasoning still needs Jev
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
@@ -407,8 +432,8 @@ class AgentConfigSemanticTest(unittest.TestCase):
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {
-            "task_complexity": MagicMock(score=2.2, confidence=0.90),
-            "reasoning_need": MagicMock(score=1.8, confidence=0.90),
+            "task_complexity": score_ans(2.2, 0.90, 4),
+            "reasoning_need": score_ans(1.8, 0.90, 3),
         }
         mock_client.system_one.return_value = mock_resp
 
@@ -419,19 +444,19 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",  # Not authoritative -> invokes Jev
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
                 called_questions = mock_client.system_one.call_args[1]["questions"]
                 self.assertIn("task_complexity", called_questions)
-                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
 
     def test_serialized_jev_state_does_not_contain_expected_complexity_label(self) -> None:
         """P1 (Section 14, 21, 41): Serialized Jev state contains NO declared_difficulty or answer labels."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
-        mock_resp.scores = {"task_complexity": MagicMock(score=1.0, confidence=0.95)}
+        mock_resp.scores = {"task_complexity": score_ans(1.0, 0.95, 4)}
         mock_client.system_one.return_value = mock_resp
 
         task = TaskCharacteristics(
@@ -441,7 +466,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 extract_abstract_task_profile(task, client=mock_client)
 
@@ -455,7 +480,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         """P1 (Section 19, 41): Serialized Jev state contains NO reasoning labels or hints."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
-        mock_resp.scores = {"reasoning_need": MagicMock(score=1.0, confidence=0.95)}
+        mock_resp.scores = {"reasoning_need": score_ans(1.0, 0.95, 3)}
         mock_client.system_one.return_value = mock_resp
 
         task = TaskCharacteristics(
@@ -464,7 +489,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 extract_abstract_task_profile(task, client=mock_client)
 
@@ -476,8 +501,8 @@ class AgentConfigSemanticTest(unittest.TestCase):
     def test_runtime_fixture_cannot_access_ground_truth_fields(self) -> None:
         """P1 (Section 21, 37, 41): validate_fixture_isolation blocks evaluation if ground truth leaks."""
         eval_candidates = [
-            Path(__file__).resolve().parent.parent.parent.parent.parent / "evals" / "jev",
-            Path(__file__).resolve().parents[5] / "evals" / "jev" if len(Path(__file__).resolve().parents) > 5 else None,
+            Path(__file__).resolve().parent.parent.parent.parent.parent / "evals" / "typed-decision",
+            Path(__file__).resolve().parents[5] / "evals" / "typed-decision" if len(Path(__file__).resolve().parents) > 5 else None,
         ]
         import sys
         found = False
@@ -525,7 +550,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         """P1 (Section 34, 41): Explicit reasoning policy skips Jev reasoning judgment."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
-        mock_resp.scores = {"task_complexity": MagicMock(score=0.2, confidence=0.90)}
+        mock_resp.scores = {"task_complexity": score_ans(0.2, 0.90, 4)}
         mock_client.system_one.return_value = mock_resp
 
         task = TaskCharacteristics(
@@ -536,7 +561,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             reasoning_policy="highest-supported",  # Explicit policy
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
@@ -560,7 +585,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 res = agent_config_recommend(
                     host=host,
@@ -578,24 +603,20 @@ class AgentConfigSemanticTest(unittest.TestCase):
         host, confirmed_profile = fresh_host_and_profile()
         task = TaskCharacteristics(title="Fix typo", difficulty="routine", difficulty_source="explicit-user")
 
-        first = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_jev=False)
+        first = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_typed_decisions=False)
         self.assertIsNone(task.reasoning_policy)
 
         task.difficulty = "high"
-        second = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_jev=False)
+        second = agent_config_recommend(host=host, task=task, profile=confirmed_profile, use_typed_decisions=False)
         self.assertEqual(first.execution_config.resolved_effort, "low")
         self.assertEqual(second.execution_config.model, "model-gamma")
         self.assertEqual(second.execution_config.resolved_effort, "high")
 
     def test_downgrade_policy_rejects_marginal_confidence_downgrade(self) -> None:
         """Verify downgrade from baseline standard to routine is rejected when evidence is marginal."""
-        mock_score_comp = MagicMock()
-        mock_score_comp.score = 0.41  # candidate routine
-        mock_score_comp.confidence = 0.59  # marginal confidence (<0.75 threshold)
+        mock_score_comp = score_ans(0.41, 0.59, 4)
 
-        mock_score_reas = MagicMock()
-        mock_score_reas.score = 0.5
-        mock_score_reas.confidence = 0.90
+        mock_score_reas = score_ans(0.5, 0.90, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -612,7 +633,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
@@ -621,17 +642,13 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.complexity_level, "standard")
                 self.assertTrue(prof.dimension_provenance["complexity"].fallback_used)
                 self.assertEqual(prof.dimension_provenance["complexity"].source, "deterministic-fallback")
-                self.assertIn("Downgrade from standard to routine rejected", prof.dimension_provenance["complexity"].fallback_reason)
+                self.assertIn("Downgrade from standard to routine not applied: low-confidence", prof.dimension_provenance["complexity"].fallback_reason)
 
     def test_downgrade_policy_accepts_strong_evidence_downgrade(self) -> None:
         """Verify downgrade from baseline standard to routine is accepted with strong evidence."""
-        mock_score_comp = MagicMock()
-        mock_score_comp.score = 0.10  # candidate routine, far from 0.5 boundary
-        mock_score_comp.confidence = 0.90  # strong confidence (>=0.75 threshold)
+        mock_score_comp = score_ans(0.10, 0.90, 4)
 
-        mock_score_reas = MagicMock()
-        mock_score_reas.score = 0.2
-        mock_score_reas.confidence = 0.90
+        mock_score_reas = score_ans(0.2, 0.90, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -648,7 +665,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
@@ -656,17 +673,13 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.recommended_tier, "routine")
                 self.assertEqual(prof.complexity_level, "routine")
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
-                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
 
     def test_upgrade_policy_accepts_standard_confidence(self) -> None:
         """Verify upgrade from routine to standard is accepted with standard confidence (>=0.50)."""
-        mock_score_comp = MagicMock()
-        mock_score_comp.score = 1.0  # candidate standard
-        mock_score_comp.confidence = 0.55  # >=0.50 upgrade threshold
+        mock_score_comp = score_ans(1.0, 0.55, 4)
 
-        mock_score_reas = MagicMock()
-        mock_score_reas.score = 1.0
-        mock_score_reas.confidence = 0.90
+        mock_score_reas = score_ans(1.0, 0.90, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -683,14 +696,47 @@ class AgentConfigSemanticTest(unittest.TestCase):
             difficulty_source="unknown",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
                 # Upgrade accepted
                 self.assertEqual(prof.recommended_tier, "standard")
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
-                self.assertEqual(prof.dimension_provenance["complexity"].source, "jev")
+                self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
+
+
+    def test_typed_answer_needs_calibration_limit_and_probabilities(self) -> None:
+        """Uncalibrated, outside the data limit, or without per-level probabilities: the baseline stands."""
+        import tempfile
+        task = TaskCharacteristics(title="t", description="d", difficulty="routine", difficulty_source="unknown")
+
+        def client_for(answer):
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(scores={"task_complexity": answer, "reasoning_need": answer})
+            return client
+
+        with patch.dict(os.environ, LOCAL_ENV), patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+            with patch("decision_source.load_policy", return_value={}):
+                prof, _, fallback, _ = extract_abstract_task_profile(task, client=client_for(score_ans(2.2, 0.95, 4)))
+            self.assertEqual(prof.recommended_tier, "routine")
+            self.assertIn("uncalibrated", prof.dimension_provenance["complexity"].fallback_reason)
+
+            with calibrated_source():
+                bare = SimpleNamespace(score=2.2, confidence=0.95)
+                prof, _, _, _ = extract_abstract_task_profile(task, client=client_for(bare))
+            self.assertEqual(prof.recommended_tier, "routine")
+            self.assertIn("malformed", prof.dimension_provenance["complexity"].fallback_reason)
+
+            with tempfile.TemporaryDirectory() as tmp, calibrated_source():
+                root = Path(tmp)
+                (root / "docs/agents").mkdir(parents=True)
+                (root / "docs/agents/light-project.md").write_text("Decision data: off\n", encoding="utf-8")
+                client = client_for(score_ans(2.2, 0.95, 4))
+                prof, _, fallback, reason = extract_abstract_task_profile(task, client=client, project_root=root)
+            client.system_one.assert_not_called()
+            self.assertTrue(fallback)
+            self.assertIn("off", reason)
 
 
 if __name__ == "__main__":

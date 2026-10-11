@@ -93,15 +93,9 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
-### 可选语义加速（TypeSafe Jev）
+### 可选的判定来源
 
-`ask-light` 与 `agent-config` 支持通过 TypeSafe Jev System One 模型进行可选的语义加速，用于快速意图校准、歧义检测与抽象任务画像：
-
-```bash
-export TYPESAFE_API_KEY="your-api-key"
-```
-
-配置后，Jev 在确定性代码安全边界内完成语义裁决。未配置或离线时，两项技能平滑降级至零外部依赖的确定性规则基准，保持 Fail-Closed 硬安全保障。
+`ask-light` 与 `agent-config` 可以通过 `light-decide` 把有界判断（在合法选项中选一个、是或否、在等级上打分）交给判定模型。每个项目在 `docs/agents/light-project.md` 里用 `Decision data:` 一行规定问题状态最远能发到哪里（`on-device`、`private-network`、`third-party` 或 `off`）。没写这一行时，只问本机上的模型。只有你的策略文件 `~/.config/light/decision-policy.json` 为某个问题做过校准，模型的答案才会被采用；否则沿用确定性基准。找不到来源时，`light-decide` 可以提出设置，等你同意再做。
 
 详细安装选项（指定 Agent、独立复制模式、非交互式 CI 安装）、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
 

@@ -50,6 +50,8 @@ EDGES = (
     ("project-spec", "light-html-plan", "calls-optional"),
     ("project-tickets", "light-html-plan", "calls-optional"),
     ("light-redirect", "light-decide", "calls-optional"),
+    ("ask-light", "light-decide", "calls-optional"),
+    ("agent-config", "light-decide", "calls-optional"),
 )
 
 

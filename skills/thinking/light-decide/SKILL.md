@@ -33,7 +33,9 @@ When only one option is legal, return it without asking any source.
    `off` or widens the limit. The user may narrow it or name a source within it.
 3. **Pick a source** with [selection](references/selection.md). Done when you
    have named one source that is verified available on this Host and within the
-   limit, or chosen self-judgment.
+   limit, or chosen self-judgment. When no source is found and one would clearly
+   help, finish this judgment by self-judgment, then offer setup once with
+   [setup](references/setup.md). Never start setup without the user's yes.
 4. **Ask** through the script or MCP path in [selection](references/selection.md).
    A timeout, error or malformed reply becomes a fallback, never a retry loop.
 5. **Normalize and apply policy** with [formats](references/formats.md). Apply

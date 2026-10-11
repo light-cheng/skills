@@ -42,7 +42,7 @@ def select_configuration(
     approval: Optional[Union[str, bool]] = None,
     approved_preview: Optional[bool] = None,
     setup_intent: bool = False,
-    jev_confidence: Optional[float] = None,
+    decision_confidence: Optional[float] = None,
     fallback_used: bool = False,
     fallback_reason: Optional[str] = None,
 ) -> AgentConfigResult:
@@ -112,7 +112,7 @@ def select_configuration(
             ),
             justification=f"Harness lacks dynamic model selector; gracefully preserved active model {host.active_model} ({topology}).",
             abstract_profile=profile,
-            jev_confidence=jev_confidence,
+            decision_confidence=decision_confidence,
             fallback_used=fallback_used,
             fallback_reason=fallback_reason,
         )
@@ -140,7 +140,7 @@ def select_configuration(
             ),
             justification="User declined configuration mutation; falling back safely to active model in main session.",
             abstract_profile=profile,
-            jev_confidence=jev_confidence,
+            decision_confidence=decision_confidence,
             fallback_used=True,
             fallback_reason="User rejected configuration change preview.",
         )
@@ -170,7 +170,7 @@ def select_configuration(
             abstract_profile=profile,
         )
 
-    # Resolve reasoning effort (explicit policy > Jev profile.reasoning_need > host bounds)
+    # Resolve reasoning effort (explicit policy > typed profile.reasoning_need > host bounds)
     effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
 
     # Determine topology
@@ -202,7 +202,7 @@ def select_configuration(
         ),
         justification=justification_msg,
         abstract_profile=profile,
-        jev_confidence=jev_confidence,
+        decision_confidence=decision_confidence,
         fallback_used=fallback_used,
         fallback_reason=fallback_reason,
     )

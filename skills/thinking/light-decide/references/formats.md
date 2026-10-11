@@ -98,8 +98,9 @@ judgment. Never rewrite a row.
 ## Policy file
 
 Thresholds belong to the user's machine, not to a project:
-`~/.config/light/decision-policy.json`. `light-decide` reads it and never
-writes it.
+`~/.config/light/decision-policy.json`. `light-decide` reads it. It writes
+the file only during setup the user approved ([setup](setup.md)), and never
+writes thresholds outside calibration.
 
 ```json
 {
@@ -124,6 +125,10 @@ writes it.
   script call find the same entry.
 - A source is calibrated for a question id when its entry has both
   `min_confidence` and a non-empty `calibration`.
+- On the script path the Host-reported name is the endpoint's `host:port`
+  (from `TYPESAFE_BASE_URL`), or `typesafe-hosted` when that variable is unset.
 - A missing or unreadable file means every source is uncalibrated.
+- A top-level `"setup": "declined"` means the user declined setup on this
+  machine. Do not offer it again.
 - `data` records this backend's destination. When evidence from the run
   differs, the farther of the two counts.

@@ -31,8 +31,8 @@ from typing import Any
 try:
     from .ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
     from .state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
-    from .compact_state_builder import build_compact_jev_state
-    from .semantic_router import route_with_jev
+    from .compact_state_builder import build_compact_decision_state
+    from .semantic_router import route_with_decisions
     from .advisor import ask_light_semantic_recommend
 except (ImportError, ValueError):
     import sys
@@ -41,8 +41,8 @@ except (ImportError, ValueError):
         sys.path.insert(0, _scripts_dir)
     from ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
     from state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
-    from compact_state_builder import build_compact_jev_state
-    from semantic_router import route_with_jev
+    from compact_state_builder import build_compact_decision_state
+    from semantic_router import route_with_decisions
     from advisor import ask_light_semantic_recommend
 
 MAP_PATH = Path(__file__).resolve().parents[1] / "references" / "light-skill-map.json"
@@ -2912,6 +2912,7 @@ def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str
             user_request=str(context.get("goal", "") or ""),
             scope=str(context.get("scope", "current-workflow")),
             explicit_target=context.get("target"),
+            project_root=Path(str(project_root_value)) if project_root_value and str(project_root_value).strip() else None,
         )
         result = rec.model_dump()
         if rec.primary_skill:

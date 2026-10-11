@@ -42,7 +42,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval (enhanced with optional TypeSafe Jev System One semantic acceleration).
+- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval (optionally through `light-decide` for bounded judgments).
 - **When to use:** The next step is unclear; you need project-aware routing, collection navigation, or standalone routing.
 - **Invocation:** User-invoked only; read-only before approval. After approval, model-invoked targets may begin where supported; user-invoked targets follow Host transition policy and render the exact invocation when direct transition is unavailable.
 - **Package:** [skills/productivity/ask-light/](skills/productivity/ask-light)

@@ -6,6 +6,12 @@
 
 ## 未发布
 
+- 判定来源（行为变化）：`ask-light` 与 `agent-config` 不再依赖 TypeSafe Jev。脚本只在项目 `Decision data:` 允许的范围内询问判定客户端；**没写这一行时只问本机上的模型，所以原来用托管 Jev 服务的项目会停止调用它，直到加上 `Decision data: third-party`。** 阈值从代码移到用户策略文件 `~/.config/light/decision-policy.json`；只有问题 id 在那里校准过，答案才会被采用，否则沿用确定性基准，答案保留在返回的 `decisions` 里（light-decide 格式）。`agent-config` 保留一条结构规则：降档时分数还要明确落在下一档里。改名：`use_jev` → `use_typed_decisions`，`jev_confidence` → `decision_confidence`，`--no-jev` → `--no-typed-decisions`，来源标记 `jev` → `typed-decision`；`ask-light` 去掉 shadow 模式（未校准的来源现在就是这样工作）。
+- `light-decide`：找不到来源且确实有用时，提出一次设置（`references/setup.md`）：先探查，再问用户，再推荐云端 API 或本机跑得动的本地模型，需要人手做的步骤推荐 `light-wizard`。用户同意前什么都不开始；拒绝会被记住。
+- `project-init`：移除 TypeSafe Jev 接入（`--jev`、`--no-jev`、`--agent-target`、`--auto-install-sdk`、key 与 SDK 设置、`references/skills_cli_conventions.md`）。用户给出时记录 `Decision data:`（`decisionData`）。
+- `ask-light`：工作流与导航模式、批准后的转换、结果记录移到 `references/`；`SKILL.md` 从 206 行减到约 140 行。
+- 删除 `docs/architecture/jev-integration-contract.md`。
+
 - 新增 Skill（共 39 个包）：`light-decide`（`thinking/`）在工作流内回答有界判断，用允许的判定来源或 Agent 自己判断，并记到 `.scratch/<feature>/decisions.md`；`light-redirect`（`project/`）在已批准的计划不再成立时把改动提案写到 `.scratch/<feature>/changes/`，并记录用户的答复；`light-html-plan`（`project/`）用 `.scratch/<feature>/plan.html` 一个离线页面讲清计划现状，`assets/` 自带视觉系统。三者都由模型调用、都是可选的：缺少时调用方照原样工作。
 - 计划信号：实现报告新增 `Plan gap:`；`project-review` 的 `FAIL` 记录 `Cause: implementation | direction`。`light-implement` 和 `project-review` 遇到计划缺口或方向性失败时调用 `light-redirect`，`plan.html` 存在时刷新它；`project-spec`、`project-tickets` 应用已批准的改动提案并标为 `applied`。
 - `project-init`：指令文件指针多一行常驻说明（已批准的计划不再成立时，先调用 `light-redirect` 再改其要求），tracker 契约写明 `changes/`、`plan.html`、`plan-history/`。已有项目重跑 `project-init` 即可补上。

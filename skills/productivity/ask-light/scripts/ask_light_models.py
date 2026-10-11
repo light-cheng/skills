@@ -1,4 +1,4 @@
-"""Data models for ask-light with bounded Jev semantic judgments."""
+"""Data models for ask-light with bounded typed-decision judgments."""
 
 from __future__ import annotations
 
@@ -65,20 +65,8 @@ class LegalActionsResult:
 
 
 @dataclass
-class JevPolicy:
-    """Policy governing Jev uncertainty, query planning, and threshold evaluation."""
-    status: str = "provisional"
-    source: str = "initial-live-eval"
-    version: str = "1.0.0"
-    action_choice_min_confidence: float = 0.55
-    ambiguity_threshold: float = 0.65
-    escalation_threshold: float = 0.60
-    execution_intent_threshold: float = 0.80
-
-
-@dataclass
 class SemanticJudgments:
-    """Bounded multi-primitive semantic judgments returned by Jev System One."""
+    """Bounded semantic judgments returned by a typed decision source."""
     action_choice: Optional[str] = None
     action_confidence: Optional[float] = None
     action_probabilities: Dict[str, float] = field(default_factory=dict)
@@ -136,6 +124,7 @@ class AskLightRecommendation:
     escalation_reason: Optional[str] = None
     fail_closed: bool = False
     justification: str = ""
+    decisions: List[Dict[str, Any]] = field(default_factory=list)  # light-decide normalized results
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)

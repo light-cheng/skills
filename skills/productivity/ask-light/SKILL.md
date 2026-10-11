@@ -59,7 +59,7 @@ evidence, and approval protocol:
    (use `--roots-json` when the collection root is known). Read the evidence
    packet: stage, project contract, current effort, SPEC, ticket frontier,
    durable review state, artifact signals, hard constraints, and the compact
-   Skill catalog. Never read all 33 SKILL.md files to route — shortlist from
+   Skill catalog. Never read every SKILL.md file to route — shortlist from
    the catalog first.
 3. **Understand candidates.** Identify 2–4 plausible Skills from catalog
    metadata. When neighboring Skills are materially close, read their
@@ -104,90 +104,20 @@ Before choosing, read [references/routing-judgment.md](references/routing-judgme
 - `$ask-light <category>` — browse the collection (e.g. `project Skills`, `review Skills`, `learning Skills`) and explain roles and neighbors.
 - Plain standalone requests (`Explain this like I'm five`, `Investigate this bug`) route without deep project inspection.
 
-## Workflow mode (`$ask-light workflow`)
+## Approval transition and safety
 
-Model-led: inspect the current context, read the helper's recipe catalog
-(`--mode workflow` publishes every canonical recipe with step availability,
-handoff contracts, `entryCondition`, `stoppingBoundary`, `finalAuthority`,
-and per-step `missing dependency` fields), select the relevant workflow
-semantically, anchor the entry point at the user's actual current state, and
-explain the relevant remaining flow from there. A project with an accepted
-SPEC must not be shown the full chain from `project-init`; show the remaining
-flow from the current state and preserve each Skill's stopping boundary.
-
-## Navigation mode (`$ask-light <category>`)
-
-Collection browsing, family listings, and exact named comparisons (for
-example `clarify vs project-clarify`) may resolve deterministically from the
-map taxonomy; the explanation is model-generated. No need to make
-deterministic list operations probabilistic.
-
-## Approval transition
-
-After explicit approval:
-
-1. **Revalidate before transition.** Re-run `--mode validate` for the
-   accepted Skill and recheck material hard project state (fresh evidence for
-   current-project recommendations). If the recommendation became stale, do
-   not execute stale advice: recompute or explain the changed state.
-2. **Transition per the host's actual capability:**
-   - a **model-invoked** accepted Skill may begin in the current conversation
-     where the host supports that;
-   - a **user-invoked** accepted Skill begins itself only where the host
-     verifiably permits an explicit approved transition — the user's explicit
-     approval may constitute the required authorization there. Otherwise
-     render the exact invocation (`$<skill>` on Codex, `/<skill>` on Claude
-     Code) and ask the user to start it.
-   - Do not fake execution, do not assume every host supports recursive Skill
-     invocation, and do not claim a transition is impossible merely because
-     the target normally requires explicit user invocation — check the
-     actual host capability and document the tested behavior. Repository
-     policy forbids a user-invoked Skill from auto-invoking another
-     user-invoked Skill without that verified capability.
-
-## Safety and stop
-
-Before approval the recommendation phase is read-only: nothing is invoked,
-installed, or orchestrated (`recommendation phase was read-only`). After
-approval: for a model-invoked accepted Skill, begin it where the host
-supports that; for a user-invoked accepted Skill without a verified
-approved-transition capability, render the exact invocation and do not fake
-execution. Follow the accepted Skill's stop condition once it actually
-starts. Do not auto-chain past the accepted Skill; that Skill decides its own
-handoff.
+Before approval, the recommendation phase is read-only: nothing is invoked,
+installed or orchestrated (`recommendation phase was read-only`). After the
+user approves, revalidate, then start the accepted Skill only as its
+invocation type and the Host's verified capability allow. Otherwise render the
+exact invocation and stop. Do not chain past the accepted Skill. Details,
+including workflow and navigation modes:
+[modes-and-transition.md](references/modes-and-transition.md).
 
 ## Result contract
 
-Return a compact, complete record:
-
-```text
-Mode: next | workflow | navigate | standalone
-
-Status: RECOMMEND | NEED-INPUT | BLOCKED
-
-Observed:
-- <fact lines from the evidence packet and conversation>
-
-Assessment: <what the project appears to be doing, what is finished,
-what is unresolved, and why the recommendation fits now>
-
-Skill: <one name, or none only when legitimately terminal / needs-input>
-Scope: current-workflow | independent | standalone
-Reason: <context-specific workflow reasoning, not a generic description>
-Alternative: <at most one, with why it is not primary>
-Source: first-party: <validated package path>
-Invocation: <host-specific command>
-
-Next: awaiting-approval | host-transition-required | beginning-<skill> | revalidation-blocked | no-execution
-Reads: metadata=<count>; bodies=<count>; references=<count>
-Execution: recommendation phase was read-only; execution begins only after explicit user approval
-```
-
-For `NEED-INPUT`/`BLOCKED` results keep the same shape, name no executable
-Skill, and explain the gap. Never expose an empty `Skill:` inside a
-`RECOMMEND` result. For a legitimately terminal current effort, return the
-clean terminal record: `Skill: none`, `Completed` includes `acceptance
-passed`, `Next: no-execution`.
+Return the record in [result-contract.md](references/result-contract.md).
+Never expose an empty `Skill:` inside a `RECOMMEND` result.
 
 ## Verification
 
@@ -199,7 +129,14 @@ hard-state scoping, post-model selection validation, workflow recipe
 publication, root discovery, first-party provenance, host availability, and
 the host-aware approval boundary.
 
-## Semantic Acceleration (Optional)
+## Optional capabilities
 
-When `TYPESAFE_API_KEY` is configured and `typesafe-sdk` is present, `ask-light` can leverage optional bounded TypeSafe Jev System One semantic judgments for candidate preference (only when multiple legal actions exist), material ambiguity detection, and deep reasoning escalation within strictly code-computed legal candidate actions. Probabilistic intent never grants transition authority: transition authority requires explicit deterministic user command or confirmed approval. If unavailable or low-confidence, it gracefully defaults to explicit deterministic fallback without degradation in safety.
-
+- **Several legal Skills remain, or ambiguity or escalation is in question**
+  → the semantic mode (`--mode semantic`) asks through the light-decide script
+  path; when you judge without the script, call `light-decide` with question
+  ids `ask-light/next-action`, `ask-light/material-ambiguity` or
+  `ask-light/reasoning-escalation`. It asks only within the project's
+  `Decision data:` limit and applies an answer only when the user's policy file
+  calibrates that question. Log the returned `decisions` with light-decide's
+  log format. Unavailable or uncalibrated → keep the deterministic baseline. A
+  judgment never grants transition authority; only the user's approval does.

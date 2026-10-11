@@ -1,6 +1,6 @@
 """Compact state builder for ask-light.
 
-Constructs a compact, token-efficient, sanitized structured dictionary for Jev System One queries:
+Constructs a compact, token-efficient, sanitized structured dictionary for typed decision queries:
   1. Zero raw repository files or whole file trees.
   2. No secrets, API keys, credentials, or raw code diffs.
   3. Strict input length capping and regex-based token redaction.
@@ -32,11 +32,11 @@ def sanitize_user_request(text: str, max_chars: int = 350) -> str:
     return cleaned
 
 
-def build_compact_jev_state(
+def build_compact_decision_state(
     legal_result: LegalActionsResult,
     user_request: str,
 ) -> Dict[str, Any]:
-    """Build a compact, sanitized structured dictionary for Jev queries."""
+    """Build a compact, sanitized structured dictionary for typed decision queries."""
     state = legal_result.compact_state or CompactProjectState()
 
     # Summarize implementation status

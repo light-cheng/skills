@@ -69,11 +69,11 @@ class AskLightContractTest(unittest.TestCase):
         self.assertIn("Model understands the situation", combined)
         self.assertIn("Model chooses the workflow action", combined)
         self.assertIn("Code validates that choice", combined)
-        self.assertIn("Python is the evidence/validation authority", skill)
+        self.assertIn("Python is the evidence/validation authority", combined)
 
         # 2. Model reads relevant candidate contracts
-        self.assertIn("shortlist from the catalog", " ".join(skill.lower().split()))
-        self.assertIn("read their `skill.md` contracts before selecting", " ".join(skill.lower().split()))
+        self.assertIn("shortlist from the catalog", " ".join(combined.lower().split()))
+        self.assertIn("read their `skill.md` contracts before selecting", " ".join(combined.lower().split()))
 
         # 3. Current conversation is first-class evidence
         self.assertIn("conversation is first-class evidence", combined)
@@ -83,11 +83,11 @@ class AskLightContractTest(unittest.TestCase):
         self.assertIn("current-workflow", combined)
 
         # 5. Final semantic selection must be validated
-        self.assertIn("Validate the selection", skill)
+        self.assertIn("Validate the selection", combined)
         self.assertIn("validate_recommendation", combined)
 
         # 6. RECOMMEND cannot contain empty Skill
-        self.assertIn("never expose an empty `skill:` inside a `recommend` result", " ".join(skill.lower().split()))
+        self.assertIn("never expose an empty `skill:` inside a `recommend` result", " ".join(combined.lower().split()))
         self.assertIn("empty `skill:` inside `recommend` is a contract violation", " ".join(contract.lower().split()))
 
         # 7. Regex ranking is not final authority
@@ -95,11 +95,11 @@ class AskLightContractTest(unittest.TestCase):
         self.assertIn("regex ranking is not the routing authority", " ".join(contract.lower().split()))
 
         # 8. Workflow mode is model-led
-        self.assertIn("Model-led", skill)
-        self.assertIn("anchor the entry point at the user's actual current state", skill)
+        self.assertIn("Model-led", combined)
+        self.assertIn("anchor the entry point at the user's actual current state", combined)
 
         # 9. Approval transition is host-aware
-        self.assertIn("Revalidate before transition", skill)
+        self.assertIn("Revalidate before transition", combined)
         self.assertIn("host-aware", combined)
 
 

@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 try:
     from .ask_light_models import AskLightRecommendation, CompactProjectState
-    from .semantic_router import route_with_jev
+    from .semantic_router import route_with_decisions
     from .state_extractor import compute_legal_actions, extract_compact_state_from_dict
 except ImportError:
     from ask_light_models import AskLightRecommendation, CompactProjectState
-    from semantic_router import route_with_jev
+    from semantic_router import route_with_decisions
     from state_extractor import compute_legal_actions, extract_compact_state_from_dict
 
 
@@ -20,10 +21,10 @@ def ask_light_semantic_recommend(
     scope: str = "current-workflow",
     explicit_target: Optional[str] = None,
     client: Optional[Any] = None,
-    use_jev: bool = True,
-    shadow_mode: bool = False,
+    use_typed_decisions: bool = True,
+    project_root: Optional[Path] = None,
 ) -> AskLightRecommendation:
-    """Recommend the next workflow action combining deterministic pre-checks and bounded Jev reasoning."""
+    """Recommend the next workflow action combining deterministic pre-checks and bounded typed decisions."""
     if isinstance(state, dict):
         compact_state = extract_compact_state_from_dict(state)
     else:
@@ -36,7 +37,7 @@ def ask_light_semantic_recommend(
         explicit_target=explicit_target,
     )
 
-    if not use_jev:
+    if not use_typed_decisions:
         if legal_result.allowed_actions:
             baseline_skill = legal_result.fallback_action or legal_result.allowed_actions[0]
             return AskLightRecommendation(
@@ -47,7 +48,7 @@ def ask_light_semantic_recommend(
                 confidence=None,
                 probabilities={baseline_skill: 1.0},
                 fallback_used=True,
-                fallback_reason="use_jev=False specified; deterministic baseline applied.",
+                fallback_reason="use_typed_decisions=False specified; deterministic baseline applied.",
                 fail_closed=legal_result.fail_closed,
                 justification=f"Deterministic baseline selected {baseline_skill}.",
             )
@@ -65,9 +66,9 @@ def ask_light_semantic_recommend(
                 justification=legal_result.blocked_reason or "Non-executable query resolved deterministically.",
             )
 
-    return route_with_jev(
+    return route_with_decisions(
         legal_result=legal_result,
         user_request=user_request,
         client=client,
-        shadow_mode=shadow_mode,
+        project_root=project_root,
     )

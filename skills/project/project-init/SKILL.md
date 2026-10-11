@@ -24,22 +24,15 @@ tickets, or run later workflow stages.
    expected outputs, collaboration mode, important constraints, relevant
    Skills, issue tracker, domain-context locations, review profile/acceptance
    strategy, working area, and the active host's inspected instruction filename
-   (`AGENTS.md` or `CLAUDE.md`). When confirmed by the user, optionally onboard
-   the TypeSafe Jev ecosystem (`typesafe-ai`). Ask only
-   fields inspection did not settle, one short question at a time.
+   (`AGENTS.md` or `CLAUDE.md`). When the user states how far decision state may
+   travel, record it as `decisionData` (`on-device`, `private-network`,
+   `third-party` or `off`); without an answer, write nothing and the default
+   `on-device` applies. Ask only fields inspection did not settle, one short
+   question at a time.
 4. **Bootstrap idempotently.** Use
    [bootstrap.py](scripts/bootstrap.py) to write or update
    `docs/agents/light-project.md`, `docs/agents/issue-tracker.md`, and one
    instruction pointer in the inspected host target.
-   
-   **TypeSafe Jev Onboarding Contract:**
-   Supports optional `--jev` and `--no-jev` flags for TypeSafe Jev onboarding (key detection, gitignore protection, and global skill reuse).
-   When Jev onboarding is selected:
-   - Inspect the active Agent host environment.
-   - Resolve the supported canonical installer target (`bootstrap.py` canonical mapping is authoritative: `pi` → `pi`, `claude` → `claude-code`, `cursor` → `cursor`, `codex` → `codex`, `agy` → `antigravity`, `grok-build` → `grok`, `hermes` → `hermes-agent`).
-   - Pass it explicitly via `--agent-target <target>` to `bootstrap.py`.
-   - Never guess unsupported CLI targets; if the host target is unresolved or unsupported (e.g. DeepSeek Harness / DSH), fail closed with `TARGET_UNRESOLVED` (the core project bootstrap still succeeds with 0 installer calls).
-   - SDK Policy (`--auto-install-sdk`): Use `--auto-install-sdk` only when the user has explicitly authorized automated dependency installation in non-interactive workflows. In interactive sessions, prompt the user for permission before running `pip install` in the active Python runtime.
 
    Preserve manual additions and previously valid decisions; revise only confirmed fields. The current local-markdown adapter uses `.scratch/<effort>/issues`; other tracker locators fail closed until an adapter exists.
    The helper requires Python 3.9 or newer; if unavailable, report `BLOCKED` before any write instead of emulating the transaction manually.

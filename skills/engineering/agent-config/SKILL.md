@@ -46,7 +46,7 @@ silently substituted.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, `execution_config: null`, and return the ticketing recommendation to the caller.
-5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`). Optional TypeSafe Jev System One semantic profiling may classify abstract task tiers without vendor coupling.
+5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`). When the difficulty or reasoning need is not stated, the script may ask a typed decision source (see Optional capabilities).
 6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
 7. **Select execution mode:**
    - **Case A (Fixed Single-model + Single-pass):** Direct execution in main session, single model, resolved effort, no fake roles.
@@ -67,6 +67,17 @@ silently substituted.
 - For standalone invocation, recommend explicit `$light-implement` when ready or `$project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
 - Code review converges via `review-loop`; final acceptance belongs to `project-review`.
 
+## Optional capabilities
+
+- **Complexity or reasoning need is not stated** → the task profiler asks
+  through the light-decide script path; when you judge without the script,
+  call `light-decide` with question ids `agent-config/task-complexity` or
+  `agent-config/reasoning-need`. It asks only within the project's
+  `Decision data:` limit, applies an answer only when the user's policy file
+  calibrates that question, and applies a downgrade only when the score sits
+  clearly inside the lower bin. Unavailable or uncalibrated → keep the
+  deterministic profile. A judgment never confirms a Profile or changes Host
+  configuration.
 ## References
 - [`references/setup.md`](references/setup.md) — Setup questionnaire and tier binding flow
 - [`references/routing.md`](references/routing.md) — 4 peer execution modes and topology selection

@@ -93,15 +93,9 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
-### Optional Semantic Acceleration (TypeSafe Jev)
+### Optional decision sources
 
-`ask-light` and `agent-config` support optional semantic acceleration using TypeSafe Jev System One models for fast intent calibration, ambiguity detection, and abstract task profiling:
-
-```bash
-export TYPESAFE_API_KEY="your-api-key"
-```
-
-When configured, Jev enhances candidate choices within deterministic boundaries. When unconfigured or offline, both Skills gracefully fall back to zero-dependency deterministic baselines with no change in fail-closed safety.
+`ask-light` and `agent-config` can hand bounded judgments (choose among legal options, yes/no, a level on a scale) to a typed decision model through `light-decide`. Each project sets how far that question state may travel with a `Decision data:` line in `docs/agents/light-project.md` (`on-device`, `private-network`, `third-party` or `off`). Without the line, only a model on this machine is asked. An answer is used only when your policy file `~/.config/light/decision-policy.json` calibrates that question; otherwise the deterministic baseline stands. When no source is found, `light-decide` can offer setup and waits for your yes.
 
 See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent targets, copy mode, non-interactive CI flags), manual file copying, and verification notes.
 

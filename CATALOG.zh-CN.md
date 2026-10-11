@@ -42,7 +42,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 
 ### ask-light
 
-- **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换（支持可选 TypeSafe Jev System One 语义加速）。
+- **作用：** 作为 Light 工作流顾问、导航器与路由入口：检查项目与工作流状态，推荐下一步 Skill 并给出理由，用户批准后安全转换（有界判断可选经 `light-decide` 完成）。
 - **什么时候用：** 不确定下一步该用哪个 Skill，或需要项目感知路由、集合能力导航与独立工作流推荐时。
 - **调用方式：** 仅 user-invoked；批准前只读。批准后支持的环境下可直接开始 model-invoked 目标，user-invoked 目标遵循 Host 转换策略并在缺少直接通道时渲染精确调用。
 - **包位置：** [skills/productivity/ask-light/](skills/productivity/ask-light)

@@ -2,7 +2,7 @@
 
 Enforces deterministic pre-checks and hard fail-closed invariants:
   - Code establishes trustworthy facts and bounds.
-  - Jev is never allowed to override fail-closed safety decisions.
+  - A typed decision source is never allowed to override fail-closed safety decisions.
 """
 
 from __future__ import annotations
@@ -122,7 +122,7 @@ def compute_legal_actions(
 ) -> LegalActionsResult:
     """Deterministically compute legal candidate actions and enforce hard fail-closed invariants.
     
-    This function owns exact rules and safety boundaries. Jev is NEVER allowed
+    This function owns exact rules and safety boundaries. A typed decision source is NEVER allowed
     to override decisions made here.
     """
     req_lower = user_request.lower()
