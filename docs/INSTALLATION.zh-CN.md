@@ -2,7 +2,7 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)，发布于 `v0.2.7` tag（不可变的[发布清单](evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+公开第一方集合当前稳定版本是 [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)，发布于 `v0.2.7` tag（不可变的[发布清单](evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。默认分支另有三个 v0.2.7 之后准入的 Skill（`light-decide`、`light-redirect`、`light-html-plan`），其安装尚未验证。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 

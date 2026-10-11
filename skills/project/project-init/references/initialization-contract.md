@@ -15,7 +15,9 @@ This reference is loaded when writing or validating a project initialization.
 
 `docs/agents/issue-tracker.md` records the work-item location, SPEC/ticket
 locators, blocking edge, statuses, and frontier rule consumed by
-`decision-map`, `project-spec`, `project-tickets`, and `light-implement`. Do not create
+`decision-map`, `project-spec`, `project-tickets`, and `light-implement`, plus
+where change proposals (`light-redirect`) and the plan page (`light-html-plan`)
+live. Do not create
 `triage-labels.md`: no admitted Light workflow consumes it.
 
 Managed markers allow reruns to update confirmed configuration while preserving
@@ -30,7 +32,10 @@ host style from an empty repository. If both styles exist, update only the
 inspected host target, preserve the other file, and report the conflict.
 
 Preserve unrelated lines and merge one `## Project Initialization` pointer to
-the stable contract. A rerun updates that section instead of appending a copy.
+the stable contract. The pointer also carries one standing line: when an
+approved plan (SPEC, ticket or acceptance item) no longer holds, call
+`light-redirect` before changing what any of them requires. A rerun updates that section
+instead of appending a copy.
 Reject instruction symlinks that resolve to either managed contract; all three
 write targets must resolve to distinct files.
 

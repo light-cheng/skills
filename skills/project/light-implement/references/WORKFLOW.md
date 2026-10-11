@@ -237,9 +237,14 @@ alone.
 - Remaining findings:
   - <F-###> · <severity> · <location> · <problem> · <reason>
 - Limitations: <unavailable dependencies, environments, untestable paths, or none>
+- Plan gap: <none, or one sentence on what in the approved SPEC, ticket or acceptance items no longer holds>
 ```
 
-Write `none` for an empty list; leave no field out. Copy each remaining
+Write `none` for an empty list; leave no field out. `Plan gap:` names a
+problem with the plan itself (a missing or wrong requirement, tickets that
+contradict each other or the SPEC), not with the work; the run stops
+`BLOCKED` with it, leaves the plan as approved, and hands it to `light-redirect`
+([Optional capabilities](../SKILL.md#optional-capabilities)). Copy each remaining
 finding from the last `review-loop` report with its original ID and fields,
 so the next review can recheck it. A non-code item records its artifact
 path in `Candidate:`, its render or schema observation under

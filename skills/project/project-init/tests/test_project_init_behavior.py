@@ -131,6 +131,32 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertIn("## Testing\n\nRun tests.", second)
             self.assertEqual(second.count(BOOTSTRAP.POINTER_START), 1)
 
+    def test_rerun_adds_the_redirect_line_to_an_older_pointer_once(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            agents = root / "AGENTS.md"
+            older = f"{BOOTSTRAP.POINTER_START}\nRead `docs/agents/light-project.md` before Light Project workflows.\n{BOOTSTRAP.POINTER_END}"
+            agents.write_text(f"# Rules\n\n## Project Initialization\n\nKeep this note.\n\n{older}\n", encoding="utf-8")
+
+            BOOTSTRAP.bootstrap(root, config())
+            BOOTSTRAP.bootstrap(root, config())
+
+            updated = agents.read_text(encoding="utf-8")
+            self.assertEqual(updated.count(BOOTSTRAP.REDIRECT_LINE), 1)
+            pointer = updated[updated.index(BOOTSTRAP.POINTER_START):updated.index(BOOTSTRAP.POINTER_END)]
+            self.assertIn(BOOTSTRAP.REDIRECT_LINE, pointer)
+            self.assertIn("Keep this note.", updated)
+
+    def test_tracker_names_change_proposals_and_the_plan_page(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            BOOTSTRAP.bootstrap(root, config())
+            tracker = (root / "docs/agents/issue-tracker.md").read_text(encoding="utf-8")
+            managed = tracker[tracker.index(BOOTSTRAP.START):tracker.index(BOOTSTRAP.END)]
+            self.assertIn("<working-area>/<effort>/changes/NN-<slug>.md", managed)
+            self.assertIn("<working-area>/<effort>/plan.html", managed)
+            self.assertIn("<working-area>/<effort>/plan-history/", managed)
+
     def test_fenced_initialization_heading_is_not_treated_as_a_live_section(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
             root = Path(tmp)

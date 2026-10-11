@@ -53,6 +53,16 @@ project-retro
 
 **可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`light-implement` 可按需调用 `light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`light-code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
 
+## 流程中的可选能力
+
+三个由模型调用的能力在流程中按事件触发。它们都是可选的：缺少时，各 Skill 照原样工作。
+
+| 事件 | 谁调用 | 能力 | 记录 |
+| --- | --- | --- | --- |
+| 已批准的计划不再成立（实现报告里有 `Plan gap:`、`FAIL` 带 `Cause: direction`，或用户改了主意） | `light-implement`、`project-review`，或 Agent 依 `project-init` 写入指令文件的那一行 | [`light-redirect`](../../../skills/project/light-redirect/SKILL.md) | `.scratch/<feature>/changes/NN-<slug>.md`；用户批准后由 `project-spec` / `project-tickets` 应用 |
+| Skill 遇到有界判断（多选一、是否、分级） | `light-implement`、`light-redirect` | [`light-decide`](../../../skills/thinking/light-decide/SKILL.md) | `.scratch/<feature>/decisions.md` |
+| `plan.html` 已存在，且某阶段结束、工作卡住或拿到验收结论 | `project-spec`、`project-tickets`、`light-implement`、`project-review` | [`light-html-plan`](../../../skills/project/light-html-plan/SKILL.md) | `.scratch/<feature>/plan.html`，旧版在 `plan-history/` |
+
 ## 未知或专业入口
 
 - 无项目上下文的模糊想法 → [`clarify`](../../../skills/thinking/clarify/SKILL.md)（standalone，经 `socratic` 后停止）。

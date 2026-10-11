@@ -1,0 +1,6 @@
+interface:
+  display_name: "Light HTML Plan"
+  short_description: "Create readable offline plans and refresh recorded progress"
+  default_prompt: "Use light-html-plan to create or refresh this offline HTML plan using its source records."
+policy:
+  allow_implicit_invocation: true

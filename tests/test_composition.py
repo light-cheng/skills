@@ -41,6 +41,15 @@ EDGES = (
     ("project-review", "review-loop", "calls"),
     ("project-review", "generic-review", "calls"),
     ("project-review", "light-code-review", "calls"),
+    # Optional capabilities: the caller keeps its own behaviour when they are missing.
+    ("light-implement", "light-decide", "calls-optional"),
+    ("light-implement", "light-redirect", "calls-optional"),
+    ("light-implement", "light-html-plan", "calls-optional"),
+    ("project-review", "light-redirect", "calls-optional"),
+    ("project-review", "light-html-plan", "calls-optional"),
+    ("project-spec", "light-html-plan", "calls-optional"),
+    ("project-tickets", "light-html-plan", "calls-optional"),
+    ("light-redirect", "light-decide", "calls-optional"),
 )
 
 
@@ -75,12 +84,28 @@ class CompositionGraphTests(unittest.TestCase):
 
     def test_a_skill_only_calls_model_invoked_capabilities(self) -> None:
         for source, target, relation in EDGES:
-            if relation == "calls":
+            if relation.startswith("calls"):
                 with self.subTest(edge=f"{source}->{target}"):
                     self.assertTrue(
                         is_model_invoked(target),
                         f"{source} calls {target}, but {target} is user-invoked; recommend it instead",
                     )
+
+    def test_optional_calls_match_declarations_and_each_has_a_fallback(self) -> None:
+        declared = set()
+        for skill_file in (ROOT / "skills").glob("*/*/SKILL.md"):
+            section = re.search(r"(?ms)^## Optional capabilities\n(.*?)(?=^## |\Z)", skill_file.read_text(encoding="utf-8"))
+            if not section:
+                continue
+            for item in re.split(r"(?m)^- ", section.group(1))[1:]:
+                targets = re.findall(r"call\s+`([\w-]+)`", item)
+                with self.subTest(skill=skill_file.parent.name, item=item[:60]):
+                    self.assertTrue(targets, "an optional capability names no call target")
+                    # trigger → call, then fallback → behaviour: two arrows
+                    self.assertGreaterEqual(item.count("→"), 2, "an optional capability gives no fallback")
+                declared |= {(skill_file.parent.name, target) for target in targets}
+        edges = {(source, target) for source, target, relation in EDGES if relation == "calls-optional"}
+        self.assertEqual(declared, edges)
 
     def test_invocation_check_rejects_a_user_invoked_target(self) -> None:
         # Negative control: the check above must be able to fail.

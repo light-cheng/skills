@@ -228,6 +228,9 @@ def check_release_manifest_consistency(
     rel_manifest_en = f"docs/evidence/releases/{tag}/RELEASE_MANIFEST.md"
     rel_manifest_zh = f"docs/evidence/releases/{tag}/RELEASE_MANIFEST.zh-CN.md"
 
+    # A published release reads its manifest and counts its packages in its own
+    # tagged tree; an untagged candidate uses the working tree.
+    revision = revision or resolve_tag_sha(tag, cwd=repo_root)
     if revision:
         if not git_path_exists(revision, rel_manifest_en, cwd=repo_root):
             return VerificationResult(

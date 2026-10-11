@@ -27,10 +27,23 @@ missing adapter instead of silently writing `.scratch` files.
 4. **Publish one file per ticket** under `.scratch/<feature>/issues/`, numbered
    from `01` in dependency order with the approved shape unchanged.
 
+**Applying a change proposal.** When the user passes an `approved` proposal
+from `.scratch/<feature>/changes/`, apply exactly its `Tickets:` line (add,
+drop, split, reorder, change `Blocked by` or acceptance). When its `SPEC:` line
+is `none` or a `SPEC applied` line is already under `## Comments`, set
+`**Status:**` to `applied` with a status line; otherwise add
+`- <date> Tickets applied — project-tickets`. A proposal in any other status, or a
+change it does not list, goes back to the user unchanged.
+
 ## Handoff
 
 After publishing, describe the frontier and recommend explicit `$light-implement`
 on the chosen ticket, then stop.
+
+## Optional capabilities
+
+- **`.scratch/<feature>/plan.html` exists** → after publishing, call
+  `light-html-plan` to refresh it. Missing page or capability → skip.
 
 ## References
 

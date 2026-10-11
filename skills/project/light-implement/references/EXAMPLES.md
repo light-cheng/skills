@@ -41,6 +41,7 @@
    - Remaining findings:
      - F-002 · medium · src/auth/middleware.ts:41 · clock skew not tolerated · Spec allows 30 s skew
    - Limitations: none
+   - Plan gap: none
    ```
 
    `light-implement` stops here. It does not decide the final `PASS`;

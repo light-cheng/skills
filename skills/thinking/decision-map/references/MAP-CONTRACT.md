@@ -87,6 +87,18 @@ Per the configured `docs/agents/issue-tracker.md`:
 Naming: always refer to tickets by title (link-wrapped) in narration and in
 the map's `Decisions so far`, never by bare `NN` or id.
 
+**Change proposals** (from `light-redirect`, after the SPEC is approved) live in
+`.scratch/<effort>/changes/`. A proposal waiting on the user is a line under
+`Not yet specified`; once the user approves or rejects it, the line moves to
+`Decisions so far`. A waiting proposal is open fog, so it keeps the map from
+handing off.
+
+```markdown
+- Change proposed, waiting on the user: `NN — <title> → changes/NN-<slug>.md`
+- Change approved <YYYY-MM-DD>: `NN — <title> → changes/NN-<slug>.md`
+- Change rejected <YYYY-MM-DD>: `NN — <title> → changes/NN-<slug>.md`
+```
+
 ## Ticket types
 
 - **research** — AFK fact: read primary sources. Use `light-research`.

@@ -16,5 +16,6 @@ Categories help you browse related skills; they do not enforce a rigid pipeline.
 
 - **[socratic](socratic/SKILL.md)** — Questioning engine: presents independent choices, provides recommendations, and confirms shared understanding step by step.
 - **[light-research](light-research/SKILL.md)** — Investigate technical or factual questions against reliable primary sources and summarize findings in markdown.
+- **[light-decide](light-decide/SKILL.md)** — Answer a bounded judgment inside a workflow (choice, yes/no, score) through an allowed decision source or the Agent itself, and log how sure it is.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

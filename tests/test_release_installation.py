@@ -105,8 +105,8 @@ class ReleasedSourceInstallationTests(unittest.TestCase):
             canonical.mkdir(parents=True)
             for entry in (ROOT / "skills").glob("*/*/SKILL.md"):
                 (canonical / entry.parent.name).symlink_to(entry.parent, target_is_directory=True)
-            self.assertEqual(len(expected), 36)
-            self.assertEqual(module.verify_destination(canonical, expected)["packages"], 36)
+            self.assertEqual(len(expected), module.COLLECTION_SIZE)
+            self.assertEqual(module.verify_destination(canonical, expected)["packages"], module.COLLECTION_SIZE)
             with self.assertRaisesRegex(ValueError, "omitted a required Agent target"):
                 module.verify_project_targets(project, expected, ["codex", "claude-code"])
             (project / ".claude").mkdir()

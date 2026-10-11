@@ -18,7 +18,10 @@ hands it to review.
 2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
    read its tracker, domain-context, and review-profile fields. Then skim only
    the named glossary, ADRs, and files the item touches; record source locations.
-3. **Offer execution routing when materially useful.** When model right-sizing,
+3. **Offer execution routing when materially useful.** Clearly bounded solo
+   work skips routing without a judgment (WORKFLOW §3A). Otherwise make the
+   yes/no call "would routing materially help?" through `light-decide`
+   ([Optional capabilities](#optional-capabilities)). When model right-sizing,
    reasoning effort tuning, delegated implementation with stronger review,
    or execution topology would materially help, offer the user a choice to
    invoke `agent-config` or proceed directly. If the user explicitly requested
@@ -34,9 +37,27 @@ hands it to review.
    code, `generic-review` or a domain reviewer for non-code.
 6. **Write the implementation report and stop.** For a tracker ticket, append
    the report under the ticket's `## Comments`: scope, fixed point, verification
-   results, and the findings `review-loop` left open
+   results, the findings `review-loop` left open, and `Plan gap:`
    ([WORKFLOW.md §7](references/WORKFLOW.md#7-write-the-implementation-report)).
    `project-review` reads it in a later session.
+
+## Optional capabilities
+
+- **Step 3 asks whether routing would materially help** for work that is not
+  clearly bounded solo work, and the user has neither requested nor declined
+  it → call `light-decide` with question id
+  `light-implement/offer-agent-config` (yes or no). Unavailable → judge it
+  yourself.
+- **A plan gap** (the approved SPEC, ticket or acceptance items no longer
+  hold), found at any step → claim the ticket if it is not claimed yet, stop
+  the item, write the report with `Outcome: BLOCKED` and the gap in
+  `Plan gap:`, then call `light-redirect` with the ticket path. If it hands
+  back a local fix, continue the item; the next report supersedes this one.
+  For a SPEC or conversation slice, skip the claim and pass the report you
+  return as the trigger.
+  Unavailable or declined → report the gap and stop.
+- **`.scratch/<feature>/plan.html` exists** → after the report, call
+  `light-html-plan` to refresh it. Missing page or capability → skip.
 
 ## Composition
 

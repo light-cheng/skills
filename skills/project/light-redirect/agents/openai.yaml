@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light Redirect"
+  short_description: "Write a change proposal when the approved plan no longer holds"
+  default_prompt: "Use light-redirect: decide whether this is a direction change or a local fix, write a change proposal under .scratch/<feature>/changes/, ask the user to approve it, and recommend the skill that applies it."
+
+policy:
+  allow_implicit_invocation: true

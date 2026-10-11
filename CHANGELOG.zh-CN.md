@@ -6,6 +6,11 @@
 
 ## 未发布
 
+- 新增 Skill（共 39 个包）：`light-decide`（`thinking/`）在工作流内回答有界判断，用允许的判定来源或 Agent 自己判断，并记到 `.scratch/<feature>/decisions.md`；`light-redirect`（`project/`）在已批准的计划不再成立时把改动提案写到 `.scratch/<feature>/changes/`，并记录用户的答复；`light-html-plan`（`project/`）用 `.scratch/<feature>/plan.html` 一个离线页面讲清计划现状，`assets/` 自带视觉系统。三者都由模型调用、都是可选的：缺少时调用方照原样工作。
+- 计划信号：实现报告新增 `Plan gap:`；`project-review` 的 `FAIL` 记录 `Cause: implementation | direction`。`light-implement` 和 `project-review` 遇到计划缺口或方向性失败时调用 `light-redirect`，`plan.html` 存在时刷新它；`project-spec`、`project-tickets` 应用已批准的改动提案并标为 `applied`。
+- `project-init`：指令文件指针多一行常驻说明（已批准的计划不再成立时，先调用 `light-redirect` 再改其要求），tracker 契约写明 `changes/`、`plan.html`、`plan-history/`。已有项目重跑 `project-init` 即可补上。
+- `decision-map`：等用户答复的改动提案放在 `Not yet specified`，答复后移到 `Decisions so far`。
+- 发布检查：`verify_release_installation.py` 按 39 个包检查；已发布版本的清单按它自己的 tag 计数。
 - 维护流程：增加审查分量。已准入包的日常改动只需本地测试和所有者真实使用；完整审查只用于新准入、调用方式/依赖/attribution 变化、可执行脚本和发布。`AGENTS.md` 改用短句和主动语态，保留全部规则，并新增写作风格规则。
 - `humanizer`：模式清单（§1–§35）和误报检查原样移到 `references/patterns.md`；`SKILL.md` 保留改写规则和流程。
 - `ask-light`：决策原则和证据读法原样移到 `references/routing-judgment.md`。

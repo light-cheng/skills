@@ -84,10 +84,10 @@ def write_public_release_fixture(root: Path, tag: str = "v9.9.9", *, attested: b
 
 
 class ReleaseIntegrityTests(unittest.TestCase):
-    def test_admitted_package_count_is_36(self) -> None:
-        """Exactly 36 admitted Skill packages must be counted under skills/*/*."""
+    def test_admitted_package_count_is_39(self) -> None:
+        """Exactly 39 admitted Skill packages must be counted under skills/*/*."""
         count = get_admitted_package_count(ROOT)
-        self.assertEqual(count, 36)
+        self.assertEqual(count, 39)
 
     def test_detect_candidate_tag(self) -> None:
         """Infers latest candidate release tag from docs/evidence/releases/."""
@@ -1464,6 +1464,40 @@ class GitObjectBoundArtifactTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.tmp.cleanup()
+
+    def _commit_manifest_claiming(self, count: int) -> None:
+        (self.rel_dir / "RELEASE_MANIFEST.md").write_text(
+            "# Manifest v9.9.9\nRelease: `v9.9.9`\nRelease identity: `refs/tags/v9.9.9^{commit}`\n"
+            f"Collection package count: {count} admitted packages\nPolicy status: `PROVISIONAL`\n",
+            encoding="utf-8",
+        )
+        (self.rel_dir / "RELEASE_MANIFEST.zh-CN.md").write_text(
+            "# 清单 v9.9.9\n发布版本：`v9.9.9`\n发布身份：`refs/tags/v9.9.9^{commit}`\n"
+            f"集合包总数：{count} 个\n政策状态：`PROVISIONAL`\n",
+            encoding="utf-8",
+        )
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "manifest"], cwd=self.tmp_root, capture_output=True, check=True)
+
+    def test_published_manifest_is_counted_against_its_own_tag(self) -> None:
+        """Packages admitted after a release do not break that release's manifest."""
+        self._commit_manifest_claiming(36)
+        subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=self.tmp_root, capture_output=True, check=True)
+        create_admitted_packages(self.tmp_root, 39)
+        # A later edit to the working-tree copy does not change what was released.
+        manifest = self.rel_dir / "RELEASE_MANIFEST.md"
+        manifest.write_text(manifest.read_text(encoding="utf-8").replace("36 admitted", "39 admitted"), encoding="utf-8")
+        res = check_release_manifest_consistency("v9.9.9", repo_root=self.tmp_root)
+        self.assertTrue(res.passed, res.message)
+        self.assertIn("36 packages", res.message)
+
+    def test_untagged_candidate_manifest_is_counted_against_the_working_tree(self) -> None:
+        """Without a tag the manifest describes the working tree, so a stale count fails."""
+        self._commit_manifest_claiming(36)
+        create_admitted_packages(self.tmp_root, 39)
+        res = check_release_manifest_consistency("v9.9.9", repo_root=self.tmp_root)
+        self.assertFalse(res.passed)
+        self.assertIn("39", res.message)
 
     def test_prepared_untracked_manifest_does_not_count_as_committed_artifact(self) -> None:
         """Candidate commit A has no manifest; manifest is only untracked in worktree -> FAIL."""

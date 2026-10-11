@@ -16,5 +16,6 @@
 
 - **[socratic](socratic/SKILL.md)** — 启发式问答引擎：提出相互独立的选择题并给出倾向建议，逐步梳理决策并形成共识，供上层澄清技能调用。
 - **[light-research](light-research/SKILL.md)** — 针对技术选型或客观问题检索一手权威资料，梳理并沉淀结构化事实调研记录。
+- **[light-decide](light-decide/SKILL.md)** — 在工作流内回答有界判断（多选一、是否、分级），用允许的判定来源或 Agent 自己判断，并记录把握有多大。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

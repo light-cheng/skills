@@ -2,7 +2,7 @@
 
 [English catalog](CATALOG.md)
 
-本目录从 `skills/` 下 36 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
+本目录从 `skills/` 下 39 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
@@ -13,14 +13,14 @@
 | 字段 | 值 |
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
-| 包数量 | 36 个已准入第一方 Skill |
-| 当前状态 | 36个包；v0.2.7为当前稳定版本 |
+| 包数量 | 39 个已准入第一方 Skill |
+| 当前状态 | 39个包；v0.2.7（36个包）为当前稳定版本；light-decide、light-redirect、light-html-plan 随下一个版本发布 |
 | 稳定版本 | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)（36个包；上一稳定版为v0.2.6） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | 证据 | [v0.2.7 发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md) · [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
 
-`v0.2.7` 的公开发布与全新安装已验证；包数量仍为 36。
+`v0.2.7` 的公开发布与全新安装已对其 36 个包验证。
 
 v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 
@@ -389,3 +389,33 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
 - **证据：** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md)。
 - **安装路径：** `<skills-root>/light-writing-for-agents/`。
+
+### light-decide
+
+- **作用：** 在工作流内回答有界判断（多选一、是否、分级），在允许且可用时用专门的判定来源，否则由 Agent 自己判断，并记录下来。
+- **什么时候用：** 其他 Skill 遇到答案集合固定的判断时。不用于用户的决定、批准、验收结论或权限。
+- **调用方式：** model-invoked。
+- **包位置：** [skills/thinking/light-decide/](skills/thinking/light-decide)
+- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
+- **证据：** [references/selection.md](skills/thinking/light-decide/references/selection.md)、[references/formats.md](skills/thinking/light-decide/references/formats.md)。
+- **安装路径：** `<skills-root>/light-decide/`。
+
+### light-redirect
+
+- **作用：** 已批准的计划不再成立时写改动提案，并记录用户批准或拒绝。
+- **什么时候用：** 实施中发现需求缺失或有误、验收因方向问题未通过、用户批准后改了主意，或工单之间、工单与 SPEC 互相矛盾时。
+- **调用方式：** model-invoked。
+- **包位置：** [skills/project/light-redirect/](skills/project/light-redirect)
+- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
+- **证据：** [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md)、[references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md)。
+- **安装路径：** `<skills-root>/light-redirect/`。
+
+### light-html-plan
+
+- **作用：** 用一个离线 HTML 页面讲清计划现状：项目是什么、做到哪一步、等你决定什么、哪里变了、系统替你做了哪些判断。
+- **什么时候用：** 用户要看计划的网页，或 `.scratch/<feature>/plan.html` 已存在且某个阶段完成、工作卡住或拿到验收结果时。
+- **调用方式：** model-invoked。
+- **包位置：** [skills/project/light-html-plan/](skills/project/light-html-plan)
+- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布；自带视觉系统（`assets/`）。
+- **证据：** [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md)、[references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md)、[ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/light-html-plan/`。

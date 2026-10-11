@@ -2,7 +2,7 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the 36 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
+This catalog is synchronized from the 39 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
@@ -13,14 +13,14 @@ The inventory shows the published v0.2.7 names: 36 packages, 12 renamed and 24 r
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
-| Package count | 36 admitted first-party Skills |
-| Current state | 36 packages; v0.2.7 is the current stable release |
+| Package count | 39 admitted first-party Skills |
+| Current state | 39 packages; v0.2.7 (36 packages) is the current stable release; light-decide, light-redirect and light-html-plan ship in the next release |
 | Stable release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages; previous stable was v0.2.6) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | Evidence | [v0.2.7 release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) · [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
 
-`v0.2.7` publication and fresh installation are verified; package count remains 36.
+`v0.2.7` publication and fresh installation are verified for its 36 packages.
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 
@@ -389,6 +389,36 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Status:** Admitted first-party; PORT — NO REDESIGN.
 - **Evidence:** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md), [ATTRIBUTION.md](skills/writing/light-writing-for-agents/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-writing-for-agents/`.
+
+### light-decide
+
+- **Purpose:** Answer a bounded judgment inside a workflow (choice, yes/no or score) through an allowed, available typed decision source or the Agent's own judgment, and log it.
+- **When to use:** Another Skill reaches a judgment with a fixed set of legal answers. Never for user decisions, approvals, verdicts or permissions.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/thinking/light-decide/](skills/thinking/light-decide)
+- **Status:** Admitted first-party after v0.2.7; ships in the next release.
+- **Evidence:** [references/selection.md](skills/thinking/light-decide/references/selection.md), [references/formats.md](skills/thinking/light-decide/references/formats.md).
+- **Installation path:** `<skills-root>/light-decide/`.
+
+### light-redirect
+
+- **Purpose:** Write a change proposal when the approved plan no longer holds, and record the user's approval or rejection.
+- **When to use:** Work finds a requirement missing or wrong, a review fails on direction, the user changes their mind after approval, or tickets contradict each other or the SPEC.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/project/light-redirect/](skills/project/light-redirect)
+- **Status:** Admitted first-party after v0.2.7; ships in the next release.
+- **Evidence:** [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md), [references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md).
+- **Installation path:** `<skills-root>/light-redirect/`.
+
+### light-html-plan
+
+- **Purpose:** Show where a plan stands as one offline HTML page: what the project is, how far it got, what waits on the user, what changed and what the system judged.
+- **When to use:** The user asks for an HTML view of a plan, or `.scratch/<feature>/plan.html` exists and a stage finished, work stopped, or an acceptance result arrived.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/project/light-html-plan/](skills/project/light-html-plan)
+- **Status:** Admitted first-party after v0.2.7; ships in the next release; built-in visual system (`assets/`).
+- **Evidence:** [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md), [references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md), [ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-html-plan/`.
 
 ## Source-state boundaries
 

@@ -4,20 +4,20 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) record the scope and verification.
+> **Release:** [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) is the current stable release (36 Skills). `light-decide`, `light-redirect` and `light-html-plan` were admitted after it and ship in the next release. Its immutable [release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) record the scope and verification.
 
-> **Name migration:** Twelve Skills now use `light-` names; 24 names and the 36-package total are retained. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [release notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). Exact CI, protected tag and actual Codex/Claude project and Codex global installs are verified.
+> **Name migration:** In v0.2.7, twelve Skills took `light-` names; the other 24 names and the 36-package total stayed. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [release notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). Exact CI, protected tag and actual Codex/Claude project and Codex global installs are verified.
 
 ## Browse by category
 
-[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; invocation modes are unchanged; candidate names follow the migration guide.
+[All categories and collection guides](skills/README.md). The 39 source packages are grouped by purpose; invocation modes are unchanged; candidate names follow the migration guide.
 
-- [project](skills/project/README.md) — 8 skills
+- [project](skills/project/README.md) — 10 skills
 - [engineering](skills/engineering/README.md) — 5 skills
 - [review](skills/review/README.md) — 4 skills
-- [thinking](skills/thinking/README.md) — 5 skills
+- [thinking](skills/thinking/README.md) — 6 skills
 - [knowledge](skills/knowledge/README.md) — 5 skills
 - [writing](skills/writing/README.md) — 3 skills
 - [productivity](skills/productivity/README.md) — 6 skills

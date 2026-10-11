@@ -68,6 +68,15 @@ state tree and resume rules. When the acceptance source is a tracker ticket,
 resolve it after `PASS` and comment the blocker after `FAIL` or `BLOCKED`
 ([Ticket closeout](references/WORKFLOW.md#ticket-closeout)).
 
+## Optional capabilities
+
+- **A `FAIL` with `Cause: direction`** → after ticket closeout, call
+  `light-redirect` with the `verdict.md` path. Unavailable or declined → the
+  ticket's `FAIL` comment is the handoff.
+- **`.scratch/<feature>/plan.html` exists** → after the verdict and ticket
+  closeout, call `light-html-plan` to refresh it. Missing page or capability →
+  skip.
+
 ## References
 
 - [WORKFLOW.md](references/WORKFLOW.md) — full init/review/resume workflows,

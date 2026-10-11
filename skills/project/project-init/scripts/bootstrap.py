@@ -33,6 +33,7 @@ PRESETS = {
     "knowledge-base", "data-analysis", "research-fallback",
 }
 MARKER_TOKENS = (START, END, POINTER_START, POINTER_END)
+REDIRECT_LINE = "When an approved plan (SPEC, ticket or acceptance item) no longer holds, call `light-redirect` before changing what any of them requires."
 
 JEV_SKILL_NAME = "typesafe-ai"
 JEV_CONSTRAINT = "TypeSafe Jev System One semantic acceleration"
@@ -752,6 +753,8 @@ def render_tracker(config: dict[str, Any]) -> str:
         "- Edge field: Blocked by: NN, NN",
         "- Statuses: open | ready-for-agent | claimed | resolved",
         "- Frontier: unblocked open/ready-for-agent items, first by number",
+        "- Change proposals: <working-area>/<effort>/changes/NN-<slug>.md",
+        "- Plan page: <working-area>/<effort>/plan.html; earlier versions in <working-area>/<effort>/plan-history/",
         END,
     )) + "\n"
 
@@ -801,6 +804,7 @@ def merge_instruction(existing: str) -> str:
     pointer = "\n".join((
         POINTER_START,
         "Read `docs/agents/light-project.md` before Light Project workflows. Its managed block is the stable project contract; preserve manual notes outside it.",
+        REDIRECT_LINE,
         POINTER_END,
     ))
     visible = mask_markdown_fences(existing)

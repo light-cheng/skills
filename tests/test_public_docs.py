@@ -186,7 +186,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
 
         skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
-        self.assertEqual(len(skills), 36)
+        self.assertEqual(len(skills), 39)
 
         en_fields = ["Purpose", "When to use", "Invocation", "Package", "Status"]
         zh_fields = ["作用", "什么时候用", "调用方式", "包位置", "状态"]
@@ -215,7 +215,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
 
         skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
-        self.assertEqual(len(skills), 36)
+        self.assertEqual(len(skills), 39)
 
         mismatches: list[str] = []
         for s in skills:
@@ -240,7 +240,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
 
         skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
-        self.assertEqual(len(skills), 36)
+        self.assertEqual(len(skills), 39)
 
         mismatches: list[str] = []
         for s in skills:

@@ -4,20 +4,20 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.7 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)；不可变的[发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+> **发布版本：** v0.2.7 是当前稳定版本（36 个 Skill）。`light-decide`、`light-redirect`、`light-html-plan` 在其后准入，随下一个版本发布。阅读[中文发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)；不可变的[发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
 
-> **名称迁移：** 12 个Skill使用 `light-` 新名称，其他24个名称及36个包总数保留。见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)和[发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。准确CI、受保护标签及真实Codex/Claude项目与Codex全局安装已验证。
+> **名称迁移：** v0.2.7 中 12 个 Skill 改用 `light-` 新名称，其他 24 个名称及当时 36 个包的总数不变。见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)和[发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。准确CI、受保护标签及真实Codex/Claude项目与Codex全局安装已验证。
 
 ## 按分类浏览
 
-[全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，调用方式不变；候选名称见迁移说明。
+[全部分类与集合说明](skills/README.zh-CN.md)。39 个技能的源文件已按用途分类，调用方式不变；候选名称见迁移说明。
 
-- [项目执行](skills/project/README.zh-CN.md) — 8 个技能
+- [项目执行](skills/project/README.zh-CN.md) — 10 个技能
 - [工程开发](skills/engineering/README.zh-CN.md) — 5 个技能
 - [审阅验收](skills/review/README.zh-CN.md) — 4 个技能
-- [澄清研究](skills/thinking/README.zh-CN.md) — 5 个技能
+- [澄清研究](skills/thinking/README.zh-CN.md) — 6 个技能
 - [学习知识](skills/knowledge/README.zh-CN.md) — 5 个技能
 - [写作编辑](skills/writing/README.zh-CN.md) — 3 个技能
 - [日常工具](skills/productivity/README.zh-CN.md) — 6 个技能

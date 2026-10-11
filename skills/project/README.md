@@ -19,5 +19,7 @@ Categories help you browse related skills; they do not enforce a rigid pipeline.
 - **[kanban-worker](kanban-worker/SKILL.md)** — Claim and complete a single task from a Light-Kanban board during scheduled runs, picking up feedback and in-progress work first.
 - **[release-workflow](release-workflow/SKILL.md)** — Manage project releases through verified checks, document synchronization, git tagging, and GitHub publication.
 - **[project-retro](project-retro/SKILL.md)** — Review completed sessions to find friction in project layout, automated checks, instruction clarity, or tool usage, then suggest concrete fixes.
+- **[light-redirect](light-redirect/SKILL.md)** — When the approved plan no longer holds, write a change proposal and record whether you approve it.
+- **[light-html-plan](light-html-plan/SKILL.md)** — Show where a plan stands as one offline HTML page, and refresh it when work moves.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

@@ -42,6 +42,9 @@ EXPECTED = {
     "light-wait-what",
     "light-wizard",
     "light-writing-for-agents",
+    "light-decide",
+    "light-redirect",
+    "light-html-plan",
 }
 
 
@@ -121,7 +124,7 @@ class CollectionContractTests(unittest.TestCase):
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")
             self.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "installation documents catalog's stable release")
             self.check((ROOT / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "stable release has a post-publication receipt")
-        self.check("36" in catalog and "34" in catalog and "admitted" in catalog, "catalog package-count boundary (36 now, historical 34 before light-travelpage)")
+        self.check("39" in catalog and "36" in catalog and "34" in catalog and "admitted" in catalog, "catalog package-count boundary (39 now, 36 in v0.2.7, historical 34 before light-travelpage)")
         self.check("v0.2.1" in catalog, "catalog mentions v0.2.1")
         self.check("v0.2.2" in catalog, "catalog mentions v0.2.2")
         self.check("v0.2.3" in catalog, "catalog mentions v0.2.3")
@@ -155,6 +158,17 @@ class CategoryLayoutTests(unittest.TestCase):
                 for package in category.glob("*/SKILL.md"):
                     self.assertIn(f"({package.parent.name}/SKILL.md)", guide)
                 self.assertIn("SKILL.md", guide)
+
+    def test_collection_guides_state_the_real_category_counts(self) -> None:
+        counts = {c.name: len(list(c.glob("*/SKILL.md"))) for c in (ROOT / "skills").iterdir() if c.is_dir() and list(c.glob("*/SKILL.md"))}
+        for guide in ("skills/README.md", "skills/README.zh-CN.md"):
+            text = (ROOT / guide).read_text(encoding="utf-8")
+            stated = {m.group(1): int(m.group(2)) for m in re.finditer(r"\]\((\w+)/README(?:\.zh-CN)?\.md\) \| (\d+) \|", text)}
+            self.assertEqual(stated, counts, guide)
+        for guide in ("README.md", "README.zh-CN.md"):
+            text = (ROOT / guide).read_text(encoding="utf-8")
+            stated = {m.group(1): int(m.group(2)) for m in re.finditer(r"\]\(skills/(\w+)/README(?:\.zh-CN)?\.md\) — (\d+)", text)}
+            self.assertEqual(stated, counts, guide)
 
 
 if __name__ == "__main__":

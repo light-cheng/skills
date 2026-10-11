@@ -53,6 +53,16 @@ If friction was detected, the Agent invokes `project-retro` to surface actionabl
 
 **Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `light-implement` may call `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`light-code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
 
+## Optional capabilities along the flow
+
+Three model-invoked capabilities fire on events during the flow. Each is optional: without it, the Skill keeps its old behaviour.
+
+| Event | Who calls | Capability | Record |
+| --- | --- | --- | --- |
+| The approved plan no longer holds (a `Plan gap:` in the implementation report, a `FAIL` with `Cause: direction`, or the user changes their mind) | `light-implement`, `project-review`, or the Agent itself via the instruction-file line `project-init` writes | [`light-redirect`](../../skills/project/light-redirect/SKILL.md) | `.scratch/<feature>/changes/NN-<slug>.md`; the user approves, then `project-spec` / `project-tickets` apply it |
+| A Skill reaches a bounded judgment (choice, yes/no, score) | `light-implement`, `light-redirect` | [`light-decide`](../../skills/thinking/light-decide/SKILL.md) | `.scratch/<feature>/decisions.md` |
+| `plan.html` exists and a stage ended, work stopped, or a verdict arrived | `project-spec`, `project-tickets`, `light-implement`, `project-review` | [`light-html-plan`](../../skills/project/light-html-plan/SKILL.md) | `.scratch/<feature>/plan.html`, old copies in `plan-history/` |
+
 ## Unknown or specialized entry
 
 - Vague idea with no project context → [`clarify`](../../skills/thinking/clarify/SKILL.md) (standalone, via `socratic`, then stop).

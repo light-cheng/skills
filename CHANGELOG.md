@@ -6,6 +6,11 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- New Skills (39 packages): `light-decide` (`thinking/`) answers bounded judgments inside a workflow through an allowed decision source or the Agent's own judgment and logs them to `.scratch/<feature>/decisions.md`; `light-redirect` (`project/`) writes a change proposal to `.scratch/<feature>/changes/` when the approved plan no longer holds and records the user's answer; `light-html-plan` (`project/`) shows where a plan stands as one offline HTML page at `.scratch/<feature>/plan.html`, with a built-in visual system in `assets/`. All three are model-invoked and optional: callers keep their old behaviour without them.
+- Plan signals: the implementation report gains `Plan gap:`; a `project-review` `FAIL` records `Cause: implementation | direction`. `light-implement` and `project-review` call `light-redirect` on a plan gap or a direction failure, and refresh `plan.html` when it exists; `project-spec` and `project-tickets` apply an approved change proposal and mark it `applied`.
+- `project-init`: the instruction pointer carries one standing line (when an approved plan no longer holds, call `light-redirect` before changing what it requires), and the tracker contract names `changes/`, `plan.html` and `plan-history/`. Rerun `project-init` to add them to an existing project.
+- `decision-map`: a change proposal waiting on the user sits under `Not yet specified`; once answered it moves to `Decisions so far`.
+- Release checks: `verify_release_installation.py` expects 39 packages; a published release's manifest is counted against its own tag.
 - Maintenance: add review weights. Everyday changes to an admitted package need only local tests and the owner's real use; full review stays for new admissions, invocation/dependency/attribution changes, executable scripts and releases. Rewrite `AGENTS.md` in short, direct sentences with every rule kept, and add a writing-style rule.
 - `humanizer`: move the pattern book (§1–§35) and false-positive checks unchanged to `references/patterns.md`; `SKILL.md` keeps the rewrite rules and process.
 - `ask-light`: move the decision principles and evidence-reading guide unchanged to `references/routing-judgment.md`.

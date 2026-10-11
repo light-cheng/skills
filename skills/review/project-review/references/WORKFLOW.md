@@ -145,7 +145,7 @@ available round, and a writable new round directory.
    baseline, Profile, findings, dispositions, repairs, and evidence. An
    unavailable required independent context is `BLOCKED`, not degraded
    acceptance.
-142	7. **Close the round.** Record the Evaluator judgment, update state and the
+7. **Close the round.** Record the Evaluator judgment, update state and the
    canonical finding registry via `review-loop` (`re-run reviewer` semantics),
    then apply the verdict and stopping rules in
    [stopping-rules.md](stopping-rules.md).
@@ -167,6 +167,10 @@ In round 1, read the newest report and use it this way:
   carries every finding the implementation stage left open into the final
   verdict.
 
+- **Plan gap:** a value other than `none` says the implementer found the
+  approved plan itself no longer holds. Record it as Producer evidence and
+  check it against the Charter like any other claim.
+
 A report with `Outcome: BLOCKED` means the item was not handed to review:
 return `BLOCKED` with that gap. No report on a claimed ticket is missing
 Producer evidence; collect it directly and record the gap.
@@ -178,7 +182,11 @@ authoritative, closeout must follow a fail-safe write sequence:
 
 1. **Write current-round `verdict.md`:** record the complete transaction
    identity (`- Charter revision:`, `- Profile:`, `- Round:`, `- Verdict:`, and
-   for software `- Reviewed implementation revision:`).
+   for software `- Reviewed implementation revision:`). A `FAIL` also records
+   `- Cause: implementation` when the artifact misses a baseline that still
+   holds, or `- Cause: direction` when the frozen baseline itself no longer
+   holds (a requirement is wrong or missing, or criteria contradict each
+   other), so no in-scope repair can meet it.
 2. **Verify durable fields:** confirm all required singleton identity fields
    match the active Charter and evaluated round.
 3. **Set `state.md` to terminal:** transition `Status:` to `PASS`, `FAIL`, or
@@ -198,7 +206,8 @@ tracker, update each of those tickets after `state.md` is terminal:
   append a gist and link to its `Decisions so far`. This opens the tickets
   that were blocked by it.
 - `FAIL` or `BLOCKED`: keep `**Status:** claimed` and append one line under
-  `## Comments` that links `verdict.md` and names the blocker. The ticket
+  `## Comments` that links `verdict.md` and names the blocker; for a `FAIL`,
+  include its `Cause:`. The ticket
   stays out of the frontier until the Producer resumes it.
 
 These are the only tracker writes this Skill makes. Leave the ticket body and

@@ -24,9 +24,22 @@ one formal SPEC that `project-tickets` can slice.
    `.scratch/<feature>/spec.md`. Confirm the publish when seams affect scoping.
 4. **Stop and recommend** explicit `$project-tickets`.
 
+**Applying a change proposal.** When the user passes an `approved` proposal
+from `.scratch/<feature>/changes/`, apply exactly its `SPEC:` line to the
+published SPEC. When its `Tickets:` line is `none` or a
+`Tickets applied` line is already under `## Comments`, set `**Status:**` to
+`applied` with a status line; otherwise add `- <date> SPEC applied — project-spec`.
+A proposal in any other status, or a change it does not list, goes back to the
+user unchanged.
+
 ```text
 project-spec → project-tickets
 ```
+
+## Optional capabilities
+
+- **`.scratch/<feature>/plan.html` exists** → after publishing, call
+  `light-html-plan` to refresh it. Missing page or capability → skip.
 
 ## References
 
