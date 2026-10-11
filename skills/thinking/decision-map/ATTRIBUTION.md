@@ -30,6 +30,12 @@ ADAPT per SPEC §15: retained the wayfinder map/ticket/blocking/frontier
 model but mapped it to Light's local-markdown tracker and Light's
 clarification family (`socratic` for grilling-type tickets).
 
+## Light changes for optional capabilities (2026-10-11)
+
+These Light changes have no upstream counterpart:
+
+- MAP-CONTRACT: a change proposal waiting on the user sits under `Not yet specified`, and moves to `Decisions so far` once answered.
+
 ## MIT notice
 
 MIT License

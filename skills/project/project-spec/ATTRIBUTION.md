@@ -34,6 +34,13 @@ ADAPT per SPEC §15: retained the `to-spec` synthesis-and-publish model but
 mapped it to Light's `project-clarify`/`decision-map` outputs, local tracker
 publishing, and concise-entry plus supporting-docs package shape.
 
+## Light changes for optional capabilities (2026-10-11)
+
+These Light changes have no upstream counterpart:
+
+- Applies a change proposal the user approved (`light-redirect`) and records a `SPEC applied` line; the proposal becomes `applied` once both SPEC and tickets are done.
+- `## Optional capabilities` refreshes `plan.html` through `light-html-plan` when it exists.
+
 ## MIT notice
 
 MIT License

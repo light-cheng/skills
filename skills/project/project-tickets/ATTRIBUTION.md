@@ -33,6 +33,13 @@ but mapped the tracker to Light's local markdown issues, added the
 `project-spec → project-tickets` handoff validation, and separated the
 concise entry from the detailed workflow in `references/`.
 
+## Light changes for optional capabilities (2026-10-11)
+
+These Light changes have no upstream counterpart:
+
+- Applies a change proposal the user approved (`light-redirect`) and records a `Tickets applied` line; the ticket contract adds `Plan gap:` to the implementation report.
+- `## Optional capabilities` refreshes `plan.html` through `light-html-plan` when it exists.
+
 ## MIT notice
 
 MIT License

@@ -39,6 +39,13 @@ the executor to Light's `.scratch` tracker, introduced host-aware routing via
 non-code artifacts, and separated the concise entry from the detailed
 workflow in `references/`.
 
+## Light changes for optional capabilities (2026-10-11)
+
+These Light changes have no upstream counterpart:
+
+- Implementation reports gain `Plan gap: none | <one sentence>`; a plan gap calls `light-redirect`.
+- `## Optional capabilities` calls `light-decide` (offer agent-config), `light-redirect` and `light-html-plan` (refresh `plan.html` when it exists).
+
 ## MIT notice
 
 MIT License
