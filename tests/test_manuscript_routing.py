@@ -41,6 +41,17 @@ def short_task() -> dict:
     }
 
 
+
+def route_judgment(answer, probabilities, applied=True, reason="none", method="typed-decision"):
+    """A light-decide normalized result for question manuscript-ops/route."""
+    return {
+        "question_id": "manuscript-ops/route", "question": "Which route fits this manuscript task?",
+        "kind": "choice", "options": list(probabilities), "answer": answer, "score": None,
+        "probabilities": probabilities, "confidence": probabilities.get(answer), "provider_confidence": None,
+        "method": method, "data": "on-device", "backend": "fixture", "calibrated": applied,
+        "applied": applied, "fallback_reason": reason, "final": answer if applied else "Structured",
+    }
+
 class ManuscriptRoutingTests(unittest.TestCase):
     def assess(self, root: Path, answers: dict) -> dict:
         answer_path = root.parent / "answers.json"
@@ -111,6 +122,14 @@ class ManuscriptRoutingTests(unittest.TestCase):
             answers["hard_triggers"] = {name: False for name in answers["hard_triggers"]}
             answers["task"]["risk_axes"] = []
             answers["task"]["deliverables"] = [{"format": "txt", "purpose": "deliverable"}]
+            answers["semantic_result"] = route_judgment("Quick", {"Quick": 0.95, "Structured": 0.04, "Project": 0.01})
+            resolved = self.assess(root, answers)
+            self.assertEqual(resolved["route"], "Quick")
+            self.assertTrue(resolved["semantic_judgment"]["applied"])
+            self.assertEqual(resolved["semantic_judgment"]["model"], "fixture")
+            self.assertFalse(resolved["needs_initialization"])
+
+            # An older snapshot's decide payload and policy still replay unchanged.
             answers["semantic_policy"] = {"min_confidence": 0.8, "calibration_reference": "fixture-policy"}
             answers["semantic_result"] = {
                 "model": "fixture", "answers": {"route": {
@@ -118,10 +137,7 @@ class ManuscriptRoutingTests(unittest.TestCase):
                     "probabilities": {"Quick": 0.95, "Structured": 0.04, "Project": 0.01},
                 }},
             }
-            resolved = self.assess(root, answers)
-            self.assertEqual(resolved["route"], "Quick")
-            self.assertTrue(resolved["semantic_judgment"]["applied"])
-            self.assertFalse(resolved["needs_initialization"])
+            self.assertTrue(self.assess(root, answers)["semantic_judgment"]["applied"])
 
     def test_new_output_directory_is_not_a_missing_project_prerequisite(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -164,14 +180,14 @@ class ManuscriptRoutingTests(unittest.TestCase):
     def test_model_failure_or_contradiction_never_waives_safety_or_adds_initialization(self):
         decisions = (
             None, {"error": "unavailable"},
-            {"answers": {"route": {"choice": "Project", "confidence": 0.99,
-                "probabilities": {"Quick": 0.005, "Structured": 0.005, "Project": 0.99}}}},
+            route_judgment("Project", {"Quick": 0.005, "Structured": 0.005, "Project": 0.99}),
+            route_judgment("Quick", {"Quick": 0.99, "Structured": 0.005, "Project": 0.005}),
+            route_judgment("Quick", {"Quick": 0.9, "Structured": 0.05, "Project": 0.05}, applied=False, reason="uncalibrated"),
+            route_judgment("Quick", {"Quick": 0.4, "Structured": 0.3, "Project": 0.3}, applied=False, reason="low-confidence"),
+            route_judgment("Structured", {"Quick": -1, "Structured": 0.99, "Project": 1.01}),
+            route_judgment("Quick", {}, method="self-judgment"),
             {"answers": {"route": {"choice": "Quick", "confidence": 0.99,
                 "probabilities": {"Quick": 0.99, "Structured": 0.005, "Project": 0.005}}}},
-            {"answers": {"route": {"choice": "Structured", "confidence": 0.4,
-                "probabilities": {"Quick": 0.3, "Structured": 0.4, "Project": 0.3}}}},
-            {"answers": {"route": {"choice": "Structured", "confidence": 0.99,
-                "probabilities": {"Quick": -1, "Structured": 0.99, "Project": 1.01}}}},
         )
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "output"

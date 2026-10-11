@@ -1,29 +1,34 @@
-# Optional structured decision MCP
+# Optional route judgment through light-decide
 
 Use this branch only when interpreting the task materially helps routing or
-review selection and the current Host exposes typed decision tools. OpenDecider
-and compatible tools are optional providers. Never bake in a local URL, model
-name, API key, SDK installation or global configuration change.
+review selection. `light-decide` owns the source choice, the project's
+`Decision data:` limit, calibration and the decision log. Never bake in a local
+URL, model name, API key, SDK installation or global configuration change.
 
 ## One bounded judgment
 
 Prepare the original request, relevant source relationships, actual deliverables
 and already-known facts. Do not send unrelated repository contents or the whole
-reference library. Ask a Choice about Quick/Structured/Project using routing.md's
-management definitions; ask narrow independent questions about source conflict
-or lifecycle needs when needed. Include an insufficient-information option.
-Batch independent questions once; repeated rescoring is not progress.
+reference library. Ask one `choice` with question id `manuscript-ops/route` and
+options `Quick`, `Structured`, `Project`, `InsufficientInfo`, using routing.md's
+management definitions. Ask narrow independent questions about source conflict
+or lifecycle needs only when needed. Repeated rescoring is not progress.
 
-A Host can consume the result directly as evidence, or pass the `decide` payload
-into the assessor as `semantic_result` (model plus `answers.route` containing
-choice, probabilities and confidence). `semantic_policy` supplies a
-`min_confidence` and non-empty `calibration_reference`. Without a measured policy,
-record the recommendation but keep the task-grounded agent route.
+Pass the normalized result to the assessor as `semantic_result`. The assessor
+uses the answer only when light-decide applied it (a calibrated typed decision
+that met its threshold). A self-judgment, an unapplied answer or a malformed
+result keeps the task-grounded route, and the observation records why.
 
 The assessor validates the distribution and keeps deterministic workflow and
 review constraints. A model cannot remove a known Project need, create a Project
 without such evidence, waive high-risk review, or grant execution/approval rights.
-Its observation reports whether it was applied and a precise fallback reason.
+
+## Older snapshots
+
+A snapshot written before light-decide stores the Host `decide` payload
+(`answers.route`) and a `semantic_policy` with `min_confidence` and
+`calibration_reference`. The validator replays it with those values. Do not
+rewrite it.
 
 ## Uncertainty and unavailable tools
 
@@ -35,8 +40,7 @@ Project initialization. A model probability is not a proof of correctness.
 ## Validation
 
 Measure on de-identified Chinese cases with expected routes/review requirements
-frozen before inference. Separate calibration cases from a held-out set. Compare
-old policy, current agent judgment and current policy with the actual MCP; record
-raw choices, probability distributions, final decisions, fallbacks and latency.
-Only promote a default preference when the comparison supports it. Simulated
-failures prove fallback behavior, not model accuracy or real service invocation.
+frozen before inference. Separate calibration cases from a held-out set, and
+record thresholds in the user's policy file through light-decide calibration.
+Simulated failures prove fallback behavior, not model accuracy or real service
+invocation.

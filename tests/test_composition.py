@@ -52,6 +52,7 @@ EDGES = (
     ("light-redirect", "light-decide", "calls-optional"),
     ("ask-light", "light-decide", "calls-optional"),
     ("agent-config", "light-decide", "calls-optional"),
+    ("manuscript-ops", "light-decide", "calls-optional"),
 )
 
 

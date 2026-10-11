@@ -17,10 +17,10 @@ existing files and the identity of the assigned writer.
 2. Use [routing.md](references/routing.md) to select Quick, Structured or Project.
    Content risk raises review requirements; unknowns remain explicit. Clarify
    only a missing decision or source that materially affects the task.
-3. When semantic interpretation is useful and a structured decision MCP is
-   exposed, follow [semantic-routing.md](references/semantic-routing.md).
-   Reuse the Host's tools; missing tools or an uncertain answer leave the current
-   agent to judge from evidence. Do not install a service or require setup.
+3. When semantic interpretation would change the route, see
+   [Optional capabilities](#optional-capabilities). Missing tools or an
+   uncertain answer leave you to judge from evidence. Do not install a service
+   or require setup.
 4. The optional read-only assessor accepts task-grounded answers:
 
    ```text
@@ -76,3 +76,12 @@ state, preserved evidence and smallest resume condition to the caller.
   conversion lineage, format capabilities, real rendering and QA boundaries.
 - [Review profile](references/review.md): manuscript axes for Project acceptance.
 - [Handoffs](references/handoffs.md): exact dependency calls and resume conditions.
+
+## Optional capabilities
+
+- **Interpreting the task would change the route** → call `light-decide` with
+  question id `manuscript-ops/route` (choice of Quick, Structured, Project,
+  InsufficientInfo), as in [semantic-routing.md](references/semantic-routing.md),
+  and pass its result to the assessor as `semantic_result`. Unavailable,
+  uncalibrated or uncertain → keep the task-grounded route. A judgment never
+  removes a Project need, waives review or grants approval.

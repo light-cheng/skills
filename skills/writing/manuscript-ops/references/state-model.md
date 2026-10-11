@@ -224,7 +224,8 @@ cover every Brief deliverable path, and be entirely `READY`.
 
 New RoutingSnapshot records include `routing_policy: needs-v2`, task-grounded
 dimensions/triggers, `required_review_axes`, `needs_initialization`, and the
-optional `semantic_result`, `semantic_policy`, `semantic_judgment`. The validator
-replays the same policy and bounded model decision. Unversioned snapshots use
+optional `semantic_result` (a light-decide result), `semantic_judgment`, and, in
+snapshots written before light-decide, `semantic_policy`. The validator replays
+the same policy and bounded model decision. Unversioned snapshots use
 `score-v1`; their Profile, receipts, hashes and approval remain unchanged.
 Do not migrate an approved Project merely to apply the new task default.

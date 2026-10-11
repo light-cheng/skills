@@ -333,17 +333,99 @@ def valid_probability(value: Any) -> bool:
     return isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value) and 0 <= value <= 1
 
 
+ROUTE_OPTIONS = {"Quick", "Structured", "Project"}
+LIGHT_DECIDE_REASONS = {"uncalibrated": "uncalibrated_policy", "low-confidence": "low_confidence"}
+
+
 def resolve_semantic_route(
+    baseline: str,
+    dimensions: dict[str, dict[str, Any]],
+    hard_triggers: dict[str, bool | None],
+    result: Any,
+    policy: Any = None,
+) -> tuple[str, dict[str, Any]]:
+    """Consume a light-decide result; never call a service or infer execution authority.
+
+    `result` is a light-decide normalized result for question `manuscript-ops/route`.
+    light-decide applies the user's calibration policy; this function keeps the
+    workflow and review constraints. A snapshot written before light-decide keeps
+    its `decide` payload and `semantic_policy`, and replays through the legacy path.
+    """
+    observation: dict[str, Any] = {"applied": False, "fallback_reason": "not_provided"}
+    if result is None:
+        return baseline, observation
+    if isinstance(result, dict) and "answers" in result:
+        return _resolve_legacy_payload(baseline, dimensions, hard_triggers, result, policy)
+    try:
+        options = result["options"]
+        choice = result["answer"]
+        probabilities = result["probabilities"]
+        confidence = result["confidence"]
+        if (
+            result["kind"] != "choice"
+            or result["method"] not in {"typed-decision", "self-judgment"}
+            or not isinstance(options, list)
+            or not ROUTE_OPTIONS.issubset(options)
+            or set(options) - ROUTE_OPTIONS - {"InsufficientInfo"}
+            or choice not in options
+        ):
+            raise ValueError("not a manuscript route judgment")
+        if result["method"] == "typed-decision" and (
+            not isinstance(probabilities, dict)
+            or set(probabilities) != set(options)
+            or not all(valid_probability(value) for value in probabilities.values())
+            or not valid_probability(confidence)
+            or abs(sum(probabilities.values()) - 1) > 0.001
+            or abs(probabilities[choice] - confidence) > 0.001
+        ):
+            raise ValueError("invalid decision distribution")
+        observation.update({"model": result.get("backend"), "choice": choice, "confidence": confidence})
+    except (TypeError, KeyError, ValueError, AttributeError):
+        observation["fallback_reason"] = "malformed_result"
+        return baseline, observation
+    if result["method"] == "self-judgment":
+        observation["fallback_reason"] = "self_judgment"
+        return baseline, observation
+    if result.get("applied") is not True:
+        reason = str(result.get("fallback_reason") or "not_applied")
+        observation["fallback_reason"] = LIGHT_DECIDE_REASONS.get(reason, reason)
+        return baseline, observation
+    return _apply_route_constraints(baseline, dimensions, hard_triggers, choice, observation)
+
+
+def _apply_route_constraints(
+    baseline: str,
+    dimensions: dict[str, dict[str, Any]],
+    hard_triggers: dict[str, bool | None],
+    choice: str,
+    observation: dict[str, Any],
+) -> tuple[str, dict[str, Any]]:
+    if choice == "InsufficientInfo":
+        observation["fallback_reason"] = "insufficient_information"
+        return baseline, observation
+    if (baseline == "Project" and choice != baseline) or (baseline != "Project" and choice == "Project"):
+        observation["fallback_reason"] = "workflow_constraint"
+        return baseline, observation
+    if choice == "Quick" and any(dimensions[name]["score"] != 0 for name in ("scale", "source_complexity", "risk", "output_complexity")):
+        observation["fallback_reason"] = "required_review"
+        return baseline, observation
+    if choice == "Quick" and hard_triggers.get("high_risk_facts") is True:
+        observation["fallback_reason"] = "required_review"
+        return baseline, observation
+    observation.update({"applied": True, "fallback_reason": None})
+    return choice, observation
+
+
+
+def _resolve_legacy_payload(
     baseline: str,
     dimensions: dict[str, dict[str, Any]],
     hard_triggers: dict[str, bool | None],
     result: Any,
     policy: Any,
 ) -> tuple[str, dict[str, Any]]:
-    """Consume a Host decision; never call a service or infer execution authority."""
+    """Replay a pre-light-decide `decide` payload kept in an older snapshot."""
     observation: dict[str, Any] = {"applied": False, "fallback_reason": "not_provided"}
-    if result is None:
-        return baseline, observation
     try:
         answer = result["answers"]["route"]
         choice = answer["choice"]
@@ -365,26 +447,14 @@ def resolve_semantic_route(
     except (TypeError, KeyError, ValueError, AttributeError):
         observation["fallback_reason"] = "malformed_result"
         return baseline, observation
-    if choice == "InsufficientInfo":
-        observation["fallback_reason"] = "insufficient_information"
-        return baseline, observation
-    if not isinstance(policy, dict) or not valid_probability(policy.get("min_confidence")) or not isinstance(policy.get("calibration_reference"), str) or not policy["calibration_reference"].strip():
-        observation["fallback_reason"] = "uncalibrated_policy"
-        return baseline, observation
-    if confidence < policy["min_confidence"]:
-        observation["fallback_reason"] = "low_confidence"
-        return baseline, observation
-    if (baseline == "Project" and choice != baseline) or (baseline != "Project" and choice == "Project"):
-        observation["fallback_reason"] = "workflow_constraint"
-        return baseline, observation
-    if choice == "Quick" and any(dimensions[name]["score"] != 0 for name in ("scale", "source_complexity", "risk", "output_complexity")):
-        observation["fallback_reason"] = "required_review"
-        return baseline, observation
-    if choice == "Quick" and hard_triggers.get("high_risk_facts") is True:
-        observation["fallback_reason"] = "required_review"
-        return baseline, observation
-    observation.update({"applied": True, "fallback_reason": None})
-    return choice, observation
+    if choice != "InsufficientInfo":
+        if not isinstance(policy, dict) or not valid_probability(policy.get("min_confidence")) or not isinstance(policy.get("calibration_reference"), str) or not policy["calibration_reference"].strip():
+            observation["fallback_reason"] = "uncalibrated_policy"
+            return baseline, observation
+        if confidence < policy["min_confidence"]:
+            observation["fallback_reason"] = "low_confidence"
+            return baseline, observation
+    return _apply_route_constraints(baseline, dimensions, hard_triggers, choice, observation)
 
 
 def routing_review_axes(route: str, dimensions: dict, hard_triggers: dict, task: Any) -> list[str]:
