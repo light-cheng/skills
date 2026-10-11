@@ -267,7 +267,10 @@ def route_with_decisions(
             )
             decisions.append(result)
             selected_skill = result["final"]
-            choice_confidence = result["confidence"] if result["answer"] in legal_result.allowed_actions else None
+            if result["applied"]:
+                choice_confidence = result["confidence"]
+            else:
+                probabilities = {baseline_skill: 1.0}
 
     nouls = getattr(response, "nouls", None) or {}
     for key in ("has_material_ambiguity", "needs_deep_reasoning_escalation"):
@@ -298,12 +301,12 @@ def route_with_decisions(
         elif "light-implement" in legal_result.allowed_actions:
             alternative_skill = "project-clarify"
 
-    unapplied = [d for d in decisions if not d["applied"]]
-    fallback_used = bool(unapplied)
+    fallen_back = [d for d in decisions if d["fallback_reason"] != "none"]
+    fallback_used = bool(fallen_back)
     fallback_reason = None
     if fallback_used:
-        reasons = sorted({d["fallback_reason"] for d in unapplied})
-        fallback_reason = "Typed answers recorded but not applied (" + ", ".join(reasons) + "); baseline kept where they were not applied."
+        reasons = sorted({d["fallback_reason"] for d in fallen_back})
+        fallback_reason = "Typed answers not used (" + ", ".join(reasons) + "); baseline kept where they were not applied."
 
     return AskLightRecommendation(
         status=legal_result.status,
@@ -315,7 +318,7 @@ def route_with_decisions(
         semantic_judgments=SemanticJudgments(
             action_choice=next((d["answer"] for d in decisions if d["question_id"] == QUESTION_IDS["next_action"]), None),
             action_confidence=choice_confidence,
-            action_probabilities=probabilities if "next_action" in questions else {},
+            action_probabilities=next((d["probabilities"] for d in decisions if d["question_id"] == QUESTION_IDS["next_action"]), {}),
             ambiguity_probability=yes_probs.get("has_material_ambiguity"),
             escalation_probability=yes_probs.get("needs_deep_reasoning_escalation"),
             questions_sent=questions_sent,

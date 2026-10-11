@@ -91,6 +91,7 @@ class AbstractTaskProfile:
     cost_sensitivity: str = "medium"  # "low", "medium", "high"
     recommended_tier: str = "standard"  # "routine", "standard", "high", "review"
     dimension_provenance: Dict[str, DimensionProvenance] = field(default_factory=dict)
+    decisions: List[Dict[str, Any]] = field(default_factory=list)  # light-decide normalized results
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)

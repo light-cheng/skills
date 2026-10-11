@@ -33,10 +33,10 @@ except ImportError:
 
 try:
     from .agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
-    from .decision_source import make_client, resolve_source
+    from .decision_source import make_client, own_result, resolve_source, typed_result
 except ImportError:
     from agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
-    from decision_source import make_client, resolve_source
+    from decision_source import make_client, own_result, resolve_source, typed_result
 
 # Capability tier ranks for direction evaluation
 TIER_RANKS: Dict[str, int] = {"routine": 1, "standard": 2, "high": 3}
@@ -45,8 +45,12 @@ REASONING_RANKS: Dict[str, int] = {"low": 1, "medium": 2, "high": 3}
 # Question ids for the user's decision policy file (light-decide). Thresholds live there.
 COMPLEXITY_QUESTION = "agent-config/task-complexity"
 REASONING_QUESTION = "agent-config/reasoning-need"
+COMPLEXITY_LEVELS = ["routine", "standard", "high", "critical"]
+REASONING_LEVELS = ["low", "medium", "high"]
+COMPLEXITY_TEXT = "How complex is the implementation work described in this task?"
+REASONING_TEXT = "What level of reasoning effort is required for this task?"
 # Structural rule, not a confidence threshold: a downgrade (the unsafe direction)
-# also needs its score at least this far inside the lower bin.
+# also needs its score at least this far below the edge of the higher bin.
 DOWNGRADE_MARGIN: float = 0.15
 
 
@@ -73,8 +77,32 @@ def _accept(direction: str, conf: float, threshold: Optional[float], margin: flo
     if conf < threshold:
         return False, "low-confidence"
     if direction == "downgrade" and margin < DOWNGRADE_MARGIN:
-        return False, "low-confidence"
+        return False, "low-confidence (score within the downgrade margin)"
     return True, "none"
+
+
+def _score_record(source: Any, question_id: str, question: str, levels: List[str], answer: Any,
+                  score: float, conf: float, baseline: str, accepted: bool) -> Dict[str, Any]:
+    """A light-decide Score result; `accepted` also carries the downgrade margin rule."""
+    probabilities = {levels[int(k)]: float(v) for k, v in answer.probabilities.items()}
+    record = typed_result(
+        source, question_id, question, "score", levels, levels[_bin_level(score, len(levels))],
+        probabilities, baseline, provider_confidence=getattr(answer, "confidence", None),
+        score=round(score, 4), confidence=conf,
+    )
+    if record["applied"] and not accepted:
+        record.update(applied=False, fallback_reason="low-confidence", final=baseline)
+    return record
+
+
+def _own_records(task: TaskCharacteristics, reason: str, ask_complexity: bool, ask_reasoning: bool) -> List[Dict[str, Any]]:
+    baseline = build_deterministic_profile(task)
+    records = []
+    if ask_complexity:
+        records.append(own_result(COMPLEXITY_QUESTION, COMPLEXITY_TEXT, "score", COMPLEXITY_LEVELS, baseline.complexity_level, reason))
+    if ask_reasoning:
+        records.append(own_result(REASONING_QUESTION, REASONING_TEXT, "score", REASONING_LEVELS, baseline.reasoning_need, reason))
+    return records
 
 
 def build_deterministic_profile(task: TaskCharacteristics) -> AbstractTaskProfile:
@@ -192,7 +220,9 @@ def extract_abstract_task_profile(
         return build_deterministic_profile(task), None, True, "Typed decisions disabled"
     source = resolve_source(project_root, TYPESAFE_AVAILABLE or client is not None, policy)
     if not source.usable:
-        return build_deterministic_profile(task), None, True, (
+        det_prof = build_deterministic_profile(task)
+        det_prof.decisions = _own_records(task, source.reason, not is_complexity_authoritative, not is_reasoning_authoritative)
+        return det_prof, None, True, (
             f"No typed decision source used ({source.reason}; Decision data '{source.limit}')"
         )
 
@@ -208,7 +238,7 @@ def extract_abstract_task_profile(
     questions: Dict[str, Score] = {}
     if not is_complexity_authoritative:
         questions["task_complexity"] = Score(
-            instructions="How complex is the implementation work described in this task?",
+            instructions=COMPLEXITY_TEXT,
             criteria=[
                 "Routine: Simple typos, formatting, minor documentation, or repetitive low-risk edits",
                 "Standard: Standard feature implementation, UI Polish, or typical application logic",
@@ -218,7 +248,7 @@ def extract_abstract_task_profile(
         )
     if not is_reasoning_authoritative:
         questions["reasoning_need"] = Score(
-            instructions="What level of reasoning effort is required for this task?",
+            instructions=REASONING_TEXT,
             criteria=[
                 "Low: Minimal reasoning, straightforward coding, or template filling",
                 "Medium: Standard programming reasoning, trade-off evaluation, and component composition",
@@ -229,141 +259,131 @@ def extract_abstract_task_profile(
     try:
         ts_client = client or make_client(TypeSafeClient, source)
         response = ts_client.system_one(state=state, questions=questions)
+    except Exception as exc:
+        failure = f"Decision source call failed ({type(exc).__name__})"
+        det_prof = build_deterministic_profile(task)
+        prov = det_prof.dimension_provenance
+        if not is_complexity_authoritative:
+            prov["complexity"].fallback_reason = failure
+            prov["tier"].fallback_reason = failure
+        if not is_reasoning_authoritative:
+            prov["reasoning"].fallback_reason = failure
+        det_prof.decisions = _own_records(task, "timeout" if isinstance(exc, TimeoutError) else "unavailable",
+                                          not is_complexity_authoritative, not is_reasoning_authoritative)
+        return det_prof, None, True, failure
 
-        comp_score_val: Optional[float] = None
-        comp_conf: Optional[float] = None
-        reas_score_val: Optional[float] = None
-        reas_conf: Optional[float] = None
+    comp_score_val: Optional[float] = None
+    comp_conf: Optional[float] = None
+    reas_score_val: Optional[float] = None
+    reas_conf: Optional[float] = None
 
-        # Check for Score answers
-        scores_dict = getattr(response, "scores", None)
-        choices_dict = getattr(response, "choices", None)
+    # Check for Score answers
+    scores_dict = getattr(response, "scores", None)
+    score_comp = score_reas = None
+    decisions: List[Dict[str, Any]] = []
 
-        if isinstance(scores_dict, dict) and scores_dict:
-            score_comp = scores_dict.get("task_complexity")
-            score_reas = scores_dict.get("reasoning_need")
+    if isinstance(scores_dict, dict) and scores_dict:
+        score_comp = scores_dict.get("task_complexity")
+        score_reas = scores_dict.get("reasoning_need")
 
-            if score_comp is not None and isinstance(getattr(score_comp, "score", None), (int, float)):
-                comp_score_val = float(score_comp.score)
-                comp_conf = _bin_confidence(score_comp, _bin_level(comp_score_val, 4), 4)
+        if score_comp is not None and isinstance(getattr(score_comp, "score", None), (int, float)):
+            comp_score_val = float(score_comp.score)
+            comp_conf = _bin_confidence(score_comp, _bin_level(comp_score_val, 4), 4)
 
-            if score_reas is not None and isinstance(getattr(score_reas, "score", None), (int, float)):
-                reas_score_val = float(score_reas.score)
-                reas_conf = _bin_confidence(score_reas, _bin_level(reas_score_val, 3), 3)
+        if score_reas is not None and isinstance(getattr(score_reas, "score", None), (int, float)):
+            reas_score_val = float(score_reas.score)
+            reas_conf = _bin_confidence(score_reas, _bin_level(reas_score_val, 3), 3)
 
 
-        prov: Dict[str, DimensionProvenance] = {}
-        fallback_dims: List[str] = []
-        reported_confs: List[float] = []
+    prov: Dict[str, DimensionProvenance] = {}
+    fallback_dims: List[str] = []
+    reported_confs: List[float] = []
 
-        # Process Complexity dimension:
-        # Discretization Mapping:
-        #   [0.0, 0.5) -> routine (rec_tier: routine)
-        #   [0.5, 1.5) -> standard (rec_tier: standard)
-        #   [1.5, 2.5) -> high (rec_tier: high)
-        #   [2.5, 3.0] -> critical (rec_tier: high)
-        comp_fallback = False
-        if is_complexity_authoritative:
-            comp_level = task.difficulty
-            rec_tier = "high" if comp_level in ("high", "critical") else ("routine" if comp_level == "routine" else "standard")
-            prov["complexity"] = DimensionProvenance(
-                dimension="complexity",
-                value=comp_level,
-                confidence=None,
-                source=task.difficulty_source,
-                fallback_used=False,
-            )
-            prov["tier"] = DimensionProvenance(
-                dimension="tier",
-                value=rec_tier,
-                confidence=None,
-                source=task.difficulty_source,
-                fallback_used=False,
-            )
-        else:
-            det_base = build_deterministic_profile(task)
-            baseline_tier = det_base.recommended_tier
-            baseline_level = det_base.complexity_level
+    # Process Complexity dimension:
+    # Discretization Mapping:
+    #   [0.0, 0.5) -> routine (rec_tier: routine)
+    #   [0.5, 1.5) -> standard (rec_tier: standard)
+    #   [1.5, 2.5) -> high (rec_tier: high)
+    #   [2.5, 3.0] -> critical (rec_tier: high)
+    comp_fallback = False
+    if is_complexity_authoritative:
+        comp_level = task.difficulty
+        rec_tier = "high" if comp_level in ("high", "critical") else ("routine" if comp_level == "routine" else "standard")
+        prov["complexity"] = DimensionProvenance(
+            dimension="complexity",
+            value=comp_level,
+            confidence=None,
+            source=task.difficulty_source,
+            fallback_used=False,
+        )
+        prov["tier"] = DimensionProvenance(
+            dimension="tier",
+            value=rec_tier,
+            confidence=None,
+            source=task.difficulty_source,
+            fallback_used=False,
+        )
+    else:
+        det_base = build_deterministic_profile(task)
+        baseline_tier = det_base.recommended_tier
+        baseline_level = det_base.complexity_level
 
-            if comp_score_val is not None and comp_conf is not None:
-                # 1. Discretization mapping
-                if comp_score_val < 0.5:
-                    cand_level = "routine"
-                    cand_tier = "routine"
-                    boundary_dist = 0.5 - comp_score_val
-                elif comp_score_val < 1.5:
-                    cand_level = "standard"
-                    cand_tier = "standard"
-                    boundary_dist = min(comp_score_val - 0.5, 1.5 - comp_score_val)
-                elif comp_score_val < 2.5:
-                    cand_level = "high"
-                    cand_tier = "high"
-                    boundary_dist = min(comp_score_val - 1.5, 2.5 - comp_score_val)
-                else:
-                    cand_level = "critical"
-                    cand_tier = "high"
-                    boundary_dist = comp_score_val - 2.5
+        if comp_score_val is not None and comp_conf is not None:
+            # 1. Discretization mapping
+            if comp_score_val < 0.5:
+                cand_level = "routine"
+                cand_tier = "routine"
+            elif comp_score_val < 1.5:
+                cand_level = "standard"
+                cand_tier = "standard"
+            elif comp_score_val < 2.5:
+                cand_level = "high"
+                cand_tier = "high"
+            else:
+                cand_level = "critical"
+                cand_tier = "high"
 
-                # 2. Evaluate direction relative to baseline: UPGRADE, HOLD, or DOWNGRADE
-                cand_rank = TIER_RANKS[cand_tier]
-                base_rank = TIER_RANKS[baseline_tier]
+            # 2. Evaluate direction relative to baseline: UPGRADE, HOLD, or DOWNGRADE
+            cand_rank = TIER_RANKS[cand_tier]
+            base_rank = TIER_RANKS[baseline_tier]
 
-                direction = "upgrade" if cand_rank > base_rank else ("hold" if cand_rank == base_rank else "downgrade")
-                accepted, why = _accept(direction, comp_conf, source.min_confidence(COMPLEXITY_QUESTION), boundary_dist)
-                rejection_reason = f"{direction.capitalize()} from {baseline_tier} to {cand_tier} not applied: {why} (confidence {comp_conf:.2f})"
+            direction = "upgrade" if cand_rank > base_rank else ("hold" if cand_rank == base_rank else "downgrade")
+            margin = (_bin_level(comp_score_val, 4) + 0.5) - comp_score_val
+            accepted, why = _accept(direction, comp_conf, source.min_confidence(COMPLEXITY_QUESTION), margin)
+            decisions.append(_score_record(source, COMPLEXITY_QUESTION, COMPLEXITY_TEXT, COMPLEXITY_LEVELS,
+                                           score_comp, comp_score_val, comp_conf, baseline_level, accepted))
+            rejection_reason = f"{direction.capitalize()} from {baseline_tier} to {cand_tier} not applied: {why} (confidence {comp_conf:.2f})"
 
-                if accepted:
-                    reported_confs.append(comp_conf)
-                    comp_level = cand_level
-                    rec_tier = cand_tier
-                    prov["complexity"] = DimensionProvenance(
-                        dimension="complexity",
-                        value=comp_level,
-                        confidence=comp_conf,
-                        source="typed-decision",
-                        fallback_used=False,
-                    )
-                    prov["tier"] = DimensionProvenance(
-                        dimension="tier",
-                        value=rec_tier,
-                        confidence=comp_conf,
-                        source="typed-decision",
-                        fallback_used=False,
-                    )
-                else:
-                    comp_fallback = True
-                    fallback_dims.append("complexity")
-                    comp_level = baseline_level
-                    rec_tier = baseline_tier
-                    prov["complexity"] = DimensionProvenance(
-                        dimension="complexity",
-                        value=comp_level,
-                        confidence=comp_conf,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=rejection_reason,
-                    )
-                    prov["tier"] = DimensionProvenance(
-                        dimension="tier",
-                        value=rec_tier,
-                        confidence=comp_conf,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=rejection_reason,
-                    )
+            if accepted:
+                reported_confs.append(comp_conf)
+                comp_level = cand_level
+                rec_tier = cand_tier
+                prov["complexity"] = DimensionProvenance(
+                    dimension="complexity",
+                    value=comp_level,
+                    confidence=comp_conf,
+                    source="typed-decision",
+                    fallback_used=False,
+                )
+                prov["tier"] = DimensionProvenance(
+                    dimension="tier",
+                    value=rec_tier,
+                    confidence=comp_conf,
+                    source="typed-decision",
+                    fallback_used=False,
+                )
             else:
                 comp_fallback = True
                 fallback_dims.append("complexity")
                 comp_level = baseline_level
                 rec_tier = baseline_tier
-                reason_msg = "malformed: typed score or per-level probabilities missing"
                 prov["complexity"] = DimensionProvenance(
                     dimension="complexity",
                     value=comp_level,
                     confidence=comp_conf,
                     source="deterministic-fallback",
                     fallback_used=True,
-                    fallback_reason=reason_msg,
+                    fallback_reason=rejection_reason,
                 )
                 prov["tier"] = DimensionProvenance(
                     dimension="tier",
@@ -371,112 +391,128 @@ def extract_abstract_task_profile(
                     confidence=comp_conf,
                     source="deterministic-fallback",
                     fallback_used=True,
-                    fallback_reason=reason_msg,
+                    fallback_reason=rejection_reason,
                 )
-
-        # Process Reasoning dimension:
-        # Discretization Mapping:
-        #   [0.0, 0.5) -> low
-        #   [0.5, 1.5) -> medium
-        #   [1.5, 2.0] -> high
-        reas_fallback = False
-        if is_reasoning_authoritative:
-            if task.reasoning_policy in ("highest-supported", "high"):
-                reasoning_need = "high"
-            elif task.reasoning_policy in ("minimal", "low"):
-                reasoning_need = "low"
-            else:
-                reasoning_need = "medium"
-            prov["reasoning"] = DimensionProvenance(
-                dimension="reasoning",
-                value=reasoning_need,
-                confidence=None,
-                source="explicit-policy",
-                fallback_used=False,
-            )
         else:
-            det_base_reas = build_deterministic_profile(task)
-            baseline_reas = det_base_reas.reasoning_need
+            comp_fallback = True
+            fallback_dims.append("complexity")
+            comp_level = baseline_level
+            rec_tier = baseline_tier
+            reason_msg = "malformed: typed score or per-level probabilities missing"
+            decisions.append(own_result(COMPLEXITY_QUESTION, COMPLEXITY_TEXT, "score", COMPLEXITY_LEVELS, comp_level, "malformed"))
+            prov["complexity"] = DimensionProvenance(
+                dimension="complexity",
+                value=comp_level,
+                confidence=comp_conf,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=reason_msg,
+            )
+            prov["tier"] = DimensionProvenance(
+                dimension="tier",
+                value=rec_tier,
+                confidence=comp_conf,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=reason_msg,
+            )
 
-            if reas_conf is not None and reas_score_val is not None:
-                if reas_score_val < 0.5:
-                    cand_reas = "low"
-                    boundary_dist_reas = 0.5 - reas_score_val
-                elif reas_score_val < 1.5:
-                    cand_reas = "medium"
-                    boundary_dist_reas = min(reas_score_val - 0.5, 1.5 - reas_score_val)
-                else:
-                    cand_reas = "high"
-                    boundary_dist_reas = reas_score_val - 1.5
+    # Process Reasoning dimension:
+    # Discretization Mapping:
+    #   [0.0, 0.5) -> low
+    #   [0.5, 1.5) -> medium
+    #   [1.5, 2.0] -> high
+    reas_fallback = False
+    if is_reasoning_authoritative:
+        if task.reasoning_policy in ("highest-supported", "high"):
+            reasoning_need = "high"
+        elif task.reasoning_policy in ("minimal", "low"):
+            reasoning_need = "low"
+        else:
+            reasoning_need = "medium"
+        prov["reasoning"] = DimensionProvenance(
+            dimension="reasoning",
+            value=reasoning_need,
+            confidence=None,
+            source="explicit-policy",
+            fallback_used=False,
+        )
+    else:
+        det_base_reas = build_deterministic_profile(task)
+        baseline_reas = det_base_reas.reasoning_need
 
-                cand_rank_reas = REASONING_RANKS[cand_reas]
-                base_rank_reas = REASONING_RANKS[baseline_reas]
+        if reas_conf is not None and reas_score_val is not None:
+            if reas_score_val < 0.5:
+                cand_reas = "low"
+            elif reas_score_val < 1.5:
+                cand_reas = "medium"
+            else:
+                cand_reas = "high"
 
-                direction_reas = "upgrade" if cand_rank_reas > base_rank_reas else ("hold" if cand_rank_reas == base_rank_reas else "downgrade")
-                accepted_reas, why_reas = _accept(direction_reas, reas_conf, source.min_confidence(REASONING_QUESTION), boundary_dist_reas)
-                rejection_reason_reas = f"{direction_reas.capitalize()} reasoning from {baseline_reas} to {cand_reas} not applied: {why_reas} (confidence {reas_conf:.2f})"
+            cand_rank_reas = REASONING_RANKS[cand_reas]
+            base_rank_reas = REASONING_RANKS[baseline_reas]
 
-                if accepted_reas:
-                    reported_confs.append(reas_conf)
-                    reasoning_need = cand_reas
-                    prov["reasoning"] = DimensionProvenance(
-                        dimension="reasoning",
-                        value=reasoning_need,
-                        confidence=reas_conf,
-                        source="typed-decision",
-                        fallback_used=False,
-                    )
-                else:
-                    reas_fallback = True
-                    fallback_dims.append("reasoning")
-                    reasoning_need = baseline_reas
-                    prov["reasoning"] = DimensionProvenance(
-                        dimension="reasoning",
-                        value=reasoning_need,
-                        confidence=reas_conf,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=rejection_reason_reas,
-                    )
+            direction_reas = "upgrade" if cand_rank_reas > base_rank_reas else ("hold" if cand_rank_reas == base_rank_reas else "downgrade")
+            margin_reas = (_bin_level(reas_score_val, 3) + 0.5) - reas_score_val
+            accepted_reas, why_reas = _accept(direction_reas, reas_conf, source.min_confidence(REASONING_QUESTION), margin_reas)
+            decisions.append(_score_record(source, REASONING_QUESTION, REASONING_TEXT, REASONING_LEVELS,
+                                           score_reas, reas_score_val, reas_conf, baseline_reas, accepted_reas))
+            rejection_reason_reas = f"{direction_reas.capitalize()} reasoning from {baseline_reas} to {cand_reas} not applied: {why_reas} (confidence {reas_conf:.2f})"
+
+            if accepted_reas:
+                reported_confs.append(reas_conf)
+                reasoning_need = cand_reas
+                prov["reasoning"] = DimensionProvenance(
+                    dimension="reasoning",
+                    value=reasoning_need,
+                    confidence=reas_conf,
+                    source="typed-decision",
+                    fallback_used=False,
+                )
             else:
                 reas_fallback = True
                 fallback_dims.append("reasoning")
-                det_base = build_deterministic_profile(task)
-                reasoning_need = det_base.reasoning_need
-                reason_msg = "malformed: typed score or per-level probabilities missing"
+                reasoning_need = baseline_reas
                 prov["reasoning"] = DimensionProvenance(
                     dimension="reasoning",
                     value=reasoning_need,
                     confidence=reas_conf,
                     source="deterministic-fallback",
                     fallback_used=True,
-                    fallback_reason=reason_msg,
+                    fallback_reason=rejection_reason_reas,
                 )
+        else:
+            reas_fallback = True
+            fallback_dims.append("reasoning")
+            det_base = build_deterministic_profile(task)
+            reasoning_need = det_base.reasoning_need
+            reason_msg = "malformed: typed score or per-level probabilities missing"
+            decisions.append(own_result(REASONING_QUESTION, REASONING_TEXT, "score", REASONING_LEVELS, reasoning_need, "malformed"))
+            prov["reasoning"] = DimensionProvenance(
+                dimension="reasoning",
+                value=reasoning_need,
+                confidence=reas_conf,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=reason_msg,
+            )
 
-        any_fallback = comp_fallback or reas_fallback
-        fallback_reason = f"Per-dimension fallback on: {', '.join(fallback_dims)}" if any_fallback else None
-        overall_conf = min(reported_confs) if reported_confs else None
+    any_fallback = comp_fallback or reas_fallback
+    fallback_reason = f"Per-dimension fallback on: {', '.join(fallback_dims)}" if any_fallback else None
+    overall_conf = min(reported_confs) if reported_confs else None
 
-        profile = AbstractTaskProfile(
-            complexity_level=comp_level,
-            complexity_score=comp_score_val,
-            complexity_confidence=comp_conf,
-            reasoning_need=reasoning_need,
-            reasoning_score=reas_score_val,
-            reasoning_confidence=reas_conf,
-            latency_sensitivity="high" if task.latency_sensitive else "medium",
-            cost_sensitivity="high" if task.cost_sensitive else "medium",
-            recommended_tier=rec_tier,
-            dimension_provenance=prov,
-        )
-        return profile, overall_conf, any_fallback, fallback_reason
+    profile = AbstractTaskProfile(
+        complexity_level=comp_level,
+        complexity_score=comp_score_val,
+        complexity_confidence=comp_conf,
+        reasoning_need=reasoning_need,
+        reasoning_score=reas_score_val,
+        reasoning_confidence=reas_conf,
+        latency_sensitivity="high" if task.latency_sensitive else "medium",
+        cost_sensitivity="high" if task.cost_sensitive else "medium",
+        recommended_tier=rec_tier,
+        dimension_provenance=prov,
+        decisions=decisions,
+    )
+    return profile, overall_conf, any_fallback, fallback_reason
 
-    except Exception as exc:
-        det_prof = build_deterministic_profile(task)
-        prov = det_prof.dimension_provenance
-        if not is_complexity_authoritative:
-            prov["complexity"].fallback_reason = f"Decision source call failed ({type(exc).__name__})"
-            prov["tier"].fallback_reason = f"Decision source call failed ({type(exc).__name__})"
-        if not is_reasoning_authoritative:
-            prov["reasoning"].fallback_reason = f"Decision source call failed ({type(exc).__name__})"
-        return det_prof, None, True, f"Decision source call failed ({type(exc).__name__})"

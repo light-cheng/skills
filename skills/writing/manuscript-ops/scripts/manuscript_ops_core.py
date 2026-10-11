@@ -356,6 +356,9 @@ def resolve_semantic_route(
         return baseline, observation
     if isinstance(result, dict) and "answers" in result:
         return _resolve_legacy_payload(baseline, dimensions, hard_triggers, result, policy)
+    if isinstance(result, dict) and result.get("method") == "self-judgment":
+        observation["fallback_reason"] = "self_judgment"
+        return baseline, observation
     try:
         options = result["options"]
         choice = result["answer"]
@@ -363,14 +366,14 @@ def resolve_semantic_route(
         confidence = result["confidence"]
         if (
             result["kind"] != "choice"
-            or result["method"] not in {"typed-decision", "self-judgment"}
+            or result["method"] != "typed-decision"
             or not isinstance(options, list)
             or not ROUTE_OPTIONS.issubset(options)
             or set(options) - ROUTE_OPTIONS - {"InsufficientInfo"}
             or choice not in options
         ):
             raise ValueError("not a manuscript route judgment")
-        if result["method"] == "typed-decision" and (
+        if (
             not isinstance(probabilities, dict)
             or set(probabilities) != set(options)
             or not all(valid_probability(value) for value in probabilities.values())
@@ -383,10 +386,7 @@ def resolve_semantic_route(
     except (TypeError, KeyError, ValueError, AttributeError):
         observation["fallback_reason"] = "malformed_result"
         return baseline, observation
-    if result["method"] == "self-judgment":
-        observation["fallback_reason"] = "self_judgment"
-        return baseline, observation
-    if result.get("applied") is not True:
+    if result.get("applied") is not True or result.get("calibrated") is not True or result.get("fallback_reason") != "none":
         reason = str(result.get("fallback_reason") or "not_applied")
         observation["fallback_reason"] = LIGHT_DECIDE_REASONS.get(reason, reason)
         return baseline, observation

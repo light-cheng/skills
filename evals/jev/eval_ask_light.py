@@ -497,7 +497,7 @@ def evaluate_scenario(scenario: AskLightScenario, client: Optional[Any] = None) 
             if scenario.expected_ambiguity is not None:
                 observed_ambig = (
                     rec.semantic_judgments.ambiguity_probability is not None
-                    and rec.semantic_judgments.ambiguity_probability >= 0.65
+                    and rec.semantic_judgments.ambiguity_probability >= 0.5
                 )
                 ambiguity_matched = (observed_ambig == scenario.expected_ambiguity)
                 if not ambiguity_matched:
@@ -579,7 +579,7 @@ def run_ask_light_eval(client: Optional[Any] = None) -> Dict[str, Any]:
             continue
 
         if sc.expected_ambiguity is not None and sj.get("ambiguity_probability") is not None:
-            obs = sj["ambiguity_probability"] >= 0.65
+            obs = sj["ambiguity_probability"] >= 0.5
             exp = sc.expected_ambiguity
             confusion_matrices["ambiguity"]["total"] += 1
             if exp and obs: confusion_matrices["ambiguity"]["tp"] += 1

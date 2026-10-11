@@ -110,6 +110,11 @@ class CompositionGraphTests(unittest.TestCase):
         edges = {(source, target) for source, target, relation in EDGES if relation == "calls-optional"}
         self.assertEqual(declared, edges)
 
+    def test_script_decision_source_copies_stay_identical(self) -> None:
+        # ask-light and agent-config each ship the light-decide script path; the copies must not drift.
+        copies = [package_dir(ROOT, name) / "scripts" / "decision_source.py" for name in ("ask-light", "agent-config")]
+        self.assertEqual(copies[0].read_bytes(), copies[1].read_bytes())
+
     def test_invocation_check_rejects_a_user_invoked_target(self) -> None:
         # Negative control: the check above must be able to fail.
         self.assertFalse(is_model_invoked("project-tickets"))

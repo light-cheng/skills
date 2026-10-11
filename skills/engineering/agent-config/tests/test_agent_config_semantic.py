@@ -753,5 +753,39 @@ class AgentConfigSemanticTest(unittest.TestCase):
         client.system_one.assert_not_called()
 
 
+    def test_profiler_returns_light_decide_records_and_measures_downgrade_from_the_higher_bin(self) -> None:
+        keys = {"question_id", "question", "kind", "options", "answer", "score", "probabilities", "confidence",
+                "provider_confidence", "method", "data", "backend", "calibrated", "applied", "fallback_reason", "final"}
+        task = TaskCharacteristics(title="t", description="d", difficulty="high", difficulty_source="heuristic")
+        client = MagicMock()
+        client.system_one.return_value = MagicMock(scores={
+            "task_complexity": score_ans(0.6, 0.6, 4), "reasoning_need": score_ans(1.0, 0.4, 3)})
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source(), patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+            prof, _, _, _ = extract_abstract_task_profile(task, client=client)
+        # 0.6 sits 0.9 below the high bin: far enough for a downgrade from high to standard.
+        self.assertEqual(prof.recommended_tier, "standard")
+        records = {d["question_id"]: d for d in prof.decisions}
+        self.assertEqual(set(records), {"agent-config/task-complexity", "agent-config/reasoning-need"})
+        for record in records.values():
+            self.assertEqual(set(record), keys)
+            self.assertEqual(record["kind"], "score")
+        comp = records["agent-config/task-complexity"]
+        self.assertEqual((comp["answer"], comp["applied"], comp["final"], comp["data"]), ("standard", True, "standard", "on-device"))
+        reas = records["agent-config/reasoning-need"]
+        self.assertEqual((reas["applied"], reas["fallback_reason"]), (False, "low-confidence"))
+
+    def test_source_failure_and_unusable_source_still_return_records(self) -> None:
+        task = TaskCharacteristics(title="t", description="d", difficulty="routine", difficulty_source="unknown")
+        client = MagicMock()
+        client.system_one.side_effect = TimeoutError("slow")
+        with patch.dict(os.environ, LOCAL_ENV), calibrated_source(), patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+            prof, _, fallback, _ = extract_abstract_task_profile(task, client=client)
+        self.assertTrue(fallback)
+        self.assertEqual({d["fallback_reason"] for d in prof.decisions}, {"timeout"})
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": ""}), calibrated_source(), patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+            prof, _, _, _ = extract_abstract_task_profile(task, client=MagicMock())
+        self.assertEqual({d["fallback_reason"] for d in prof.decisions}, {"unavailable"})
+
+
 if __name__ == "__main__":
     unittest.main()

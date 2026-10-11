@@ -186,6 +186,8 @@ class ManuscriptRoutingTests(unittest.TestCase):
             route_judgment("Quick", {"Quick": 0.4, "Structured": 0.3, "Project": 0.3}, applied=False, reason="low-confidence"),
             route_judgment("Structured", {"Quick": -1, "Structured": 0.99, "Project": 1.01}),
             route_judgment("Quick", {}, method="self-judgment"),
+            route_judgment("Quick", {"Quick": 0.99, "Structured": 0.005, "Project": 0.005}) | {"calibrated": False},
+            {**route_judgment("Quick", {"Quick": 0.99, "Structured": 0.005, "Project": 0.005}), "options": ["Quick"], "method": "self-judgment"},
             {"answers": {"route": {"choice": "Quick", "confidence": 0.99,
                 "probabilities": {"Quick": 0.99, "Structured": 0.005, "Project": 0.005}}}},
         )

@@ -23,6 +23,8 @@ PROJECT_ROOT = EVAL_DIR.parent.parent
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 
+import atexit
+import shutil
 import tempfile
 
 import eval_ask_light
@@ -68,7 +70,6 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None, decisi
             # Check project root .env or lab .env
             env_candidates = [
                 PROJECT_ROOT / ".env",
-                PROJECT_ROOT.parent / "skills-jev-lab" / ".env",
             ]
             for env_file in env_candidates:
                 if env_file.is_file():
@@ -79,7 +80,8 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None, decisi
                     if api_key:
                         break
 
-        if not api_key and os.environ.get("TYPESAFE_BASE_URL"):
+        base_host = urlparse(os.environ.get("TYPESAFE_BASE_URL", "")).hostname
+        if not api_key and base_host in ("127.0.0.1", "localhost", "::1"):
             api_key = "local-no-key"  # a local decision server needs no key
 
         if not api_key:
@@ -97,6 +99,7 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None, decisi
             sys.exit(1)
 
     root, policy = evaluation_context(decision_data)
+    atexit.register(shutil.rmtree, root, True)
     eval_ask_light.EVAL_CONTEXT.update(policy=policy, project_root=root)
     eval_agent_config.EVAL_CONTEXT.update(decision_policy=policy, project_root=root)
 
@@ -186,8 +189,8 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None, decisi
             "",
             "### 1.1 Confusion Matrices for Evaluated Semantic Dimensions",
             "",
-            f"- **Material Ambiguity (p >= 0.65):** TP={cm.get('ambiguity', {}).get('tp', 0)}, FP={cm.get('ambiguity', {}).get('fp', 0)}, TN={cm.get('ambiguity', {}).get('tn', 0)}, FN={cm.get('ambiguity', {}).get('fn', 0)} (Total evaluated: {cm.get('ambiguity', {}).get('total', 0)})",
-            f"- **Reasoning Escalation (p >= 0.60):** TP={cm.get('escalation', {}).get('tp', 0)}, FP={cm.get('escalation', {}).get('fp', 0)}, TN={cm.get('escalation', {}).get('tn', 0)}, FN={cm.get('escalation', {}).get('fn', 0)} (Total evaluated: {cm.get('escalation', {}).get('total', 0)})",
+            f"- **Material Ambiguity (p >= 0.5):** TP={cm.get('ambiguity', {}).get('tp', 0)}, FP={cm.get('ambiguity', {}).get('fp', 0)}, TN={cm.get('ambiguity', {}).get('tn', 0)}, FN={cm.get('ambiguity', {}).get('fn', 0)} (Total evaluated: {cm.get('ambiguity', {}).get('total', 0)})",
+            f"- **Reasoning Escalation (p >= 0.5):** TP={cm.get('escalation', {}).get('tp', 0)}, FP={cm.get('escalation', {}).get('fp', 0)}, TN={cm.get('escalation', {}).get('tn', 0)}, FN={cm.get('escalation', {}).get('fn', 0)} (Total evaluated: {cm.get('escalation', {}).get('total', 0)})",
             "- **Choice Routing:** N/A — no multi-action candidates in current canonical state machine (singleton queries skip Choice).",
         ])
 

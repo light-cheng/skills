@@ -25,23 +25,44 @@ PROJECT_FILE = Path("docs/agents/light-project.md")
 HOSTED_ENDPOINT = "typesafe-hosted"
 LOCAL_PLACEHOLDER_KEY = "local-no-key"
 
-_DECISION_LINE = re.compile(r"^\s*(?:[-*]\s*)?Decision data:\s*`?([A-Za-z-]+)`?\s*$", re.MULTILINE)
+_DECISION_PHRASE = re.compile(r"decision data", re.IGNORECASE)
+_FENCE = re.compile(r"^\s*(```|~~~)")
+
+
+def find_project_file(start: Optional[Path]) -> Optional[Path]:
+    """The nearest docs/agents/light-project.md from `start` (or cwd) upward, stopping at a git root."""
+    here = (start or Path.cwd()).resolve()
+    for folder in (here, *here.parents):
+        candidate = folder / PROJECT_FILE
+        if candidate.is_file():
+            return candidate
+        if (folder / ".git").exists():
+            return None
+    return None
 
 
 def read_decision_limit(project_root: Optional[Path]) -> tuple[str, bool]:
-    """Return (limit, recognized). No line means on-device; an unknown value means off."""
-    if project_root is None:
+    """Return (limit, recognized). No line means on-device; any other value means off.
+
+    The line may carry list markers, emphasis, code ticks or table bars. Lines
+    inside code fences are examples, not the setting.
+    """
+    path = find_project_file(project_root)
+    if path is None:
         return DEFAULT_LIMIT, True
-    path = project_root / PROJECT_FILE
-    if not path.is_file():
-        return DEFAULT_LIMIT, True
-    match = _DECISION_LINE.search(path.read_text(encoding="utf-8"))
-    if not match:
-        return DEFAULT_LIMIT, True
-    value = match.group(1).strip().lower()
-    if value in LIMITS:
-        return value, True
-    return "off", False
+    in_fence = False
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if _FENCE.match(line):
+            in_fence = not in_fence
+            continue
+        match = _DECISION_PHRASE.search(line)
+        if in_fence or not match:
+            continue
+        value = re.sub(r"[*`|:]", " ", line[match.end():]).strip().lower()
+        if value in LIMITS:
+            return value, True
+        return "off", False
+    return DEFAULT_LIMIT, True
 
 
 def within_limit(destination: str, limit: str) -> bool:
@@ -61,10 +82,12 @@ def load_policy(path: Optional[Path] = None) -> Dict[str, Any]:
 
 
 def _endpoint_name(base_url: Optional[str]) -> str:
+    """`host:port` of the endpoint, never its credentials or path."""
     if not base_url:
         return HOSTED_ENDPOINT
     parsed = urlparse(base_url)
-    return parsed.netloc or base_url
+    host = parsed.hostname or "unknown-endpoint"
+    return f"{host}:{parsed.port}" if parsed.port else host
 
 
 def _host_destination(base_url: Optional[str]) -> str:
@@ -89,10 +112,14 @@ def _farther(a: str, b: str) -> str:
 
 
 def _find_backend(policy: Dict[str, Any], reported: str) -> tuple[Optional[str], Dict[str, Any]]:
-    for key, entry in (policy.get("backends") or {}).items():
+    backends = policy.get("backends")
+    if not isinstance(backends, dict):
+        return None, {}
+    for key, entry in backends.items():
         if not isinstance(entry, dict):
             continue
-        if reported == key or reported in (entry.get("names") or []):
+        names = entry.get("names")
+        if reported == key or (isinstance(names, list) and reported in names):
             return key, entry
     return None, {}
 
@@ -127,9 +154,14 @@ class DecisionSource:
 
     def min_confidence(self, question_id: str) -> Optional[float]:
         """Threshold for a calibrated question, or None when it is uncalibrated."""
-        entry = (self.policy_entry.get("questions") or {}).get(question_id) or {}
+        questions = self.policy_entry.get("questions")
+        entry = questions.get(question_id) if isinstance(questions, dict) else None
+        if not isinstance(entry, dict):
+            return None
         threshold = entry.get("min_confidence")
-        if isinstance(threshold, (int, float)) and str(entry.get("calibration") or "").strip():
+        calibration = entry.get("calibration")
+        if (isinstance(threshold, (int, float)) and not isinstance(threshold, bool) and 0 <= threshold <= 1
+                and isinstance(calibration, str) and calibration.strip()):
             return float(threshold)
         return None
 
@@ -148,6 +180,9 @@ def resolve_source(
     declared = entry.get("data")
     if declared in DESTINATIONS:
         data = _farther(data, declared)
+    # A private address counts as the user's own network only when the policy says so.
+    if data == "private-network" and declared != "private-network":
+        data = "third-party"
     api_key = _read_env_key(project_root)
     if api_key is None and data == "on-device":
         api_key = LOCAL_PLACEHOLDER_KEY
@@ -173,8 +208,13 @@ def resolve_source(
 
 
 def make_client(client_cls: Any, source: DecisionSource) -> Any:
-    # The client reads TYPESAFE_BASE_URL itself; swapping backends changes only that variable.
-    return client_cls(api_key=source.api_key)
+    """One attempt per judgment: a timeout or error falls back, never retries.
+
+    The client reads TYPESAFE_BASE_URL itself; swapping backends changes only that variable.
+    """
+    from typesafe_sdk import RetryPolicy
+
+    return client_cls(api_key=source.api_key, retry=RetryPolicy(max_retries=0))
 
 
 def yes_no_probabilities(p_yes: float) -> Dict[str, float]:

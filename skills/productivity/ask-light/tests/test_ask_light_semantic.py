@@ -440,15 +440,87 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertEqual(rec.primary_skill, "light-implement")
         self.assertEqual(rec.decisions[0]["fallback_reason"], "timeout")
 
+    def _project(self, tmp, text):
+        root = Path(tmp)
+        (root / "docs/agents").mkdir(parents=True)
+        (root / "docs/agents/light-project.md").write_text(text, encoding="utf-8")
+        return root
+
+    def test_decision_data_variants_never_lift_off(self) -> None:
+        import tempfile
+        cases = {
+            "Decision data: off.\n": ("off", False),
+            "Decision data: `off` (no model)\n": ("off", False),
+            "- **Decision data:** off\n": ("off", True),
+            "decision data: OFF\n": ("off", True),
+            "| Decision data | off |\n": ("off", True),
+            "Decision data: third party\n": ("off", False),
+            "- Decision data: private-network\n": ("private-network", True),
+            "```\nDecision data: third-party\n```\n": ("on-device", True),
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as tmp:
+                self.assertEqual(read_decision_limit(self._project(tmp, text)), expected)
+
+    def test_limit_is_found_from_a_subdirectory_or_cwd(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp, "Decision data: off\n")
+            (root / ".git").mkdir()
+            sub = root / "src" / "pkg"
+            sub.mkdir(parents=True)
+            self.assertEqual(read_decision_limit(sub), ("off", True))
+            cwd = os.getcwd()
+            try:
+                os.chdir(sub)
+                self.assertEqual(read_decision_limit(None), ("off", True))
+            finally:
+                os.chdir(cwd)
+
+    def test_backend_name_drops_credentials_and_bad_policy_is_uncalibrated(self) -> None:
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://user:token@127.0.0.1:8001/v1"}, clear=True):
+            self.assertEqual(resolve_source(None, True, {}).backend, "127.0.0.1:8001")
+        bad_policies = (
+            {"backends": [{"names": ["127.0.0.1:8001"]}]},
+            {"backends": {"x": {"names": "127.0.0.1:8001x", "questions": {"ask-light/next-action": {"min_confidence": 0.1, "calibration": "c"}}}}},
+            {"backends": {"x": {"names": ["127.0.0.1:8001"], "questions": ["ask-light/next-action"]}}},
+            {"backends": {"x": {"names": ["127.0.0.1:8001"], "questions": {"ask-light/next-action": {"min_confidence": True, "calibration": "c"}}}}},
+        )
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
+            for policy in bad_policies:
+                with self.subTest(policy=policy):
+                    self.assertIsNone(resolve_source(None, True, policy).min_confidence("ask-light/next-action"))
+
+    def test_malformed_answers_mark_fallback_and_unapplied_choice_keeps_baseline_numbers(self) -> None:
+        legal = LegalActionsResult(
+            status="RECOMMEND", allowed_actions=["light-implement", "project-clarify"], fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Implement", "project-clarify": "Clarify"},
+        )
+        empty = MagicMock()
+        empty.system_one.return_value = MagicMock(choices={}, nouls={}, scores={})
+        with patch.dict(os.environ, LOCAL_ENV, clear=True), patch("semantic_router.TYPESAFE_AVAILABLE", True):
+            rec = route_calibrated(legal, "What next?", client=empty)
+            self.assertTrue(rec.fallback_used)
+            self.assertIn("malformed", rec.fallback_reason)
+            rec = route_with_decisions(legal, "What next?", client=choice_client("project-clarify", 0.9), policy={})
+        self.assertEqual(rec.primary_skill, "light-implement")
+        self.assertIsNone(rec.confidence)
+        self.assertEqual(rec.probabilities, {"light-implement": 1.0})
+        self.assertEqual(rec.semantic_judgments.action_probabilities["project-clarify"], 0.9)
+
     def test_destination_and_limit_rules(self) -> None:
         self.assertEqual(read_decision_limit(None), ("on-device", True))
         self.assertTrue(within_limit("on-device", "private-network"))
         self.assertFalse(within_limit("private-network", "on-device"))
         self.assertFalse(within_limit("on-device", "off"))
-        for url, dest in (("http://localhost:8001", "on-device"), ("http://192.168.1.20:8001", "private-network"),
+        # A private address is the user's own network only when the policy names it so.
+        for url, dest in (("http://localhost:8001", "on-device"), ("http://192.168.1.20:8001", "third-party"),
                           ("https://decider.example.com", "third-party")):
             with patch.dict(os.environ, {"TYPESAFE_BASE_URL": url}, clear=True):
                 self.assertEqual(resolve_source(None, True, {}).data, dest)
+        lan = {"backends": {"lan": {"names": ["192.168.1.20:8001"], "data": "private-network"}}}
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://192.168.1.20:8001"}, clear=True):
+            self.assertEqual(resolve_source(None, True, lan).data, "private-network")
         # A policy entry that declares a farther destination wins over the address.
         policy = {"backends": {"tunnel": {"names": ["localhost:9000"], "data": "third-party"}}}
         with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://localhost:9000"}, clear=True):
