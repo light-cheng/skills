@@ -55,7 +55,7 @@ def score_ans(score: float, conf: float, levels: int) -> SimpleNamespace:
     """A typed Score answer whose bin level holds `conf` and the other levels share the rest."""
     level = max(0, min(levels - 1, int(score + 0.5)))
     rest = (1.0 - conf) / (levels - 1)
-    probs = {f"L{i}": (conf if i == level else rest) for i in range(levels)}
+    probs = {i: (conf if i == level else rest) for i in range(levels)}
     return SimpleNamespace(score=score, confidence=conf, probabilities=probs)
 
 

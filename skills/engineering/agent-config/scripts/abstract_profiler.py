@@ -51,17 +51,15 @@ DOWNGRADE_MARGIN: float = 0.15
 
 
 def _bin_confidence(answer: Any, level: int, levels: int) -> Optional[float]:
-    """Probability of the bin's level, from the answer's per-level probabilities (light-decide Score rule)."""
+    """Probability of the bin's level (light-decide Score rule).
+
+    The client returns `probabilities` keyed by level index (0 = first criterion).
+    """
     probs = getattr(answer, "probabilities", None)
-    if isinstance(probs, dict):
-        values = list(probs.values())
-    elif isinstance(probs, (list, tuple)):
-        values = list(probs)
-    else:
+    if not isinstance(probs, dict) or set(probs) != set(range(levels)):
         return None
-    if len(values) != levels or not all(isinstance(v, (int, float)) for v in values):
-        return None
-    return float(values[level])
+    value = probs[level]
+    return float(value) if isinstance(value, (int, float)) else None
 
 
 def _bin_level(score: float, levels: int) -> int:
