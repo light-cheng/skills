@@ -501,8 +501,8 @@ class AgentConfigSemanticTest(unittest.TestCase):
     def test_runtime_fixture_cannot_access_ground_truth_fields(self) -> None:
         """P1 (Section 21, 37, 41): validate_fixture_isolation blocks evaluation if ground truth leaks."""
         eval_candidates = [
-            Path(__file__).resolve().parent.parent.parent.parent.parent / "evals" / "typed-decision",
-            Path(__file__).resolve().parents[5] / "evals" / "typed-decision" if len(Path(__file__).resolve().parents) > 5 else None,
+            Path(__file__).resolve().parent.parent.parent.parent.parent / "evals" / "jev",
+            Path(__file__).resolve().parents[5] / "evals" / "jev" if len(Path(__file__).resolve().parents) > 5 else None,
         ]
         import sys
         found = False
