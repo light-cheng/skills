@@ -5,6 +5,7 @@ Profiles work items into abstract tiers (routine, standard, high) and reasoning 
 
 from __future__ import annotations
 
+import math
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -62,8 +63,13 @@ def _bin_confidence(answer: Any, level: int, levels: int) -> Optional[float]:
     probs = getattr(answer, "probabilities", None)
     if not isinstance(probs, dict) or set(probs) != set(range(levels)):
         return None
-    value = probs[level]
-    return float(value) if isinstance(value, (int, float)) else None
+    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 1 for v in probs.values()):
+        return None
+    return float(probs[level])
+
+
+def _finite_score(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def _bin_level(score: float, levels: int) -> int:
@@ -286,11 +292,11 @@ def extract_abstract_task_profile(
         score_comp = scores_dict.get("task_complexity")
         score_reas = scores_dict.get("reasoning_need")
 
-        if score_comp is not None and isinstance(getattr(score_comp, "score", None), (int, float)):
+        if score_comp is not None and _finite_score(getattr(score_comp, "score", None)):
             comp_score_val = float(score_comp.score)
             comp_conf = _bin_confidence(score_comp, _bin_level(comp_score_val, 4), 4)
 
-        if score_reas is not None and isinstance(getattr(score_reas, "score", None), (int, float)):
+        if score_reas is not None and _finite_score(getattr(score_reas, "score", None)):
             reas_score_val = float(score_reas.score)
             reas_conf = _bin_confidence(score_reas, _bin_level(reas_score_val, 3), 3)
 

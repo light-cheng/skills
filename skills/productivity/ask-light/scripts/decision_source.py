@@ -25,7 +25,9 @@ PROJECT_FILE = Path("docs/agents/light-project.md")
 HOSTED_ENDPOINT = "typesafe-hosted"
 LOCAL_PLACEHOLDER_KEY = "local-no-key"
 
-_DECISION_PHRASE = re.compile(r"decision data", re.IGNORECASE)
+# The setting is a label: "Decision data:" or a table row "| Decision data | value |",
+# after optional list markers or emphasis. A mention inside other text is not the setting.
+_DECISION_LABEL = re.compile(r"^\s*(?:[-*+]\s+)?\|?\s*[*_`]*decision data[*_`]*\s*(?::|\|)", re.IGNORECASE)
 _FENCE = re.compile(r"^\s*(```|~~~)")
 
 
@@ -55,10 +57,10 @@ def read_decision_limit(project_root: Optional[Path]) -> tuple[str, bool]:
         if _FENCE.match(line):
             in_fence = not in_fence
             continue
-        match = _DECISION_PHRASE.search(line)
+        match = _DECISION_LABEL.match(line)
         if in_fence or not match:
             continue
-        value = re.sub(r"[*`|:]", " ", line[match.end():]).strip().lower()
+        value = re.sub(r"[*_`|:]", " ", line[match.end():]).strip().lower()
         if value in LIMITS:
             return value, True
         return "off", False

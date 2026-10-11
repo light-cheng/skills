@@ -787,5 +787,25 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual({d["fallback_reason"] for d in prof.decisions}, {"unavailable"})
 
 
+    def test_malformed_scores_fall_back_instead_of_crashing(self) -> None:
+        task = TaskCharacteristics(title="t", description="d", difficulty="routine", difficulty_source="unknown")
+        answers = (
+            SimpleNamespace(score=float("nan"), confidence=0.9, probabilities={0: 0.9, 1: 0.1, 2: 0.0, 3: 0.0}),
+            SimpleNamespace(score=float("inf"), confidence=0.9, probabilities={0: 0.9, 1: 0.1, 2: 0.0, 3: 0.0}),
+            SimpleNamespace(score=1.0, confidence=0.6, probabilities={0: 0.1, 1: 0.6, 2: "x", 3: 0.0}),
+            SimpleNamespace(score=1.0, confidence=0.6, probabilities={0: 0.1, 1: True, 2: 0.3, 3: 0.0}),
+        )
+        for answer in answers:
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(scores={"task_complexity": answer})
+            with self.subTest(answer=answer), patch.dict(os.environ, LOCAL_ENV), calibrated_source(), \
+                    patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, _, fallback, _ = extract_abstract_task_profile(task, client=client)
+                self.assertTrue(fallback)
+                self.assertEqual(prof.recommended_tier, "routine")
+                record = next(d for d in prof.decisions if d["question_id"] == "agent-config/task-complexity")
+                self.assertEqual(record["fallback_reason"], "malformed")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -457,6 +457,9 @@ class AskLightSemanticTest(unittest.TestCase):
             "Decision data: third party\n": ("off", False),
             "- Decision data: private-network\n": ("private-network", True),
             "```\nDecision data: third-party\n```\n": ("on-device", True),
+            "- Constraints: keep decision data local\n- Decision data: third-party\n": ("third-party", True),
+            "## Decision data\n\nSee below.\n": ("on-device", True),
+            "- Decision data: on-device (default)\n": ("off", False),
         }
         for text, expected in cases.items():
             with self.subTest(text=text), tempfile.TemporaryDirectory() as tmp:

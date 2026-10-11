@@ -235,6 +235,8 @@ def route_with_decisions(
             note = "Decision data is off" + ("" if source.limit_recognized else " (unrecognized Decision data line)") + "; used deterministic baseline."
         else:
             note = f"No typed decision source available within Decision data '{source.limit}'; used deterministic baseline."
+            if source.limit == "private-network" and source.data == "third-party":
+                note += " A machine on your own network counts only when its policy entry declares data: private-network."
         return baseline(source.reason, note)
 
     try:

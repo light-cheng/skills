@@ -46,9 +46,11 @@ def evaluation_context(decision_data: str) -> tuple[Path, Dict[str, Any]]:
     root = Path(tempfile.mkdtemp(prefix="light-eval-"))
     (root / "docs/agents").mkdir(parents=True)
     (root / "docs/agents/light-project.md").write_text(f"Decision data: {decision_data}\n", encoding="utf-8")
-    base_url = os.environ.get("TYPESAFE_BASE_URL", "").strip()
-    name = urlparse(base_url).netloc if base_url else "typesafe-hosted"
-    policy = {"backends": {"evaluation": {"names": [name], "questions": {
+    sys.path.insert(0, str(PROJECT_ROOT / "skills/productivity/ask-light/scripts"))
+    from decision_source import _endpoint_name
+
+    name = _endpoint_name(os.environ.get("TYPESAFE_BASE_URL", "").strip() or None)
+    policy = {"backends": {"evaluation": {"names": [name], "data": decision_data, "questions": {
         qid: {"min_confidence": 0.0, "calibration": "evaluation run: apply every answer"} for qid in QUESTION_IDS}}}}
     return root, policy
 
