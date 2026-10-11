@@ -644,6 +644,11 @@ def validate_fixture_isolation(scenarios: Optional[List[AgentConfigScenario]] = 
     return True
 
 
+# Set by run_eval: an evaluation policy that applies every answer, and a project root
+# whose Decision data line allows the endpoint under test.
+EVAL_CONTEXT: Dict[str, Any] = {"decision_policy": None, "project_root": None}
+
+
 def evaluate_scenario(scenario: AgentConfigScenario, client: Optional[Any] = None) -> Dict[str, Any]:
     """Evaluate one agent-config scenario separating config correctness from semantic quality."""
     now = datetime.now(timezone.utc).isoformat()
@@ -656,6 +661,7 @@ def evaluate_scenario(scenario: AgentConfigScenario, client: Optional[Any] = Non
         client=client,
         profile=copy.deepcopy(scenario.profile),
         active_session=_active_session(scenario.active_model, now) if scenario.active_model else None,
+        **EVAL_CONTEXT,
     )
 
     readiness_ok = res.readiness == scenario.expected.expected_readiness
@@ -687,14 +693,14 @@ def evaluate_scenario(scenario: AgentConfigScenario, client: Optional[Any] = Non
 
     # Complexity semantic evaluation (tri-state: PASS, FAIL, NOT_EVALUATED)
     complexity_semantic = "NOT_EVALUATED"
-    if comp_src == "jev" and comp_score is not None:
+    if comp_src == "typed-decision" and comp_score is not None:
         score_ok = scenario.expected.expected_min_complexity <= comp_score <= scenario.expected.expected_max_complexity
         tier_matched = (scenario.expected.expected_complexity_tier is None or res.abstract_profile.recommended_tier == scenario.expected.expected_complexity_tier)
         complexity_semantic = "PASS" if (score_ok and tier_matched) else "FAIL"
 
     # Reasoning semantic evaluation (tri-state: PASS, FAIL, NOT_EVALUATED)
     reasoning_semantic = "NOT_EVALUATED"
-    if reas_src == "jev" and reas_score is not None:
+    if reas_src == "typed-decision" and reas_score is not None:
         score_ok = scenario.expected.expected_min_reasoning <= reas_score <= scenario.expected.expected_max_reasoning
         level_matched = (scenario.expected.expected_reasoning_level is None or res.abstract_profile.reasoning_need == scenario.expected.expected_reasoning_level)
         reasoning_semantic = "PASS" if (score_ok and level_matched) else "FAIL"
@@ -749,7 +755,7 @@ def run_agent_config_eval(client: Optional[Any] = None) -> Dict[str, Any]:
         1 for r in results
         if r["raw_evidence"]["complexity_source"] in ("explicit-user", "verified-ticket", "deterministic-policy")
     )
-    comp_eval = sum(1 for r in results if r["raw_evidence"]["complexity_source"] == "jev")
+    comp_eval = sum(1 for r in results if r["raw_evidence"]["complexity_source"] == "typed-decision")
     comp_pass = sum(1 for r in results if r["complexity_semantic"] == "PASS")
     comp_fail = sum(1 for r in results if r["complexity_semantic"] == "FAIL")
     comp_fallback = sum(1 for r in results if r["raw_evidence"]["complexity_source"] == "deterministic-fallback")
@@ -761,7 +767,7 @@ def run_agent_config_eval(client: Optional[Any] = None) -> Dict[str, Any]:
         1 for r in results
         if r["raw_evidence"]["reasoning_source"] in ("explicit-policy", "explicit-user")
     )
-    reas_eval = sum(1 for r in results if r["raw_evidence"]["reasoning_source"] == "jev")
+    reas_eval = sum(1 for r in results if r["raw_evidence"]["reasoning_source"] == "typed-decision")
     reas_pass = sum(1 for r in results if r["reasoning_semantic"] == "PASS")
     reas_fail = sum(1 for r in results if r["reasoning_semantic"] == "FAIL")
     reas_fallback = sum(1 for r in results if r["raw_evidence"]["reasoning_source"] == "deterministic-fallback")

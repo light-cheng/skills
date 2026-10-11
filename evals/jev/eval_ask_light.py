@@ -35,7 +35,11 @@ if str(ASK_LIGHT_SCRIPTS) not in sys.path:
 
 from ask_light_models import AskLightRecommendation, CompactProjectState, LegalActionsResult
 from state_extractor import compute_legal_actions
-from semantic_router import route_with_jev
+from semantic_router import route_with_decisions
+
+# Set by run_eval: an evaluation policy that applies every answer, and a project root
+# whose Decision data line allows the endpoint under test.
+EVAL_CONTEXT: Dict[str, Any] = {"policy": None, "project_root": None}
 
 
 @dataclass
@@ -456,7 +460,7 @@ def evaluate_scenario(scenario: AskLightScenario, client: Optional[Any] = None) 
     explicit_tgt = "99" if "99" in scenario.user_request else None
     legal = compute_legal_actions(scenario.state, scenario.user_request, explicit_target=explicit_tgt)
 
-    rec = route_with_jev(legal, scenario.user_request, client=client)
+    rec = route_with_decisions(legal, scenario.user_request, client=client, **EVAL_CONTEXT)
 
     legal_ok = legal.allowed_actions == scenario.expected_legal_actions
     fallback_ok = legal.fallback_action == scenario.expected_fallback_action

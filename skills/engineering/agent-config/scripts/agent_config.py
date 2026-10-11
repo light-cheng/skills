@@ -40,6 +40,8 @@ def agent_config_recommend(
     use_typed_decisions: bool = True,
     profile: Optional[Dict[str, Any]] = None,
     active_session: Optional[Dict[str, Any]] = None,
+    project_root: Optional[Path] = None,
+    decision_policy: Optional[Dict[str, Any]] = None,
 ) -> AgentConfigResult:
     """Recommend right-sized topology, model, and effort for task on current host."""
     if setup_intent:
@@ -72,6 +74,8 @@ def agent_config_recommend(
         task=task_obj,
         client=client,
         use_typed_decisions=use_typed_decisions,
+        project_root=project_root,
+        policy=decision_policy,
     )
     if not task_obj.reasoning_policy and isinstance(profile, dict):
         try:
@@ -242,6 +246,7 @@ def main() -> int:
     parser.add_argument("--approval", choices=["unknown", "approved", "declined"], default=None, help="Explicit preview approval state")
     parser.add_argument("--no-preview-approval", action="store_true", help="Simulate user declining preview")
     parser.add_argument("--no-typed-decisions", action="store_true", help="Do not ask a typed decision source")
+    parser.add_argument("--project-root", type=Path, default=None, help="Project whose Decision data line limits the decision source")
 
     args = parser.parse_args()
     host_data = json.loads(args.host_json)
@@ -259,6 +264,7 @@ def main() -> int:
         approval=approval_arg,
         setup_intent=args.setup,
         use_typed_decisions=not args.no_typed_decisions,
+        project_root=args.project_root,
     )
 
     print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))

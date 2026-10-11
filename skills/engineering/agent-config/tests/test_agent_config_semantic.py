@@ -739,5 +739,19 @@ class AgentConfigSemanticTest(unittest.TestCase):
             self.assertIn("off", reason)
 
 
+    def test_recommend_reads_decision_data_from_the_project_root(self) -> None:
+        import tempfile
+        host, profile = fresh_host_and_profile()
+        task = {"title": "Rework consensus", "description": "Leader election", "difficulty_source": "unknown"}
+        client = MagicMock()
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, LOCAL_ENV), calibrated_source():
+            root = Path(tmp)
+            (root / "docs/agents").mkdir(parents=True)
+            (root / "docs/agents/light-project.md").write_text("Decision data: off\n", encoding="utf-8")
+            with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                agent_config_recommend(host, task, profile=profile, client=client, project_root=root)
+        client.system_one.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()

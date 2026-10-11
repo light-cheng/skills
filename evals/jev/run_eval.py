@@ -15,18 +15,43 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+from urllib.parse import urlparse
 
 EVAL_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = EVAL_DIR.parent.parent
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 
+import tempfile
+
+import eval_ask_light
+import eval_agent_config
 from eval_ask_light import run_ask_light_eval
 from eval_agent_config import run_agent_config_eval, validate_fixture_isolation
 
+QUESTION_IDS = (
+    "ask-light/next-action", "ask-light/material-ambiguity", "ask-light/reasoning-escalation",
+    "agent-config/task-complexity", "agent-config/reasoning-need",
+)
 
-def run_all_evals(live: bool = False, output_path: Optional[Path] = None) -> Dict[str, Any]:
+
+def evaluation_context(decision_data: str) -> tuple[Path, Dict[str, Any]]:
+    """A throwaway project allowing `decision_data`, and a policy applying every answer.
+
+    Evaluation scores raw source answers on labeled cases; it never writes the user's policy file.
+    """
+    root = Path(tempfile.mkdtemp(prefix="light-eval-"))
+    (root / "docs/agents").mkdir(parents=True)
+    (root / "docs/agents/light-project.md").write_text(f"Decision data: {decision_data}\n", encoding="utf-8")
+    base_url = os.environ.get("TYPESAFE_BASE_URL", "").strip()
+    name = urlparse(base_url).netloc if base_url else "typesafe-hosted"
+    policy = {"backends": {"evaluation": {"names": [name], "questions": {
+        qid: {"min_confidence": 0.0, "calibration": "evaluation run: apply every answer"} for qid in QUESTION_IDS}}}}
+    return root, policy
+
+
+def run_all_evals(live: bool = False, output_path: Optional[Path] = None, decision_data: str = "on-device") -> Dict[str, Any]:
     """Execute evaluation suites and capture calibration evidence."""
     # Preflight assertion: ensure zero fixture label leakage
     validate_fixture_isolation()
@@ -54,6 +79,9 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None) -> Dic
                     if api_key:
                         break
 
+        if not api_key and os.environ.get("TYPESAFE_BASE_URL"):
+            api_key = "local-no-key"  # a local decision server needs no key
+
         if not api_key:
             print("ERROR: --live mode requested but TYPESAFE_API_KEY is not set in environment or project .env", file=sys.stderr)
             sys.exit(1)
@@ -67,6 +95,10 @@ def run_all_evals(live: bool = False, output_path: Optional[Path] = None) -> Dic
         except ImportError:
             print("ERROR: typesafe-sdk is not installed. Install with 'pip install typesafe-sdk'", file=sys.stderr)
             sys.exit(1)
+
+    root, policy = evaluation_context(decision_data)
+    eval_ask_light.EVAL_CONTEXT.update(policy=policy, project_root=root)
+    eval_agent_config.EVAL_CONTEXT.update(decision_policy=policy, project_root=root)
 
     t0 = time.time()
     ask_light_res = run_ask_light_eval(client=client)
@@ -195,9 +227,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run TypeSafe Jev evaluation suite.")
     parser.add_argument("--live", action="store_true", help="Run live evaluations against TypeSafe API")
     parser.add_argument("--output", type=Path, default=PROJECT_ROOT / "docs" / "evidence" / "jev-evaluation-report.json")
+    parser.add_argument("--decision-data", default="on-device", choices=("on-device", "private-network", "third-party"),
+                        help="Farthest destination the run may send question state to (see light-decide)")
     args = parser.parse_args()
 
-    report = run_all_evals(live=args.live, output_path=args.output)
+    report = run_all_evals(live=args.live, output_path=args.output, decision_data=args.decision_data)
 
     print("\n" + "=" * 60)
     print(f"TypeSafe Jev Evaluation Summary ({report['mode']})")
