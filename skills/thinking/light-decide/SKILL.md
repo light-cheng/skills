@@ -35,7 +35,7 @@ When only one option is legal, return it without asking any source.
    have named one source that is verified available on this Host and within the
    limit, or chosen self-judgment. When no source is found and one would clearly
    help, finish this judgment by self-judgment, then offer setup once with
-   [setup](references/setup.md). Never start setup without the user's yes.
+   [setup](references/setup.md). Setup only looks until the user says yes; it changes nothing before.
 4. **Ask** through the script or MCP path in [selection](references/selection.md).
    A timeout, error or malformed reply becomes a fallback, never a retry loop.
 5. **Normalize and apply policy** with [formats](references/formats.md). Apply

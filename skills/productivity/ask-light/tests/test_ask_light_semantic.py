@@ -460,6 +460,12 @@ class AskLightSemanticTest(unittest.TestCase):
             "- Constraints: keep decision data local\n- Decision data: third-party\n": ("third-party", True),
             "## Decision data\n\nSee below.\n": ("on-device", True),
             "- Decision data: on-device (default)\n": ("off", False),
+            "## Decision data: off\n": ("off", True),
+            "1. Decision data: off\n": ("off", True),
+            "> Decision data: off\n": ("off", True),
+            "Decision data = off\n": ("off", True),
+            "Decision data: third-party\nDecision data: off\n": ("off", True),
+            "Decision data: third-party\nDecision data: on-device\n": ("on-device", True),
         }
         for text, expected in cases.items():
             with self.subTest(text=text), tempfile.TemporaryDirectory() as tmp:
@@ -510,6 +516,49 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertIsNone(rec.confidence)
         self.assertEqual(rec.probabilities, {"light-implement": 1.0})
         self.assertEqual(rec.semantic_judgments.action_probabilities["project-clarify"], 0.9)
+
+    def test_malformed_choice_and_yes_no_replies_fall_back(self) -> None:
+        legal = LegalActionsResult(
+            status="RECOMMEND", allowed_actions=["light-implement", "project-clarify"], fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Implement", "project-clarify": "Clarify"},
+        )
+        bad_choices = (None, {"project-clarify": "high", "light-implement": 0.1}, {"project-clarify": 0.9},
+                       {"project-clarify": 0.9, "light-implement": 0.9}, {"project-clarify": float("nan"), "light-implement": 0.1})
+        for probs in bad_choices:
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(
+                choices={"next_action": MagicMock(choice="project-clarify", confidence=0.9, probabilities=probs)},
+                nouls={}, scores={})
+            with self.subTest(probs=probs), patch.dict(os.environ, LOCAL_ENV, clear=True), \
+                    patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(legal, "What next?", client=client)
+                self.assertEqual(rec.primary_skill, "light-implement")
+                self.assertEqual(rec.decisions[0]["fallback_reason"], "malformed")
+        for value in (True, 7, -0.1, float("nan")):
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(
+                choices={"next_action": MagicMock(choice="light-implement", confidence=0.6,
+                                                  probabilities={"light-implement": 0.6, "project-clarify": 0.4})},
+                nouls={"has_material_ambiguity": MagicMock(noul=value)}, scores={})
+            with self.subTest(noul=value), patch.dict(os.environ, LOCAL_ENV, clear=True), \
+                    patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(legal, "What next?", client=client)
+                self.assertEqual(rec.primary_skill, "light-implement")
+                amb = next(d for d in rec.decisions if d["question_id"] == "ask-light/material-ambiguity")
+                self.assertEqual(amb["fallback_reason"], "malformed")
+
+    def test_sdk_timeout_class_counts_as_timeout_and_lan_server_needs_no_key(self) -> None:
+        class APITimeoutError(Exception):
+            pass
+        client = MagicMock()
+        client.system_one.side_effect = APITimeoutError("slow")
+        with patch.dict(os.environ, LOCAL_ENV, clear=True), patch("semantic_router.TYPESAFE_AVAILABLE", True):
+            rec = route_calibrated(two_actions(), "What next?", client=client)
+        self.assertEqual(rec.decisions[0]["fallback_reason"], "timeout")
+        lan = {"backends": {"lan": {"names": ["192.168.1.20:8001"], "data": "private-network"}}}
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://192.168.1.20:8001"}, clear=True):
+            source = resolve_source(None, True, lan)
+        self.assertIsNotNone(source.api_key)
 
     def test_destination_and_limit_rules(self) -> None:
         self.assertEqual(read_decision_limit(None), ("on-device", True))

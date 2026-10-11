@@ -81,6 +81,7 @@ silently substituted.
   clearly inside the lower bin. Unavailable or uncalibrated → keep the
   deterministic profile. A judgment never confirms a Profile or changes Host
   configuration.
+
 ## References
 - [`references/setup.md`](references/setup.md) — Setup questionnaire and tier binding flow
 - [`references/routing.md`](references/routing.md) — 4 peer execution modes and topology selection

@@ -34,10 +34,10 @@ except ImportError:
 
 try:
     from .agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
-    from .decision_source import make_client, own_result, resolve_source, typed_result
+    from .decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution
 except ImportError:
     from agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
-    from decision_source import make_client, own_result, resolve_source, typed_result
+    from decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution
 
 # Capability tier ranks for direction evaluation
 TIER_RANKS: Dict[str, int] = {"routine": 1, "standard": 2, "high": 3}
@@ -55,17 +55,20 @@ REASONING_TEXT = "What level of reasoning effort is required for this task?"
 DOWNGRADE_MARGIN: float = 0.15
 
 
-def _bin_confidence(answer: Any, level: int, levels: int) -> Optional[float]:
-    """Probability of the bin's level (light-decide Score rule).
-
-    The client returns `probabilities` keyed by level index (0 = first criterion).
-    """
+def _valid_score_answer(answer: Any, levels: int) -> bool:
+    """A Score reply is usable only when its per-level probabilities form a distribution
+    and its score is their expected value (light-decide Score rule)."""
     probs = getattr(answer, "probabilities", None)
-    if not isinstance(probs, dict) or set(probs) != set(range(levels)):
-        return None
-    if not all(isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 1 for v in probs.values()):
-        return None
-    return float(probs[level])
+    score = getattr(answer, "score", None)
+    if not valid_distribution(probs, list(range(levels))) or not _finite_score(score):
+        return False
+    expected = sum(level * p for level, p in probs.items())
+    return 0 <= score <= levels - 1 and abs(score - expected) <= 0.02
+
+
+def _bin_confidence(answer: Any, level: int, levels: int) -> Optional[float]:
+    """Probability of the bin's level; the client keys probabilities by level index."""
+    return float(answer.probabilities[level])
 
 
 def _finite_score(value: Any) -> bool:
@@ -274,7 +277,7 @@ def extract_abstract_task_profile(
             prov["tier"].fallback_reason = failure
         if not is_reasoning_authoritative:
             prov["reasoning"].fallback_reason = failure
-        det_prof.decisions = _own_records(task, "timeout" if isinstance(exc, TimeoutError) else "unavailable",
+        det_prof.decisions = _own_records(task, "timeout" if is_timeout(exc) else "unavailable",
                                           not is_complexity_authoritative, not is_reasoning_authoritative)
         return det_prof, None, True, failure
 
@@ -292,11 +295,11 @@ def extract_abstract_task_profile(
         score_comp = scores_dict.get("task_complexity")
         score_reas = scores_dict.get("reasoning_need")
 
-        if score_comp is not None and _finite_score(getattr(score_comp, "score", None)):
+        if score_comp is not None and _valid_score_answer(score_comp, 4):
             comp_score_val = float(score_comp.score)
             comp_conf = _bin_confidence(score_comp, _bin_level(comp_score_val, 4), 4)
 
-        if score_reas is not None and _finite_score(getattr(score_reas, "score", None)):
+        if score_reas is not None and _valid_score_answer(score_reas, 3):
             reas_score_val = float(score_reas.score)
             reas_conf = _bin_confidence(score_reas, _bin_level(reas_score_val, 3), 3)
 

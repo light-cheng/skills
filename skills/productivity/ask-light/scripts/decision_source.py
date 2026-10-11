@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import math
 import os
 import re
 from dataclasses import dataclass
@@ -26,8 +27,11 @@ HOSTED_ENDPOINT = "typesafe-hosted"
 LOCAL_PLACEHOLDER_KEY = "local-no-key"
 
 # The setting is a label: "Decision data:" or a table row "| Decision data | value |",
-# after optional list markers or emphasis. A mention inside other text is not the setting.
-_DECISION_LABEL = re.compile(r"^\s*(?:[-*+]\s+)?\|?\s*[*_`]*decision data[*_`]*\s*(?::|\|)", re.IGNORECASE)
+# after optional quote, heading, list markers or emphasis. A mention inside other text is not the setting.
+_DECISION_LABEL = re.compile(
+    r"^\s*(?:>\s*)*(?:#{1,6}\s+|[-*+]\s+|\d+[.)]\s+)?\|?\s*[*_`]*decision data[*_`]*\s*(?::|\||=)",
+    re.IGNORECASE,
+)
 _FENCE = re.compile(r"^\s*(```|~~~)")
 
 
@@ -53,6 +57,7 @@ def read_decision_limit(project_root: Optional[Path]) -> tuple[str, bool]:
     if path is None:
         return DEFAULT_LIMIT, True
     in_fence = False
+    values = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if _FENCE.match(line):
             in_fence = not in_fence
@@ -60,11 +65,14 @@ def read_decision_limit(project_root: Optional[Path]) -> tuple[str, bool]:
         match = _DECISION_LABEL.match(line)
         if in_fence or not match:
             continue
-        value = re.sub(r"[*_`|:]", " ", line[match.end():]).strip().lower()
-        if value in LIMITS:
-            return value, True
-        return "off", False
-    return DEFAULT_LIMIT, True
+        value = re.sub(r"[*_`|:=]", " ", line[match.end():]).strip().lower()
+        if value not in LIMITS:
+            return "off", False
+        values.append(value)
+    if not values:
+        return DEFAULT_LIMIT, True
+    # Several lines: the most restrictive one holds.
+    return min(values, key=lambda v: -1 if v == "off" else DESTINATIONS.index(v)), True
 
 
 def within_limit(destination: str, limit: str) -> bool:
@@ -186,7 +194,7 @@ def resolve_source(
     if data == "private-network" and declared != "private-network":
         data = "third-party"
     api_key = _read_env_key(project_root)
-    if api_key is None and data == "on-device":
+    if api_key is None and data in ("on-device", "private-network"):
         api_key = LOCAL_PLACEHOLDER_KEY
 
     source = DecisionSource(
@@ -219,8 +227,26 @@ def make_client(client_cls: Any, source: DecisionSource) -> Any:
     return client_cls(api_key=source.api_key, retry=RetryPolicy(max_retries=0))
 
 
+def valid_probability(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and 0 <= value <= 1
+
+
+def valid_distribution(probabilities: Any, keys: List[Any]) -> bool:
+    """One probability per expected key, each in [0, 1], summing to 1."""
+    return (
+        isinstance(probabilities, dict)
+        and set(probabilities) == set(keys)
+        and all(valid_probability(v) for v in probabilities.values())
+        and abs(sum(probabilities.values()) - 1) <= 0.01
+    )
+
+
+def is_timeout(exc: BaseException) -> bool:
+    """The builtin TimeoutError or a client timeout class (for example an SDK or HTTP timeout)."""
+    return isinstance(exc, TimeoutError) or "timeout" in type(exc).__name__.lower()
+
+
 def yes_no_probabilities(p_yes: float) -> Dict[str, float]:
-    p_yes = min(max(float(p_yes), 0.0), 1.0)
     return {"yes": round(p_yes, 4), "no": round(1.0 - p_yes, 4)}
 
 

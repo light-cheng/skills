@@ -52,11 +52,31 @@ CALIBRATED = {
 
 
 def score_ans(score: float, conf: float, levels: int) -> SimpleNamespace:
-    """A typed Score answer whose bin level holds `conf` and the other levels share the rest."""
+    """A consistent typed Score reply whose expected value is `score` (as the real client
+    reports). The bin level holds `conf`, lowered when no reply could hold that much."""
     level = max(0, min(levels - 1, int(score + 0.5)))
-    rest = (1.0 - conf) / (levels - 1)
-    probs = {i: (conf if i == level else rest) for i in range(levels)}
-    return SimpleNamespace(score=score, confidence=conf, probabilities=probs)
+    probs = {i: 0.0 for i in range(levels)}
+    if score != level:
+        # Lower the bin probability just enough that the remaining mass can reach `score`.
+        edge = levels - 1 if score > level else 0
+        if edge != level:
+            conf = min(conf, (edge - score) / (edge - level))
+    probs[level] = conf
+    rest = 1.0 - conf
+    if rest > 1e-9:
+        mean = round((score - conf * level) / rest, 9)
+        others = [i for i in range(levels) if i != level]
+        below = [i for i in others if i <= mean]
+        above = [i for i in others if i >= mean]
+        if not below or not above:
+            raise ValueError(f"no reply has score {score} with bin probability {conf}")
+        low, high = max(below), min(above)
+        if low == high:
+            probs[low] += rest
+        else:
+            probs[high] += rest * (mean - low) / (high - low)
+            probs[low] += rest * (high - mean) / (high - low)
+    return SimpleNamespace(score=sum(i * p for i, p in probs.items()), confidence=conf, probabilities=probs)
 
 
 def calibrated_source():
@@ -218,11 +238,11 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual(prof_high.recommended_tier, "high")
         self.assertEqual(prof_high.reasoning_need, "high")
 
-    def test_mock_jev_abstract_profiler(self) -> None:
-        """Verify abstract task profiling via mock Jev System One Score primitives."""
-        mock_score_comp = score_ans(2.2, 0.92, 4)
+    def test_typed_scores_build_the_abstract_profile(self) -> None:
+        """Verify abstract task profiling via mock typed Score replies."""
+        mock_score_comp = score_ans(2.05, 0.92, 4)
 
-        mock_score_reas = score_ans(1.9, 0.88, 3)
+        mock_score_reas = score_ans(1.85, 0.88, 3)
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -245,7 +265,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(conf, 0.88)  # Dimension-aware: min(0.92, 0.88)
                 self.assertFalse(fallback)
 
-    def test_jev_reasoning_need_influences_effort_when_no_explicit_policy(self) -> None:
+    def test_typed_reasoning_need_influences_effort_when_no_explicit_policy(self) -> None:
         """P0 (Section 22): Jev reasoning_need influences resolved effort when user policy is None."""
         host = HostCapabilities(
             has_model_selector=True,
@@ -260,7 +280,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         res = select_configuration(host, task, profile)
         self.assertEqual(res.execution_config.resolved_effort, "high")
 
-    def test_explicit_user_effort_overrides_jev(self) -> None:
+    def test_explicit_user_effort_overrides_typed_reasoning(self) -> None:
         """Section 22 & 25: Explicit user effort policy takes strict precedence over Jev."""
         host = HostCapabilities(
             has_model_selector=True,
@@ -275,7 +295,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         res = select_configuration(host, task, profile)
         self.assertEqual(res.execution_config.resolved_effort, "low")  # User policy wins
 
-    def test_host_supported_effort_bounds_jev_output(self) -> None:
+    def test_host_supported_effort_bounds_typed_reasoning(self) -> None:
         """Section 22 & 30: Host supported effort strictly bounds Jev output; never invents unsupported values."""
         host = HostCapabilities(
             has_model_selector=True,
@@ -322,7 +342,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         """P1 (Sections 27-29): High-confidence complexity is retained when reasoning falls back."""
         mock_score_comp = score_ans(2.2, 0.95, 4)
 
-        mock_score_reas = score_ans(1.8, 0.35, 3)
+        mock_score_reas = score_ans(1.0, 0.35, 3)  # medium bin, low certainty
 
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -338,7 +358,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
-                # Complexity retained from Jev
+                # Complexity retained from the typed answer
                 self.assertEqual(prof.recommended_tier, "high")
                 self.assertEqual(prof.complexity_level, "high")
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
@@ -397,7 +417,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(p_over3.complexity_level, "critical")
                 self.assertEqual(p_over3.recommended_tier, "high")
 
-    def test_authoritative_difficulty_skips_jev_complexity(self) -> None:
+    def test_authoritative_difficulty_skips_the_complexity_question(self) -> None:
         """P1 (Section 15, 18, 41): Authoritative difficulty skips Jev complexity query; consumed by code."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
@@ -427,7 +447,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.dimension_provenance["complexity"].source, "explicit-user")
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
 
-    def test_unknown_difficulty_invokes_jev_complexity(self) -> None:
+    def test_unknown_difficulty_asks_the_complexity_question(self) -> None:
         """P1 (Section 17, 41): Unknown difficulty invokes Jev task_complexity query."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
@@ -452,7 +472,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertIn("task_complexity", called_questions)
                 self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
 
-    def test_serialized_jev_state_does_not_contain_expected_complexity_label(self) -> None:
+    def test_serialized_decision_state_does_not_contain_expected_complexity_label(self) -> None:
         """P1 (Section 14, 21, 41): Serialized Jev state contains NO declared_difficulty or answer labels."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
@@ -476,7 +496,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertNotIn("expected_tier", called_state)
                 self.assertNotIn("expected_complexity", called_state)
 
-    def test_serialized_jev_state_does_not_contain_expected_reasoning_label(self) -> None:
+    def test_serialized_decision_state_does_not_contain_expected_reasoning_label(self) -> None:
         """P1 (Section 19, 41): Serialized Jev state contains NO reasoning labels or hints."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
@@ -546,7 +566,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             validate_fixture_isolation([leaking_scenario])
         self.assertIn("FIXTURE LEAKAGE DETECTED", str(ctx.exception))
 
-    def test_explicit_reasoning_policy_skips_jev_reasoning_judgment(self) -> None:
+    def test_explicit_reasoning_policy_skips_the_reasoning_question(self) -> None:
         """P1 (Section 34, 41): Explicit reasoning policy skips Jev reasoning judgment."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
@@ -803,6 +823,24 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 prof, _, fallback, _ = extract_abstract_task_profile(task, client=client)
                 self.assertTrue(fallback)
                 self.assertEqual(prof.recommended_tier, "routine")
+                record = next(d for d in prof.decisions if d["question_id"] == "agent-config/task-complexity")
+                self.assertEqual(record["fallback_reason"], "malformed")
+
+
+    def test_inconsistent_or_out_of_range_score_cannot_downgrade(self) -> None:
+        task = TaskCharacteristics(title="t", description="d", difficulty="high", difficulty_source="heuristic")
+        replies = (
+            SimpleNamespace(score=0.1, confidence=0.6, probabilities={0: 0.6, 1: 0.0, 2: 0.0, 3: 0.4}),
+            SimpleNamespace(score=-4.0, confidence=0.9, probabilities={0: 0.9, 1: 0.1, 2: 0.0, 3: 0.0}),
+            SimpleNamespace(score=0.0, confidence=1.0, probabilities={0: 1.0, 1: 1.0, 2: 1.0, 3: 1.0}),
+        )
+        for reply in replies:
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(scores={"task_complexity": reply})
+            with self.subTest(reply=reply), patch.dict(os.environ, LOCAL_ENV), calibrated_source(), \
+                    patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
+                prof, _, _, _ = extract_abstract_task_profile(task, client=client)
+                self.assertEqual(prof.recommended_tier, "high")
                 record = next(d for d in prof.decisions if d["question_id"] == "agent-config/task-complexity")
                 self.assertEqual(record["fallback_reason"], "malformed")
 

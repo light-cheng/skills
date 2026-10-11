@@ -40,11 +40,11 @@ except ImportError:
 try:
     from .compact_state_builder import build_compact_decision_state
     from .ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
-    from .decision_source import make_client, own_result, resolve_source, typed_result, yes_no_probabilities
+    from .decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution, valid_probability, yes_no_probabilities
 except ImportError:
     from compact_state_builder import build_compact_decision_state
     from ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
-    from decision_source import make_client, own_result, resolve_source, typed_result, yes_no_probabilities
+    from decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution, valid_probability, yes_no_probabilities
 
 QUESTION_IDS = {
     "next_action": "ask-light/next-action",
@@ -245,7 +245,7 @@ def route_with_decisions(
             state=build_compact_decision_state(legal_result, user_request), questions=questions,
         )
     except Exception as exc:
-        reason = "timeout" if isinstance(exc, TimeoutError) else "unavailable"
+        reason = "timeout" if is_timeout(exc) else "unavailable"
         return baseline(reason, f"Decision source call failed ({type(exc).__name__}); used deterministic baseline.")
 
     decisions: List[Dict[str, Any]] = []
@@ -257,11 +257,12 @@ def route_with_decisions(
 
     if "next_action" in questions:
         choice_ans = (getattr(response, "choices", None) or {}).get("next_action")
-        if choice_ans is None:
+        raw = getattr(choice_ans, "probabilities", None)
+        if choice_ans is None or not valid_distribution(raw, legal_result.allowed_actions):
             decisions.append(own_result(QUESTION_IDS["next_action"], _question_text(questions, "next_action"),
                                         "choice", legal_result.allowed_actions, baseline_skill, "malformed"))
         else:
-            probabilities = {str(k): float(v) for k, v in dict(choice_ans.probabilities).items()}
+            probabilities = {str(k): float(v) for k, v in raw.items()}
             result = typed_result(
                 source, QUESTION_IDS["next_action"], _question_text(questions, "next_action"), "choice",
                 legal_result.allowed_actions, str(choice_ans.choice), probabilities, baseline_skill,
@@ -279,7 +280,7 @@ def route_with_decisions(
         if key not in questions:
             continue
         value = getattr(nouls.get(key), "noul", None)
-        if not isinstance(value, (int, float)):
+        if not valid_probability(value):
             decisions.append(own_result(QUESTION_IDS[key], _question_text(questions, key), "yes_no",
                                         ["yes", "no"], "no", "malformed"))
             finals[key] = "no"
