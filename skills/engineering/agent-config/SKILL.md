@@ -5,7 +5,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 
 # Agent Config
 
-`agent-config` maps verified Agent Host capabilities and user-confirmed profile tiers to a right-sized execution topology, model, and effort. It never guesses model intelligence, never mutates host config silently, and treats single-model as a first-class peer topology. It provides native support for primary coding-agent harnesses (Codex, Claude Code, Antigravity, DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) with safe generic/manual fallback for others. It has no required companion capability, no external Skill, and no external service requirements.
+`agent-config` maps verified Agent Host capabilities and user-confirmed profile tiers to a right-sized execution topology, model, and effort. It provides native support for primary coding-agent harnesses (Codex, Claude Code, Antigravity, DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) with safe generic/manual fallback for others. It has no required companion capability, no external Skill, and no external service requirements.
 
 ## When to use
 - Before complex multi-agent or partitioned work where topology, model tier, or effort matters.
