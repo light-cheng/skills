@@ -32,7 +32,7 @@ $project-init
 $project-review init using brief.md
 ```
 
-只选择与当前状态匹配的命令。预期结果是可检查的建议、最小初始化报告或 review Charter/state。以下是 Illustrative output（示意输出），不代表本仓库已经运行：
+只选择与当前状态匹配的命令。预期结果是可检查的建议、最小初始化报告或 review Charter/state。以下是示意输出，不代表本仓库已经运行：
 
 ```text
 Status: RECOMMEND

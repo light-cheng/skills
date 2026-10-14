@@ -42,7 +42,7 @@
 
 ## 证据与独立性
 
-Producer Evidence 须写明精确命令、环境、输入输出、revision、范围与限制。 reviewer 按 [运行时 reviewer 契约](../skills/review/review-loop/references/reviewer-contract.md)（人类摘要：[REVIEWER_CONTRACT.zh-CN.md](REVIEWER_CONTRACT.zh-CN.md)）的输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）返回 `id`/`severity`/`location`/`problem`/`reason`（可选 `suggestion`），绝不直接写 `PASS`/`FAIL`/`BLOCKED`。Producer 负责修复；Evaluator 须 fresh independent。快速通道省略单独 Critic；完整路径需要 one fresh independent Evaluator with the frozen baseline and admissible evidence。
+Producer Evidence 须写明精确命令、环境、输入输出、revision、范围与限制。 reviewer 按 [运行时 reviewer 契约](../skills/review/review-loop/references/reviewer-contract.md)（人类摘要：[REVIEWER_CONTRACT.zh-CN.md](REVIEWER_CONTRACT.zh-CN.md)）的输入包（`Target`·`Requirements`·`Relevant context`·`Previous findings`）返回 `id`/`severity`/`location`/`problem`/`reason`（可选 `suggestion`），绝不直接写 `PASS`/`FAIL`/`BLOCKED`。Producer 负责修复；Evaluator 须是新开且独立的。快速通道省略单独 Critic；完整路径需要一个新开的独立 Evaluator，依据冻结基线和可采信证据作出判断。
 
 ## Repair、verdict 与边界
 

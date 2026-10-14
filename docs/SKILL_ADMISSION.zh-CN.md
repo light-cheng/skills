@@ -30,7 +30,7 @@
 
 仅验证静态 prompt 与 output contract 的自包含测试不算 runtime executable resource，但仍须非零断言与正负 fixtures。
 
-快速通道要求 structure/metadata、隔离单包 copy/discovery、deterministic contract tests、显式调用与 non-trigger observations、同步 catalog/docs/changelog，以及一个 fresh independent Evaluator；不需要额外 Critic 或 `light-code-review`。存疑、副作用、implicit trigger、runtime executable、外部依赖、provenance 问题或 confirmed finding 质疑 eligibility 时必须升级到 `review-loop`/`project-review` 完整路径。
+快速通道要求 structure/metadata、隔离单包 copy/discovery、deterministic contract tests、显式调用与 non-trigger observations、同步 catalog/docs/changelog，以及一个新开的独立 Evaluator；不需要额外 Critic 或 `light-code-review`。存疑、副作用、implicit trigger、runtime executable、外部依赖、provenance 问题或 confirmed finding 质疑 eligibility 时必须升级到 `review-loop`/`project-review` 完整路径。
 
 ## 必需 evidence
 

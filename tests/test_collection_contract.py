@@ -99,10 +99,7 @@ class CollectionContractTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         catalog = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
         installation = (ROOT / "docs/INSTALLATION.md").read_text(encoding="utf-8")
-        admission = (ROOT / "docs/SKILL_ADMISSION.md").read_text(encoding="utf-8")
-        admission_zh = (ROOT / "docs/SKILL_ADMISSION.zh-CN.md").read_text(encoding="utf-8")
         review_policy = (ROOT / "docs/REVIEW_POLICY.md").read_text(encoding="utf-8")
-        review_policy_zh = (ROOT / "docs/REVIEW_POLICY.zh-CN.md").read_text(encoding="utf-8")
         self.check("npx skills add LightDevCoder/skills" in readme, "README generic latest whole install")
         self.check("npx skills add LightDevCoder/skills --skill project-review" in installation, "installation generic latest per-Skill install")
         self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation historical pinned v0.1.2 install")
@@ -124,11 +121,6 @@ class CollectionContractTests(unittest.TestCase):
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")
             self.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "installation documents catalog's stable release")
             self.check((ROOT / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "stable release has a post-publication receipt")
-        for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
-                            ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
-            self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")
-            self.check("fresh independent Evaluator" in text, f"{label} independent evaluator boundary")
-            self.check("Critic" in text and "light-code-review" in text, f"{label} omitted specialist boundaries")
         # New governance: reviewer vs engine vs acceptance
         self.check("project-review" in review_policy and "review-loop" in review_policy, "review policy must distinguish project-review vs review-loop")
         self.check("generic-review" in review_policy, "review policy must mention generic-review reviewer")

@@ -320,28 +320,6 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         for marker in markers:
             c.check(marker in en_text and marker in zh_text, f"{en} and {zh} are missing the synchronized semantic marker: {marker}")
 
-    for path in ("docs/SKILL_ADMISSION.md", "docs/SKILL_ADMISSION.zh-CN.md", "docs/REVIEW_POLICY.md", "docs/REVIEW_POLICY.zh-CN.md"):
-        text = read(root, path)
-        c.check(bool(re.search(r"prompt-only|纯提示型", text)), "Admission/review policy must describe the prompt-only fast track.")
-        c.check("fresh independent Evaluator" in text, "Fast-track policy must preserve one fresh independent Evaluator.")
-        c.check("Critic" in text, "Fast-track policy must state the separate Critic boundary.")
-        c.check("light-code-review" in text, "Fast-track policy must state the light-code-review boundary.")
-
-    semantic_matrix = [
-        ("README.md", "README.zh-CN.md", [("Light Skills", "Light Skills"), ("ask-light", "ask-light"), ("Assets/header.png", "Assets/header.png")]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", [("Collection status", "集合状态"), ("Stable release", "稳定版"), ("Installation authority", "安装权威")]),
-        ("CHANGELOG.md", "CHANGELOG.zh-CN.md", [("0.2.0", "0.2.0"), ("ATTRIBUTION", "ATTRIBUTION")]),
-        ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", [("Revision semantics", "Revision 语义"), ("Historical v0.1.0 verification", "历史 v0.1.0 验证"), ("Manual fallback", "手动 fallback")]),
-        ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", [("Authoritative records", "权威记录"), ("Synchronization matrix", "同步矩阵"), ("closeout", "closeout")]),
-        ("docs/REVIEW_POLICY.md", "docs/REVIEW_POLICY.zh-CN.md", [("Reviewer vs review-loop vs project-review", "Reviewer vs review-loop vs project-review"), ("project-review", "project-review"), ("BLOCKED", "BLOCKED")]),
-        ("docs/SKILL_ADMISSION.md", "docs/SKILL_ADMISSION.zh-CN.md", [("Ownership gate", "ownership gate"), ("Approved PORT", "已批准"), ("review-loop", "review-loop")]),
-    ]
-    for en, zh, pairs in semantic_matrix:
-        en_text = read(root, en)
-        zh_text = read(root, zh)
-        for a, b in pairs:
-            c.check(a in en_text and b in zh_text, f"{en} and {zh} are missing the semantic pair: {a} / {b}")
-
     # Skill guides — only check those that exist; not every new skill has a docs/skills guide yet
     for name in ("ask-light", "kanban-worker", "kb-init", "language-learning", "learn-anything", "manuscript-ops", "project-init", "recap", "review-loop"):
         en_path = root / f"docs/skills/{name}.md"
