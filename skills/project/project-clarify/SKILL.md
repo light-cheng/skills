@@ -68,5 +68,4 @@ If the effort is large, multi-session, or has many dependent decisions,
 recommend `$decision-map` and stop. The full contract is in
 [project-clarification-contract.md](references/project-clarification-contract.md);
 workflow and examples are in [WORKFLOW.md](references/WORKFLOW.md) and
-[EXAMPLES.md](references/EXAMPLES.md). Session transitions are specified by
-[session_state.py](scripts/session_state.py).
+[EXAMPLES.md](references/EXAMPLES.md).

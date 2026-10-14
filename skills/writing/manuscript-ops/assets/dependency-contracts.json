@@ -9,12 +9,11 @@
       "invocation_type": "user-invoked",
       "required_files": [
         "SKILL.md",
-        "references/WORKFLOW.md",
-        "scripts/session_state.py"
+        "references/WORKFLOW.md"
       ],
       "interface_tokens": {
-        "scripts/session_state.py": [
-          "transition"
+        "references/WORKFLOW.md": [
+          "socratic"
         ]
       },
       "repository": "LightDevCoder/skills"
@@ -27,13 +26,12 @@
       "invocation_type": "model-invoked",
       "required_files": [
         "SKILL.md",
-        "references/conversation-contract.json",
-        "scripts/frontier.py"
+        "references/conversation-contract.json"
       ],
       "interface_tokens": {
-        "scripts/frontier.py": [
-          "compute_frontier",
-          "apply_answers"
+        "references/conversation-contract.json": [
+          "frontierAsRound",
+          "factRoutes"
         ]
       },
       "repository": "LightDevCoder/skills"

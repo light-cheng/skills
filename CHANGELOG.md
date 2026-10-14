@@ -37,6 +37,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 - Tests (release audit): remove tests that only pinned wording, asserted their own fixture text, re-ran another test, or kept the logic under test inside the test file (the "behavior" suites of `review-loop`, `generic-review`, `project-retro`, `light-implement`, `decision-map` and the `project-review` profiles). Tests that check paths, fields, status codes and composition edges stay. One collection test now checks that no package file carries a local home path, and the package count is read from `skills/*/*/SKILL.md` instead of being written in several places.
 - `check_public_docs.py` (behaviour change): implementation-jargon hits are printed as `WARNING:` lines and no longer fail the gate. Catalog status words match whole words, so "adapters" no longer counts as ADAPT. A README adapter count without a count in `harness-support.md` is an error instead of being compared with a built-in 10.
+- `clarify`, `project-clarify`, `socratic`: remove `scripts/session_state.py` and `scripts/frontier.py`. Agents never ran them; only tests did. The clarification flow lives in each package's `SKILL.md` and `references/`. `manuscript-ops` now checks `clarify` through `references/WORKFLOW.md` and `socratic` through `references/conversation-contract.json` before a Project handoff.
 - `humanizer`: record which quoted examples in `references/patterns.md` come from Wikipedia (CC BY-SA 4.0).
 
 ## 0.2.7 — 2026-10-07
