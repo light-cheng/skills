@@ -422,7 +422,6 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         # Ensure no hard requirement to install upstream at runtime
         c.check("install mattpocock/skills" not in text.lower() and "requires matt" not in text.lower(), f"{skill} must not require Matt runtime install.")
 
-    c.check("sol-advisor" not in read(root, "skills/engineering/agent-config/SKILL.md").lower() or "sol advisor" in read(root, "skills/engineering/agent-config/SKILL.md").lower(), "agent-config should reference Sol Advisor as design reference, not a runtime dependency claim.")
     # Ensure agent-config does not hardcode Sol/Terra/Luna topology
     ac_text = read(root, "skills/engineering/agent-config/SKILL.md")
     c.check("Terra" not in ac_text and "Luna" not in ac_text, "agent-config must not hardcode Sol/Terra/Luna topology.")

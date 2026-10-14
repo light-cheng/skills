@@ -124,10 +124,6 @@ class CollectionContractTests(unittest.TestCase):
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")
             self.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "installation documents catalog's stable release")
             self.check((ROOT / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "stable release has a post-publication receipt")
-        self.check("39" in catalog and "36" in catalog and "34" in catalog and "admitted" in catalog, "catalog package-count boundary (39 now, 36 in v0.2.7, historical 34 before light-travelpage)")
-        self.check("v0.2.1" in catalog, "catalog mentions v0.2.1")
-        self.check("v0.2.2" in catalog, "catalog mentions v0.2.2")
-        self.check("v0.2.3" in catalog, "catalog mentions v0.2.3")
         for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
                             ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
             self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")

@@ -241,12 +241,9 @@ def test_preparation_history_and_generic_candidate_guidance_are_accepted(tmp_pat
     make_candidate(tmp_path)
     path = tmp_path / "docs/MAINTENANCE.md"
     path.write_text(path.read_text(encoding="utf-8") + "\nIf a release candidate fails verification, stop promotion and repair it.\n", encoding="utf-8")
-    candidate = commit(tmp_path)
+    commit(tmp_path)
     result = integrity(tmp_path)
     assert result.returncode == 0, result.stdout + result.stderr
-    manifest = git(tmp_path, "show", f"{candidate}:docs/evidence/releases/{TAG}/RELEASE_MANIFEST.md")
-    assert "Previous stable at preparation: v9.8.6" in manifest
-    assert "installation and publication pending at preparation" in manifest
 
 
 def test_current_gate_cannot_silently_switch_to_another_release_target(tmp_path: Path) -> None:

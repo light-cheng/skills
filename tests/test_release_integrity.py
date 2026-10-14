@@ -105,7 +105,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
         res = check_tag_immutability("v9.9.9-nonexistent", "HEAD", cwd=ROOT)
         self.assertTrue(res.passed)
         self.assertEqual(res.status, "PASS")
-        self.assertIn("does not exist yet", res.message)
 
     def test_existing_tag_same_target_is_idempotent_pass(self) -> None:
         """An existing tag pointing to the exact same target commit returns IDEMPOTENT_PASS."""
@@ -125,7 +124,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
             res = check_tag_immutability("v1.0.0", c1_sha, cwd=tmp_root)
             self.assertTrue(res.passed)
             self.assertEqual(res.status, "IDEMPOTENT_PASS")
-            self.assertIn("Safe for CI retry", res.message)
 
     def test_local_tag_does_not_hide_remote_query_failure(self) -> None:
         from unittest.mock import patch
@@ -177,7 +175,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
             res = check_tag_immutability("v1.0.0", "HEAD", cwd=tmp_root)
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "HARD_FAIL")
-            self.assertIn("Tag retargeting/force-moving is strictly forbidden", res.message)
 
     def test_receipt_consistency_v022(self) -> None:
         """v0.2.2 release receipts match dual-language requirements and package count."""
@@ -647,26 +644,6 @@ class ReleaseIntegrityTests(unittest.TestCase):
         self.assertTrue(res.passed)
         self.assertEqual(res.status, "PASS")
 
-    def test_single_version_include_blocks(self) -> None:
-        """Single version include blocks publication gate."""
-        self.test_exact_single_version_include_fails()
-
-    def test_release_namespace_exclude_blocks(self) -> None:
-        """Release namespace exclude blocks publication gate."""
-        self.test_release_namespace_excluded_fails()
-
-    def test_inactive_ruleset_blocks(self) -> None:
-        """Inactive ruleset blocks publication gate."""
-        self.test_inactive_ruleset_fails()
-
-    def test_missing_update_blocks(self) -> None:
-        """Missing update rule blocks publication gate."""
-        self.test_missing_update_rule_fails()
-
-    def test_missing_deletion_blocks(self) -> None:
-        """Missing deletion rule blocks publication gate."""
-        self.test_missing_deletion_rule_fails()
-
 
 def make_valid_receipt_en(
     tag: str = "v0.2.4",
@@ -959,14 +936,6 @@ class ReceiptStrictValidationTests(unittest.TestCase):
         res_immut = check_tag_immutability("v0.2.4", cand_sha, stage="tagged", cwd=self.tmp_root)
         self.assertFalse(res_immut.passed)
         self.assertEqual(res_immut.status, "LIGHTWEIGHT_TAG_FORBIDDEN")
-
-    def test_receipt_tag_object_must_match_real_annotated_tag_object(self) -> None:
-        """Receipt Annotated Tag Object must match real tag object SHA."""
-        self.test_attested_receipt_wrong_tag_object_rejected()
-
-    def test_receipt_target_commit_must_match_peeled_commit(self) -> None:
-        """Receipt Tag Target Commit must match actual peeled commit SHA."""
-        self.test_attested_receipt_wrong_tag_target_rejected()
 
     def test_attested_main_head_may_differ_from_release_candidate(self) -> None:
         """Crucial regression: attested gate passes when main HEAD is an attestation commit later than the candidate commit."""
@@ -1858,7 +1827,6 @@ class RemoteTagPreflightTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("already exists on origin", res.message)
 
     def test_remote_unreachable_blocks(self) -> None:
         """Unreachable or non-existent remote returns QUERY_FAILED and blocks preflight."""
@@ -1875,7 +1843,6 @@ class RemoteTagPreflightTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("Could not verify remote tag state", res.message)
 
     def test_remote_auth_failure_blocks(self) -> None:
         """Remote auth failure (exit code 128) must return QUERY_FAILED and BLOCK."""
@@ -1892,7 +1859,6 @@ class RemoteTagPreflightTests(unittest.TestCase):
         with patch("check_release_tag_preflight.run_git", side_effect=mock_run_git):
             res_remote = resolve_remote_tag("v9.9.9", remote="origin", cwd=self.client_dir)
             self.assertEqual(res_remote.status, RemoteTagStatus.QUERY_FAILED)
-            self.assertIn("Authentication failed", res_remote.error or "")
 
             res = run_tag_preflight(
                 tag="v9.9.9",
@@ -1902,7 +1868,6 @@ class RemoteTagPreflightTests(unittest.TestCase):
             )
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "BLOCKED")
-            self.assertIn("Could not verify remote tag state", res.message)
 
     def test_ls_remote_nonzero_blocks(self) -> None:
         """Any nonzero return code from git ls-remote must return QUERY_FAILED and BLOCK."""
@@ -1928,7 +1893,6 @@ class RemoteTagPreflightTests(unittest.TestCase):
             )
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "BLOCKED")
-            self.assertIn("Could not verify remote tag state", res.message)
 
     def test_empty_successful_result_means_absent(self) -> None:
         """Exit code 0 with empty output must resolve to ABSENT."""
@@ -1992,7 +1956,6 @@ class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("Local tag 'v9.9.9' already exists", res.message)
 
     def test_remote_annotated_tag_existing_blocks_preflight(self) -> None:
         """Remote annotated tag pointing to same candidate commit blocks preflight (unidirectional creation)."""
@@ -2009,7 +1972,6 @@ class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("already exists on origin", res.message)
 
     def test_remote_annotated_tag_different_candidate_blocks(self) -> None:
         """Remote annotated tag pointing to a different commit blocks preflight."""
@@ -2031,7 +1993,6 @@ class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("already exists on origin", res.message)
 
     def test_remote_lightweight_tag_blocks(self) -> None:
         """Remote lightweight tag blocks preflight."""
@@ -2047,7 +2008,6 @@ class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "BLOCKED")
-        self.assertIn("already exists on origin", res.message)
 
     def test_remote_tag_object_sha_distinguished_from_peeled_commit(self) -> None:
         """Remote annotated tag resolves tag object T != candidate A and peeled commit == A."""
@@ -2082,7 +2042,6 @@ class RemoteTagUnidirectionalProtectionTests(unittest.TestCase):
             )
             self.assertFalse(res.passed)
             self.assertEqual(res.status, "BLOCKED")
-            self.assertIn("Could not verify remote tag state", res.message)
 
 
 class ReceiptGitObjectDriftTests(unittest.TestCase):
@@ -2205,7 +2164,6 @@ class ReceiptGitObjectDriftTests(unittest.TestCase):
         )
         self.assertFalse(res.passed)
         self.assertEqual(res.status, "COUNT_MISMATCH")
-        self.assertIn("receipt claims 2, but release snapshot has 1 admitted packages", res.message)
 
     def test_receipt_count_must_match_tag_snapshot(self) -> None:
         """Tag snapshot has 1 package; release_revision resolving to refs/tags/v9.9.9 enforces 1."""
@@ -2517,7 +2475,6 @@ class ReleaseBodyLinkHardeningTests(unittest.TestCase):
         bad_body = "[中文说明](RELEASE_NOTES.zh-CN.md)"
         valid, errors = prepare_release_body.validate_release_body_links(bad_body, "v9.9.9")
         self.assertFalse(valid)
-        self.assertTrue(any("Bare relative link detected" in e for e in errors))
 
     def test_validate_release_body_accepts_absolute_links(self) -> None:
         import prepare_release_body

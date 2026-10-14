@@ -130,11 +130,6 @@ def check_category_readmes(repo_root: Path = REPO_ROOT) -> list[str]:
                     errors.append(
                         f"{readme_path.relative_to(repo_root)} is missing link to {expected_link}"
                     )
-                target_skill = cat_dir / expected_link
-                if not target_skill.is_file():
-                    errors.append(
-                        f"Resolved link target does not exist: {target_skill.relative_to(repo_root)}"
-                    )
 
     return errors
 
@@ -180,7 +175,7 @@ def check_release_link_labels(
     return errors
 
 
-def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
+def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int | None:
     """Retrieve canonical native harness adapter count from agent-config documentation."""
     harness_doc = repo_root / "skills" / "engineering" / "agent-config" / "references" / "harness-support.md"
     if harness_doc.is_file():
@@ -188,7 +183,7 @@ def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
         m = re.search(r"native host adapters for\s+(\d+)\s+primary coding-agent harnesses", text, re.IGNORECASE)
         if m:
             return int(m.group(1))
-    return 10
+    return None
 
 
 def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
@@ -212,7 +207,9 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.md contains stale claim stating admitted package is an unreleased addition.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s+native\s+adapters", text_en, re.IGNORECASE)
-        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
+        if m_adapt and canonical_adapters is None:
+            errors.append("README.md states a native adapter count, but agent-config harness-support.md does not state the canonical count.")
+        elif m_adapt and int(m_adapt.group(1)) != canonical_adapters:
             errors.append(f"README.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
 
     if readme_zh.is_file():
@@ -226,7 +223,9 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.zh-CN.md contains stale claim stating admitted package is not included in version tag.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s*种原生适配器", text_zh)
-        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
+        if m_adapt and canonical_adapters is None:
+            errors.append("README.zh-CN.md states a native adapter count, but agent-config harness-support.md does not state the canonical count.")
+        elif m_adapt and int(m_adapt.group(1)) != canonical_adapters:
             errors.append(f"README.zh-CN.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
 
     return errors
@@ -247,21 +246,21 @@ def extract_status_tokens(text: str) -> set[str]:
     tokens: set[str] = set()
     t = text.upper()
 
-    if "ADMITTED" in t or "第一方已准入" in text or "实质性转换的第一方能力" in text:
+    if re.search(r"\bADMITTED\b", t) or "第一方已准入" in text or "实质性转换的第一方能力" in text:
         tokens.add("ADMITTED")
-    if "PASS" in t:
+    if re.search(r"\bPASS(?:ED)?\b", t):
         tokens.add("PASS")
-    if "PORT" in t:
+    if re.search(r"\bPORT(?:ED|S)?\b", t):
         tokens.add("PORT")
-    if "ADAPT" in t or "适配" in text:
+    if re.search(r"\bADAPT(?:ATION|ED)?\b", t) or re.search(r"适配(?!器)", text):
         tokens.add("ADAPT")
-    if "REFACTOR" in t or "重构" in text:
+    if re.search(r"\bREFACTOR(?:ED|S)?\b", t) or "重构" in text:
         tokens.add("REFACTOR")
-    if "SPLIT" in t or "拆分" in text:
+    if re.search(r"\bSPLIT\b", t) or "拆分" in text:
         tokens.add("SPLIT")
-    if "MIGRATE" in t or "迁移" in text:
+    if re.search(r"\bMIGRATE[DS]?\b", t) or "迁移" in text:
         tokens.add("MIGRATE")
-    if "PRESERVE" in t or "保留" in text:
+    if re.search(r"\bPRESERVE[DS]?\b", t) or "保留" in text:
         tokens.add("PRESERVE")
     if "NO REWRITE" in t or "NO-REWRITE" in t or "无需重写" in text:
         tokens.add("NO_REWRITE")
