@@ -196,6 +196,64 @@
 - **测试：** 新增代表性 top routing、空仓库 bootstrap/rerun、clarification lifecycle、本地 pointer、所有权与历史/runtime 边界测试；通过行为测试消除已修复的 prose coupling，而非恢复旧措辞。
 - **recap：** 根据用户明确修订，`SKILL.md` 现在只含必需 frontmatter 与一条手动 `$recap` 执行语句；输出当前 session 的一句简洁摘要，不替换或压缩对话历史。
 
+### 变更 — 核心工作流与 Socratic 修复
+
+- **ask-light 工作流顾问：** `ask-light` 现在检查项目与工作流证据，说明当前阶段，带理由推荐下一个 Skill，支持集合导航，无需调用方注入根目录即可发现 Light 根，区分第一方来源与同目录的第三方包，并在用户批准后安全转换（Codex 上直接执行是中间状态；未发布版本的最终行为以上文当前 Host 转换策略为准）。
+- **Socratic 前沿轮次：** `socratic` 现在把完整的可行动前沿作为一轮带编号的独立问题提出，附选项与推荐，并接受 `1B, 2A, 3C` 这样的批量回复；`clarify` 和 `project-clarify` 使用相同的轮次交互。
+- **project-init 可用性：** bootstrap 现在把声明的相关能力分为 `available`、`unavailable` 或 `unknown`，从不静默把 `unknown` 提升为 `available`。
+- **Reviewer 所有权：** `review-loop/references/reviewer-contract.md` 是唯一的规范运行时契约；`docs/REVIEWER_CONTRACT.md`（及 zh-CN）现在是面向人的摘要与指针。
+- **页头：** README 主图仍为 `Assets/header.png`，作为新的仓库页头图。
+
+### 变更 — Review 基线完整性
+
+- **ask-light 软件固定点：** `software` Profile 的 verdict 现在只有在当前树仍与 Charter 产出的 `- Fixed point:` 身份一致时才可消费，且只看所记录的实现窗口触及的路径；窗口内的未提交或已提交漂移会把旧 verdict 判为过期，转入 `review-stale → project-review`；窗口外的改动从不使其失效；固定点缺失、无法解析或无法界定（repository-first）时失败关闭（`review-freshness-unknown`）。
+- **ask-light 目录基线：** Charter 引用目录来源时，整个目录就是被审查的基线——记录的修订之后在目录内出现的文件（包括未跟踪文件）现在会让 verdict 过期；被引用目录之外的未跟踪文件，以及只引用文件时的同级文件，仍视为无关。
+- **project-review 产出方契约：** `references/profiles/software.md` 记录持久的双基线记录；Charter 模板（`acceptance-charter.md`）新增仅限 software 的 `- Fixed point:` 行，`init` 工作流把它与基线一起冻结。
+- **测试：** 新增 11 个基于 Git 的回归测试（17 个用例），覆盖 §13/§14 矩阵：新鲜 PASS、实现的未提交/已提交改动、无关改动隔离、过期 FAIL/BLOCKED、固定点缺失/无法解析/无法验证、目录内已跟踪文件修改/删除、新的未跟踪子文件、目录外噪声，以及文件来源的同级隔离。
+
+> 历史说明：本节所述固定点规则经审计为失败开放（监控改动文件集合，且身份可被挽救），
+> 已在**任何发布之前**被下文"软件 review 基线契约"取代。本节原样保留，
+> 因为审计记录必须显示早先规则声称了什么，而不是重新标注它。
+
+### 变更 — 软件 review 基线契约（在任何发布之前取代上文的双值固定点规则）
+
+人工审计在早先未发布的规则下复现了错误的 `accepted` verdict：审查 diff 未触及的、早已存在的范围内文件，以及 PASS 之后在组件内新建的文件，都逃过了新鲜度检查，因为监控集合来自窗口内的改动路径；格式错误的固定点被部分挽救（丢弃无效 token、去重重复项）；而把候选版本冻结进不可变的 Charter，与已授权的"审查 → 有界修复 → 复审"生命周期相矛盾。作为产出方 + 消费方契约修复，全程失败关闭：
+
+- **三字段软件基线（产出方 `project-review`）：** Charter 冻结 `- Fixed point:`（恰好一个完整提交 SHA——不可变的代码审查基点；冻结实际起界定作用的提交，绝不是可变的分支名）和 `- Implementation scope:`（以 `';'` 分隔的仓库相对字面路径——已批准的软件 `In scope` 的机器投影；稳定的组件根，绝不从改动路径、扩展名或公共目录推断；无法验证的目标为 `BLOCKED`，任一无效条目使整个字段被拒）。最终候选版本不在 `init` 时冻结：每个持久的 `PASS`/`FAIL`/`BLOCKED` 都在 `verdict.md` 上记录 `- Reviewed implementation revision:`，因此合法的 C1→C2 修复可以重新绑定验收而不修改 Charter。
+- **消费方新鲜度不变量（`ask-light`）：** 软件 verdict 只有在以下条件全部满足时才可消费：三个身份都严格解析（不挽救、不去重）；基点与最终修订不同、能界定最终修订，且范围内改动非空；在冻结的范围内，已跟踪、已暂存、已提交和未跟踪的新增内容都仍与被审查的修订一致。范围内漂移会让任何旧 verdict 过期（`review-stale`）；范围外改动仍视为无关；整库范围 `.` 有意在 README 改动时过期（没有隐藏例外）；旧格式记录从不被接受（`review-freshness-unknown`），需要重新运行 `project-review`。
+- **测试：** 基于 Git 的矩阵重写为 22 个方法、约 45 个用例：§10–§14 新鲜度矩阵（范围内改动/早已存在/新增/删除、范围外隔离、单文件范围、整库范围）、严格的固定点与最终修订语法、包括有效/无效混合的范围校验、基点/最终修订关系检查、FAIL/BLOCKED 绑定、旧记录不兼容、§16 自我过期防护，以及强制的"审查→修复→PASS"生命周期绑定到 C2。
+- **文档：** `project-review` 的 references（software profile、Charter 模板、workflow、证据协议、迁移说明）定义该契约；`ask-light` 的 discovery-contract 只保留简明的消费方摘要。
+
+### 变更 — 持久基线加固（单例字段、无歧义身份、被忽略文件的完整性）
+
+人工审计在 `52d8638` 复现了三类错误 `accepted`：重复的规范持久字段按"首个匹配胜出"被消费（重复或缺失的 `Profile` 会静默跳过软件新鲜度检查）；多候选的 `Source revision or identity` 值被挽救为第一个可解析的 SHA；被 `.gitignore` / `.git/info/exclude` 从 `git status` 中隐藏的文件逃过了目录来源与实现范围的新鲜度检查。已失败关闭地修复：
+
+- **单例持久字段：** 产出方拥有的规范字段（Charter 中的 `Source:`、`Source revision or identity:`、`Profile:`、`Fixed point:`、`Implementation scope:`；verdict 上的 `Reviewed implementation revision:`）是单例字段——出现次数是有效性的一部分。恰好出现一次才解析；零次或多次（即使是完全相同的重复）都失败关闭为 `review-freshness-unknown` / `review-ownership-unknown`，与字段顺序无关。`ask-light` 从不对权威字段采用"第一个值胜出"。
+- **无歧义来源身份：** `Source revision or identity` 只有在恰好携带一个无歧义、可在本地解析的 Git 提交时才可用；无效+有效、有效+有效、重复值或重复字段都失败关闭，不做部分挽救。非 Git 身份仍不被消费方支持（失败关闭，未变）。
+- **被忽略文件的完整性：** 目录来源与实现范围的新文件检测现在使用 `git ls-files --others`（字面 pathspec，不带 `--exclude-standard`），因此范围内被忽略的文件会像其他新增内容一样让 verdict 过期。Git ignore 控制的是状态展示，而不是范围归属；单文件范围、只引用文件的来源和范围外路径保持原有的窄语义。
+- **产出方文档：** `project-review` 的 references（Charter 模板、software profile、workflow）写明单例规则，以及被审查范围的完整性包括被 Git 忽略的文件；`ask-light` 的 discovery-contract 记录消费方摘要。
+- **测试：** 新增 19 个基于 Git 的回归方法（ask-light 套件共 122 个）：单例出现次数矩阵（含顺序无关性，以及经真实路由路径的持久记录篡改）、来源修订歧义矩阵、被忽略文件矩阵（范围内/范围外、单文件、整库、目录来源的子文件），以及有效基线的正向对照。
+
+### 变更 — 持久 review 事务一致性（charter.md + state.md + verdict.md）
+
+人工审计在 `38f4f9b` 复现了错误的 `accepted` verdict：`state.md` 处于活动/非终态（READY、CRITIC、REPAIR、EVALUATE）、缺失，或已更新到新的 Charter 修订但仍保留之前的 PASS verdict。`ask-light` 现在把 `charter.md` + `state.md` + `verdict.md` 作为一个一致的 review 事务来评估：
+
+- **必须有状态文件：** `state.md` 必须存在，并给出规范的单例字段（`Status:`、`Charter revision:`、`Profile:`）。字段缺失或重复时失败关闭为 `review-state-unknown`。
+- **活动状态压过旧 verdict：** 活动的 review 状态（`INIT`、`READY`、`CRITIC`、`REPAIR`、`EVALUATE`）立即路由到 `project-review`（阶段 `project-review`）；之前的任何 `verdict.md` 都不具权威性，从不被接受。
+- **终态 State/Verdict 一致：** 终态 review 状态（`PASS`、`FAIL`、`BLOCKED`）要求有一致的 `verdict.md`；冲突时失败关闭为 `acceptance-unknown`。
+- **Charter 修订与 Profile 一致：** `state.md` 的 `Charter revision` 和 `Profile` 都必须与 `charter.md` 一致；不一致时失败关闭为 `review-state-unknown`。
+- **测试与冒烟：** 新增 15 个测试方法（pytest 套件共 300 个测试，ask-light 套件 137 个），覆盖完整的事务矩阵、重新打开生命周期、Charter 更新生命周期、C1→修复→C2 生命周期，以及在真实持久状态上的 24 个手动冒烟场景。
+
+### 变更 — 终态 review 事务身份绑定（State 与 Verdict 的 Round、强制的 Verdict 身份、唯一结论）
+
+修复了 `d414a3b` 处的错误 `accepted` 缺陷：终态 State（例如第 2 轮 PASS）可能接受旧轮次的 PASS verdict（第 1 轮），因为 `Round` 未被绑定，且 Verdict 侧的 Charter 修订和 Profile 是可选的。完成了持久 review 事务契约：
+
+- **Round 绑定（`state.md` + `verdict.md`）：** `Round` 是 `state.md`（缺失/重复/格式错误时为 `review-state-unknown`）和终态 `verdict.md`（缺失/重复/格式错误/不一致时为 `acceptance-unknown`）中强制的规范单例字段。规范的产出方语法（`1`、`2`、`round-01`、`round-01 (final)`）被解析为规范化的 review 轮次身份。
+- **强制的 Verdict 身份：** `Charter revision:` 和 `Profile:` 是终态 `verdict.md` 上强制的单例字段；缺失、重复或不一致时失败关闭为 `acceptance-unknown`。
+- **唯一的终态结论语义：** 终态结论集合（`PASS`、`FAIL`、`BLOCKED`）必须解析为恰好一个无歧义的结论；多个或相互冲突的结论（`PASS+FAIL`、`PASS+BLOCKED`、`FAIL+BLOCKED`、`PASS+FAIL+BLOCKED`）失败关闭为 `acceptance-unknown`。
+- **安全的收尾顺序：** 产出方文档（`WORKFLOW.md`）明确规定失败安全的收尾顺序（`写当前轮次 verdict → 校验持久字段 → 把状态设为终态`），确保中间状态失败关闭。
+- **测试与冒烟：** 新增 6 个测试方法（pytest 套件共 306 个测试，ask-light 套件 143 个），覆盖完整的事务身份矩阵、Round 不一致、Verdict 身份要求、终态结论唯一性、SPEC §14 重新打开轮次生命周期，以及 24 个手动冒烟场景。
+
 ### No-Redesign 验证
 
 对 18 个 `NO REWRITE/PORT` 按 `git diff` 逐个检查（SPEC §26）：`manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`release-workflow`、`research`、`prototype`、`tdd`、`handoff`、`diagnosing-bugs`、`wizard`、`teach`、`wait-what`、`to-questionnaire`、`writing-for-agents`、`resolving-merge-conflicts`——仅在真实集成需求处加最小 handoff/attribution。`recap` 是上文单独记录、经用户批准的例外。
