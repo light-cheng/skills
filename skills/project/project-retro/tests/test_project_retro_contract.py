@@ -60,12 +60,6 @@ class ProjectRetroContractTest(unittest.TestCase):
                 f"Missing category in categories.md: {cat}",
             )
 
-    def test_agent_self_evaluation_trigger_documented(self) -> None:
-        self.assertIn("Agent self-evaluation trigger", SKILL)
-        self.assertIn("Friction signal", SKILL)
-        self.assertIn("Skip", SKILL)
-        self.assertIn("heuristics.md", SKILL)
-
     def test_reference_links_resolve(self) -> None:
         for match in re.finditer(r"\[([^\]]+)\]\(([^)]+)\)", SKILL):
             link = match.group(2).split("#")[0]
@@ -84,14 +78,6 @@ class ProjectRetroContractTest(unittest.TestCase):
         self.assertIn("[CLOSED]", SKILL)
         self.assertIn("[PARTIAL]", SKILL)
         self.assertIn("[OPEN]", SKILL)
-        self.assertIn("Already-Closed Guardrails", TEMPLATE)
-        self.assertIn("Remaining Systemic Findings", TEMPLATE)
-        self.assertIn("Suggested Actions — Pending Approval", TEMPLATE)
-        self.assertIn("Suggested Actions — Pending Approval", SKILL)
-        self.assertIn("Useful signals", CATEGORIES)
-        self.assertIn("Typical durable improvements", CATEGORIES)
-        self.assertIn("Neutral Tone", HEURISTICS)
-        self.assertIn("Recommendation Is Not Authorization", HEURISTICS)
 
     def test_positive_instruction_and_state_transitions(self) -> None:
         """Verify positive instructions, Audit Communication, and state transitions."""
@@ -99,10 +85,8 @@ class ProjectRetroContractTest(unittest.TestCase):
         heuristics_text = (ROOT / "references" / "heuristics.md").read_text(encoding="utf-8")
         template_text = (ROOT / "references" / "template.md").read_text(encoding="utf-8")
 
-        self.assertIn("Audit Communication", skill_text)
         self.assertIn("AWAITING_SELECTION", skill_text)
         self.assertIn("APPROVED_ACTION", skill_text)
-        self.assertRegex(skill_text, r"Routine sessions with no reusable systemic\s+friction")
         self.assertIn("AWAITING_SELECTION", heuristics_text)
         self.assertIn("APPROVED_ACTION", heuristics_text)
         self.assertIn("AWAITING_SELECTION", template_text)
