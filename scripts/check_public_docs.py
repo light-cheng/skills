@@ -108,7 +108,7 @@ def check_catalog_inventory(repo_root: Path = REPO_ROOT) -> list[str]:
 
 
 def check_category_readmes(repo_root: Path = REPO_ROOT) -> list[str]:
-    """Verify category READMEs list all packages in their category and links resolve."""
+    """Verify category READMEs link every package in their category."""
     errors: list[str] = []
     category_dirs = [d for d in (repo_root / "skills").iterdir() if d.is_dir() and d.name != "docs"]
 
@@ -186,6 +186,16 @@ def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int | None:
     return None
 
 
+def _adapter_claim_errors(name: str, claim: re.Match | None, canonical: int | None) -> list[str]:
+    if claim is None:
+        return []
+    if canonical is None:
+        return [f"{name} states a native adapter count, but agent-config harness-support.md does not state the canonical count."]
+    if int(claim.group(1)) != canonical:
+        return [f"{name} reports {claim.group(1)} native adapters, expected {canonical}."]
+    return []
+
+
 def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
     """Validate root README facts against repository canonical state."""
     errors: list[str] = []
@@ -207,10 +217,7 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.md contains stale claim stating admitted package is an unreleased addition.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s+native\s+adapters", text_en, re.IGNORECASE)
-        if m_adapt and canonical_adapters is None:
-            errors.append("README.md states a native adapter count, but agent-config harness-support.md does not state the canonical count.")
-        elif m_adapt and int(m_adapt.group(1)) != canonical_adapters:
-            errors.append(f"README.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+        errors.extend(_adapter_claim_errors("README.md", m_adapt, canonical_adapters))
 
     if readme_zh.is_file():
         text_zh = readme_zh.read_text(encoding="utf-8")
@@ -223,10 +230,7 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.zh-CN.md contains stale claim stating admitted package is not included in version tag.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s*种原生适配器", text_zh)
-        if m_adapt and canonical_adapters is None:
-            errors.append("README.zh-CN.md states a native adapter count, but agent-config harness-support.md does not state the canonical count.")
-        elif m_adapt and int(m_adapt.group(1)) != canonical_adapters:
-            errors.append(f"README.zh-CN.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+        errors.extend(_adapter_claim_errors("README.zh-CN.md", m_adapt, canonical_adapters))
 
     return errors
 
@@ -242,31 +246,39 @@ def normalize_invocation(text: str) -> str:
 
 
 def extract_status_tokens(text: str) -> set[str]:
-    """Extract canonical semantic status tokens from English or Chinese status prose."""
+    """Extract canonical semantic status tokens from English or Chinese status prose.
+
+    English words match case-insensitively as whole ASCII words (so "adapters"
+    is not ADAPT, and "经PORT" still is PORT); Chinese status words match as
+    substrings. Both sides read prose, so the two catalogs stay comparable.
+    """
     tokens: set[str] = set()
     t = text.upper()
 
-    if re.search(r"\bADMITTED\b", t) or "第一方已准入" in text or "实质性转换的第一方能力" in text:
+    def word(stem: str, suffixes: str = "") -> bool:
+        return re.search(rf"(?<![A-Z0-9_]){stem}(?:{suffixes})?(?![A-Z0-9_])", t) is not None
+
+    if word("ADMITTED") or "第一方已准入" in text or "实质性转换的第一方能力" in text:
         tokens.add("ADMITTED")
-    if re.search(r"\bPASS(?:ED)?\b", t):
+    if word("PASS", "ED|ES|ING"):
         tokens.add("PASS")
-    if re.search(r"\bPORT(?:ED|S)?\b", t):
+    if word("PORT", "ED|S|ING"):
         tokens.add("PORT")
-    if re.search(r"\bADAPT(?:ATION|ED)?\b", t) or re.search(r"适配(?!器)", text):
+    if word("ADAPT", "ATION|ED|S|ING") or re.search(r"适配(?!器)", text):
         tokens.add("ADAPT")
-    if re.search(r"\bREFACTOR(?:ED|S)?\b", t) or "重构" in text:
+    if word("REFACTOR", "ED|S|ING") or "重构" in text:
         tokens.add("REFACTOR")
-    if re.search(r"\bSPLIT\b", t) or "拆分" in text:
+    if word("SPLIT", "S|TING") or "拆分" in text:
         tokens.add("SPLIT")
-    if re.search(r"\bMIGRATE[DS]?\b", t) or "迁移" in text:
+    if word("MIGRATE", "D|S") or "迁移" in text:
         tokens.add("MIGRATE")
-    if re.search(r"\bPRESERVE[DS]?\b", t) or "保留" in text:
+    if word("PRESERVE", "D|S") or "保留" in text:
         tokens.add("PRESERVE")
     if "NO REWRITE" in t or "NO-REWRITE" in t or "无需重写" in text:
         tokens.add("NO_REWRITE")
     if "NO REDESIGN" in t or "NO-REDESIGN" in t or "无需重新设计" in text:
         tokens.add("NO_REDESIGN")
-    if re.search(r"\bNEW\b", t) or "新建" in text or "新增" in text:
+    if word("NEW") or "新建" in text or "新增" in text:
         tokens.add("NEW")
 
     for m in re.finditer(r"RELEASED\s+(?:IN|ON\s+THE)\s+(V\d+\.\d+\.\d+)", t):

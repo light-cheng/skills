@@ -2473,7 +2473,7 @@ class ReleaseBodyLinkHardeningTests(unittest.TestCase):
     def test_validate_release_body_rejects_bare_relative_links(self) -> None:
         import prepare_release_body
         bad_body = "[中文说明](RELEASE_NOTES.zh-CN.md)"
-        valid, errors = prepare_release_body.validate_release_body_links(bad_body, "v9.9.9")
+        valid, _ = prepare_release_body.validate_release_body_links(bad_body, "v9.9.9")
         self.assertFalse(valid)
 
     def test_validate_release_body_accepts_absolute_links(self) -> None:

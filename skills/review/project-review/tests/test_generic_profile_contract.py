@@ -64,9 +64,13 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
 
 
+    c.require_match("TC-GEN-007 missing acceptance source", workflow, r"(?i)missing acceptance source.*BLOCKED|BLOCKED.*missing acceptance source")
+
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)independence: unavailable")
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)return `BLOCKED`")
 
+
+    c.require_match("TC-GEN-009 maximum rounds", stopping, r"(?i)maximum round.*BLOCKED|BLOCKED.*maximum round")
 
     c.require_match("TC-GEN-010 verdicts", stopping, r"`PASS`")
     c.require_match("TC-GEN-010 verdicts", stopping, r"`FAIL`")

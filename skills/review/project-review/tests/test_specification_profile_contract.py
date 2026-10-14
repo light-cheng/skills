@@ -41,7 +41,6 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     profile = profile_path.read_text(encoding="utf-8", errors="replace")
     generic = generic_path.read_text(encoding="utf-8", errors="replace")
     finding = finding_path.read_text(encoding="utf-8", errors="replace")
-    evidence = evidence_path.read_text(encoding="utf-8", errors="replace")
     stopping = stopping_path.read_text(encoding="utf-8", errors="replace")
 
     c.require_match("TC-SP-001 profile link", skill, r"(?im)\[specification\.md\]\(references/profiles/specification\.md\)")

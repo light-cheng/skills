@@ -108,15 +108,26 @@ class PublicDocsQualityTests(unittest.TestCase):
         self.assertEqual(extract_status_tokens("10 种原生适配器"), set())
         self.assertEqual(extract_status_tokens("ADAPT (Matt `to-spec`)"), {"ADAPT"})
         self.assertEqual(extract_status_tokens("PORT & LIGHT WORKFLOW ADAPTATION"), {"PORT", "ADAPT"})
+        self.assertEqual(extract_status_tokens("经PORT与ADAPT改造"), {"PORT", "ADAPT"})
 
     def test_readme_adapter_claim_fails_without_canonical_count(self) -> None:
         with tempfile.TemporaryDirectory(prefix="readme-facts-") as tmp:
             root = Path(tmp)
             (root / "README.md").write_text("# Light\n\n10 native adapters\n", encoding="utf-8")
-            (root / "README.zh-CN.md").write_text("# Light\n", encoding="utf-8")
+            (root / "README.zh-CN.md").write_text("# Light\n\n10 种原生适配器\n", encoding="utf-8")
             errors = check_readme_facts(root)
-        self.assertEqual(len(errors), 1)
-        self.assertIn("harness-support.md", errors[0])
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("harness-support.md" in e for e in errors))
+
+    def test_real_readmes_state_the_counts_the_checker_compares(self) -> None:
+        """Synthetic fixtures may omit count claims; the real READMEs must keep them parseable."""
+        for name, count, adapters in (
+            ("README.md", r"provides\s+\d+\s+first-party\s+Agent\s+Skills", r"\d+\s+native\s+adapters"),
+            ("README.zh-CN.md", r"包含\s*\d+\s*个第一方\s*Agent\s*Skill", r"\d+\s*种原生适配器"),
+        ):
+            text = (ROOT / name).read_text(encoding="utf-8")
+            self.assertRegex(text, count, name)
+            self.assertRegex(text, adapters, name)
 
     def test_category_readme_missing_skill_link_fails(self) -> None:
         """If a category README omits a skill in its directory, check fails."""

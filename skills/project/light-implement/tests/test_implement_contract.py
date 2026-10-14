@@ -25,7 +25,7 @@ class ImplementContractTest(unittest.TestCase):
         self.assertRegex(SKILL, r"(?m)^disable-model-invocation:\s*true\s*$")
         self.assertRegex(METADATA, r"(?m)^\s*allow_implicit_invocation:\s*false\s*$")
 
-    def test_agent_config_is_opt_in_and_user_controlled(self) -> None:
+    def test_routing_question_for_agent_config_is_declared(self) -> None:
         self.assertIn("would routing materially help", SKILL)
 
     def test_composition_targets_are_declared(self) -> None:

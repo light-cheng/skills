@@ -31,6 +31,7 @@ EDGES = (
     ("decision-map", "light-research", "calls"),
     ("decision-map", "light-prototype", "calls"),
     ("decision-map", "light-to-questionnaire", "recommends"),
+    ("decision-map", "project-spec", "recommends"),
     ("project-spec", "project-tickets", "recommends"),
     ("light-implement", "agent-config", "calls"),
     ("light-implement", "light-tdd", "calls"),
