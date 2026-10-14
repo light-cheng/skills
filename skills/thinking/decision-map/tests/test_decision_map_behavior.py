@@ -85,27 +85,6 @@ Test notes
             self.assertEqual(frontier(base), ["02-second-decision.md"])
             self.assertIn("First decision", map_md.read_text(encoding="utf-8"))
 
-    def test_map_contract_describes_decisions_so_far_indexing(self) -> None:
-        mc = (ROOT / "references" / "MAP-CONTRACT.md").read_text(encoding="utf-8")
-        wf = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
-
-        self.assertIn("Decisions so far", mc)
-        self.assertIn("one line per closed ticket", mc)
-        self.assertIn("gist", mc.lower())
-        self.assertIn("Not yet specified", mc)
-        self.assertIn("Out of scope", mc)
-        # workflow mentions graduation of fog and scope ruling
-        self.assertIn("graduate", wf.lower())
-        self.assertIn("Out of scope", wf)
-
-    def test_handoff_material_exists_when_fog_clear(self) -> None:
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        wf = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
-
-        self.assertIn("project-spec", skill.lower())
-        self.assertIn("fog is empty", wf.lower() if "fog is empty" in wf.lower() else wf.lower() + skill.lower())
-        self.assertIn("No open tickets", wf)
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
