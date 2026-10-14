@@ -1,4 +1,7 @@
-"""Installed packages must not carry paths from the author's machine."""
+"""Package files outside tests/ must not carry paths from the author's machine.
+
+Package tests are skipped because they hold sample paths in negative checks.
+"""
 
 from __future__ import annotations
 

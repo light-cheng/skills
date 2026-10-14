@@ -35,6 +35,10 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 - `release-workflow`: Validate finalized staged artifacts and receipt/archive links before every push; bind candidate and final attestation CI to exact commits, wait for success, and disclose failed attempts and historical file badges. Use one final commit/push per coherent same-stage repair, gathering review and all affected artifacts first; keep candidate/receipt stages and genuine post-push failures distinct. Preserve release history and notification settings.
 
+- Tests (release audit): remove tests that only pinned wording, asserted their own fixture text, re-ran another test, or kept the logic under test inside the test file (the "behavior" suites of `review-loop`, `generic-review`, `project-retro`, `light-implement`, `decision-map` and the `project-review` profiles). Tests that check paths, fields, status codes and composition edges stay. One collection test now checks that no package file carries a local home path, and the package count is read from `skills/*/*/SKILL.md` instead of being written in several places.
+- `check_public_docs.py` (behaviour change): implementation-jargon hits are printed as `WARNING:` lines and no longer fail the gate. Catalog status words match whole words, so "adapters" no longer counts as ADAPT. A README adapter count without a count in `harness-support.md` is an error instead of being compared with a built-in 10.
+- `humanizer`: record which quoted examples in `references/patterns.md` come from Wikipedia (CC BY-SA 4.0).
+
 ## 0.2.7 — 2026-10-07
 
 - Add `light-` to 12 Skill names; synchronize package identity, UI source labels, internal references, ask-light routing/state/discovery, attribution and bilingual migration/docs. Retain 24 other names, 36 packages, responsibilities and invocation permissions. No old-name aliases or automatic global migration.

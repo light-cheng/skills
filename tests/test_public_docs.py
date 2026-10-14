@@ -13,7 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from check_public_docs import (
     run_checks,
-    check_anti_patterns,
+    check_jargon,
     check_release_link_labels,
     check_catalog_inventory,
     check_category_readmes,
@@ -21,7 +21,7 @@ from check_public_docs import (
     check_readme_facts,
     extract_status_tokens,
     get_public_surface_files,
-    FORBIDDEN_PATTERNS,
+    get_admitted_packages,
 )
 
 
@@ -64,7 +64,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         self.assertIn("docs/zh-CN/workflows/project-workflow.md", rel_files)
 
     def test_anti_pattern_regression_fixtures(self) -> None:
-        """Verify each forbidden implementation anti-pattern triggers detection on public docs."""
+        """Each jargon pattern is detected on public docs."""
         fixtures = [
             ("frontier-round", "This skill uses a frontier-round interview style."),
             ("tracer-bullet ticket graph", "Generates a tracer-bullet ticket graph with dependencies."),
@@ -81,10 +81,10 @@ class PublicDocsQualityTests(unittest.TestCase):
             for label, offensive_text in fixtures:
                 dummy_file = tmp_root / f"doc_{label.replace(' ', '_')}.md"
                 dummy_file.write_text(f"# Title\n\n{offensive_text}\n", encoding="utf-8")
-                errors = check_anti_patterns(tmp_root, files=[dummy_file])
+                warnings = check_jargon(tmp_root, files=[dummy_file])
                 self.assertTrue(
-                    any(label in err for err in errors),
-                    f"Expected detection of [{label}] in '{offensive_text}', got: {errors}",
+                    any(label in w for w in warnings),
+                    f"Expected detection of [{label}] in '{offensive_text}', got: {warnings}",
                 )
 
     def test_jargon_warns_without_failing_the_gate(self) -> None:
@@ -157,7 +157,7 @@ class PublicDocsQualityTests(unittest.TestCase):
 
     def test_english_chinese_skill_inventory_matches(self) -> None:
         """CATALOG.md, CATALOG.zh-CN.md, and skills/*/*/SKILL.md must list identical package sets."""
-        admitted = {p.parent.name for p in ROOT.glob("skills/*/*/SKILL.md")}
+        admitted = get_admitted_packages(ROOT)
 
         cat_en = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
@@ -174,7 +174,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
 
         skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
-        self.assertEqual(set(skills), {p.parent.name for p in ROOT.glob("skills/*/*/SKILL.md")})
+        self.assertEqual(set(skills), get_admitted_packages(ROOT))
 
         mismatches: list[str] = []
         for s in skills:

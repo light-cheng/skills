@@ -35,6 +35,10 @@
 
 - `release-workflow`：每次推送前核对最终暂存产物及收据/归档链接；绑定准确候选和最终证明提交等待 CI 成功，交代失败、修复和文件历史红叉。同一阶段的完整修复先收齐审阅和全部产物，再一次最终提交/推送；候选与收据阶段以及真实推送后故障分别记录。保留发布历史及通知设置。
 
+- 测试（发布前审计）：删除只钉措辞、只断言自己写入的夹具文字、只转调另一个测试，或把被测逻辑写在测试文件里的测试（`review-loop`、`generic-review`、`project-retro`、`light-implement`、`decision-map` 和 `project-review` 各 profile 的"行为"测试）。检查路径、字段、状态码和组合边的测试保留。新增一条全集合测试，检查包文件里没有本机主目录路径；包数改为从 `skills/*/*/SKILL.md` 推出，不再写在多处。
+- `check_public_docs.py`（行为变化）：命中实现术语时只打印 `WARNING:`，不再让检查失败。目录状态词按整词匹配，"adapters" 不再算作 ADAPT。README 写了适配器数量而 `harness-support.md` 没写时报错，不再和内置的 10 比较。
+- `humanizer`：记录 `references/patterns.md` 里哪些引用示例来自维基百科（CC BY-SA 4.0）。
+
 ## 0.2.7 — 2026-10-07
 
 - 12个Skill名称增加 `light-`，同步包身份、界面来源、内部引用、ask-light路由/状态/发现、归属与双语迁移文档。保留其他24个名称、36个包及职责/调用权限。不提供旧名alias，不自动迁移全局安装。

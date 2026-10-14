@@ -31,7 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Implementation jargon that should not reach the public surface. Hits are
 # reported as warnings for a human to judge; they never fail the gate.
-FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+JARGON_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"frontier-round", re.IGNORECASE), "frontier-round"),
     (re.compile(r"tracer-bullet ticket graph", re.IGNORECASE), "tracer-bullet ticket graph"),
     (re.compile(r"下游.*消费"), "下游 ... 消费"),
@@ -46,7 +46,7 @@ FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 class PublicDocCheckResult(NamedTuple):
     passed: bool
     errors: list[str]
-    warnings: list[str] = []
+    warnings: tuple[str, ...] = ()
 
 
 def get_admitted_packages(repo_root: Path = REPO_ROOT) -> set[str]:
@@ -136,12 +136,12 @@ def check_category_readmes(repo_root: Path = REPO_ROOT) -> list[str]:
     return errors
 
 
-def check_anti_patterns(
+def check_jargon(
     repo_root: Path = REPO_ROOT,
     files: list[Path] | None = None,
 ) -> list[str]:
-    """Scan public documentation surface for forbidden implementation-only leakages."""
-    errors: list[str] = []
+    """Warn about implementation jargon on the public documentation surface."""
+    warnings: list[str] = []
     target_files = files if files is not None else get_public_surface_files(repo_root)
 
     for path in target_files:
@@ -152,13 +152,13 @@ def check_anti_patterns(
 
         lines = path.read_text(encoding="utf-8").splitlines()
         for idx, line in enumerate(lines, start=1):
-            for pattern, pattern_label in FORBIDDEN_PATTERNS:
+            for pattern, pattern_label in JARGON_PATTERNS:
                 if pattern.search(line):
-                    errors.append(
-                        f"{rel_path}:{idx} contains forbidden implementation anti-pattern [{pattern_label}]: {line.strip()}"
+                    warnings.append(
+                        f"{rel_path}:{idx} uses implementation jargon [{pattern_label}]: {line.strip()}"
                     )
 
-    return errors
+    return warnings
 
 
 def check_release_link_labels(
@@ -406,7 +406,7 @@ def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = Non
     errors: list[str] = []
     errors.extend(check_catalog_inventory(repo_root))
     errors.extend(check_category_readmes(repo_root))
-    warnings = check_anti_patterns(repo_root)
+    warnings = check_jargon(repo_root)
     errors.extend(check_release_link_labels(repo_root))
     errors.extend(check_readme_facts(repo_root))
     errors.extend(check_catalog_parity(repo_root))
@@ -419,7 +419,7 @@ def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = Non
     if context is not None:
         files = {path.relative_to(repo_root).as_posix() for path in repo_root.rglob("*") if ".git" not in path.parts and (path.is_file() or path.is_dir())}
         errors.extend(check_release_documents(documents, context, files))
-    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors, warnings=warnings)
+    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors, warnings=tuple(warnings))
 
 
 def main() -> int:
@@ -446,7 +446,7 @@ def main() -> int:
     for warning in result.warnings:
         print(f"WARNING: {warning}")
     if result.passed:
-        print("RESULT: PASS — Public documentation structural and terminology checks passed.")
+        print("RESULT: PASS — Public documentation structural checks passed.")
         return 0
 
     print(f"RESULT: FAIL — {len(result.errors)} documentation issues detected:")
