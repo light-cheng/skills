@@ -237,7 +237,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked (Agent self-evaluation at workflow conclusion); manual entry supported.
 - **Package:** [skills/project/project-retro/](skills/project/project-retro)
 - **Status:** Admitted first-party; PORT & LIGHT WORKFLOW ADAPTATION (Matt Pocock `retro`).
-- **Evidence:** Contract and behavior tests under [skills/project/project-retro/tests/](skills/project/project-retro/tests); [SKILL.md](skills/project/project-retro/SKILL.md), [ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md).
+- **Evidence:** Contract tests under [skills/project/project-retro/tests/](skills/project/project-retro/tests); [SKILL.md](skills/project/project-retro/SKILL.md), [ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/project-retro/`.
 
 ### project-spec

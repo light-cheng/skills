@@ -237,7 +237,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked（工作流终点由 Agent 自主评估是否需要调用）；支持手动入口。
 - **包位置：** [skills/project/project-retro/](skills/project/project-retro)
 - **状态：** 第一方已准入；PORT 与 Light 工作流适配（Matt Pocock `retro`）。
-- **证据：** 契约与行为测试见 [skills/project/project-retro/tests/](skills/project/project-retro/tests)；[SKILL.md](skills/project/project-retro/SKILL.md)，[ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md)。
+- **证据：** 契约测试见 [skills/project/project-retro/tests/](skills/project/project-retro/tests)；[SKILL.md](skills/project/project-retro/SKILL.md)，[ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/project-retro/`。
 
 ### project-spec
