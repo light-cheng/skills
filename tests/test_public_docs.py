@@ -87,6 +87,17 @@ class PublicDocsQualityTests(unittest.TestCase):
                     f"Expected detection of [{label}] in '{offensive_text}', got: {errors}",
                 )
 
+    def test_jargon_warns_without_failing_the_gate(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="public-doc-warning-") as tmp:
+            root = Path(tmp)
+            (root / "README.md").write_text("# Light\n\n建立初始稳定 tracker 契约。\n", encoding="utf-8")
+            (root / "skills").mkdir()
+            (root / "CATALOG.md").write_text("# Catalog\n", encoding="utf-8")
+            (root / "CATALOG.zh-CN.md").write_text("# 目录\n", encoding="utf-8")
+            result = run_checks(root)
+        self.assertTrue(any("稳定 ... 契约" in w for w in result.warnings))
+        self.assertFalse(any("稳定 ... 契约" in e for e in result.errors))
+
     def test_missing_catalog_package_fails(self) -> None:
         """If a package is missing from CATALOG.md or CATALOG.zh-CN.md, check fails."""
         with tempfile.TemporaryDirectory(prefix="catalog-test-") as tmp:
@@ -163,7 +174,7 @@ class PublicDocsQualityTests(unittest.TestCase):
         cat_zh = (ROOT / "CATALOG.zh-CN.md").read_text(encoding="utf-8")
 
         skills = re.findall(r"^###\s+([a-zA-Z0-9_-]+)", cat_en, re.MULTILINE)
-        self.assertEqual(len(skills), 39)
+        self.assertEqual(set(skills), {p.parent.name for p in ROOT.glob("skills/*/*/SKILL.md")})
 
         mismatches: list[str] = []
         for s in skills:

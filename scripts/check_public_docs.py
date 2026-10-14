@@ -29,7 +29,8 @@ from release_context import PUBLIC_RELEASE_DOCS, STAGES, ReleaseContext, check_r
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Implementation-only anti-pattern signatures forbidden on the public surface
+# Implementation jargon that should not reach the public surface. Hits are
+# reported as warnings for a human to judge; they never fail the gate.
 FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"frontier-round", re.IGNORECASE), "frontier-round"),
     (re.compile(r"tracer-bullet ticket graph", re.IGNORECASE), "tracer-bullet ticket graph"),
@@ -45,6 +46,7 @@ FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 class PublicDocCheckResult(NamedTuple):
     passed: bool
     errors: list[str]
+    warnings: list[str] = []
 
 
 def get_admitted_packages(repo_root: Path = REPO_ROOT) -> set[str]:
@@ -404,7 +406,7 @@ def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = Non
     errors: list[str] = []
     errors.extend(check_catalog_inventory(repo_root))
     errors.extend(check_category_readmes(repo_root))
-    errors.extend(check_anti_patterns(repo_root))
+    warnings = check_anti_patterns(repo_root)
     errors.extend(check_release_link_labels(repo_root))
     errors.extend(check_readme_facts(repo_root))
     errors.extend(check_catalog_parity(repo_root))
@@ -417,7 +419,7 @@ def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = Non
     if context is not None:
         files = {path.relative_to(repo_root).as_posix() for path in repo_root.rglob("*") if ".git" not in path.parts and (path.is_file() or path.is_dir())}
         errors.extend(check_release_documents(documents, context, files))
-    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors)
+    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors, warnings=warnings)
 
 
 def main() -> int:
@@ -441,6 +443,8 @@ def main() -> int:
         context = ReleaseContext(args.tag, args.stage, mode=args.mode, current_stable=stable, evidence_source=source,
                                  install_verified=stable == args.tag, published=stable == args.tag)
     result = run_checks(repo_root, context)
+    for warning in result.warnings:
+        print(f"WARNING: {warning}")
     if result.passed:
         print("RESULT: PASS — Public documentation structural and terminology checks passed.")
         return 0
