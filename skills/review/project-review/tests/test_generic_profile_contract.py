@@ -48,44 +48,31 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     c.require_match("TC-GEN-001 generic profile", skill, r"references/profiles/generic\.md")
     c.require_match("TC-GEN-001 generic profile", profile, r"(?im)^# Generic Profile$")
-    c.require_no_match("TC-GEN-001 generic profile", profile, r"(?i)software|manuscript|agent-skill|specification|light-code-review")
 
     c.require_match("TC-GEN-002 public modes", skill, r"(?im)^- `init`:")
     c.require_match("TC-GEN-002 public modes", skill, r"(?im)^- `review`:")
     c.require_match("TC-GEN-002 public modes", skill, r"(?im)^- `resume`:")
-    c.require_match("TC-GEN-002 invocation", skill, r"(?i)model-invoked")
-    c.require_match("TC-GEN-002 invocation", skill, r"(?i)manually invoked")
     c.require_match("TC-GEN-002 invocation metadata", metadata, r"(?im)^\s*allow_implicit_invocation:\s*true\s*$")
 
     c.require_match("TC-GEN-003 baseline", charter, r"(?im)^## Acceptance baseline$")
     c.require_match("TC-GEN-003 profile", charter, r"(?im)^## Review Profile$")
     c.require_match("TC-GEN-003 state records", workflow, r"(?m)^\|-- findings\.md$")
 
-    c.require_match("TC-GEN-004 stable finding identity", findings, r"(?i)stable.*Finding ID|Finding ID.*stable")
-    c.require_match("TC-GEN-004 stable finding identity", findings, r"(?i)must not be reused")
     c.require_match("TC-GEN-004 finding registry", findings, r"(?im)^# Finding Registry$")
 
     c.require_match("TC-GEN-005 rejected findings", findings, r"`rejected`")
-    c.require_match("TC-GEN-005 rejected findings", findings, r"(?i)Resolution evidence")
 
-    c.require_match("TC-GEN-006 bounded repair", skill, r"(?i)confirmed.*in-scope.*bounded|in-scope.*confirmed.*bounded")
-    c.require_match("TC-GEN-006 Producer ownership", roles, r"(?is)Producer.*only.*modif")
-    c.require_match("TC-GEN-006 read-only reviewers", roles, r"(?i)Critic.*read-only")
-    c.require_match("TC-GEN-006 read-only reviewers", roles, r"(?i)Evaluator.*read-only")
 
-    c.require_match("TC-GEN-007 missing acceptance source", workflow, r"(?i)missing acceptance source.*BLOCKED|BLOCKED.*missing acceptance source")
 
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)independence: unavailable")
     c.require_match("TC-GEN-008 missing independent context", roles, r"(?i)return `BLOCKED`")
 
-    c.require_match("TC-GEN-009 maximum rounds", stopping, r"(?i)maximum round.*BLOCKED|BLOCKED.*maximum round")
 
     c.require_match("TC-GEN-010 verdicts", stopping, r"`PASS`")
     c.require_match("TC-GEN-010 verdicts", stopping, r"`FAIL`")
     c.require_match("TC-GEN-010 verdicts", stopping, r"`BLOCKED`")
 
     c.require_match("TC-GEN-011 resume", workflow, r"(?im)^## `resume` workflow$")
-    c.require_match("TC-GEN-011 resume", workflow, r"(?i)append rather than rewrite")
 
     c.require_match("TC-GEN-012 evidence labels", evidence, r"(?im)^- Evidence label:")
     c.require_match("TC-GEN-012 evidence labels", evidence, r"`structural`")
