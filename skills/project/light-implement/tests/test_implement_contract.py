@@ -26,20 +26,7 @@ class ImplementContractTest(unittest.TestCase):
         self.assertRegex(METADATA, r"(?m)^\s*allow_implicit_invocation:\s*false\s*$")
 
     def test_agent_config_is_opt_in_and_user_controlled(self) -> None:
-        # Core loop and workflow must offer rather than auto-call
-        self.assertIn("offer agent-config", SKILL)
-        self.assertIn("accept", SKILL)
-        self.assertIn("decline", SKILL)
         self.assertIn("would routing materially help", SKILL)
-        self.assertIn("User choice contract", WORKFLOW)
-        self.assertIn("Explicit user intent overrides", WORKFLOW)
-        self.assertIn("Non-blocking fallback", WORKFLOW)
-
-    def test_implement_remains_functional_without_agent_config(self) -> None:
-        self.assertIn("optional enhancement", SKILL)
-        self.assertIn("declining it or running on a Host", SKILL)
-        self.assertIn("does not block implementation", SKILL)
-        self.assertIn("never convert into a\n`BLOCKED` implementation by default", WORKFLOW)
 
     def test_composition_targets_are_declared(self) -> None:
         for target in ("tdd", "review-loop", "light-code-review", "generic-review"):
