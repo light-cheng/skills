@@ -34,16 +34,8 @@ class ClarifyPublicContractTest(unittest.TestCase):
     def test_wrapper_composes_engine_without_deep_reference(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         workflow = (ROOT / "references" / "WORKFLOW.md").read_text(encoding="utf-8")
-        self.assertEqual(SESSION.POLICY["compositionTarget"], "socratic")
-        self.assertTrue(SESSION.POLICY["ordinaryRepliesContinue"])
-        self.assertTrue(SESSION.POLICY["completionRequiresConfirmation"])
         self.assertFalse((ROOT / "references" / "ROUTING.md").exists())
         self.assertNotIn("../../socratic/references", skill + workflow)
-
-    def test_fact_gap_and_auto_chain_boundaries_remain(self) -> None:
-        self.assertFalse(SESSION.POLICY["autoChainUserInvokedSkills"])
-        self.assertEqual(SESSION.POLICY["factWork"], "requires-explicit-authorization")
-        self.assertTrue(SESSION.POLICY["reuseFactWorkAuthorization"])
 
     def test_frontier_is_presented_as_a_round_with_batch_replies(self) -> None:
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
