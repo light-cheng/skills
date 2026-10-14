@@ -72,7 +72,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c = Checks()
     skill_root = root / "skills"
     actual = sorted(p.parent.name for p in skill_root.glob("*/*/SKILL.md"))
-    c.check(actual == EXPECTED, f"skills/ must contain exactly the 39 admitted package directories. got {actual}")
+    c.check(actual == EXPECTED, f"skills/ must contain exactly the admitted package directories in EXPECTED. got {actual}")
 
     readme = read(root, "README.md")
     catalog = read(root, "CATALOG.md")

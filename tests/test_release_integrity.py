@@ -84,10 +84,9 @@ def write_public_release_fixture(root: Path, tag: str = "v9.9.9", *, attested: b
 
 
 class ReleaseIntegrityTests(unittest.TestCase):
-    def test_admitted_package_count_is_39(self) -> None:
-        """Exactly 39 admitted Skill packages must be counted under skills/*/*."""
+    def test_admitted_package_count_matches_the_package_directories(self) -> None:
         count = get_admitted_package_count(ROOT)
-        self.assertEqual(count, 39)
+        self.assertEqual(count, len(list(ROOT.glob("skills/*/*/SKILL.md"))))
 
     def test_detect_candidate_tag(self) -> None:
         """Infers latest candidate release tag from docs/evidence/releases/."""
