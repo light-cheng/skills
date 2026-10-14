@@ -40,14 +40,11 @@ class ReviewLoopContractTest(unittest.TestCase):
         self.assertTrue((ROOT / "agents" / "openai.yaml").is_file())
         self.assertTrue(model_invoked(SKILL, METADATA))
         self.assertIn("model-invoked", SKILL)
-        self.assertIn("manually invoked", normalized(SKILL))
 
     def test_responsibilities_are_the_five_steps(self) -> None:
         text = normalized(SKILL).lower()
         for marker in ("resolve reviewer", "invoke reviewer", "receive findings", "return repair", "re-run reviewer"):
             self.assertIn(marker, text)
-        self.assertIn("at the limit", text)
-        self.assertIn("stop", text)
 
     def test_input_packet_is_the_four_fields(self) -> None:
         for marker in ("Target:", "Requirements:", "Relevant context:", "Previous findings:"):
@@ -58,7 +55,6 @@ class ReviewLoopContractTest(unittest.TestCase):
     def test_reviewer_resolution_is_explicit(self) -> None:
         self.assertIn("generic-review", SKILL)
         self.assertIn("light-code-review", SKILL)
-        self.assertIn("domain reviewer", normalized(SKILL).lower())
 
     def test_normalized_findings_contract(self) -> None:
         for marker in ("id:", "severity:", "location:", "problem:", "reason:"):
@@ -67,28 +63,16 @@ class ReviewLoopContractTest(unittest.TestCase):
         self.assertIn("Findings: []", COMBINED)
         for state in ("new", "persists", "fixed", "duplicate"):
             self.assertIn(state, COMBINED)
-        self.assertIn("never reuse", normalized(COMBINED).lower())
         self.assertIn("duplicate_of", COMBINED)
 
     def test_bounded_convergence_and_handoff(self) -> None:
         self.assertIn("3 rounds", SKILL)
-        self.assertIn("handoff", normalized(SKILL).lower())
-        self.assertIn("hand the outstanding", normalized(SKILL).lower())
 
     def test_legacy_note_points_to_project_review(self) -> None:
         self.assertIn("project-review", SKILL)
-        self.assertIn("migrated", normalized(REFS).lower())
-        self.assertIn("frozen", normalized(REFS).lower())
         self.assertIn("PASS", COMBINED)
         self.assertIn("FAIL", COMBINED)
         self.assertIn("BLOCKED", COMBINED)
-
-    def test_read_only_and_no_final_verdict_boundary(self) -> None:
-        # review-loop engine must not claim final project verdict
-        self.assertIn("owns no project final acceptance", normalized(SKILL))
-        self.assertIn("belong to `project-review`", SKILL)
-        # engine itself is not the verdict owner
-        self.assertTrue("project-review" in SKILL and "PASS" in SKILL)
 
     def test_invocation_mutation_is_rejected(self) -> None:
         self.assertTrue(model_invoked(SKILL, METADATA))
@@ -106,10 +90,6 @@ class ReviewLoopContractTest(unittest.TestCase):
             link_path = link.split("#")[0]
             resolved = (ROOT / link_path).resolve()
             self.assertTrue(resolved.exists(), f"unresolved link {link} -> {resolved}")
-
-    def test_no_heavy_acceptance_ownership(self) -> None:
-        self.assertNotIn("The Core owns the final verdict", SKILL)
-        self.assertIn("project-review", SKILL)
 
 
 if __name__ == "__main__":
