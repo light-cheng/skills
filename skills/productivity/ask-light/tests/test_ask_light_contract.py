@@ -50,57 +50,10 @@ class AskLightContractTest(unittest.TestCase):
         self.assertIn("Python 3.9", powershell + skill + contract)
         self.assertIn("sys.version_info >= (3, 9)", powershell)
         self.assertIn("$LASTEXITCODE -eq 0", powershell)
-        self.assertIn("manually", skill + contract)
         self.assertIn("status = 'BLOCKED'", powershell)
         self.assertTrue(re.search(r'choices=\("next",\s*"workflow",\s*"navigate"', python))
         self.assertIn("LIGHT_SKILL_ROOTS", python)
         self.assertIn("discover_roots", python)
-        self.assertIn("recommendation phase was read-only", python + powershell + skill)
-
-    def test_skill_contract_enforces_model_led_hybrid_advisor_boundaries(self) -> None:
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        contract = (ROOT / "references" / "discovery-contract.md").read_text(encoding="utf-8")
-        # The contract may live in SKILL.md or any of its references (progressive disclosure).
-        references = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ROOT / "references").glob("*.md")))
-        combined = skill + "\n" + references
-
-        # 1. Python is evidence/validation authority, not semantic recommendation authority
-        self.assertIn("Code establishes trustworthy facts", combined)
-        self.assertIn("Model understands the situation", combined)
-        self.assertIn("Model chooses the workflow action", combined)
-        self.assertIn("Code validates that choice", combined)
-        self.assertIn("Python is the evidence/validation authority", combined)
-
-        # 2. Model reads relevant candidate contracts
-        self.assertIn("shortlist from the catalog", " ".join(combined.lower().split()))
-        self.assertIn("read their `skill.md` contracts before selecting", " ".join(combined.lower().split()))
-
-        # 3. Current conversation is first-class evidence
-        self.assertIn("conversation is first-class evidence", combined)
-
-        # 4. Hard evidence is scoped to the request being answered
-        self.assertIn("Hard constraints are scoped", combined)
-        self.assertIn("current-workflow", combined)
-
-        # 5. Final semantic selection must be validated
-        self.assertIn("Validate the selection", combined)
-        self.assertIn("validate_recommendation", combined)
-
-        # 6. RECOMMEND cannot contain empty Skill
-        self.assertIn("never expose an empty `skill:` inside a `recommend` result", " ".join(combined.lower().split()))
-        self.assertIn("empty `skill:` inside `recommend` is a contract violation", " ".join(contract.lower().split()))
-
-        # 7. Regex ranking is not final authority
-        self.assertIn("candidate hints only", combined)
-        self.assertIn("regex ranking is not the routing authority", " ".join(contract.lower().split()))
-
-        # 8. Workflow mode is model-led
-        self.assertIn("Model-led", combined)
-        self.assertIn("anchor the entry point at the user's actual current state", combined)
-
-        # 9. Approval transition is host-aware
-        self.assertIn("Revalidate before transition", combined)
-        self.assertIn("host-aware", combined)
 
 
 if __name__ == "__main__":

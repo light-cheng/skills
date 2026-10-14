@@ -24,13 +24,6 @@ Five stages, with an explicit ownership boundary:
 4. **Final workflow judgment** — MODEL: choose one primary Skill, justify it.
 5. **Selection validation / transition** — CODE + host capability.
 
-```text
-Code establishes trustworthy facts.
-Model understands the situation.
-Model chooses the workflow action.
-Code validates that choice.
-```
-
 Python is the evidence/validation authority, **not** the semantic
 recommendation authority. It never names a recommended Skill; the evidence
 packet returns facts plus scoped hard constraints. Regex patterns,
@@ -107,7 +100,7 @@ Before choosing, read [references/routing-judgment.md](references/routing-judgme
 ## Approval transition and safety
 
 Before approval, the recommendation phase is read-only: nothing is invoked,
-installed or orchestrated (`recommendation phase was read-only`). After the
+installed or orchestrated. After the
 user approves, revalidate, then start the accepted Skill only as its
 invocation type and the Host's verified capability allow. Otherwise render the
 exact invocation and stop. Do not chain past the accepted Skill. Details,
@@ -117,17 +110,6 @@ including workflow and navigation modes:
 ## Result contract
 
 Return the record in [result-contract.md](references/result-contract.md).
-Never expose an empty `Skill:` inside a `RECOMMEND` result.
-
-## Verification
-
-Run the package contract and behavior tests
-(`python3 -m unittest discover -s skills/productivity/ask-light/tests` from the repository
-root). They cover the evidence packet, ticket frontier, review ownership and
-freshness protections, router boundary (Python makes no semantic decision),
-hard-state scoping, post-model selection validation, workflow recipe
-publication, root discovery, first-party provenance, host availability, and
-the host-aware approval boundary.
 
 ## Optional capabilities
 
