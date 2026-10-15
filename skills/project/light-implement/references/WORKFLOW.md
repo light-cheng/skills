@@ -32,7 +32,7 @@ Each file carries near the top:
 **Status:** ready-for-agent | claimed | resolved
 ```
 
-and a body starting `## What to build` with acceptance criteria.
+and a body starting `**What to build:**` with acceptance criteria.
 
 When `$light-implement` is passed a ticket path:
 

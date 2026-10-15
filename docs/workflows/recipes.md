@@ -21,12 +21,12 @@ Each row declares the handoff artifact and stop condition. `user-invoked` means 
 
 | Order | Skill | Invocation | Input → output | Handoff / stop |
 | --- | --- | --- | --- | --- |
+| 0 | `project-clarify` (optional) | user-invoked | open user decisions → clarification handoff | Skip when decisions are already clarified. |
 | 1 | `project-spec` | user-invoked | goal, constraints + clarified decisions → traceable SPEC | SPEC artifact; stop for user approval before ticket slicing. |
 | 2 | `project-tickets` | user-invoked | approved SPEC → dependency-ordered tracer tickets | Ticket graph; do not auto-start `light-implement`. |
-| 3 | `light-implement` | user-invoked | one unblocked ticket → bounded diff + tests | Commit evidence; stop at ticket scope. |
-| 4 | `light-code-review` | model-invoked | fixed diff → Standards/Spec findings | Specialist review; it does not accept the change. |
-| 5 | `project-review` | model-invoked via `review-loop` + `light-code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; stop. |
-| 6 | `light-handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
+| 3 | `light-implement` | user-invoked | one unblocked ticket → bounded diff + tests, findings converged through `review-loop` (`light-code-review`) | Commit evidence; stop at ticket scope. |
+| 4 | `project-review` | model-invoked via `review-loop` + `light-code-review`/`generic-review` | implementation + tests + findings → final verdict | Durable `PASS`/`FAIL`/`BLOCKED`; on `PASS` resolve the ticket; stop. |
+| 5 | `light-handoff` | user-invoked | accepted result or blocker → closeout/resume record | Closeout artifact; user decides whether to resume. |
 
 **Blocked conditions:** missing acceptance authority, unapproved tickets, unresolved dependencies, or absent independent evaluator. **Evidence:** SPEC, ticket graph, commit, focused tests, specialist findings, `project-review`/`review-loop` state/verdict, and `light-handoff`.
 

@@ -21,12 +21,12 @@
 
 | 顺序 | Skill | 调用方式 | 输入 → 输出 | 交接 / 停止（stop） |
 | --- | --- | --- | --- | --- |
+| 0 | `project-clarify`（可选） | 用户调用 | 未定的用户决定 → 澄清交接 | 决定已澄清时跳过。 |
 | 1 | `project-spec` | 用户调用 | 目标、约束和已澄清的决定 → 可追溯的 SPEC | SPEC 产物；切工单前停下等用户批准。 |
 | 2 | `project-tickets` | 用户调用 | 已批准的 SPEC → 按依赖排序的追踪工单 | 工单图；不自动启动 `light-implement`。 |
-| 3 | `light-implement` | 用户调用 | 一张未被阻塞的工单 → 有界的 diff 和测试 | 提交证据；在工单范围处停止。 |
-| 4 | `light-code-review` | 模型调用 | 固定的 diff → Standards/Spec 两轴发现 | 专项审查；它不负责接受改动。 |
-| 5 | `project-review` | 模型调用，经 `review-loop` 加 `light-code-review`/`generic-review` | 实现、测试和发现 → 最终结论 | 持久的 `PASS`/`FAIL`/`BLOCKED`；停止。 |
-| 6 | `light-handoff` | 用户调用 | 已接受的结果或阻塞 → 收尾或续作记录 | 收尾产物；由用户决定是否续作。 |
+| 3 | `light-implement` | 用户调用 | 一张未被阻塞的工单 → 有界的 diff 和测试，发现经 `review-loop`（`light-code-review`）收敛 | 提交证据；在工单范围处停止。 |
+| 4 | `project-review` | 模型调用，经 `review-loop` 加 `light-code-review`/`generic-review` | 实现、测试和发现 → 最终结论 | 持久的 `PASS`/`FAIL`/`BLOCKED`；`PASS` 时 resolve 工单；停止。 |
+| 5 | `light-handoff` | 用户调用 | 已接受的结果或阻塞 → 收尾或续作记录 | 收尾产物；由用户决定是否续作。 |
 
 **受阻条件：** 缺少验收授权、工单未获批准、依赖未解决，或没有独立的 Evaluator。**证据：** SPEC、工单图、提交、针对性测试、专项审查发现、`project-review`/`review-loop` 的状态和结论，以及 `light-handoff`。
 
