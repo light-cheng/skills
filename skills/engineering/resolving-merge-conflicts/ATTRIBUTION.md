@@ -14,3 +14,7 @@ This package is a Light first-party port of an upstream Skill.
   5. No runtime dependency on `https://github.com/mattpocock/skills` remains; the package is self-contained and does not require `install Matt skills first`.
 
 Verification: `SKILL.md` frontmatter `name: resolving-merge-conflicts` matches, `agents/openai.yaml` is valid, and aside from this attribution no `mattpocock/skills` runtime coupling remains in executable content.
+
+## Description note (2026-10-16)
+
+The `description` keeps the upstream trigger wording and adds one sentence naming the upstream Skill, so an Agent that sees both copies can tell them apart. Install one or the other, not both.

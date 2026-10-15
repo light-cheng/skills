@@ -1,6 +1,6 @@
 ---
 name: light-prototype
-description: Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like.
+description: Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like. Light Skills version of mattpocock/skills `prototype`; install one or the other, not both.
 ---
 
 # Prototype

@@ -38,6 +38,7 @@
 - 测试（发布前审计）：删除只钉措辞、只断言自己写入的夹具文字、只转调另一个测试，或把被测逻辑写在测试文件里的测试（`review-loop`、`generic-review`、`project-retro`、`light-implement`、`decision-map` 和 `project-review` 各 profile 的"行为"测试）。检查路径、字段、状态码和组合边的测试保留。新增一条全集合测试，检查包文件里没有本机主目录路径；包数改为从 `skills/*/*/SKILL.md` 推出，不再写在多处。
 - `check_public_docs.py`（行为变化）：命中实现术语时只打印 `WARNING:`，不再让检查失败。目录状态词按整词匹配，"adapters" 不再算作 ADAPT。README 写了适配器数量而 `harness-support.md` 没写时报错，不再和内置的 10 比较。
 - `clarify`、`project-clarify`、`socratic`：删除 `scripts/session_state.py` 和 `scripts/frontier.py`。Agent 从不运行它们，只有测试调用。澄清流程写在各包的 `SKILL.md` 和 `references/` 里。`manuscript-ops` 在项目交接前改为通过 `references/WORKFLOW.md` 检查 `clarify`，通过 `references/conversation-contract.json` 检查 `socratic`。
+- `light-diagnosing-bugs`、`light-tdd`、`light-prototype`、`light-research`、`light-wizard`、`light-writing-for-agents`、`resolving-merge-conflicts`：`description` 写明对应的 mattpocock/skills 原版，并提示二者只装一个。`docs/INSTALLATION.zh-CN.md` 说明原因：两份触发说法相同，`resolving-merge-conflicts` 还与上游同名。
 - `ask-light`：`SKILL.md` 从 124 行缩到 73 行。会话流程保留各步骤和硬规则；校验范围、顾问式解释清单和"不得虚构状态"的例子移到 `references/routing-judgment.md`。行为不变。
 - `project-review`、`agent-config`、`light-redirect`：缩短 `SKILL.md`（106→84、94→82、89→77 行）。重复的规则改为链接：companion 健康检查指向 `companion-contract.md`，脚本入口参数移到 `host-evidence-schema.md#script-entry`，redirect 的答复处理和手工编辑移到 `PROPOSAL.md`。行为不变。
 - 来源记录：`project-retro` 不再声称有行为测试套件（已在审计中删除），并记下 `AWAITING_SELECTION` 工作流状态；`project-clarify`、`decision-map`、`socratic` 改用当前包名称呼其路由（`light-research`、`light-prototype`、`light-to-questionnaire`）。

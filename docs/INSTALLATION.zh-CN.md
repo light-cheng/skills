@@ -231,6 +231,8 @@ cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 
 未修改的 Matt Pocock Skill 保持在 [mattpocock/skills](https://github.com/mattpocock/skills)。修改版只能进入私有 [skills-3rdParty](https://github.com/LightDevCoder/skills-3rdParty)，不属于本公开第一方集合，并有独立的 pinned manifest 和 release evidence。已批准的 Matt PORT（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装上游；Light 主流程不要求 `mattpocock/skills` 或 `sol-advisor`。
 
+Light 的 Port 和它的上游 Skill 只装一个，不要同时装。七个 Port 保留了上游的触发说法：`light-diagnosing-bugs`、`light-tdd`、`light-prototype`、`light-research`、`light-wizard`、`light-writing-for-agents` 和 `resolving-merge-conflicts`。两份都装时，同一个请求会对上两个 Skill，Agent 可能任选其一。`resolving-merge-conflicts` 和上游同名，后装的可能覆盖先装的。这几个包的 description 都写明了对应的上游 Skill。
+
 ## 记录要求
 
 每次验证保存 exact command、installer version、URL、commit/tag、host/scope/destination、脱离 source checkout 的 discovery、success/boundary/invocation/missing-dependency smoke、fallback 和 limitations。结构检查、source checkout scan 或未执行命令都不能写成 installation proof；collection discovery script 也不能替代 fresh host install。
