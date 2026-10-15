@@ -13,7 +13,7 @@
       ],
       "interface_tokens": {
         "references/WORKFLOW.md": [
-          "socratic"
+          "Call `socratic`"
         ]
       },
       "repository": "LightDevCoder/skills"
