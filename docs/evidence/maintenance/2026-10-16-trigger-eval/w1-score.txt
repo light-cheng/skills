@@ -1,0 +1,124 @@
+case  host   rep status  loaded                                   left                           verdict
+A1    claude 1   exit0   light-writing-for-agents                 -                              ok
+A1    claude 2   exit0   light-writing-for-agents                 -                              ok
+D1    claude 1   exit0   -                                        -                              ok
+D1    claude 2   exit0   -                                        -                              ok
+D1b   claude 1   exit0   light-redirect                           proposal                       MISS
+D1b   claude 2   exit0   light-redirect                           proposal                       MISS
+D2    claude 1   exit0   -                                        -                              MISS
+D2    claude 2   exit0   -                                        -                              MISS
+D3    claude 1   exit0   -                                        -                              ok
+D3    claude 2   exit0   -                                        -                              ok
+E1    claude 1   exit0   eli5                                     -                              ok
+E1    claude 2   exit0   eli5                                     -                              ok
+E2    claude 1   exit0   eli5                                     -                              ok
+E2    claude 2   exit0   eli5                                     -                              ok
+E3    claude 1   exit0   -                                        -                              ok
+E3    claude 2   exit0   -                                        -                              ok
+E4    claude 1   exit0   -                                        -                              ok
+E4    claude 2   exit0   -                                        -                              ok
+G1    claude 1   exit0   light-diagnosing-bugs                    -                              ok
+G1    claude 2   exit0   light-diagnosing-bugs                    -                              ok
+H1    claude 1   exit0   light-html-plan                          plan-created                   ok
+H1    claude 2   exit0   light-html-plan                          plan-created                   ok
+H2    claude 1   exit0   light-html-plan                          plan-refresh                   ok
+H2    claude 2   exit0   light-html-plan                          plan-refresh                   ok
+H3    claude 1   exit0   light-html-plan                          plan-refresh                   ok
+H3    claude 2   exit0   light-html-plan                          plan-refresh                   ok
+H4    claude 1   exit0   -                                        -                              ok
+H4    claude 2   exit0   -                                        -                              ok
+H5    claude 1   exit0   -                                        -                              ok
+H5    claude 2   exit0   -                                        -                              ok
+M1    claude 1   exit0   light-merge-conflicts                    -                              ok
+M1    claude 2   exit0   light-merge-conflicts                    -                              ok
+P1    claude 1   exit0   light-prototype                          -                              ok
+P1    claude 2   exit0   light-prototype                          -                              ok
+R1    claude 1   exit0   light-redirect                           proposal                       ok
+R1    claude 2   exit0   light-redirect                           decision-row,proposal          ok
+R2    claude 1   exit0   light-redirect                           proposal                       ok
+R2    claude 2   exit0   light-redirect                           proposal                       ok
+R3    claude 1   exit0   light-redirect                           proposal                       ok
+R3    claude 2   exit0   light-redirect                           proposal                       ok
+R4    claude 1   exit0   light-redirect                           proposal                       ok
+R4    claude 2   exit0   light-redirect                           proposal                       ok
+R5    claude 1   exit0   -                                        -                              ok
+R5    claude 2   exit0   -                                        -                              ok
+R6    claude 1   exit0   -                                        -                              ok
+R6    claude 2   exit0   -                                        -                              ok
+S1    claude 1   exit0   light-research                           -                              ok
+S1    claude 2   exit0   light-research                           -                              ok
+S2    claude 1   exit0   -                                        -                              ok
+S2    claude 2   exit0   -                                        -                              ok
+T1    claude 1   exit0   light-tdd                                -                              ok
+T1    claude 2   exit0   light-tdd                                -                              ok
+W1    claude 1   exit0   light-wizard                             -                              ok
+W1    claude 2   exit0   light-wizard                             -                              ok
+W2    claude 1   exit0   -                                        -                              ok
+W2    claude 2   exit0   -                                        -                              ok
+A1    pi     1   exit0   light-writing-for-agents                 -                              ok
+D1    pi     1   exit0   light-decide                             -                              ok
+D1b   pi     1   exit0   light-decide,light-redirect              decision-row,proposal          ok
+D2    pi     1   exit0   light-decide,light-redirect              decision-row                   ok
+D3    pi     1   exit0   light-decide                             -                              MISS
+D3    pi     2   exit0   light-decide                             -                              MISS
+D3    pi     3   exit0   light-decide                             -                              MISS
+D3    pi     4   exit0   light-decide                             -                              MISS
+E1    pi     1   exit0   eli5                                     -                              ok
+E2    pi     1   exit0   eli5                                     -                              ok
+E3    pi     1   exit0   eli5,light-redirect                      -                              MISS
+E3    pi     2   exit0   eli5,light-redirect                      -                              MISS
+E3    pi     3   exit0   eli5,light-redirect                      -                              MISS
+E3    pi     4   exit0   -                                        -                              ok
+E4    pi     1   exit0   -                                        -                              ok
+G1    pi     1   exit0   light-diagnosing-bugs                    -                              ok
+H1    pi     1   exit0   light-html-plan                          plan-created                   ok
+H2    pi     1   exit0   light-html-plan                          plan-refresh                   ok
+H3    pi     1   exit0   light-html-plan                          plan-refresh                   ok
+H4    pi     1   exit0   -                                        -                              ok
+H5    pi     1   exit0   -                                        -                              ok
+M1    pi     1   exit0   light-merge-conflicts                    -                              ok
+P1    pi     1   exit0   light-prototype                          -                              ok
+R1    pi     1   exit0   light-decide,light-redirect              decision-row,proposal          ok
+R2    pi     1   exit0   light-decide,light-redirect              decision-row,proposal          ok
+R3    pi     1   exit0   light-decide,light-redirect              decision-row,proposal          ok
+R4    pi     1   exit0   light-decide,light-redirect              decision-row,proposal          ok
+R5    pi     1   exit0   light-redirect                           -                              MISS
+R5    pi     2   exit0   light-decide,light-redirect              -                              MISS
+R5    pi     3   exit0   light-redirect                           -                              MISS
+R5    pi     4   exit0   -                                        -                              ok
+R6    pi     1   exit0   -                                        -                              ok
+S1    pi     1   exit0   light-research                           -                              ok
+S2    pi     1   exit0   -                                        -                              ok
+T1    pi     1   exit0   light-tdd                                -                              ok
+W1    pi     1   exit0   light-wizard                             -                              ok
+W2    pi     1   exit0   -                                        -                              ok
+
+per case (ok/runs):
+R1 yes:light-redirect claude=2/2  pi=1/1
+R2 yes:light-redirect claude=2/2  pi=1/1
+R3 yes:light-redirect claude=2/2  pi=1/1
+R4 yes:light-redirect claude=2/2  pi=1/1
+R5 no:light-redirect claude=2/2  pi=1/4
+R6 no:light-redirect claude=2/2  pi=1/1
+H1 yes:light-html-plan claude=2/2  pi=1/1
+H2 yes:light-html-plan claude=2/2  pi=1/1
+H3 yes:light-html-plan claude=2/2  pi=1/1
+H4 no:light-html-plan claude=2/2  pi=1/1
+H5 no:light-html-plan claude=2/2  pi=1/1
+D1 any:light-decide claude=2/2  pi=1/1
+D2 yes:light-decide claude=0/2  pi=1/1
+D3 no:light-decide claude=2/2  pi=0/4
+D1b yes:light-decide claude=0/2  pi=1/1
+T1 yes:light-tdd claude=2/2  pi=1/1
+G1 yes:light-diagnosing-bugs claude=2/2  pi=1/1
+P1 yes:light-prototype claude=2/2  pi=1/1
+M1 yes:light-merge-conflicts claude=2/2  pi=1/1
+W1 yes:light-wizard claude=2/2  pi=1/1
+W2 no:light-wizard claude=2/2  pi=1/1
+S1 yes:light-research claude=2/2  pi=1/1
+S2 no:light-research claude=2/2  pi=1/1
+A1 yes:light-writing-for-agents claude=2/2  pi=1/1
+E1 yes:eli5 claude=2/2  pi=1/1
+E2 yes:eli5 claude=2/2  pi=1/1
+E3 no:eli5 claude=2/2  pi=1/4
+E4 no:eli5 claude=2/2  pi=1/1

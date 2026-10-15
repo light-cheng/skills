@@ -1,6 +1,6 @@
 ---
 name: eli5
-description: "Explain a topic, piece of code, concept or error so a named audience can follow it: a child, a grade level, a non-specialist adult, or someone in a given role or relationship. Use when the user says ELI5, \"explain like I'm …\", \"explain this to my …\", \"in plain words for …\", \"dumb it down\", \"simplify this for …\", or otherwise names who the explanation is for or asks for a non-technical version."
+description: "Explain a topic, piece of code, concept or error so a named audience can follow it: a child, a grade level, a non-specialist adult, or someone in a given role or relationship. Use when the user says ELI5, \"explain like I'm …\", \"explain this to my …\", \"in plain words for …\", \"dumb it down\", \"simplify this for …\", or otherwise names who the explanation is for or asks for a non-technical explanation. Not for rewriting a document for its readers."
 ---
 
 # ELI5

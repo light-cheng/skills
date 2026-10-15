@@ -1,0 +1,27 @@
+case  host   rep status  loaded                                   left                           verdict
+E1    claude 1   exit0   eli5                                     -                              ok
+E1    claude 2   exit0   eli5                                     -                              ok
+E2    claude 1   exit0   eli5                                     -                              ok
+E2    claude 2   exit0   eli5                                     -                              ok
+E3    claude 1   exit0   -                                        -                              ok
+E3    claude 2   exit0   -                                        -                              ok
+E4    claude 1   exit0   -                                        -                              ok
+E4    claude 2   exit0   -                                        -                              ok
+E1    pi     1   exit0   eli5                                     -                              ok
+E1    pi     2   exit0   eli5                                     -                              ok
+E1    pi     3   exit0   eli5                                     -                              ok
+E2    pi     1   exit0   eli5                                     -                              ok
+E2    pi     2   exit0   eli5                                     -                              ok
+E2    pi     3   exit0   eli5                                     -                              ok
+E3    pi     1   exit0   eli5                                     -                              MISS
+E3    pi     2   exit0   eli5                                     -                              MISS
+E3    pi     3   exit0   eli5                                     -                              MISS
+E4    pi     1   exit0   -                                        -                              ok
+E4    pi     2   exit0   eli5                                     -                              MISS
+E4    pi     3   exit0   -                                        -                              ok
+
+per case (ok/runs):
+E1 yes:eli5 claude=2/2  pi=3/3
+E2 yes:eli5 claude=2/2  pi=3/3
+E3 no:eli5 claude=2/2  pi=0/3
+E4 no:eli5 claude=2/2  pi=2/3

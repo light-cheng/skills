@@ -1,0 +1,28 @@
+R1	base	yes:light-redirect	我在做工单 02 的预约功能。刚想到一个点子：某个工具当天被约满时，应该让别人排队候补，空出来就通知他。把这个加进去吧。
+R2	fail-direction	yes:light-redirect	工单 02 验收没通过，记录在 .project-review 里。你看看接下来该怎么办。
+R3	base	yes:light-redirect	我改主意了：归还提醒不要前一晚发，改成提前两天发，当天早上再发一次。
+R4	conflict	yes:light-redirect	我看了下工单 04，它说归还后要等夜里同步才显示可借。这跟我们之前定的好像不一样，你帮我处理一下。
+R5	base	no:light-redirect	工单 02 的预约保存有个 bug：存进去的取件日期总是少一天，应该是时区问题，帮我修一下。
+R6	base	no:light-redirect	SPEC 里 R2 说"每个工具每天一个预约"，具体是怎么判断的？用两三句话讲给我听。
+H1	base	yes:light-html-plan	帮我做一个网页，让我在浏览器里一眼看清这个项目现在进展到哪了。
+H2	plan	yes:light-html-plan	工单 02 刚写完，实现报告已经记在工单里了。这个项目有一个计划页面，按项目的做法把它更新一下。
+H3	plan-pass	yes:light-html-plan	工单 02 刚验收通过，记录都写好了。项目里该同步的东西你同步一下。
+H4	base	no:light-html-plan	帮我规划一下下周要做的事，按优先级列出来就行，直接在这里回答。
+H5	base	no:light-html-plan	用五条要点在这里直接概括一下 .scratch/tool-lending/spec.md 写了什么，不用生成文件。
+D1	impl	any:light-decide	@IMPL 工单 04
+D2	base	yes:light-decide	工单 02 拒绝重复预约的提示文案，我觉得应该写成"这个工具那天已经有人约了"，比验收里那句"明确提示"更具体。你看这算改计划还是直接改就行？
+D3	base	no:light-decide	预约数据存 SQLite 还是 JSON 文件？你帮我直接选一个，说一句理由。
+D1b	impl-large	yes:light-decide	@IMPL 工单 04
+T1	base	yes:light-tdd	用测试先行的方式做工单 02 的重复预约检查：先写一个会失败的测试，再写实现让它通过。
+G1	base	yes:light-diagnosing-bugs	借用列表页面以前打开不到一秒，现在要八秒多，帮我诊断一下到底是哪里变慢了。
+P1	base	yes:light-prototype	我拿不准预约的几个状态（待取、已借出、逾期、已归还）之间怎么转换才合理。先做一个一次性的小原型让我点一点试试，别动正式代码。
+M1	base	yes:light-merge-conflicts	我正在把 feature 分支 rebase 到 main 上，卡在冲突里了，帮我把这次 rebase 的冲突解决掉。
+W1	base	yes:light-wizard	我要给这个应用在 Cloudflare 后台配好自定义域名和一个 API token，这些步骤只有我能在网页上点。给我做一个能一步步带我操作的交互式脚本。
+W2	base	no:light-wizard	在项目里新建 scripts/hello.sh，内容是打印 hello，然后给它加上可执行权限。
+S1	base	yes:light-research	帮我调研 SQLite 的 WAL 模式在多个进程同时写入时会怎样，以官方文档为准，把结论写成仓库里的一个 Markdown 文件。
+S2	base	no:light-research	SQLite 是什么？一句话回答就行，不用查资料。
+A1	base	yes:light-writing-for-agents	给这个项目里写给 agent 看的指令文件（CLAUDE.md 或 AGENTS.md，看项目里有哪个）加一条规则：提交前必须先跑测试。
+E1	base	yes:eli5	用讲给五岁小孩听的方式，解释一下这个项目的 SPEC 在讲什么。
+E2	base	yes:eli5	我奶奶想知道这个工具借用应用是干什么用的，用她能听懂的话给她讲讲。
+E3	base	no:eli5	把 .scratch/tool-lending/spec.md 的 Problem Statement 一节改写成给非技术读者看的版本，直接改文件，别的不用说。
+E4	base	no:eli5	解释一下 .scratch/tool-lending/spec.md 里"每个工具每天一个预约"这条规则是怎么判断的。
