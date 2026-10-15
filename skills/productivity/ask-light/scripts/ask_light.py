@@ -1358,7 +1358,7 @@ def _explicit_effort_references(root: Path) -> set[str]:
         text = _small_text(path)
         for match in effort_field.finditer(text):
             value = match.group(1).strip().strip("`*_")
-            if not value or "<effort>" in value or value.lower() in {"none", "none recorded", "?"}:
+            if not value or "<effort>" in value or "<feature>" in value or value.lower() in {"none", "none recorded", "?"}:
                 continue
             name = value.split()[0].strip("():-")
             if name:

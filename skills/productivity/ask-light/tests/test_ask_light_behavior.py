@@ -1874,6 +1874,17 @@ class DiscoveryAndProvenanceMatrixTest(unittest.TestCase):
         finally:
             del os.environ["LIGHT_SKILL_ROOTS"]
 
+    def test_placeholder_effort_lines_are_not_effort_pointers(self) -> None:
+        for placeholder in ("<effort>", "<feature>"):
+            with self.subTest(placeholder=placeholder):
+                agents = self.root / placeholder.strip("<>") / "docs" / "agents"
+                agents.mkdir(parents=True)
+                (agents / "light-project.md").write_text(
+                    f"- Current effort: {placeholder}\n- Ticket location: .scratch/{placeholder}/issues/NN-<slug>.md\n",
+                    encoding="utf-8",
+                )
+                self.assertEqual(ASK_LIGHT._explicit_effort_references(agents.parent.parent), set())
+
     def test_duplicate_first_party_copy_requires_precedence(self) -> None:
         root1 = self.root / "root1"
         root2 = self.root / "root2"

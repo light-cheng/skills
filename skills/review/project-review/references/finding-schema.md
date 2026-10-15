@@ -49,6 +49,25 @@ registry ID:
 - Related finding: F-<n> or none
 ```
 
+## From a review-loop report
+
+`review-loop` reviewers report `state` and lower-case `severity`. Record them
+in the registry like this:
+
+| review-loop | Registry |
+| --- | --- |
+| `id` | Keep it when it already names a registry ID; otherwise allocate the next `F-###` and record the reviewer's ID as the original |
+| `severity: critical / high / medium / low` | `Severity: Critical / High / Medium / Low` (same level, capitalized) |
+| `state: new` | New record with `Status: pending` |
+| `state: persists` | Same ID; status unchanged (`pending` or `confirmed`); add the round's evidence |
+| `state: fixed` | Same ID; evidence that the gap is gone. Only the Evaluator sets `resolved` |
+| `state: duplicate` | `Status: duplicate`, linked to the canonical ID |
+| `location`, `problem`, `reason` | `Current evidence`, `Canonical summary`, and the candidate's `Expected behavior` |
+| `suggestion` | `Recommended minimal repair` (a candidate, not an instruction) |
+
+A reviewer's `state` never sets `confirmed`, `rejected` or `out-of-scope`;
+those are dispositions owned by the acceptance owner.
+
 ## Dispositions
 
 - `confirmed`: evidence shows an in-scope gap against the frozen baseline; a

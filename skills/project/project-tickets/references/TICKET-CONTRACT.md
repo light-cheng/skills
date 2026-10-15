@@ -34,8 +34,8 @@ user's perspective — not a layer-by-layer implementation list.
 
 **Status:** ready-for-agent
 
-- [ ] Acceptance criterion 1 (observable, verifiable)
-- [ ] Acceptance criterion 2 (…)
+- [ ] Acceptance criterion 1 (observable, verifiable) (US-1)
+- [ ] Acceptance criterion 2 (…) (US-1, US-3)
 
 ## Comments
 
@@ -93,6 +93,11 @@ confirm after the slice lands. Typical styles:
 
 A criterion is not a line-numbered code instruction or a paragraph from the
 SPEC; it is the slice's demo.
+
+End each criterion with the SPEC user stories it serves, such as `(US-2)`.
+Every user story in the SPEC is served by at least one ticket criterion or is
+listed in the SPEC's Out of Scope. A SPEC without `US-` numbers gets them
+cited by position (`US-3` = the third story).
 
 ## Dependency hygiene
 

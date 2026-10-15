@@ -11,6 +11,10 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 - The readable plan page is `.scratch/<feature-slug>/plan.html`; each earlier version is kept in `.scratch/<feature-slug>/plan-history/` (written by `light-html-plan`)
 
+## Placeholder names
+
+`<feature>` names one directory under `.scratch/`. `<effort>` (used by `decision-map` and `project-init`) is an alias for the same directory; both mean the same path.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).

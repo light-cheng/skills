@@ -38,9 +38,13 @@ implementation layer ordering; the layering belongs below.
 
 ## User Stories
 
-An extensive, numbered list. Each story is:
+An extensive list with stable numbers. Each story is:
 
-1. As a <actor>, I want <capability> so that <benefit>
+- US-1: As a <actor>, I want <capability> so that <benefit>
+
+Never renumber a story once the SPEC is approved; tickets and the acceptance
+Charter cite these numbers. A dropped story keeps its number and moves to
+Out of Scope.
 
 Cover the feature broadly: happy path, important boundaries, and failure
 behaviour worth guaranteeing. For a non-product deliverable (Skill, document

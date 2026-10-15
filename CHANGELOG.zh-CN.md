@@ -6,6 +6,7 @@
 
 ## 未发布
 
+- 项目流程（阶段 4–5 对齐）：software-feature 流程以可选的 `project-clarify` 开头，`light-code-review` 在 `light-implement` 内经 `review-loop` 运行；SPEC 用户故事编号为 `US-<n>`，工单验收项引用它们，Charter 的每条 `AC-<n>` 写明覆盖的故事和工单；`project-review` 的发现登记表写明 `review-loop` 的 state 与 severity 如何对应；`<feature>` 为 `.scratch/` 下的规范占位名，`<effort>` 作为别名仍被接受（`project-init`、`ask-light`）；`docs/agents/triage-labels.md` 列出工单状态值。
 - 准入（新检查）：`scripts/check_skill_names.py` 与 `tests/test_skill_names.py` 在包名与 `docs/reference/external-skill-names.json`（固定版本的 mattpocock/skills、anthropics/skills 及各 Port 的上游）或私有 `skills-3rdParty` 检出（如存在）中的 Skill 重名时失败。`humanizer` 和 `eli5` 记为已接受：两者都是所有者自己的 Skill。
 - **改名（需迁移）：** `resolving-merge-conflicts` 改名为 `light-merge-conflicts`，不再与 mattpocock/skills 原版同名。行为和调用方式不变；旧名没有别名。见 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
 - `eli5`（重写）：从零重写为所有者编写的 Skill，结构全新（一个核心意思、一个类比、说明类比在哪里不成立），听众表放在 `references/audiences.md`。删除之前迁移来的副本及其 `ATTRIBUTION.md`。名称和模型调用方式不变。

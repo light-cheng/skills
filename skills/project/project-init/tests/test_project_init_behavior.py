@@ -243,6 +243,14 @@ class ProjectInitBehaviorTest(unittest.TestCase):
                 BOOTSTRAP.bootstrap(root, unsupported)
             self.assertEqual(list(root.iterdir()), [])
 
+    def test_feature_placeholder_is_accepted_as_the_tracker_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            aliased = config()
+            aliased["issueTracker"] = {"kind": "local-markdown", "path": ".scratch/<feature>/issues"}
+            BOOTSTRAP.bootstrap(root, aliased)
+            self.assertTrue((root / "docs/agents/light-project.md").is_file())
+
     def test_empty_domain_context_is_recorded_without_blocking_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
             root = Path(tmp)

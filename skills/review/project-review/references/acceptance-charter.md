@@ -37,7 +37,7 @@ copy them into state, round, or verdict records.
 - <explicit exclusions>
 
 ## Acceptance criteria
-- AC-1: <observable criterion and required evidence>
+- AC-1: <observable criterion and required evidence> (covers US-1, US-2; tickets 01, 03)
 
 ## Required evidence
 - <evidence item and its allowed label>
@@ -51,6 +51,10 @@ copy them into state, round, or verdict records.
 ## Approved exceptions
 - None
 ```
+
+Each `AC-<n>` names the SPEC user stories (`US-<n>`) and the tickets it
+covers. Every user story appears in at least one AC or in the SPEC's Out of
+Scope; a story with neither is a Charter gap to raise before review.
 
 Use `Not applicable - <reason>` rather than silently omitting a necessary
 section. A source explicitly approved by the user or program record may create

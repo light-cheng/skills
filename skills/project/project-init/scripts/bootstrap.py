@@ -67,7 +67,8 @@ def validate_config(config: dict[str, Any]) -> None:
     tracker_path = Path(str(config["issueTracker"]["path"]))
     if tracker_path.is_absolute() or ".." in tracker_path.parts or not tracker_path.parts or tracker_path.parts[0] != config["workingArea"]:
         raise ValueError("issueTracker path must stay under the configured .scratch working area")
-    if tracker_path.as_posix() != ".scratch/<effort>/issues":
+    # <feature> is the canonical placeholder; <effort> is its accepted alias.
+    if tracker_path.as_posix() not in (".scratch/<effort>/issues", ".scratch/<feature>/issues"):
         raise ValueError("issueTracker path must use the supported .scratch/<effort>/issues contract")
     for key in ("outputs", "relevantSkills", "domainContext"):
         if not isinstance(config[key], list):
