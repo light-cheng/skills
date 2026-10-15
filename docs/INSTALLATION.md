@@ -188,7 +188,7 @@ The verified CLI version, destination class, discovery result, and smoke result 
 
 ## Historical v0.1.0 verification
 
-The historical stable release was the published v0.1.0 snapshot at commit `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`. The following unqualified commands are retained as historical commands from that published release. The summarized CLI, host, destination, validator, and known evidence limits are recorded in the [historical installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v0.1.0-summary):
+The historical stable release was the published v0.1.0 snapshot at commit `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`. The following unqualified commands are retained as historical commands from that published release. The summarized CLI, host, destination, validator, and known evidence limits are recorded in the [historical installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v010-summary):
 
 ```text
 npx skills add LightDevCoder/skills

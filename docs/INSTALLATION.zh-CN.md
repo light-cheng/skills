@@ -188,7 +188,7 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 
 ## 历史 v0.1.0 验证
 
-历史稳定版本是已发布的 v0.1.0 snapshot，commit 为 `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`。以下无 fragment 命令作为历史命令保留；其 CLI、host、destination、validator 和证据限制见[历史安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v0.1.0-摘要)：
+历史稳定版本是已发布的 v0.1.0 snapshot，commit 为 `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`。以下无 fragment 命令作为历史命令保留；其 CLI、host、destination、validator 和证据限制见[历史安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v010-摘要)：
 
 ```text
 npx skills add LightDevCoder/skills

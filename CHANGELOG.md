@@ -488,4 +488,4 @@ Fixed a false-`accepted` defect at `d414a3b` where a terminal State (e.g. Round 
 - Stable tag: v0.1.0.
 - The v0.1.0 whole-collection and per-Skill installer commands were verified against a fresh destination and the published package content; this historical evidence is retained alongside the v0.1.1 release.
 - Historical commands: `npx skills add LightDevCoder/skills` and `npx skills add LightDevCoder/skills --skill review-loop`.
-- Historical installation details: [v0.1.0 summary](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v0.1.0-summary).
+- Historical installation details: [v0.1.0 summary](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v010-summary).

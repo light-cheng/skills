@@ -408,4 +408,4 @@
 - 稳定 tag：v0.1.0。
 - v0.1.0 的整集合与单 Skill 安装命令曾针对 fresh destination 和已发布包内容完成验证；这份历史证据与 v0.1.1 release 证据一并保留。
 - 历史命令：`npx skills add LightDevCoder/skills` 和 `npx skills add LightDevCoder/skills --skill review-loop`。
-- 历史安装明细：[v0.1.0 摘要](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v0.1.0-摘要)。
+- 历史安装明细：[v0.1.0 摘要](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v010-摘要)。
