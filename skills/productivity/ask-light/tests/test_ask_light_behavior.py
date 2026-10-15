@@ -1886,6 +1886,93 @@ class DiscoveryAndProvenanceMatrixTest(unittest.TestCase):
         self.assertEqual(val["status"], "BLOCKED")
         self.assertIn("multiple available first-party copies", val["reason"])
 
+    def test_duplicate_copy_in_the_running_collection_wins(self) -> None:
+        # A project install next to a global install of another Host: the copy loaded with ask-light is used.
+        root1 = self.root / "root1"
+        root2 = self.root / "root2"
+        root1.mkdir()
+        root2.mkdir()
+        write_skill(root1, "eli5")
+        write_skill(root2, "eli5")
+        roots = [{"category": "first-party", "path": str(root1)}, {"category": "first-party", "path": str(root2)}]
+        with patch.object(ASK_LIGHT, "running_collection", return_value=root2):
+            val = ASK_LIGHT.validate_recommendation("eli5", roots=roots, host="claude-code", scope="standalone")
+        self.assertEqual(val["status"], "VALIDATED")
+        self.assertTrue(val["checks"]["runningCollectionCopy"])
+        self.assertEqual(val["invocation"], "/eli5")
+
+    def test_duplicate_copies_outside_the_running_collection_still_block(self) -> None:
+        root1 = self.root / "root1"
+        root2 = self.root / "root2"
+        root1.mkdir()
+        root2.mkdir()
+        write_skill(root1, "eli5")
+        write_skill(root2, "eli5")
+        roots = [{"category": "first-party", "path": str(root1)}, {"category": "first-party", "path": str(root2)}]
+        with patch.object(ASK_LIGHT, "running_collection", return_value=self.root / "elsewhere"):
+            val = ASK_LIGHT.validate_recommendation("eli5", roots=roots, host="codex", scope="standalone")
+        self.assertEqual(val["status"], "BLOCKED")
+        self.assertIn("multiple available first-party copies", val["reason"])
+
+    def _load_copy(self, scripts_dir: Path):
+        spec = importlib.util.spec_from_file_location(f"ask_light_copy_{scripts_dir.parent.parent.name}", scripts_dir / "ask_light.py")
+        module = importlib.util.module_from_spec(spec)
+        import sys
+        sys.path.insert(0, str(scripts_dir))
+        try:
+            spec.loader.exec_module(module)
+        finally:
+            sys.path.remove(str(scripts_dir))
+        return module
+
+    def _install(self, package_parent: Path) -> Path:
+        import shutil
+        target = package_parent / "ask-light"
+        shutil.copytree(ROOT, target, ignore=shutil.ignore_patterns("tests", "__pycache__"))
+        return target / "scripts"
+
+    def test_running_collection_resolves_a_flat_install(self) -> None:
+        flat = self.root / "flat" / "skills"
+        flat.mkdir(parents=True)
+        write_skill(flat, "socratic")
+        module = self._load_copy(self._install(flat))
+        self.assertEqual(module.running_collection(), flat.resolve())
+
+    def test_running_collection_resolves_a_source_checkout(self) -> None:
+        checkout = self.root / "checkout" / "skills"
+        (checkout / "productivity").mkdir(parents=True)
+        (checkout / "thinking").mkdir(parents=True)
+        write_skill(checkout / "thinking", "socratic")
+        module = self._load_copy(self._install(checkout / "productivity"))
+        self.assertEqual(module.running_collection(), checkout.resolve())
+
+    def test_running_collection_is_none_without_a_confirmed_collection(self) -> None:
+        lonely = self.root / "lonely" / "skills"
+        lonely.mkdir(parents=True)
+        module = self._load_copy(self._install(lonely))
+        self.assertIsNone(module.running_collection())
+
+    def test_cli_without_host_name_renders_claude_code_invocations(self) -> None:
+        only = self.root / "only"
+        only.mkdir()
+        write_skill(only, "eli5")
+        command = ["python3", str(ROOT / "scripts" / "ask_light.py"), "--mode", "validate", "--skill", "eli5",
+                   "--scope", "standalone", "--context-json", "{}",
+                   "--roots-json", json.dumps([{"category": "first-party", "path": str(only)}])]
+        env = dict(os.environ, CLAUDECODE="1")
+        out = subprocess.run(command, capture_output=True, text=True, env=env, check=True)
+        self.assertEqual(json.loads(out.stdout)["invocation"], "/eli5")
+        env.pop("CLAUDECODE")
+        out = subprocess.run(command, capture_output=True, text=True, env=env, check=True)
+        self.assertEqual(json.loads(out.stdout)["invocation"], "$eli5")
+
+    def test_host_is_detected_from_the_environment(self) -> None:
+        with patch.dict(os.environ, {"CLAUDECODE": "1"}):
+            self.assertEqual(ASK_LIGHT.detect_host(), "claude-code")
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+        with patch.dict(os.environ, env, clear=True):
+            self.assertEqual(ASK_LIGHT.detect_host(), "codex")
+
     def test_third_party_same_name_isolated(self) -> None:
         root1 = self.root / "root1"
         root1.mkdir()

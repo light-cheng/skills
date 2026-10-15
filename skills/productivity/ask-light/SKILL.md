@@ -28,7 +28,9 @@ only. Full evidence, validation and approval protocol:
    overview, or collection navigation. It decides which evidence binds.
 2. **Collect evidence.** Run
    `python3 scripts/ask_light.py --mode next --context-json '{"projectRoot": "..."}'`
-   (add `--roots-json` when the collection root is known). Shortlist from the
+   (add `--host-name` with your Host, such as `claude-code` or `codex`, and
+   `--roots-json` when the collection root is known; without `--host-name` the
+   script guesses from the environment). Shortlist from the
    catalog in the packet; never read every SKILL.md to route.
 3. **Understand candidates.** Pick 2–4 plausible Skills. Read their
    `SKILL.md` when neighbors are materially close.

@@ -2311,6 +2311,25 @@ def validate_selected(candidate: dict[str, Any]) -> tuple[int, int, str]:
     return 1, reference_reads, ""
 
 
+def detect_host() -> str:
+    """The Host running this script, from its own environment. Claude Code sets CLAUDECODE."""
+    if os.environ.get("CLAUDECODE"):
+        return "claude-code"
+    return "codex"
+
+
+def running_collection() -> Path | None:
+    """The collection this ask-light was loaded from, or None when it cannot be confirmed.
+
+    A flat install keeps packages side by side; a source checkout adds one category level.
+    """
+    package = Path(__file__).resolve().parents[1]
+    for root in (package.parent, package.parent.parent):
+        if _has_collection_package(root, "ask-light") and _has_collection_package(root, "socratic"):
+            return root
+    return None
+
+
 def invocation(name: str, host: str) -> str:
     if host.lower() == "codex":
         return f"${name}"
@@ -2637,6 +2656,7 @@ def validate_recommendation(
             "inLightMap": False,
             "available": False,
             "uniqueCopy": False,
+            "runningCollectionCopy": False,
             "metadataReadable": False,
             "hostPermits": False,
             "invocationCompatible": False,
@@ -2728,6 +2748,14 @@ def validate_recommendation(
             f"logical recommendation: {selected}; status: BLOCKED; the selected Skill is unavailable "
             "on this host. ask-light does not substitute another Skill."
         )
+    if len(installed) > 1:
+        # The copy in the collection this ask-light was loaded from is the one the Host is using.
+        own = running_collection()
+        local = [c for c in installed if own is not None and is_under(Path(c["packagePath"]), own)]
+        if len(local) == 1:
+            installed = local
+            result["checks"]["uniqueCopy"] = True
+            result["checks"]["runningCollectionCopy"] = True
     if len(installed) > 1:
         return blocked(
             f"logical recommendation: {selected}; status: BLOCKED; multiple available first-party copies "
@@ -2933,7 +2961,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--roots-json", default="[]")
     parser.add_argument("--context-json", required=True)
-    parser.add_argument("--host-name", default="codex")
+    parser.add_argument("--host-name", default=None)
     # Public modes: choices=("next", "workflow", "navigate") + internal validate
     parser.add_argument("--mode", choices=("next", "workflow", "navigate", "validate", "semantic"), default="next")
     parser.add_argument("--skill", default="")
@@ -2943,6 +2971,8 @@ def main() -> int:
         choices=CONSTRAINT_SCOPES,
     )
     args = parser.parse_args()
+    if not args.host_name:
+        args.host_name = detect_host()
     context = json.loads(args.context_json)
     skill_map = load_map()
     roots = json.loads(args.roots_json)
