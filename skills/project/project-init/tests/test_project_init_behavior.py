@@ -145,7 +145,7 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertIn(BOOTSTRAP.REDIRECT_LINE, pointer)
             self.assertIn("Keep this note.", updated)
 
-    def test_tracker_names_change_proposals_and_the_plan_page(self) -> None:
+    def test_tracker_names_the_shared_effort_artifacts(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
             root = Path(tmp)
             BOOTSTRAP.bootstrap(root, config())
@@ -154,6 +154,8 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertIn("<working-area>/<effort>/changes/NN-<slug>.md", managed)
             self.assertIn("<working-area>/<effort>/plan.html", managed)
             self.assertIn("<working-area>/<effort>/plan-history/", managed)
+            self.assertIn("<working-area>/<effort>/clarify-handoff.md", managed)
+            self.assertIn("Tickets approved", managed)
 
     def test_fenced_initialization_heading_is_not_treated_as_a_live_section(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:

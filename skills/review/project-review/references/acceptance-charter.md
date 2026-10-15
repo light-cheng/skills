@@ -18,7 +18,7 @@ copy them into state, round, or verdict records.
 - Fixed point: <software Profile only - exactly one full Git commit SHA: the immutable light-code-review base>
 - Implementation scope: <software Profile only - reviewed software target as ';'-separated repository-relative literal paths>
 - Approval state: approved | pending user confirmation
-- Approval evidence: <source section or confirmation>
+- Approval evidence: <the SPEC's `Approval:` line and `Tickets approved` comment, quoted; or the recorded confirmation>
 
 ## Review Profile
 - Profile: generic | <accepted named Profile>
@@ -58,7 +58,10 @@ Scope; a story with neither is a Charter gap to raise before review.
 
 Use `Not applicable - <reason>` rather than silently omitting a necessary
 section. A source explicitly approved by the user or program record may create
-an approved Charter. A synthesized baseline starts `pending user confirmation`;
+an approved Charter. For a `project-spec` SPEC, quote its `Approval:` line and,
+when tickets are in scope, its `Tickets approved` comment as the approval
+evidence. `Approval: pending`, or no such line, means the source is not yet
+approved. A synthesized baseline starts `pending user confirmation`;
 do not review it until confirmation is recorded.
 
 Canonical durable fields are singleton fields: `- Charter revision:`,

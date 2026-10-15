@@ -23,6 +23,8 @@ when a decision follows or deliberately departs from one.
 ```markdown
 # SPEC — <Feature title>
 
+Approval: <who>, <date> — "<the user's approving words>"
+
 ## Problem Statement
 
 The problem from the user's perspective — who is affected, what is currently
@@ -91,6 +93,17 @@ preserving. If a fact remains unresolved but does not block the SPEC, note it
 here with the evidence gap and the next fact-work step (`light-research` /
 `light-prototype`) without converting it into a user question.
 ```
+
+## Approval line
+
+`Approval:` records who approved this SPEC, when, and the words they used,
+for example `Approval: project owner, 2026-10-16 — "Looks right, publish it."`.
+Quote only words the user actually said in this session. Until the user
+approves, write `Approval: pending`. `project-review` cites this line as the
+Charter's approval evidence.
+
+`project-tickets` appends the ticket-graph approval under a `## Comments`
+heading at the end of this file (see its workflow). Keep that heading last.
 
 ## Vocabulary and evidence rules
 

@@ -5,7 +5,8 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 ## Conventions
 
 - One feature per directory: `.scratch/<feature-slug>/`
-- The spec is `.scratch/<feature-slug>/spec.md`
+- A saved clarification handoff is `.scratch/<feature-slug>/clarify-handoff.md` (written by `project-clarify` or `clarify` only after the user confirms; read by `project-spec`)
+- The spec is `.scratch/<feature-slug>/spec.md`; its `Approval:` line records who approved it, when, and their words, and a `Tickets approved` line under its `## Comments` records the ticket-graph approval
 - Implementation issues are one file per ticket at `.scratch/<feature-slug>/issues/<NN>-<slug>.md`, numbered from `01` — never a single combined tickets file
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading

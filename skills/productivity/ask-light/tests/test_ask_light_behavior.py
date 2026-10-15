@@ -234,6 +234,31 @@ class SemanticEvidenceRegressionTest(unittest.TestCase):
         self.assertEqual(result["primary_skill"], "project-spec")
         self.assertEqual(result["validation"]["status"], "VALIDATED")
 
+    def test_saved_clarify_handoff_alone_routes_to_spec(self) -> None:
+        # project-clarify saves its handoff at .scratch/<feature>/clarify-handoff.md before any SPEC exists.
+        write_project_state(self.project, initialized=True, spec=False)
+        effort = self.project / ".scratch" / "parser"
+        effort.mkdir(parents=True, exist_ok=True)
+        (effort / "clarify-handoff.md").write_text(
+            "Project clarification handoff\n- Status: ready-for-next-stage\n- Recommended next explicit invocation: project-spec\n"
+        )
+        result = self.route()
+        self.assertEqual(result["primary_skill"], "project-spec")
+        self.assertEqual(result["validation"]["status"], "VALIDATED")
+
+    def test_plain_clarify_synthesis_is_not_effort_evidence(self) -> None:
+        # clarify may save a plain synthesis under the same filename; only a real handoff marks an effort.
+        write_project_state(self.project, initialized=True, spec=False)
+        for name, body in (
+            ("beta", "Project clarification handoff\n- Status: ready-for-next-stage\n- Recommended next explicit invocation: project-spec\n"),
+            ("gamma", "We agreed the parser reads CSV first and JSON later.\n"),
+        ):
+            effort = self.project / ".scratch" / name
+            effort.mkdir(parents=True, exist_ok=True)
+            (effort / "clarify-handoff.md").write_text(body)
+        result = self.route()
+        self.assertEqual(result["primary_skill"], "project-spec")
+
     def test_unknown_review_freshness_cannot_release(self) -> None:
         write_project_state(self.project, initialized=True, spec=True, ticket_status="resolved")
         write_project_review_state(self.project, reviewed_effort="effort", verdict="PASS", revision_identity="0123456789abcdef0123456789abcdef01234567")

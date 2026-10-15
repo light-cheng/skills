@@ -16,6 +16,10 @@
 
 `ask-light` 和 `agent-config` 不再调用 TypeSafe Jev。`docs/agents/light-project.md` 里没有 `Decision data:` 一行的项目，只使用本机判断。要使用有类型的决策来源，请写上 `Decision data:`，并通过 `light-decide` 配置来源（见其 `references/setup.md`）。
 
+## SPEC 批准行
+
+SPEC 现在在标题下用一行 `Approval:` 记录批准，`project-tickets` 会在 SPEC 的 `## Comments` 下加一行 `Tickets approved`。0.2.8 之前写的 SPEC 没有 `Approval:` 行：`project-tickets` 会问它是否已批准，答"是"就补上这一行。写着 `Approval: pending` 的 SPEC 先回到 `project-spec` 批准。存在 `.scratch/<feature>/clarify-handoff.md` 的目录会被 `ask-light` 当作一个新功能。若另一个功能目录里仍有生效中的 SPEC，`ask-light` 会继续路由到那个目录：在 `docs/agents/light-project.md` 写上 `Current effort:`，或把已完成的 SPEC 标为 superseded。重跑 `project-init` 即可给已有项目补上新的 tracker 行（`clarify-handoff.md`、批准记录）。
+
 ## 升级之前
 
 记下目标 Host 和它的 Skill 根目录。动已安装的 `resolving-merge-conflicts` 之前，先确认它的来源：打开它的 `SKILL.md` 和 `ATTRIBUTION.md`，或查看符号链接指向。Light 的副本会写明 `LightDevCoder/skills`，Matt 的原版不会。其他来源的包保持不动。

@@ -17,15 +17,18 @@ missing adapter instead of silently writing `.scratch` files.
 
 ## Core behavior
 
-1. **Verify the SPEC handoff.** Read the SPEC at the supplied path; a missing
-   or malformed SPEC is a handoff gap — report it and stop.
+1. **Verify the SPEC handoff.** Read the SPEC at the supplied path; a missing,
+   malformed or `Approval: pending` SPEC is a handoff gap — report it and
+   stop. A SPEC with no `Approval:` line: ask the user, and on yes record it.
 2. **Draft tracer-bullet vertical slices.** Each slice is a narrow, complete,
    demoable path through the relevant layers, with `Blocked by` edges,
    `ready work`, and `parallelizable` groups.
 3. **Quiz the user.** Show title, Blocked by, and what each ticket delivers;
    iterate until the granularity and edges are approved.
 4. **Publish one file per ticket** under `.scratch/<feature>/issues/`, numbered
-   from `01` in dependency order with the approved shape unchanged.
+   from `01` in dependency order with the approved shape unchanged. Then
+   append the approval (who, when, their words) to the SPEC's `## Comments`
+   as a `Tickets approved` line.
 
 **Applying a change proposal.** When the user passes an `approved` proposal
 from `.scratch/<feature>/changes/`, apply exactly its `Tickets:` line (add,

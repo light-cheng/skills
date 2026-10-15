@@ -1309,12 +1309,17 @@ EFFORT_EVIDENCE_PATTERNS = (
     "map.md",
     "issues/*.md",
 )
+# A saved handoff (`project-clarify`) marks an effort before any SPEC exists.
+# `clarify` may save a plain synthesis under the same name; that does not count.
+SAVED_HANDOFF_NAME = "clarify-handoff.md"
 
 
 def _effort_has_evidence(path: Path) -> bool:
     if not path.is_dir():
         return False
-    return any(_has_glob(path, pattern) for pattern in EFFORT_EVIDENCE_PATTERNS)
+    if any(_has_glob(path, pattern) for pattern in EFFORT_EVIDENCE_PATTERNS):
+        return True
+    return _is_clarification_handoff(_small_text(path / SAVED_HANDOFF_NAME))
 
 
 def _root_active_spec(root: Path) -> bool:
@@ -1494,6 +1499,15 @@ CLARIFICATION_STATUS_STATES = {
 CLARIFICATION_RECOMMENDED_FIELD = "Recommended next explicit invocation"
 
 
+def _is_clarification_handoff(text: str) -> bool:
+    """True when ``text`` follows the project-clarify handoff contract."""
+    if CLARIFICATION_HANDOFF_MARKER in text.lower():
+        return True
+    statuses = _field_values(text, ("Status",))
+    recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD, "Recommended next invocation"))
+    return any(status in CLARIFICATION_STATUS_STATES for status in statuses) and bool(recommended)
+
+
 def _clarification_candidate_files(root: Path, current_effort: str | None) -> list[Path]:
     """Bounded candidate scan for persisted clarification handoffs."""
     directories = [root / "docs" / "agents"]
@@ -1535,14 +1549,12 @@ def _classify_clarification_signals(root: Path, current_effort: str | None) -> l
     records: list[dict[str, Any]] = []
     for path in _clarification_candidate_files(root, current_effort):
         text = _small_text(path)
-        if not text.strip():
+        if not text.strip() or not _is_clarification_handoff(text):
             continue
         marker = CLARIFICATION_HANDOFF_MARKER in text.lower()
         statuses = _field_values(text, ("Status",))
         recognized = [status for status in statuses if status in CLARIFICATION_STATUS_STATES]
         recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD, "Recommended next invocation", "Recommended next explicit invocation"))
-        if not marker and not (recognized and recommended):
-            continue
         raw_status = recognized[0] if recognized else ""
         raw_state = CLARIFICATION_STATUS_STATES.get(raw_status, "unknown")
         rec_next = recommended[0] if recommended else ""

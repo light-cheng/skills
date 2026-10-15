@@ -13,7 +13,8 @@ one formal SPEC that `project-tickets` can slice.
 ## Core behavior
 
 1. **Gather and validate** the clarification handoff or map answers plus a
-   light repo inspection. When `docs/agents/light-project.md` exists, consume
+   light repo inspection. With only a slug, read the handoff from
+   `.scratch/<feature>/clarify-handoff.md`. When `docs/agents/light-project.md` exists, consume
    its goal, outputs, domain-context locators, and working area before reading
    the named glossary, ADRs, and seams. Use settled facts and decisions as-is.
 2. **Check the blocking-decision gate.** If a truly blocking user-owned
@@ -21,7 +22,8 @@ one formal SPEC that `project-tickets` can slice.
    map) with the exact blocker and context pointer.
 3. **Synthesize and publish** one bounded SPEC using
    [OUTPUT-FORMAT.md](references/OUTPUT-FORMAT.md), to
-   `.scratch/<feature>/spec.md`. Confirm the publish when seams affect scoping.
+   `.scratch/<feature>/spec.md`. Ask the user to approve it and record who,
+   when and their words in the SPEC's `Approval:` line.
 4. **Stop and recommend** explicit `$project-tickets`.
 
 **Applying a change proposal.** When the user passes an `approved` proposal

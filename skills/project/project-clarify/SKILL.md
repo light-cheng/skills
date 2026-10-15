@@ -54,9 +54,10 @@ Project clarification handoff
 - Status: ready-for-next-stage | waiting-for-user | blocked
 ```
 
-Return the handoff in memory by default. Write it to a file only when the user
-separately names a writable destination and confirms the write. Then stop; the
-user chooses the next invocation.
+Return the handoff in memory by default. When the next stage may run in
+another session, offer to save it at `.scratch/<feature>/clarify-handoff.md`
+(or a destination the user names). Write only after the user confirms. Then
+stop; the user chooses the next invocation.
 
 ## Composition and upgrade
 

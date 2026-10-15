@@ -28,7 +28,11 @@ without a SPEC — that case belongs to `project-spec` first.
 
 If the SPEC file is missing, unreadable, or lacks the sections required by
 `project-spec`'s `OUTPUT-FORMAT.md`, report a handoff gap and stop — do not
-invent tickets.
+invent tickets. A SPEC with `Approval: pending` is not approved yet: report
+a handoff gap and ask the user to approve it through `project-spec` first. A
+SPEC with no `Approval:` line predates the line: ask the user whether it is
+approved. On yes, add `Approval:` under its title with their words; on no,
+stop as a handoff gap.
 
 ### 2. Explore the codebase (optional, inspect before slicing)
 
@@ -94,7 +98,8 @@ Ask the three canonical questions:
 - Should any tickets be merged or split further?
 
 Iterate until the user approves. The approved graph is the one you publish;
-do not reorder or rewrite it silently before publishing.
+do not reorder or rewrite it silently before publishing. Keep the user's
+approving words for the record in step 5.
 
 ### 5. Publish the tickets to the local tracker
 
@@ -118,7 +123,22 @@ empty or entirely `resolved`, whose `Status` is `ready-for-agent` (or `open`
 for a map-style scan), and which is not `claimed` is immediately ready work.
 First by number wins; independent tickets are parallelizable.
 
-Do not close or modify the parent SPEC or the map that supplied it.
+After every ticket file is written, record the approval in the SPEC file:
+append one line under its `## Comments` heading (create the heading at the end
+if missing):
+
+```text
+- <date> Tickets approved — <who>: "<the user's approving words>" (01–NN)
+```
+
+Quote only words the user actually said. If publishing stops partway, do not
+add the line; report which files were written. Apart from an `Approval:`
+line added to an older SPEC in step 1, this is the only change
+`project-tickets` makes to the SPEC; `project-review` cites it as approval
+evidence for the ticket graph.
+
+Do not close or modify the parent SPEC or the map that supplied it, apart
+from the approval lines above.
 
 ### 6. Describe ready work and stop
 
@@ -135,10 +155,11 @@ defined in the configured `docs/agents/issue-tracker.md` contract:
   when every file it lists is `resolved`.
 - **Frontier** — scan `.scratch/<feature>/issues/` for `open` /
   `ready-for-agent`, unblocked, unclaimed files; first by number wins.
-- **Claim** — set `Status: claimed` before any work so concurrent sessions
-  skip it.
-- **Resolve** — append `## Answer`, set `Status: resolved`, optionally link
-  from the map's `Decisions so far` or the SPEC's evidence when applicable.
+- **Claim** — `light-implement` sets `Status: claimed` before any work so
+  concurrent sessions skip it.
+- **Resolve** — after a `PASS`, `project-review` appends `## Answer`, sets
+  `Status: resolved`, and links from the map's `Decisions so far` when the
+  effort keeps a map.
 
 A browser that only understands the map contract's `Status: open | claimed |
 resolved` must still be able to identify the frontier; see

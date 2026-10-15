@@ -16,6 +16,10 @@ The old name was the same as the mattpocock/skills original, so installing both 
 
 `ask-light` and `agent-config` no longer call TypeSafe Jev. A project that has no `Decision data:` line in `docs/agents/light-project.md` gets on-device judgments only. To use a typed decision source, set `Decision data:` and configure the source through `light-decide` (see its `references/setup.md`).
 
+## SPEC approval line
+
+A SPEC now records its approval in an `Approval:` line under the title, and `project-tickets` adds a `Tickets approved` line under the SPEC's `## Comments`. A SPEC written before 0.2.8 has no `Approval:` line: `project-tickets` asks whether it is approved and adds the line on yes. A SPEC that says `Approval: pending` goes back to `project-spec` for approval. A handoff saved at `.scratch/<feature>/clarify-handoff.md` marks a new feature for `ask-light`. When another feature folder still holds an active SPEC, `ask-light` keeps routing to that one: set `Current effort:` in `docs/agents/light-project.md`, or mark the finished SPEC superseded. Rerun `project-init` to add the new tracker lines (`clarify-handoff.md`, approvals) to an existing project.
+
 ## Before upgrading
 
 Record the target Host and its Skill root. For an installed `resolving-merge-conflicts`, check where it came from before touching it: open its `SKILL.md` and `ATTRIBUTION.md`, or the symlink target. A Light copy names `LightDevCoder/skills`; Matt's original does not. Leave a package from another source in place.
