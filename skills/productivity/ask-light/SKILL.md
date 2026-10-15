@@ -69,7 +69,7 @@ Return the record in [result-contract.md](references/result-contract.md).
   path; when you judge without the script, call `light-decide` with question
   ids `ask-light/next-action`, `ask-light/material-ambiguity` or
   `ask-light/reasoning-escalation`. It asks only within the project's
-  `Decision data:` limit and applies an answer only when the user's policy file
+  `Decision data:` limit (no line means on-device) and applies an answer only when the user's policy file
   calibrates that question. Log the returned `decisions` with light-decide's
   log format. Unavailable or uncalibrated → keep the deterministic baseline. A
   judgment never grants transition authority; only the user's approval does.

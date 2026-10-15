@@ -64,7 +64,7 @@ and rules: [host-evidence-schema.md](references/host-evidence-schema.md#script-e
   through the light-decide script path; when you judge without the script,
   call `light-decide` with question ids `agent-config/task-complexity` or
   `agent-config/reasoning-need`. It asks only within the project's
-  `Decision data:` limit, applies an answer only when the user's policy file
+  `Decision data:` limit (no line means on-device), applies an answer only when the user's policy file
   calibrates that question, and applies a downgrade only when the score sits
   clearly inside the lower bin. Unavailable or uncalibrated → keep the
   deterministic profile. A judgment never confirms a Profile or changes Host
