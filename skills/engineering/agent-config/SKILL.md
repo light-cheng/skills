@@ -16,25 +16,13 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - Bounded task, SPEC, or ticket graph.
 - Evidenced host capabilities and confirmed profile (via companion MCP or session input).
 
-The standalone Python entry `scripts/agent_config.py` accepts canonical
-`--host-json` and `--profile-json` from the companion schemas. Missing, stale,
-or mismatched evidence returns `NEED_INPUT`; a legacy flat Host dictionary or
-unproven Python dataclass is not treated as confirmed evidence.
-`--active-session-json` may supply separately observed, fresh current-session
-model evidence; the canonical Host inventory alone does not identify that model.
-The profiler reads the project's `Decision data:` line from `--project-root`, or
-from the nearest `docs/agents/light-project.md` above the current directory, and
-returns its judgments as `abstract_profile.decisions`.
-For a fixed-model Host, the entry can identify the current model only when the
-verified inventory contains exactly one model. A single-model Profile on a Host
-that can select among models remains supported, but direct execution requires
-fresh, matching current-session model evidence after any approved selection.
-Unsupported explicit effort values return `NEED_INPUT` instead of being
-silently substituted.
+The script entry `scripts/agent_config.py` takes canonical Host and Profile
+evidence; missing, stale or mismatched evidence returns `NEED_INPUT`. Flags
+and rules: [host-evidence-schema.md](references/host-evidence-schema.md#script-entry).
 
 ## Setup Gate
 - **Explicit setup:** If invoked with setup intent (`agent-config setup`), run setup mode to prepare or repair the runtime environment and Profile (see [`references/setup.md`](references/setup.md)). Setup never plans execution for the current task.
-- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. Companion health requires compatible MCP transport protocol, Agent Config Companion contract `protocol_version === 1`, all 8 canonical tools present with matching schemas, and reachable responsive process; missing tools or schema mismatch is classified as `stale` or `unsupported`, not healthy. If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
+- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`; health rules are in [companion-contract.md](references/companion-contract.md). If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
 
 ## Output Contract: AgentConfigResult
 `agent-config` yields a canonical `AgentConfigResult` envelope:
@@ -45,7 +33,7 @@ silently substituted.
 - `execution_config`: `ExecutionConfig | null` (strictly present when `readiness === "READY"`; strictly `null` for all non-ready states).
 
 ## Core flow
-1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires compatible MCP transport protocol, Agent Config contract `protocol_version === 1`, all 8 canonical tools, and responsiveness.
+1. **Setup check:** Verify a confirmed profile via a healthy companion or session input. Never guess single-model without a profile.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, `execution_config: null`, and return the ticketing recommendation to the caller.

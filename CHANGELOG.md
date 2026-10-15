@@ -39,6 +39,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 - `check_public_docs.py` (behaviour change): implementation-jargon hits are printed as `WARNING:` lines and no longer fail the gate. Catalog status words match whole words, so "adapters" no longer counts as ADAPT. A README adapter count without a count in `harness-support.md` is an error instead of being compared with a built-in 10.
 - `clarify`, `project-clarify`, `socratic`: remove `scripts/session_state.py` and `scripts/frontier.py`. Agents never ran them; only tests did. The clarification flow lives in each package's `SKILL.md` and `references/`. `manuscript-ops` now checks `clarify` through `references/WORKFLOW.md` and `socratic` through `references/conversation-contract.json` before a Project handoff.
 - `ask-light`: shorten `SKILL.md` from 124 to 73 lines. The session flow keeps its steps and hard rules; validation scopes, the advisor explanation checklist and the "never invent state" examples move to `references/routing-judgment.md`. Behaviour is unchanged.
+- `project-review`, `agent-config`, `light-redirect`: shorten `SKILL.md` (106→84, 94→82, 89→77 lines). Repeated rules become links: companion health to `companion-contract.md`, the script-entry flags to `host-evidence-schema.md#script-entry`, and redirect answer handling and hand edits to `PROPOSAL.md`. Behaviour is unchanged.
 - `humanizer`: record which quoted examples in `references/patterns.md` come from Wikipedia (CC BY-SA 4.0).
 
 ## 0.2.7 — 2026-10-07

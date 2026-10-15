@@ -65,6 +65,28 @@ saw it, and every open decision needs the user's own answer. Never infer approva
 silence, from a model's judgment, or from an earlier approval of something
 else.
 
+## Handling the answer
+
+- An approval that leaves an open decision unanswered: ask that decision and
+  keep the proposal `proposed` until each one has an explicit answer. "Go
+  with your recommendations" is an explicit answer.
+- An answer that changes the proposal: edit the proposal and ask again.
+- No answer yet: leave it `proposed` and stop. When the user answers later,
+  in any conversation, start at step 5 with that proposal.
+- The user asks you to skip the proposal and edit directly: the proposal
+  still gets written, and their request counts as approval only when the
+  proposal changes exactly what they asked. If it changes anything more, ask
+  about the rest.
+
+## Hand edit
+
+When the user insists again, explicitly and after the approval, on a hand
+edit, leave `light-redirect`. As an ordinary edit, make exactly the approved
+SPEC and ticket changes, then record `applied` in the proposal with the
+user's words and "edited by hand, not through project-spec or
+project-tickets". A hand edit never touches a Charter; a Charter change still
+goes through `project-review`'s Change Proposal.
+
 ## Map pointer
 
 When `.scratch/<feature>/map.md` exists, a proposal is open fog until the

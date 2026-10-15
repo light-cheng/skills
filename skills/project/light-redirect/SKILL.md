@@ -8,7 +8,7 @@ description: Use when the approved plan no longer holds - work finds a requireme
 A **change proposal** says that the approved plan should change, why, and
 exactly what would change. `light-redirect` writes it and records the user's
 answer. Only the user approves it. `project-spec` and `project-tickets` apply
-it, unless the user insists on a hand edit (see step 6).
+it, unless the user insists on a hand edit.
 
 ## Direction or local fix
 
@@ -33,21 +33,12 @@ through a proposal, however small.
    every affected SPEC section, ticket action, Charter item and resolved ticket
    that needs acceptance again, every decision the user still has to make, and
    what stays unchanged.
-4. **Point** to it from `.scratch/<feature>/map.md` when that file exists, as
-   the format describes: under `Not yet specified` while it waits, under
-   `Decisions so far` once you record `approved` or `rejected`. Without a map, skip this step.
+4. **Point** to it from `.scratch/<feature>/map.md` when that file exists
+   ([map pointer](references/PROPOSAL.md#map-pointer)).
 5. **Ask** the user to approve or reject it, in plain words, together with any
-   open decisions. Record the answer as the format describes:
-   - An approval that leaves an open decision unanswered: ask that decision
-     and keep the proposal `proposed` until each one has an explicit answer.
-     "Go with your recommendations" is an explicit answer.
-   - An answer that changes the proposal: edit the proposal and ask again.
-   - No answer yet: leave it `proposed` and stop. When the user answers later,
-     in any conversation, start here with that proposal.
-   - The user asks you to skip the proposal and edit directly: the proposal
-     still gets written, and their request counts as approval only when the
-     proposal changes exactly what they asked. If it changes anything more,
-     ask about the rest.
+   open decisions. Record the answer as the format describes; partial
+   approvals, edits, silence and "just edit it" are covered in
+   [handling the answer](references/PROPOSAL.md#handling-the-answer).
 6. **Hand off** and stop:
    - Approved → recommend `$project-spec` for SPEC changes and
      `$project-tickets` for ticket changes, passing the proposal path. When its
@@ -58,12 +49,9 @@ through a proposal, however small.
      `proposed`.
    - Rejected → return to the caller with the reason.
 
-The applying skills make the edits; `light-redirect` never does. When the
-user insists again, explicitly and after the approval, on a hand edit instead,
-leave `light-redirect`: as an ordinary edit, make exactly the approved SPEC and
-ticket changes, then record `applied` in the proposal with the user's words and
-"edited by hand, not through project-spec or project-tickets". A hand edit never touches a Charter; a
-Charter change still goes through `project-review`'s Change Proposal.
+The applying skills make the edits; `light-redirect` never does. A hand edit
+the user insists on after approval follows
+[hand edit](references/PROPOSAL.md#hand-edit).
 
 See [examples](references/EXAMPLES.md) for a direction change and a local fix.
 

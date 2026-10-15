@@ -155,3 +155,21 @@ window. An unknown or unobserved capability does not authorize execution.
 - `capabilities.concurrency` records maximum concurrency when supported (`max_concurrency: int >= 1`).
 - `capabilities.per_agent_model_selection` records whether subagents can each be launched with independently assigned models.
 - `capabilities.configuration_mutation` records whether host configuration files or session parameters can be mutated with user consent.
+
+## Script entry
+
+The standalone Python entry `scripts/agent_config.py` accepts canonical
+`--host-json` and `--profile-json` from the companion schemas. Missing, stale,
+or mismatched evidence returns `NEED_INPUT`; a legacy flat Host dictionary or
+unproven Python dataclass is not treated as confirmed evidence.
+`--active-session-json` may supply separately observed, fresh current-session
+model evidence; the canonical Host inventory alone does not identify that model.
+The profiler reads the project's `Decision data:` line from `--project-root`, or
+from the nearest `docs/agents/light-project.md` above the current directory, and
+returns its judgments as `abstract_profile.decisions`.
+For a fixed-model Host, the entry can identify the current model only when the
+verified inventory contains exactly one model. A single-model Profile on a Host
+that can select among models remains supported, but direct execution requires
+fresh, matching current-session model evidence after any approved selection.
+Unsupported explicit effort values return `NEED_INPUT` instead of being
+silently substituted.

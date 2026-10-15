@@ -39,6 +39,7 @@
 - `check_public_docs.py`（行为变化）：命中实现术语时只打印 `WARNING:`，不再让检查失败。目录状态词按整词匹配，"adapters" 不再算作 ADAPT。README 写了适配器数量而 `harness-support.md` 没写时报错，不再和内置的 10 比较。
 - `clarify`、`project-clarify`、`socratic`：删除 `scripts/session_state.py` 和 `scripts/frontier.py`。Agent 从不运行它们，只有测试调用。澄清流程写在各包的 `SKILL.md` 和 `references/` 里。`manuscript-ops` 在项目交接前改为通过 `references/WORKFLOW.md` 检查 `clarify`，通过 `references/conversation-contract.json` 检查 `socratic`。
 - `ask-light`：`SKILL.md` 从 124 行缩到 73 行。会话流程保留各步骤和硬规则；校验范围、顾问式解释清单和"不得虚构状态"的例子移到 `references/routing-judgment.md`。行为不变。
+- `project-review`、`agent-config`、`light-redirect`：缩短 `SKILL.md`（106→84、94→82、89→77 行）。重复的规则改为链接：companion 健康检查指向 `companion-contract.md`，脚本入口参数移到 `host-evidence-schema.md#script-entry`，redirect 的答复处理和手工编辑移到 `PROPOSAL.md`。行为不变。
 - `humanizer`：记录 `references/patterns.md` 里哪些引用示例来自维基百科（CC BY-SA 4.0）。
 
 ## 0.2.7 — 2026-10-07
