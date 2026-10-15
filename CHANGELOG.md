@@ -40,6 +40,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 - `clarify`, `project-clarify`, `socratic`: remove `scripts/session_state.py` and `scripts/frontier.py`. Agents never ran them; only tests did. The clarification flow lives in each package's `SKILL.md` and `references/`. `manuscript-ops` now checks `clarify` through `references/WORKFLOW.md` and `socratic` through `references/conversation-contract.json` before a Project handoff.
 - `ask-light`: shorten `SKILL.md` from 124 to 73 lines. The session flow keeps its steps and hard rules; validation scopes, the advisor explanation checklist and the "never invent state" examples move to `references/routing-judgment.md`. Behaviour is unchanged.
 - `project-review`, `agent-config`, `light-redirect`: shorten `SKILL.md` (106→84, 94→82, 89→77 lines). Repeated rules become links: companion health to `companion-contract.md`, the script-entry flags to `host-evidence-schema.md#script-entry`, and redirect answer handling and hand edits to `PROPOSAL.md`. Behaviour is unchanged.
+- Attribution: `project-retro` no longer claims a behaviour test suite (removed in the audit) and records its `AWAITING_SELECTION` workflow state; `project-clarify`, `decision-map` and `socratic` name their routes by current package names (`light-research`, `light-prototype`, `light-to-questionnaire`).
 - `humanizer`: record which quoted examples in `references/patterns.md` come from Wikipedia (CC BY-SA 4.0).
 
 ## 0.2.7 — 2026-10-07

@@ -25,7 +25,7 @@ verbatim interview format.
 
 ADAPT per SPEC §15: retained the frontier interview idea from `grilling` but
 replaced its design-tree exposition with a Light decision-state model,
-explicit Unknown routing to `research`/`prototype`/`to-questionnaire`, and a
+explicit Unknown routing to `light-research`/`light-prototype`/`light-to-questionnaire`, and a
 bounded engine boundary compatible with `clarify`/`project-clarify`/
 `decision-map`.
 

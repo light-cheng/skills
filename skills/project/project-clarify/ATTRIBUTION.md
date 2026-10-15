@@ -18,7 +18,7 @@ its files, wrapper wording, or runtime dependency chain was copied here.
 `project-clarify` is an owner-authored evidence-first project stage with a
 different capability boundary. It reads actual project materials before asking
 questions, uses the locally admitted model-invoked `socratic` engine for
-user-owned decisions, records deliberate optional `research` or `prototype`
+user-owned decisions, records deliberate optional `light-research` or `light-prototype`
 calls and their failures, returns a bounded handoff artifact, and stops. It
 does not run the upstream grilling or domain-modeling chain, create ADRs or a
 glossary, auto-chain to another user stage, or write a formal specification.

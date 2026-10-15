@@ -21,7 +21,7 @@ contract. It stores the map and child tickets as local markdown files per
 `docs/agents/issue-tracker.md` Wayfinding operations
 (`.scratch/<effort>/map.md`, `.scratch/<effort>/issues/NN-<slug>.md`,
 `Type:`, `Status: claimed/resolved`, `Blocked by:`, `Frontier`, `Claim`,
-`Resolve`). It composes `research`/`prototype`/`socratic`/`to-questionnaire`
+`Resolve`). It composes `light-research`/`light-prototype`/`socratic`/`light-to-questionnaire`
 per ticket Type and hands off to `project-spec` when fog clears. It does not
 reimplement upstream grilling/domain-modeling chains or require an external
 issue tracker.
