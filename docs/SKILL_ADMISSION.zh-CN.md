@@ -2,50 +2,88 @@
 
 [English admission contract](SKILL_ADMISSION.md)
 
-本契约适用于新包进入 `skills/` 前，以及 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 判定为完整审查的改动。已准入包的日常改动不重复准入。
+本文是第一方 Skill 的准入与证据契约。它适用于新包加入 `skills/` 之前，以及 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 判定为完整审查的改动。已准入包的日常改动不重复准入。
 
-## Reuse-before-invention 与 ownership gate
+## 先复用，再新建
 
-优先顺序：直接使用 upstream；在边界配置/适配；增加 local Profile 或 internal Layer；必要时 wrapper；必要的本地修改放入 `skills-3rdParty`；只有确实缺少能力时才创建新的第一方 Skill。目录美观、便利或想要本地副本不是 fork/admit 的理由。
+按以下顺序评估候选：
 
-第一方候选必须满足其一：
+1. 上游 Skill 已能满足需求时，直接使用它。
+2. 在边界上配置或适配它。
+3. 增加本地 Profile 或内部 Layer，前提是保留上游边界。
+4. 只在必要时做包装（wrapper）。
+5. 必要的本地修改放进 `skills-3rdParty`。
+6. 只有确实缺少某项能力时，才新建第一方 Skill。
 
-- 由 collection owner 编写；或
-- 已实质变换为独立 owned capability，并有 `ATTRIBUTION.md` 记录原仓库、路径、pinned revision/tag、license/notice 与具体变换；或
-- 为**已批准的上游 Port**—— SPEC（§14/§16）已显式授权，带 `ATTRIBUTION.md`、有 Light 特定集成（handoff/命名/解耦），且**无上游运行时依赖**。
+图方便、想换目录结构或想要一份本地副本，都不是 fork 或准入上游 Skill 的理由。
 
-未获 SPEC 授权的未修改 upstream/third-party 复制必须拒绝，指向原仓库安装路径。仍以第三方为主且未获授权的修改版进入 `skills-3rdParty`。
+## 归属门槛
 
-**本仓库已批准的 PORT（SPEC §14）：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`、`project-retro`——均为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装 `mattpocock/skills`。Light 变更限于运行时解耦、命名与 handoff 串联，不允许实质性重设计。
+候选必须满足以下之一：
 
-> **Port ≠ 任意复制。** 架构层面的迁入授权不免除 attribution、license/notice 保留与自包含无上游运行时依赖的要求。未经 SPEC 授权的任意上游快照仍不合格。
+- 由集合所有者编写；或
+- 已实质改造为独立的自有能力，并带 `ATTRIBUTION.md`，写明原仓库与路径、固定版本或 tag、适用的许可证或 notice，以及具体的改造摘要；或
+- 是**已批准的上游 Port**：SPEC（§14/§16）明确授权，带 `ATTRIBUTION.md`，有 Light 特有的集成（交接、命名、解耦），并且**没有上游运行时依赖**。（已批准 PORT）
 
-## Admission questions
+未获 SPEC 授权、未经修改的第三方或上游副本一律拒绝，并引导用户使用原上游安装方式。改过但主体仍是第三方能力、又未获 SPEC 授权的包，放进 `skills-3rdParty`，并须满足该仓库的来源与 fork 必要性规则。
 
-审查必须确认：independent value、明确 triggers、bounded responsibility、user/model invocation type、动态组合安全、无不可用依赖（含未安装的上游运行时）、包及其 scripts/templates/assets 完整且无 placeholder-only 目录。进入某个 canonical workflow 不是准入条件。
+**本仓库已批准的 Port（SPEC §14）：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`、`project-retro`。每个都是带 `ATTRIBUTION.md` 的自包含第一方包，运行时不需要安装 `mattpocock/skills`。Light 的改动只限于运行时解耦、命名和交接串联，不允许实质性重新设计。
+
+> **Port 不等于随意复制。** 架构层面的迁入授权不免除署名、许可证与 notice 保留，也不免除"自包含、无需安装上游运行时"的要求。没有 SPEC 授权的任意上游快照仍不合格。
+
+## 准入问题
+
+审查者必须逐项确认：
+
+- **独立价值：** 该 Skill 提供可复用的能力，不是一次性的叙述，也不重复现有包。
+- **触发条件：** 何时使用、何时不用写得足够清楚，能和相邻 Skill 区分开。
+- **职责有界：** 输入、输出、决策点、约束、依赖和失败状态都写明，不形成第二套编排层级。
+- **调用类型：** 有意声明为用户调用或模型调用，并遵守调用方向规则。
+- **动态组合：** 需要时能与其他可用 Skill 安全配合，不要求属于某条固定工作流。
+- **独立性：** 不依赖不可用的资源、未声明的 Host 假设或未安装的依赖——Port 也不得依赖未安装的上游运行时。
+- **包的质量：** `SKILL.md`、资源、脚本、模板和素材都是必要的、完整的、链接正确的，没有只放占位文件的目录。
+
+是否属于某条固定工作流、路由表或组合示例，不是准入条件。经过验证的组合只是示例和测试素材。
 
 ## 低风险纯提示型快速通道
 
-仅同时满足以下条件才能使用快速通道：由 owner 编写且无第三方代码/资产；仅 user-invoked 且两处 metadata 均禁止 implicit invocation；输出仅 bounded text 且不能运行工具/网络/读写文件/改变状态/处理凭据/调用其他 Skill；无 runtime scripts/hooks/installers/binaries/外部服务/依赖；不改变 migration/security/privacy/licensing 等高风险行为。
+只有下列条件全部成立，候选才能走快速通道：
 
-仅验证静态 prompt 与 output contract 的自包含测试不算 runtime executable resource，但仍须非零断言与正负 fixtures。
+- 由所有者编写，没有复制第三方代码或素材；
+- 只能由用户调用，两处 Host 元数据都禁止隐式调用；
+- 唯一的产出是有界文本，不能运行工具、访问网络、读写文件、改变状态、处理凭据或调用其他 Skill；
+- 没有运行时脚本、hook、安装器、二进制、外部服务或依赖；
+- 不改变迁移、安全、隐私、许可证或其他高风险行为。
 
-快速通道要求 structure/metadata、隔离单包 copy/discovery、deterministic contract tests、显式调用与 non-trigger observations、同步 catalog/docs/changelog，以及一个新开的独立 Evaluator；不需要额外 Critic 或 `light-code-review`。存疑、副作用、implicit trigger、runtime executable、外部依赖、provenance 问题或 confirmed finding 质疑 eligibility 时必须升级到 `review-loop`/`project-review` 完整路径。
+只验证静态提示和输出契约的自包含测试不算运行时可执行资源。这类测试仍须有非零断言，并有正反两类夹具。
 
-## 必需 evidence
+快速通道需要：结构与元数据校验、按单包隔离的复制与发现检查、确定性的契约测试、有代表性的显式调用与不触发观察、同步更新目录/文档/变更记录，以及一个新开的独立 Evaluator。它不需要单独的 Critic，也不需要 Standards/Spec 两轴的 `light-code-review`。Evaluator 在一份简短的准入记录里写下最终的 `PASS`、`FAIL` 或 `BLOCKED`。
 
-| Evidence | 必须展示 | 不证明 |
+只要对资格有疑问，或出现副作用、隐式触发、运行时可执行资源、外部依赖、来源问题，或有已确认的发现质疑资格或产品行为，候选就转入下文的完整证据与 `review-loop`/`project-review` 路径。文档或测试标签类的发现可以在快速通道内修复。快速通道不能免除发布验证或已发布安装命令的验证。
+
+## 必需证据
+
+作出最终准入结论前，候选必须具备以下证据。把确切的命令、环境事实、输入、输出和局限，和改动或其验收记录放在一起。
+
+| 证据领域 | 必须展示 | 不能证明 |
 | --- | --- | --- |
-| Structural | 包树、metadata、内部链接与资源通过结构工具。 | runtime、fresh install 或 host discovery。 |
-| Installation/discovery | fresh environment 安装并脱离 source checkout 发现。 | 除 discovery 外的行为。 |
-| Behavioral | success、boundary、failure/missing-dependency 场景；快速通道可用显式调用与 non-trigger observations。 | 无 independent review 的 acceptance。 |
-| Invocation | 调用类型一致，且 user-invoked 不会自动调用另一个 user-invoked。 | 未覆盖行为。 |
-| Review | 完整路径为 `review-loop`（引擎）按 Profile，或项目级 `project-review`；快速通道为单 fresh Evaluator。 | 扩大冻结 scope 的权限。 |
-| Attribution | owner/source/revision/notice/license/transformation 可检查；Port 需 `ATTRIBUTION.md` 且无上游运行时要求。 | 把未修改 copy 变成第一方。 |
-| Executable scripts | focused、negative、adversarial/mutation tests 与 `light-code-review`。 | 静态 validator 覆盖全部行为。 |
+| 结构 | 包树、`SKILL.md` 元数据、内部链接和资源能通过相应的结构工具校验。 | 运行时行为、全新安装或真实 Host 发现。 |
+| 安装与发现 | 在全新环境里分别安装相应范围和单包形式，然后不依赖源码检出就能发现已安装的 Skill。 | 发现之外的行为是否正确。 |
+| 行为 | 至少一个成功、一个边界、一个失败或缺依赖的场景，用来检验声明的契约。符合条件的快速通道 Skill 可以用显式调用与不触发观察，因为它不允许有依赖和运行时失败模式。 | 未经独立审查的验收。 |
+| 调用 | 有场景确认声明的调用类型，并证明用户调用的 Skill 不会静默或隐式调用另一个用户调用的 Skill（进入某个明确推荐目标的已批准切换，需要用户明确同意和经核实的 Host 证据）。 | 场景没覆盖到的更多行为。 |
+| 审查 | 完整路径：按适用 Profile 走 `review-loop`（引擎），项目级验收走 `project-review`；快速通道：一个新开的独立 Evaluator。两者都基于 Producer 证据和新开的 Evaluator。 | 扩大冻结范围的许可。 |
+| 来源 | 原创或改造的归属、来源、版本、notice 或许可证、本地改造在适用时都可查；Port 带 `ATTRIBUTION.md`，且不要求上游运行时。 | 未修改的副本变成了第一方。 |
+| 可执行脚本（如有） | 有针对性的自动化测试、反向测试、适当时的对抗或变异夹具，以及 `light-code-review` 证据。没有断言或夹具是空操作时，测试命令必须失败。 | 静态校验器通过就覆盖了脚本行为。 |
 
-所有 static、inferred、simulated、keyword-only 检查必须标注真实 evidence class，不能写成 runtime proof。
+静态、推断、模拟或只查关键词的检查，必须按实际证据类别标注，绝不能写成运行时证明。
 
 ## 最终决定
 
-仅当满足 ownership gate、全部 admission questions、所需 evidence（含准确标签）、适用的快速通道或完整 `review-loop`/`project-review` `PASS`，并完成维护文档同步，包才可进入第一方集合；`FAIL`/`BLOCKED` 必须留在集合外并写明缺口。
+审查者只能准入满足以下全部条件的包：
+
+1. 通过归属门槛和所有适用的准入问题；
+2. 提供必需证据，且标注准确；
+3. 通过纯提示型快速通道的独立结论，或适用的完整 `review-loop`/`project-review` 最终验收；
+4. 完成 [维护](MAINTENANCE.zh-CN.md) 要求的文档和目录更新。
+
+只有最终 `PASS` 的包能进入第一方集合。`FAIL` 和 `BLOCKED` 的结果留在目录之外，并写明缺少的证据或授权。准入不免除发布、安装命令验证或项目级验收门槛。

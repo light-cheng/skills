@@ -235,7 +235,17 @@ Light 的 Port 和它的上游 Skill 只装一个，不要同时装。七个 Por
 
 ## 记录要求
 
-每次验证保存 exact command、installer version、URL、commit/tag、host/scope/destination、脱离 source checkout 的 discovery、success/boundary/invocation/missing-dependency smoke、fallback 和 limitations。结构检查、source checkout scan 或未执行命令都不能写成 installation proof；collection discovery script 也不能替代 fresh host install。
+今后每次验证发布或单包安装命令，都保存：
+
+- 确切的命令和安装器版本；
+- 仓库 URL 和发布的 commit 或 tag；
+- Host、安装范围和实际安装位置；
+- 不依赖源码检出的全新环境发现结果；
+- 成功、边界、调用和缺依赖的冒烟测试结果；
+- 用过的手动备用方式；以及
+- 已知局限。
+
+结构校验、扫描源码检出和没有执行过的命令都不是安装证据。集合发现脚本只是结构上的交叉引用检查，不能代替在全新 Host 上安装。
 
 ## 发布源安装验证环境
 

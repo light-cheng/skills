@@ -31,7 +31,7 @@
 
 | 变更 | 必需 final acceptance | specialist evidence |
 | --- | --- | --- |
-| 符合条件的低风险纯提示型 Skill | 快速通道单 fresh Evaluator | structure/metadata、隔离 copy/discovery、deterministic 正负 contract tests、显式调用/non-trigger、同步 docs；无 Critic 或 `light-code-review`。 |
+| 符合条件的低风险纯提示型 Skill | 按 [准入](SKILL_ADMISSION.zh-CN.md) 的快速通道，由一个新开的独立 Evaluator 审 | structure/metadata、隔离 copy/discovery、deterministic 正负 contract tests、显式调用/non-trigger、同步 docs；无 Critic 或 `light-code-review`。 |
 | 新增第一方 Skill，或对其做完整审查级改动 | `project-review`（`agent-skill` Profile，经 `review-loop`） | structural、fresh-install、behavioral、invocation、attribution。 |
 | 包含 executable script | `project-review`（经 `review-loop` + `light-code-review`） | focused/negative/adversarial tests 与 `light-code-review` findings。 |
 | Skill 内的软件 artifact | `project-review` 拥有 verdict，`review-loop` 为引擎 | `light-code-review` 提供 Standards/Spec findings。 |
@@ -39,6 +39,8 @@
 | Release candidate | 包级验收 + Program 级验收 | verified release installation 与文档同步证据。 |
 
 `generic-review` 为无 specialist 时的默认 reviewer。`light-code-review` 为有界 `git diff` 的 specialist（Standards + Spec），只读。
+
+符合条件的纯提示型 Skill，其自包含的校验测试本身不触发"可执行脚本"那一行。如果测试会运行产品代码、共享辅助代码、安装器、hook、子进程、网络访问或其他运行时行为，就不能走快速通道，必须做专项审查。
 
 ## 证据与独立性
 
@@ -58,8 +60,8 @@ Producer Evidence 须写明精确命令、环境、输入输出、revision、范
 
 ## 记录与发布边界
 
-保存冻结 source、reviewer findings、repairs、跨轮 evidence、最终 Evaluator 与 verdict；Skill 链接到准入证据，release/项目链接到受影响包记录与已验证安装证据。
+保存冻结 source、reviewer findings、repairs、跨轮 evidence、最终 Evaluator 与 verdict；Skill 链接到准入证据，release/项目链接到受影响包记录与已验证安装证据。审查者只产出 `Findings: []`，结论由验收负责方给出。
 
-Release、目录或安装命令在必需 verdict 与 checks 齐全前不得暗示已验收。
+Release、目录或安装命令在必需 verdict 与 checks 齐全前不得暗示已验收。见 [准入](SKILL_ADMISSION.zh-CN.md) 和 [维护](MAINTENANCE.zh-CN.md)。
 
 历史说明：曾嵌在 `review-loop` 中的 final-acceptance 能力（`frozen baseline`、`PASS/FAIL/BLOCKED`、`scope-change boundary`）已迁移至 `project-review`（§25 Phase 7），`review-loop` 现为轻量引擎。

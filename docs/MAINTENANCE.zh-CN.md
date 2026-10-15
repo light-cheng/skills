@@ -6,7 +6,17 @@
 
 ## 权威记录
 
-每个事实只保留一个权威位置，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<category>/<skill-name>/SKILL.md`（及 supporting files）为准；Port/变换包的来源在 `ATTRIBUTION.md`；可读目录是 [CATALOG.md](../CATALOG.md)；安装与验证是 [docs/INSTALLATION.md](INSTALLATION.md)；审查与 verdict 是 [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) 与 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)；历史是 [CHANGELOG.md](../CHANGELOG.md) 与真实 release；组合验证资产在 [docs/workflows/](workflows)。
+每个事实只放在一个权威位置，其他地方链接过去：
+
+| 事实 | 权威位置 |
+| --- | --- |
+| 包的行为、触发条件、调用方式、输入、输出、资源 | `skills/<category>/<skill-name>/SKILL.md`（及其配套文件） |
+| Port 或改造包的来源 | `skills/<category>/<skill-name>/ATTRIBUTION.md` |
+| 给人看的包清单 | [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)，由包元数据同步 |
+| 安装步骤和验证要求 | [docs/INSTALLATION.zh-CN.md](INSTALLATION.zh-CN.md) |
+| 何时审查；审查者、引擎与验收的分工 | [docs/REVIEW_POLICY.zh-CN.md](REVIEW_POLICY.zh-CN.md) · [docs/REVIEWER_CONTRACT.zh-CN.md](REVIEWER_CONTRACT.zh-CN.md) |
+| 仓库变更历史 | [CHANGELOG.zh-CN.md](../CHANGELOG.zh-CN.md) 和真实的发布记录 |
+| 组合验证素材 | [docs/zh-CN/workflows/](zh-CN/workflows) 和链接的证据 |
 
 ## 当前同步基线
 
@@ -20,7 +30,7 @@
 
 每次 **新增 / 更新 / 改名 / 弃用 / 移除 / Port / Adapt**：
 
-1. 先执行 [Skill 准入](SKILL_ADMISSION.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
+1. 先执行 [Skill 准入](SKILL_ADMISSION.zh-CN.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
 2. 保留包边界、invocation direction、attribution 与必要资源。
 3. 按 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 选审查分量：日常改动、仅文档、完整审查或发布；只收集该分量要求的证据。完整审查时 `review-loop` 为引擎，`project-review` 拥有最终验收。
 4. 新准入再判断走低风险纯提示型快速通道还是完整路径，见 [Skill 准入](SKILL_ADMISSION.zh-CN.md)。

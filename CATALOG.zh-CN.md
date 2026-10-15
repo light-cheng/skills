@@ -57,7 +57,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/thinking/clarify/](skills/thinking/clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-me` → Light，经 `socratic`）。
-- **证据：** [SKILL.md](skills/thinking/clarify/SKILL.md) 与 [ATTRIBUTION.md](skills/thinking/clarify/ATTRIBUTION.md)。
+- **证据：** [SKILL.md](skills/thinking/clarify/SKILL.md) 与 [ATTRIBUTION.md](skills/thinking/clarify/ATTRIBUTION.md)；[references/WORKFLOW.md](skills/thinking/clarify/references/WORKFLOW.md)。
 - **安装路径：** `<skills-root>/clarify/`。
 
 ### light-code-review
@@ -67,7 +67,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；只读，不修复也不裁决。
 - **包位置：** [skills/review/light-code-review/](skills/review/light-code-review)
 - **状态：** 第一方已准入；ADAPT（保留 Matt `code-review` 的双轴方法）。
-- **证据：** [references/WORKFLOW.md](skills/review/light-code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/review/light-code-review/ATTRIBUTION.md)。
+- **证据：** [references/WORKFLOW.md](skills/review/light-code-review/references/WORKFLOW.md) 与 [ATTRIBUTION.md](skills/review/light-code-review/ATTRIBUTION.md)；[SMELL-BASELINE.md](skills/review/light-code-review/references/SMELL-BASELINE.md)。
 - **安装路径：** `<skills-root>/light-code-review/`。
 
 ### decision-map
@@ -77,7 +77,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/thinking/decision-map/](skills/thinking/decision-map)
 - **状态：** 第一方已准入；ADAPT（Matt `wayfinder`）。
-- **证据：** [references/MAP-CONTRACT.md](skills/thinking/decision-map/references/MAP-CONTRACT.md)。
+- **证据：** [references/MAP-CONTRACT.md](skills/thinking/decision-map/references/MAP-CONTRACT.md)；[ATTRIBUTION.md](skills/thinking/decision-map/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/decision-map/`。
 
 ### light-diagnosing-bugs
@@ -87,7 +87,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/light-diagnosing-bugs/](skills/engineering/light-diagnosing-bugs)
 - **状态：** 第一方已准入；PORT — NO REDESIGN（保留 Matt 基线）。
-- **证据：** [SKILL.md](skills/engineering/light-diagnosing-bugs/SKILL.md)。
+- **证据：** [SKILL.md](skills/engineering/light-diagnosing-bugs/SKILL.md)；[ATTRIBUTION.md](skills/engineering/light-diagnosing-bugs/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-diagnosing-bugs/`。
 
 ### eli5
@@ -116,8 +116,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 需要在会话结束时或在不同 Agent / 会话之间交接当前上下文时。
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/productivity/light-handoff/](skills/productivity/light-handoff)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/light-handoff/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `handoff`）。
+- **证据：** [SKILL.md](skills/productivity/light-handoff/SKILL.md)；[ATTRIBUTION.md](skills/productivity/light-handoff/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-handoff/`。
 
 ### humanizer
@@ -127,7 +127,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/writing/humanizer/](skills/writing/humanizer)
 - **状态：** 第一方已准入，full-path `PASS`；v0.2.0 线发布；ADAPT 自 blader/humanizer（2.11.2）+ 薄中文适配，MIT 归属保留。
-- **证据：** [SKILL.md](skills/writing/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)。
+- **证据：** [SKILL.md](skills/writing/humanizer/SKILL.md)、[准入记录](docs/evidence/admissions/humanizer/README.zh-CN.md)；[ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md)、[README.md](docs/evidence/admissions/humanizer/README.md)。
 - **安装路径：** `<skills-root>/humanizer/`。
 
 ### light-implement
@@ -137,7 +137,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/project/light-implement/](skills/project/light-implement)
 - **状态：** 第一方已准入；ADAPT（Matt `implement` → 通用执行器）。
-- **证据：** [references/WORKFLOW.md](skills/project/light-implement/references/WORKFLOW.md)。
+- **证据：** [references/WORKFLOW.md](skills/project/light-implement/references/WORKFLOW.md)；[ATTRIBUTION.md](skills/project/light-implement/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-implement/`。
 
 ### kanban-worker
@@ -147,7 +147,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/kanban-worker/](skills/project/kanban-worker)
 - **状态：** 第一方已准入（通过 full path review-loop agent-skill PASS）；在 v0.1.6 中自 light-kanban-worker 更名。
-- **证据：** [SKILL.md](skills/project/kanban-worker/SKILL.md)。
+- **证据：** [SKILL.md](skills/project/kanban-worker/SKILL.md)；[测试](skills/project/kanban-worker/tests)、[使用指南](docs/zh-CN/skills/kanban-worker.md)。
 - **安装路径：** `<skills-root>/kanban-worker/`。
 
 ### kb-init
@@ -157,7 +157,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/kb-init/](skills/knowledge/kb-init)
 - **状态：** 第一方已准入（通过 full path review-loop agent-skill PASS）；随 v0.1.6 发布。
-- **证据：** [SKILL.md](skills/knowledge/kb-init/SKILL.md)。
+- **证据：** [SKILL.md](skills/knowledge/kb-init/SKILL.md)；[测试](skills/knowledge/kb-init/tests)、[使用指南](docs/zh-CN/skills/kb-init.md)。
 - **安装路径：** `<skills-root>/kb-init/`。
 
 ### language-learning
@@ -167,7 +167,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/language-learning/](skills/knowledge/language-learning)
 - **状态：** 第一方已准入（通过 prompt-only fast-track PASS）；随 v0.1.2 发布。
-- **证据：** [skills/knowledge/language-learning/tests/](skills/knowledge/language-learning/tests)。
+- **证据：** [skills/knowledge/language-learning/tests/](skills/knowledge/language-learning/tests)；[使用指南](docs/zh-CN/skills/language-learning.md)。
 - **安装路径：** `<skills-root>/language-learning/`。
 
 ### learn-anything
@@ -177,7 +177,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/learn-anything/](skills/knowledge/learn-anything)
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
-- **证据：** [package contract](skills/knowledge/learn-anything/SKILL.md)。
+- **证据：** [package contract](skills/knowledge/learn-anything/SKILL.md)；[使用指南](docs/zh-CN/skills/learn-anything.md)。
 - **安装路径：** `<skills-root>/learn-anything/`。
 
 ### light-travelpage
@@ -197,7 +197,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/writing/manuscript-ops/](skills/writing/manuscript-ops)
 - **状态：** 第一方已准入；PRESERVE — NO REWRITE。
-- **证据：** [package contract](skills/writing/manuscript-ops/SKILL.md)。
+- **证据：** [package contract](skills/writing/manuscript-ops/SKILL.md)；[使用指南](docs/zh-CN/skills/manuscript-ops.md)。
 - **安装路径：** `<skills-root>/manuscript-ops/`。
 
 ### project-clarify
@@ -207,7 +207,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/project/project-clarify/](skills/project/project-clarify)
 - **状态：** 第一方已准入；ADAPT（Matt `grill-with-docs`）。
-- **证据：** [references/project-clarification-contract.md](skills/project/project-clarify/references/project-clarification-contract.md)。
+- **证据：** [references/project-clarification-contract.md](skills/project/project-clarify/references/project-clarification-contract.md)；[ATTRIBUTION.md](skills/project/project-clarify/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/project-clarify/`。
 
 ### project-init
@@ -217,7 +217,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/project/project-init/](skills/project/project-init)
 - **状态：** 第一方已准入；REFACTOR（仓库 bootstrap；完整澄清仍归 `project-clarify`）。
-- **证据：** [skills/project/project-init/tests/](skills/project/project-init/tests)。
+- **证据：** [skills/project/project-init/tests/](skills/project/project-init/tests)；[使用指南](docs/zh-CN/skills/project-init.md)。
 - **安装路径：** `<skills-root>/project-init/`。
 
 ### project-review
@@ -227,7 +227,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/review/project-review/](skills/review/project-review)
 - **状态：** 第一方已准入；NEW（从旧 `review-loop` 迁移 final-acceptance 逻辑）。
-- **证据：** [SKILL.md](skills/review/project-review/SKILL.md)。
+- **证据：** [SKILL.md](skills/review/project-review/SKILL.md)；[references/profiles/](skills/review/project-review/references/profiles)。
 - **安装路径：** `<skills-root>/project-review/`。
 
 ### project-retro
@@ -247,7 +247,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/project/project-spec/](skills/project/project-spec)
 - **状态：** 第一方已准入；ADAPT（Matt `to-spec`）。
-- **证据：** [references/](skills/project/project-spec/references)。
+- **证据：** [references/](skills/project/project-spec/references)；[ATTRIBUTION.md](skills/project/project-spec/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/project-spec/`。
 
 ### project-tickets
@@ -257,7 +257,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/project/project-tickets/](skills/project/project-tickets)
 - **状态：** 第一方已准入；ADAPT（Matt `to-tickets`）。
-- **证据：** [references/](skills/project/project-tickets/references)。
+- **证据：** [references/](skills/project/project-tickets/references)；[ATTRIBUTION.md](skills/project/project-tickets/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/project-tickets/`。
 
 ### light-prototype
@@ -266,8 +266,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 在正式编码前，需要快速构建探索性原型以验证状态模型或 UI 逻辑交互感受时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/light-prototype/](skills/engineering/light-prototype)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/light-prototype/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `prototype`）。
+- **证据：** [SKILL.md](skills/engineering/light-prototype/SKILL.md)；[ATTRIBUTION.md](skills/engineering/light-prototype/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-prototype/`。
 
 ### recap
@@ -277,7 +277,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked；唯一入口为 `$recap`。
 - **包位置：** [skills/productivity/recap/](skills/productivity/recap)
 - **状态：** 第一方已准入；仅手动触发的稳定形式随 v0.2.0 发布；当前 main 分支跟踪集合更新。
-- **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/productivity/recap/tests/](skills/productivity/recap/tests)。
+- **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/productivity/recap/tests/](skills/productivity/recap/tests)；[使用指南](docs/zh-CN/skills/recap.md)。
 - **安装路径：** `<skills-root>/recap/`。
 
 ### release-workflow
@@ -296,8 +296,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 本地预设或已知事实不足以支持决策，需要检索外部权威证据与资料时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/thinking/light-research/](skills/thinking/light-research)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/thinking/light-research/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `research`）。
+- **证据：** [SKILL.md](skills/thinking/light-research/SKILL.md)；[ATTRIBUTION.md](skills/thinking/light-research/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-research/`。
 
 ### resolving-merge-conflicts
@@ -307,7 +307,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/resolving-merge-conflicts/](skills/engineering/resolving-merge-conflicts)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md)。
+- **证据：** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md)；[ATTRIBUTION.md](skills/engineering/resolving-merge-conflicts/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/resolving-merge-conflicts/`。
 
 ### review-loop
@@ -317,7 +317,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/review/review-loop/](skills/review/review-loop)
 - **状态：** 第一方已准入；REFACTOR + SPLIT（终审验收移至 project-review）。
-- **证据：** [SKILL.md](skills/review/review-loop/SKILL.md)。
+- **证据：** [SKILL.md](skills/review/review-loop/SKILL.md)；[references/](skills/review/review-loop/references)。
 - **安装路径：** `<skills-root>/review-loop/`。
 
 ### socratic
@@ -326,8 +326,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 作为 `clarify`、`project-clarify`、`decision-map` 的底层提问引擎（非独立项目入口）。
 - **调用方式：** Model-invoked（由 clarify 等技能调用）。
 - **包位置：** [skills/thinking/socratic/](skills/thinking/socratic)
-- **状态：** 第一方已准入；ADAPT（Matt grilling）。
-- **证据：** [SKILL.md](skills/thinking/socratic/SKILL.md)。
+- **状态：** 第一方已准入；ADAPT（Matt `grilling`）。
+- **证据：** [SKILL.md](skills/thinking/socratic/SKILL.md)；[ATTRIBUTION.md](skills/thinking/socratic/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/socratic/`。
 
 ### light-tdd
@@ -336,8 +336,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 采用测试驱动开发模式编写代码新功能，或在修复 Bug 时增加回归测试时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/light-tdd/](skills/engineering/light-tdd)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/light-tdd/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `tdd`）。
+- **证据：** [SKILL.md](skills/engineering/light-tdd/SKILL.md)；[ATTRIBUTION.md](skills/engineering/light-tdd/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-tdd/`。
 
 ### light-teach
@@ -346,8 +346,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 用户希望针对特定主题开展由浅入深的引导式教学时。
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/knowledge/light-teach/](skills/knowledge/light-teach)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/knowledge/light-teach/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `teach`）。
+- **证据：** [SKILL.md](skills/knowledge/light-teach/SKILL.md)；[ATTRIBUTION.md](skills/knowledge/light-teach/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-teach/`。
 
 ### light-to-questionnaire
@@ -357,7 +357,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/thinking/light-to-questionnaire/](skills/thinking/light-to-questionnaire)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/thinking/light-to-questionnaire/SKILL.md)。
+- **证据：** [SKILL.md](skills/thinking/light-to-questionnaire/SKILL.md)；[ATTRIBUTION.md](skills/thinking/light-to-questionnaire/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-to-questionnaire/`。
 
 ### light-wait-what
@@ -367,7 +367,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** 仅 user-invoked。
 - **包位置：** [skills/productivity/light-wait-what/](skills/productivity/light-wait-what)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/light-wait-what/SKILL.md)。
+- **证据：** [SKILL.md](skills/productivity/light-wait-what/SKILL.md)；[ATTRIBUTION.md](skills/productivity/light-wait-what/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-wait-what/`。
 
 ### light-wizard
@@ -376,8 +376,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 任务涉及必须由人工操作的步骤（如配置云控制台、管理凭据、切流），需要交互式向导时。
 - **调用方式：** Model-invoked 或 user-invoked。
 - **包位置：** [skills/productivity/light-wizard/](skills/productivity/light-wizard)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/productivity/light-wizard/SKILL.md)。
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `wizard`）。
+- **证据：** [SKILL.md](skills/productivity/light-wizard/SKILL.md)；[ATTRIBUTION.md](skills/productivity/light-wizard/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-wizard/`。
 
 ### light-writing-for-agents
@@ -387,7 +387,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/writing/light-writing-for-agents/](skills/writing/light-writing-for-agents)
 - **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md)。
+- **证据：** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md)；[ATTRIBUTION.md](skills/writing/light-writing-for-agents/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-writing-for-agents/`。
 
 ### light-decide
