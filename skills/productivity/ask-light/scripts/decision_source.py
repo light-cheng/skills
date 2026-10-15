@@ -26,12 +26,15 @@ PROJECT_FILE = Path("docs/agents/light-project.md")
 HOSTED_ENDPOINT = "typesafe-hosted"
 LOCAL_PLACEHOLDER_KEY = "local-no-key"
 
-# The setting is a label: "Decision data:" or a table row "| Decision data | value |",
+# The setting is a label: "Decision data:" (or "=", or a dash) or a table row "| Decision data | value |",
 # after optional quote, heading, list markers or emphasis. A mention inside other text is not the setting.
 _DECISION_LABEL = re.compile(
-    r"^\s*(?:>\s*)*(?:#{1,6}\s+|[-*+]\s+|\d+[.)]\s+)?\|?\s*[*_`]*decision data[*_`]*\s*(?::|\||=)",
+    r"^\s*(?:>\s*)*(?:#{1,6}\s+|[-*+]\s+|\d+[.)]\s+)?\|?\s*[*_`]*decision data[*_`]*\s*(?::|\||=|\u2014|\u2013|-\s)",
     re.IGNORECASE,
 )
+# A heading that is only the label; its value is on the next non-empty line.
+_DECISION_HEADING = re.compile(r"^\s*#{1,6}\s+[*_`]*decision data[*_`]*\s*:?\s*$", re.IGNORECASE)
+_TABLE_RULE = re.compile(r"^\s*\|?\s*:?-{3,}")
 _FENCE = re.compile(r"^\s*(```|~~~)")
 
 
@@ -58,14 +61,26 @@ def read_decision_limit(project_root: Optional[Path]) -> tuple[str, bool]:
         return DEFAULT_LIMIT, True
     in_fence = False
     values = []
-    for line in path.read_text(encoding="utf-8").splitlines():
+    lines = path.read_text(encoding="utf-8").splitlines()
+    for index, line in enumerate(lines):
         if _FENCE.match(line):
             in_fence = not in_fence
             continue
-        match = _DECISION_LABEL.match(line)
-        if in_fence or not match:
+        if in_fence:
             continue
-        value = re.sub(r"[*_`|:=]", " ", line[match.end():]).strip().lower()
+        following = next((l for l in lines[index + 1:] if l.strip()), "")
+        if _DECISION_HEADING.match(line):
+            # The next line is the value unless it is a labelled line or a heading of its own.
+            if _DECISION_LABEL.match(following) or following.lstrip().startswith("#"):
+                continue
+            raw = following
+        else:
+            match = _DECISION_LABEL.match(line)
+            # A table header row is followed by its separator line; it names the column, not the value.
+            if not match or (line.lstrip().startswith("|") and _TABLE_RULE.match(following)):
+                continue
+            raw = line[match.end():]
+        value = re.sub(r"[*_`|:=\u2014\u2013]", " ", raw).strip().lower()
         if value not in LIMITS:
             return "off", False
         values.append(value)

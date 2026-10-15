@@ -266,7 +266,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertFalse(fallback)
 
     def test_typed_reasoning_need_influences_effort_when_no_explicit_policy(self) -> None:
-        """P0 (Section 22): Jev reasoning_need influences resolved effort when user policy is None."""
+        """P0 (Section 22): the typed decision source reasoning_need influences resolved effort when user policy is None."""
         host = HostCapabilities(
             has_model_selector=True,
             active_model="gpt-4o",
@@ -281,14 +281,14 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual(res.execution_config.resolved_effort, "high")
 
     def test_explicit_user_effort_overrides_typed_reasoning(self) -> None:
-        """Section 22 & 25: Explicit user effort policy takes strict precedence over Jev."""
+        """Section 22 & 25: Explicit user effort policy takes strict precedence over the typed decision source."""
         host = HostCapabilities(
             has_model_selector=True,
             supported_effort=["low", "medium", "high"],
             profile_tiers={"high": "o3-mini"},
             available_models=["o3-mini"],
         )
-        # User explicitly requested minimal effort; Jev says high
+        # User explicitly requested minimal effort; the typed decision source says high
         task = TaskCharacteristics(shape="single-pass", reasoning_policy="minimal")
         profile = AbstractTaskProfile(recommended_tier="high", reasoning_need="high")
 
@@ -296,7 +296,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertEqual(res.execution_config.resolved_effort, "low")  # User policy wins
 
     def test_host_supported_effort_bounds_typed_reasoning(self) -> None:
-        """Section 22 & 30: Host supported effort strictly bounds Jev output; never invents unsupported values."""
+        """Section 22 & 30: Host supported effort strictly bounds the typed decision source output; never invents unsupported values."""
         host = HostCapabilities(
             has_model_selector=True,
             supported_effort=["low", "medium"],  # No 'high' supported
@@ -418,7 +418,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(p_over3.recommended_tier, "high")
 
     def test_authoritative_difficulty_skips_the_complexity_question(self) -> None:
-        """P1 (Section 15, 18, 41): Authoritative difficulty skips Jev complexity query; consumed by code."""
+        """P1 (Section 15, 18, 41): Authoritative difficulty skips the typed decision source complexity query; consumed by code."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {"reasoning_need": score_ans(1.8, 0.95, 3)}
@@ -429,14 +429,14 @@ class AgentConfigSemanticTest(unittest.TestCase):
             description="Replace synchronization logic",
             difficulty="high",
             difficulty_source="explicit-user",  # Authoritative source
-            reasoning_policy=None,  # Reasoning still needs Jev
+            reasoning_policy=None,  # Reasoning still needs the typed decision source
         )
 
         with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
             with patch("abstract_profiler.TYPESAFE_AVAILABLE", True):
                 prof, conf, fallback, reason = extract_abstract_task_profile(task, client=mock_client)
 
-                # Verified: task_complexity was NOT asked to Jev!
+                # Verified: task_complexity was NOT asked of the typed decision source!
                 called_questions = mock_client.system_one.call_args[1]["questions"]
                 self.assertNotIn("task_complexity", called_questions)
                 self.assertIn("reasoning_need", called_questions)
@@ -448,7 +448,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertFalse(prof.dimension_provenance["complexity"].fallback_used)
 
     def test_unknown_difficulty_asks_the_complexity_question(self) -> None:
-        """P1 (Section 17, 41): Unknown difficulty invokes Jev task_complexity query."""
+        """P1 (Section 17, 41): Unknown difficulty invokes the typed decision source task_complexity query."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {
@@ -461,7 +461,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
             title="New feature exploration",
             description="Implement complex multi-tier algorithm",
             difficulty="standard",
-            difficulty_source="unknown",  # Not authoritative -> invokes Jev
+            difficulty_source="unknown",  # Not authoritative -> invokes the typed decision source
         )
 
         with patch.dict(os.environ, LOCAL_ENV), calibrated_source():
@@ -473,7 +473,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.dimension_provenance["complexity"].source, "typed-decision")
 
     def test_serialized_decision_state_does_not_contain_expected_complexity_label(self) -> None:
-        """P1 (Section 14, 21, 41): Serialized Jev state contains NO declared_difficulty or answer labels."""
+        """P1 (Section 14, 21, 41): Serialized the typed decision source state contains NO declared_difficulty or answer labels."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {"task_complexity": score_ans(1.0, 0.95, 4)}
@@ -497,7 +497,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertNotIn("expected_complexity", called_state)
 
     def test_serialized_decision_state_does_not_contain_expected_reasoning_label(self) -> None:
-        """P1 (Section 19, 41): Serialized Jev state contains NO reasoning labels or hints."""
+        """P1 (Section 19, 41): Serialized the typed decision source state contains NO reasoning labels or hints."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {"reasoning_need": score_ans(1.0, 0.95, 3)}
@@ -567,7 +567,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
         self.assertIn("FIXTURE LEAKAGE DETECTED", str(ctx.exception))
 
     def test_explicit_reasoning_policy_skips_the_reasoning_question(self) -> None:
-        """P1 (Section 34, 41): Explicit reasoning policy skips Jev reasoning judgment."""
+        """P1 (Section 34, 41): Explicit reasoning policy skips the typed decision source reasoning judgment."""
         mock_client = MagicMock()
         mock_resp = MagicMock()
         mock_resp.scores = {"task_complexity": score_ans(0.2, 0.90, 4)}
@@ -591,7 +591,7 @@ class AgentConfigSemanticTest(unittest.TestCase):
                 self.assertEqual(prof.dimension_provenance["reasoning"].source, "explicit-policy")
 
     def test_semantic_fallback_keeps_workflow_config_functional(self) -> None:
-        """P1 (Section 41): When Jev call fails completely, configuration remains fully functional."""
+        """P1 (Section 41): When the typed decision call fails completely, configuration remains fully functional."""
         from agent_config import agent_config_recommend
 
         failing_client = MagicMock()

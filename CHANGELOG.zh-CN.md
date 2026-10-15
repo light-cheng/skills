@@ -7,6 +7,8 @@
 ## 未发布
 
 - **改名（需迁移）：** `resolving-merge-conflicts` 改名为 `light-merge-conflicts`，不再与 mattpocock/skills 原版同名。行为和调用方式不变；旧名没有别名。见 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
+- `eli5`（重写）：从零重写为所有者编写的 Skill，结构全新（一个核心意思、一个类比、说明类比在哪里不成立），听众表放在 `references/audiences.md`。删除之前迁移来的副本及其 `ATTRIBUTION.md`。名称和模型调用方式不变。
+- `ask-light`、`agent-config`（`decision_source.py`）：`Decision data` 表头行不再被读成取值 `off`；能识别 `Decision data — off`（长短破折号）和标题 `## Decision data` 下一行写值的写法。标题后接普通文字时仍按 `off` 处理（失败时关闭）。
 - 判定来源（行为变化）：`ask-light` 与 `agent-config` 不再依赖 TypeSafe Jev。脚本只在项目 `Decision data:` 允许的范围内询问判定客户端；**没写这一行时只问本机上的模型，所以原来用托管 Jev 服务的项目会停止调用它，直到加上 `Decision data: third-party`。** 阈值从代码移到用户策略文件 `~/.config/light/decision-policy.json`；只有问题 id 在那里校准过，答案才会被采用，否则沿用确定性基准，答案按 light-decide 格式保留（ask-light 在 `decisions`，agent-config 在 `abstract_profile.decisions`）。没给项目根时，脚本从当前目录往上找最近的 `docs/agents/light-project.md`；`Decision data:` 写成四个值以外的任何内容都按关闭处理；私网地址只有策略文件写明时才算 `private-network`；调用失败不重试。`agent-config` 保留一条结构规则：降档时分数还要明确落在下一档里。改名：`use_jev` → `use_typed_decisions`，`jev_confidence` → `decision_confidence`，`--no-jev` → `--no-typed-decisions`，来源标记 `jev` → `typed-decision`；`ask-light` 去掉 shadow 模式（未校准的来源现在就是这样工作）。
 - `agent-config`：`agent_config_recommend` 新增 `project_root`（命令行 `--project-root`）和 `decision_policy`，分档时读取项目的 `Decision data:`；不传时只问本机来源。`evals/jev` 改用新接口，用临时项目和评测专用策略运行（`--decision-data`），本机判定服务不需要 key。
 - `light-decide`：找不到来源且确实有用时，提出一次设置（`references/setup.md`）：先探查，再问用户，再推荐云端 API 或本机跑得动的本地模型，需要人手做的步骤推荐 `light-wizard`。用户同意前什么都不开始；拒绝会被记住。
