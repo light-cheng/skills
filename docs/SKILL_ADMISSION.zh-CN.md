@@ -25,6 +25,8 @@
 - 已实质改造为独立的自有能力，并带 `ATTRIBUTION.md`，写明原仓库与路径、固定版本或 tag、适用的许可证或 notice，以及具体的改造摘要；或
 - 是**已批准的上游 Port**：SPEC（§14/§16）明确授权，带 `ATTRIBUTION.md`，有 Light 特有的集成（交接、命名、解耦），并且**没有上游运行时依赖**。（已批准 PORT）
 
+候选的名称不得与 [external-skill-names.json](reference/external-skill-names.json) 中的任何 Skill 名称相同，也不得与私有 `skills-3rdParty` 仓库中的任何包同名，这样各集合可以同时安装。所有者只能在该文件的 `accepted` 下写明理由，才能保留冲突的名称。`python3 scripts/check_skill_names.py` 负责检查；它从 `../skills-3rdParty` 读取私有检出，设置了 `LIGHT_PRIVATE_SKILLS_ROOT` 时从该路径读取。
+
 未获 SPEC 授权、未经修改的第三方或上游副本一律拒绝，并引导用户使用原上游安装方式。改过但主体仍是第三方能力、又未获 SPEC 授权的包，放进 `skills-3rdParty`，并须满足该仓库的来源与 fork 必要性规则。
 
 **本仓库已批准的 Port（SPEC §14）：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`light-merge-conflicts`、`project-retro`。每个都是带 `ATTRIBUTION.md` 的自包含第一方包，运行时不需要安装 `mattpocock/skills`。Light 的改动只限于运行时解耦、命名和交接串联，不允许实质性重新设计。

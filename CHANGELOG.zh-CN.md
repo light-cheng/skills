@@ -6,6 +6,7 @@
 
 ## 未发布
 
+- 准入（新检查）：`scripts/check_skill_names.py` 与 `tests/test_skill_names.py` 在包名与 `docs/reference/external-skill-names.json`（固定版本的 mattpocock/skills、anthropics/skills 及各 Port 的上游）或私有 `skills-3rdParty` 检出（如存在）中的 Skill 重名时失败。`humanizer` 和 `eli5` 记为已接受：两者都是所有者自己的 Skill。
 - **改名（需迁移）：** `resolving-merge-conflicts` 改名为 `light-merge-conflicts`，不再与 mattpocock/skills 原版同名。行为和调用方式不变；旧名没有别名。见 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
 - `eli5`（重写）：从零重写为所有者编写的 Skill，结构全新（一个核心意思、一个类比、说明类比在哪里不成立），听众表放在 `references/audiences.md`。删除之前迁移来的副本及其 `ATTRIBUTION.md`。名称和模型调用方式不变。
 - `ask-light`（真实 Claude Code 运行中发现）：不传 `--host-name` 时，脚本从环境识别 Claude Code，不再默认当作 Codex，调用写法显示为 `/skill`。项目安装和另一个 Host 的全局安装里都有同一个 Skill 时，校验采用 ask-light 所在集合里的那份，不再返回 `BLOCKED`；其他位置的重复副本仍然阻塞。

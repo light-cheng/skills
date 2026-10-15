@@ -6,6 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Admission (new check): `scripts/check_skill_names.py` and `tests/test_skill_names.py` fail when a package reuses a Skill name from `docs/reference/external-skill-names.json` (pinned mattpocock/skills, anthropics/skills and the upstreams of Ports) or from the private `skills-3rdParty` checkout when present. `humanizer` and `eli5` are recorded as accepted: both are the owner's own Skills.
 - **Rename (migration):** `resolving-merge-conflicts` becomes `light-merge-conflicts`, so it no longer shares a name with the mattpocock/skills original. Behaviour and invocation are unchanged; there is no alias for the old name. See [the v0.2.8 migration](docs/MIGRATION-v0.2.8.md).
 - `eli5` (rewrite): rewritten from scratch as an owner-authored Skill with a new structure (one idea, one anchor, where the comparison breaks) and an audience table in `references/audiences.md`. The earlier migrated copy and its `ATTRIBUTION.md` are removed. The name and model invocation are unchanged.
 - `ask-light` (found in a real Claude Code run): without `--host-name` the script now detects Claude Code from its environment instead of assuming Codex, so invocations render as `/skill`. When a project install and another Host's global install both hold a Skill, validation uses the copy in the collection ask-light was loaded from instead of returning `BLOCKED`; copies elsewhere still block.
