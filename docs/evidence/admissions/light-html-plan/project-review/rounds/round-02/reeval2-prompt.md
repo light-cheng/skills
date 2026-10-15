@@ -1,0 +1,4 @@
+Re-evaluation round 3. Same role and rules (fresh, strictly read-only Evaluator); original instructions in .scratch/light-html-plan/review/.project-review/rounds/round-02/evaluator-prompt.md, with these changes:
+- Target identity: ../review/.project-review/rounds/round-02/candidate-manifest-repair3.txt. Charter revision 3.
+- Evidence on the current text: producer-evidence.md section "Repair3", with runs-repair3/ and pages-repair3/. Rendering evidence is the repair2 section; judge whether it still applies (the Producer says only skeleton.html and progress-and-refresh.md changed — verify by diffing manifests and reading the changes).
+- Previous findings: your reports evaluator-codex.md and evaluator-codex-2.md (E-004..E-008), dispositions in findings.md. Recheck E-004 and E-008 (keep IDs; fixed / still open), report any new finding as E-009.., and give a recommended verdict.

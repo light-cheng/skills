@@ -1,0 +1,8 @@
+89848e63dc6e3c0bdd001f36bef4c52a05dff15fd4970a82a6c3c69a414d27af  light-html-plan/ATTRIBUTION.md
+f92a024bc67ee993b05f80a9dccc2a9ea7ec3f12ed4308d8330b194621ff73f5  light-html-plan/SKILL.md
+45a4d18ea831348be8040b59fccbdc5df05b12bb89bacac83500d8209c636c5a  light-html-plan/agents/openai.yaml
+80fc05fb67a9ee87cc64399c964788e8bb3c504b899bc27bbb456b9070991276  light-html-plan/references/design-and-verification.md
+0b2810f866b431e8c88f75620a427bb1c5660dfd1afbade3ad170847c0ddf0f0  light-html-plan/references/design-handoff.md
+04242320db9c2b35e12672da18bc563ab2a0b0d1975e349bdf030afb420d6f3a  light-html-plan/references/progress-and-refresh.md
+dcc7c0c893cd102170ef9ff08b2936654ab4d083874aa3c7739fc6b501dd87bd  light-html-plan/references/source-protocol.md
+ad7a82a09f58fbac3a13dfd21cf3b29360bdf973c6ecb7f37f2a775de5376b02  light-html-plan/references/writing.md

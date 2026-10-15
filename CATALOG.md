@@ -397,7 +397,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/thinking/light-decide/](skills/thinking/light-decide)
 - **Status:** Admitted first-party after v0.2.7; ships in the next release.
-- **Evidence:** [references/selection.md](skills/thinking/light-decide/references/selection.md), [references/formats.md](skills/thinking/light-decide/references/formats.md).
+- **Evidence:** [admission record](docs/evidence/admissions/light-decide/README.md), [references/selection.md](skills/thinking/light-decide/references/selection.md), [references/formats.md](skills/thinking/light-decide/references/formats.md).
 - **Installation path:** `<skills-root>/light-decide/`.
 
 ### light-redirect
@@ -407,7 +407,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/project/light-redirect/](skills/project/light-redirect)
 - **Status:** Admitted first-party after v0.2.7; ships in the next release.
-- **Evidence:** [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md), [references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md).
+- **Evidence:** [admission record](docs/evidence/admissions/light-redirect/README.md), [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md), [references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md).
 - **Installation path:** `<skills-root>/light-redirect/`.
 
 ### light-html-plan
@@ -417,7 +417,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/project/light-html-plan/](skills/project/light-html-plan)
 - **Status:** Admitted first-party after v0.2.7; ships in the next release; built-in visual system (`assets/`).
-- **Evidence:** [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md), [references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md), [ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md).
+- **Evidence:** [admission record](docs/evidence/admissions/light-html-plan/README.md), [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md), [references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md), [ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-html-plan/`.
 
 ## Source-state boundaries

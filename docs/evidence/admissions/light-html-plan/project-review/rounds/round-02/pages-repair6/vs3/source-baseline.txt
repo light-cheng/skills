@@ -1,0 +1,12 @@
+d00b18e465d1b092500436c2fe8543474f7b5b80b2cdba4fbc39dcff619dff81  ./.project-review/state.md
+30567ad155d2e1ba99fa27c2297d39eacdb2db6c6ea3bd62ab767b647e9d47ea  ./.project-review/verdict.md
+0ac496705653e0149e97f6d9b3742236bc63b24f61d68ff5bcd3cbde6bed5a2b  ./.scratch/tool-lending/changes/01-seven-day-window.md
+3303ce1fe74e2f5c10af48177a401fe29464431dfae6ad9159c947b7f9e43063  ./.scratch/tool-lending/changes/02-sms-reminders.md
+b9c3197a31a1254dc991c800f36d677bb03bbd28120f23bafba155be3ff6d9eb  ./.scratch/tool-lending/decisions.md
+e9726204eb631bd0a4f5c7f320a0c40eee3346f08e11d3b4cc134d40cc800c37  ./.scratch/tool-lending/issues/01-availability-list.md
+c4e710a173c6544ae688e0b007fd747007dcc8a34106b3a1c7e0e54c9d0af43b  ./.scratch/tool-lending/issues/02-reservations.md
+480e9cc181b850732fbce7d636fb8dd370b3e2a1609ce4ea4f4c4a4d51e45523  ./.scratch/tool-lending/issues/03-due-back-reminders.md
+93cbf078efd4c22a2cebb551c9c9633306f6e8682b3bff95c7269564c8aa59e1  ./.scratch/tool-lending/plan.html
+14ab72e48a1d9138b06598b9e4c4f8562e43f41f26f31a3e6b20f91c6a366c51  ./.scratch/tool-lending/spec.md
+4f570718d5d2138b0d7de5eba083110dcbe767ad2a57cd7dd87471434bfe42c6  ./AGENTS.md
+0eb8254b6275ab054fdf2cb1340a9acb3ef49d72ceb55b99d1b3da3aad2583bf  ./docs/agents/issue-tracker.md

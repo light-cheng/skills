@@ -73,7 +73,9 @@
 
 ## Closeout 记录
 
-收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（当前包数）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
+收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（当前包数）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。历史收尾必须写明确切的标识和局限——收尾不是结构证明。历史证据（`docs/evidence/`）保持不变。
+
+v0.2.7 之后新增的证据不写出任何人的机器信息。提交证据文件前，运行 `python3 scripts/check_evidence_paths.py --apply <文件>...`：它把仓库根改成 `<repo>`、临时目录改成 `<tmp>`、主目录改成 `~`，形似 key 的值改成 `<redacted>`。只要 v0.2.7 之后新增的证据里还有个人路径或形似 key 的值，`python3 scripts/check_evidence_paths.py --check` 就失败；发布前运行它。更早的证据不改写。
 
 
 ## 分类目录的验证入口

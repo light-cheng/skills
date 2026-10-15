@@ -1,0 +1,73 @@
+{
+  "evidence_class": "structural",
+  "actor": "/root Core",
+  "checked_at": "2026-10-09T07:32:26.119925+00:00",
+  "manifest_path": "<repo>/.scratch/light-html-plan/evidence/ticket04/review-target-r1.json",
+  "manifest_sha256": "19b98b09a7e17e3bf0c481610dda2406b1bed420a7f3df180b8c518b668586a5",
+  "manifest_unchanged": true,
+  "transaction_identity": {
+    "charter.md": {
+      "Charter revision": "5",
+      "Profile": "agent-skill"
+    },
+    "state.md": {
+      "Charter revision": "5",
+      "Profile": "agent-skill",
+      "Round": "1",
+      "Maximum rounds": "3"
+    },
+    "verdict.md": {
+      "Charter revision": "5",
+      "Profile": "agent-skill",
+      "Round": "1",
+      "Maximum rounds": "3"
+    }
+  },
+  "state_before": "EVALUATE",
+  "verdict_before_terminal_transition": "BLOCKED",
+  "recorded_file_count": 237,
+  "matching_file_count": 232,
+  "post_evaluation_shared_collection_control_changes": [
+    {
+      "path": "<repo>/CATALOG.md",
+      "expected_sha256": "89592030c92ce7c1416418cdecf888c0727efda339a5873cf54cac96974335b6",
+      "actual_sha256": "d54b35e9da9202a56420180f1ebe46c964ca3b7d8cc41f69196a651859a5d086",
+      "recorded_role": "bounded formal collection controls; no synchronization performed",
+      "recorded_sha256_matches_fixed_head": true
+    },
+    {
+      "path": "<repo>/CHANGELOG.md",
+      "expected_sha256": "aa34994965737806aba60934766c03122485c6d92b7462c7c0f9dcacaf42eac8",
+      "actual_sha256": "8ba9e780c6386a354ba31b734491ef927e44dedce368f6dec719e9f6d5d6c0b5",
+      "recorded_role": "bounded formal collection controls; no synchronization performed",
+      "recorded_sha256_matches_fixed_head": true
+    },
+    {
+      "path": "<repo>/docs/INSTALLATION.md",
+      "expected_sha256": "d64c8908a0fa5dde266a2df57277de527401b60000158c85a75c90b70955d64c",
+      "actual_sha256": "221494d148719b489edb8a137f646fdbba9b31c6029f023954801bff48b17429",
+      "recorded_role": "bounded formal collection controls; no synchronization performed",
+      "recorded_sha256_matches_fixed_head": true
+    },
+    {
+      "path": "<repo>/docs/INSTALLATION.zh-CN.md",
+      "expected_sha256": "0dc0432f3780c4012599e6dbb5d16222439b41d64aba9398e2f17b92948d94ca",
+      "actual_sha256": "d83004891c780bc9b12703759f6cec637a479597981e73e3eb26caa9a48ea950",
+      "recorded_role": "bounded formal collection controls; no synchronization performed",
+      "recorded_sha256_matches_fixed_head": true
+    },
+    {
+      "path": "<repo>/docs/MAINTENANCE.md",
+      "expected_sha256": "92a5fca700ca17839fca31817abf02227e6659deba698ee0c0a3602a32851288",
+      "actual_sha256": "816c8107c886781943e307e54b7733bd5f369f45a2d6968edc54362ffde79603",
+      "recorded_role": "bounded formal collection controls; no synchronization performed",
+      "recorded_sha256_matches_fixed_head": true
+    }
+  ],
+  "candidate_files_matching": 6,
+  "current_html_matching": 8,
+  "historical_evaluator_check_at": "2026-10-09T07:19:04Z",
+  "historical_evaluator_matching_file_count": 237,
+  "interpretation": "The Evaluator report applies to its check time. Current candidate and HTML are unchanged. Five read-only collection controls changed after review; do not claim current full-manifest freshness or formal admission. Original manifest and report retained.",
+  "next_requirement": "Resolve F-A13 and recheck then-current collection controls before future formal synchronization/admission."
+}

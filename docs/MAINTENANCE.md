@@ -75,6 +75,8 @@ If a release candidate fails verification, stop promotion and repair through the
 
 At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (current package count), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.
 
+Evidence added after v0.2.7 names no one's machine. Before you commit an evidence file, run `python3 scripts/check_evidence_paths.py --apply <file>...`: it turns the repository root into `<repo>`, temporary directories into `<tmp>`, the home directory into `~`, and key-shaped values into `<redacted>`. `python3 scripts/check_evidence_paths.py --check` fails while any evidence added since v0.2.7 still holds a personal path or a key-shaped value; run it before a release. Older evidence is not rewritten.
+
 
 ## Validation entry points after categorization
 

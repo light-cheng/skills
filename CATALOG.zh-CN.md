@@ -397,7 +397,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** model-invoked。
 - **包位置：** [skills/thinking/light-decide/](skills/thinking/light-decide)
 - **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
-- **证据：** [references/selection.md](skills/thinking/light-decide/references/selection.md)、[references/formats.md](skills/thinking/light-decide/references/formats.md)。
+- **证据：** [准入记录](docs/evidence/admissions/light-decide/README.zh-CN.md)、[references/selection.md](skills/thinking/light-decide/references/selection.md)、[references/formats.md](skills/thinking/light-decide/references/formats.md)。
 - **安装路径：** `<skills-root>/light-decide/`。
 
 ### light-redirect
@@ -407,7 +407,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** model-invoked。
 - **包位置：** [skills/project/light-redirect/](skills/project/light-redirect)
 - **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
-- **证据：** [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md)、[references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md)。
+- **证据：** [准入记录](docs/evidence/admissions/light-redirect/README.zh-CN.md)、[references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md)、[references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md)。
 - **安装路径：** `<skills-root>/light-redirect/`。
 
 ### light-html-plan
@@ -417,7 +417,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** model-invoked。
 - **包位置：** [skills/project/light-html-plan/](skills/project/light-html-plan)
 - **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布；自带视觉系统（`assets/`）。
-- **证据：** [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md)、[references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md)、[ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md)。
+- **证据：** [准入记录](docs/evidence/admissions/light-html-plan/README.zh-CN.md)、[references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md)、[references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md)、[ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-html-plan/`。
 
 ## 来源状态边界
