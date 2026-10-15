@@ -61,6 +61,9 @@ Boundary reasoning that matters most:
 
 ## Reading the evidence
 
+- **Hard evidence overrides imagination.** Never claim a SPEC when
+  `spec.exists` is false. Never claim acceptance when review freshness is
+  stale or unknown. Never claim execution for an unavailable Skill.
 - **Hard constraints are scoped.** `hardConstraints[]` carry
   `appliesTo: current-workflow`, an `ownerSkill` where the workflow
   has a deterministic owner (uninitialized → `project-init`, active review /
@@ -87,3 +90,26 @@ Boundary reasoning that matters most:
   review transaction (ownership, status, verdict, freshness) before tickets
   exist; use the producer-owned review contract to determine what it applies
   to.
+
+## Scopes for validation
+
+- `current-workflow`: the user asks what to do next in this project. Hard
+  constraints bind.
+- `independent`: an explicit task, a named Skill, or a new effort.
+- `standalone`: a request that needs no project workflow.
+
+A `RECOMMEND` result always carries a real Skill unless the project is
+legitimately terminal.
+
+## Explaining the recommendation
+
+For current-project questions, answer from the observed facts:
+
+- what the project appears to be doing;
+- where the current effort is;
+- what is already finished;
+- what is actually unresolved;
+- why the recommended Skill fits **now**;
+- why the most obvious neighboring Skill is premature or unnecessary.
+
+Never give "Light Skill Map matched pattern …" as the user-facing reason.
