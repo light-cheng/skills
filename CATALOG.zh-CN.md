@@ -96,8 +96,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 用户要求“像对 5 岁孩子一样解释”、“向领导汇报”或需要非技术视角的通俗讲解时。
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/knowledge/eli5/](skills/knowledge/eli5)
-- **状态：** 第一方已准入；MIGRATE — NO REWRITE（源自上游 `DreambigOu/ELI5` @ `a766623`，经临时迁移 fork `LightDevCoder/ELI5`）。
-- **证据：** [SKILL.md](skills/knowledge/eli5/SKILL.md)、[ATTRIBUTION.md](skills/knowledge/eli5/ATTRIBUTION.md)。
+- **状态：** 第一方已准入；所有者编写（v0.2.8 从零重写，取代之前迁移来的副本）。
+- **证据：** [SKILL.md](skills/knowledge/eli5/SKILL.md)、[audiences.md](skills/knowledge/eli5/references/audiences.md)。
 - **安装路径：** `<skills-root>/eli5/`。
 
 ### generic-review

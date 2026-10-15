@@ -1,116 +1,50 @@
 ---
 name: eli5
-description: "Explain any topic, code, concept, or error tailored to a specific audience's level of understanding. Use this skill whenever the user says 'explain like I am', 'ELI5', 'explain this to my', 'break this down for', 'dumb it down', 'simplify this for', or asks you to explain something to a specific person or audience type (e.g., 'explain this to a manager', 'how would I explain this to my mom', 'make this understandable for a 5th grader'). Also trigger when the user mentions wanting to understand something at a particular level, or asks for an explanation targeting a non-technical audience. Even partial matches like 'explain to my wife' or 'tell my boss' should trigger this skill."
+description: "Explain a topic, piece of code, concept or error so a named audience can follow it: a child, a grade level, a non-specialist adult, or someone in a given role or relationship. Use when the user says ELI5, \"explain like I'm …\", \"explain this to my …\", \"in plain words for …\", \"dumb it down\", \"simplify this for …\", or otherwise names who the explanation is for or asks for a non-technical version."
 ---
 
-# Explain Like I Am... (ELI5)
+# ELI5
 
-You are an expert at taking complex topics and making them accessible to any audience. Your job is to explain the given topic in a way that perfectly matches the audience's background, vocabulary, and interests.
+Turn something hard into an explanation that one specific listener can follow
+and repeat. Accuracy comes first; simplicity is how you deliver it.
 
-## Step 1: Identify the Audience
+## How
 
-Parse the user's request to determine who the explanation is for. The audience falls into one of these categories:
+1. **Name the listener.** Take the audience from the request ("my mum", "a
+   ten-year-old", "our CFO"). A bare "ELI5" means a young child. Any other
+   request with no listener named (such as "dumb it down") gets a curious adult
+   with no background in the field; say so in one line. Match the profile in
+   [audiences.md](references/audiences.md).
+2. **Read before you explain.** When the request points at code, a file, a log
+   or an error, open it first. Explain what is actually there, not what such
+   things usually do. If you cannot see the material, ask for it; do not guess
+   its contents.
+3. **Find the one idea.** Write, for yourself, the single sentence the listener
+   must leave with. Everything else supports that sentence or goes.
+4. **Pick one anchor.** Choose one comparison from the listener's own world
+   and keep using it. Do not switch analogies halfway.
+5. **Build the answer:**
+   - the one idea, in a sentence;
+   - how it works, in three to five short steps that use the anchor;
+   - why it matters to this listener;
+   - where the comparison stops being true, in one sentence.
+6. **Offer a next level.** End with one line that says what to ask for a
+   deeper version. Do not write the deeper version unasked.
 
-### Ages
-| Audience | Style |
-|----------|-------|
-| Age 5 | Super simple words. Use fun analogies with toys, animals, candy, playground. Short sentences. "Imagine you have a box of crayons..." |
-| Age 10 | Elementary school level. Can handle basic cause-and-effect. Use school, sports, video game analogies. |
-| Age 15 | Teenager. Can handle some abstraction. Use social media, phone, gaming references. Be slightly casual. |
-| Age 20-30 | Young adult. Clear and direct. Real-world analogies from daily life, work, money. |
-| Age 40+ | Mature adult. Respectful tone. Analogies from home ownership, career, family management. |
+## Rules
 
-### Grade / Education Levels
-| Audience | Style |
-|----------|-------|
-| 5th grade | Simple vocabulary, concrete examples, avoid jargon entirely. "Think of it like..." |
-| Middle school | Can introduce basic terminology with definitions. Step-by-step logic. |
-| Senior High | Can handle moderate complexity. Introduce proper terms but explain them. SAT-level vocabulary OK. |
-| College Student | Academic framing. Can use technical terms with brief context. Theory + practical application. |
-| Graduate school | Assume strong foundational knowledge. Focus on nuance, trade-offs, edge cases, and deeper implications. Be precise. |
+- Answer in the language the user wrote in.
+- Use a technical word only when the listener will meet it again; define it
+  once, in plain words, the first time. A listener who works in the same field
+  keeps the proper terms; simplifying those would talk down to them.
+- Prefer concrete numbers and everyday objects to abstractions.
+- Keep the length the profile suggests. A child gets a short answer; an
+  executive gets the decision-relevant part first.
+- Never trade truth for a cute picture. If the simple version would mislead,
+  say what it leaves out.
+- Speak to the listener's level, never down to them.
 
-### Job Roles
-| Audience | They care about... | Frame explanations around... |
-|----------|-------------------|------------------------------|
-| Manager | Impact, timeline, risk, cost | Business outcomes, team implications, what decisions need to be made |
-| Engineer | How it works, architecture, trade-offs | Technical details, implementation, performance, maintainability |
-| Designer | User experience, visual impact, flow | How it affects the user, interaction patterns, accessibility |
-| Director | Strategy, ROI, competitive advantage | Big picture, market position, resource allocation |
-| Colleague | Practical context, shared work | How it affects their work, what they need to know to collaborate |
-| Product Manager | User value, priorities, scope | Feature impact, user stories, what to build vs. skip |
+## Stop
 
-### Relationships
-| Audience | Tone | Analogy style |
-|----------|------|---------------|
-| Wife / Husband / Partner | Warm, conversational, patient | Household tasks, shared experiences, daily routines |
-| Father / Mother / Parents | Respectful, clear, no condescension | Familiar technology they use, home analogies, generational bridges |
-| Kids / Children | Playful, encouraging, short | Games, cartoons, school, animals |
-| Friend | Casual, maybe humorous | Pop culture, shared interests, "you know how..." |
-
-If the audience isn't explicitly stated, default to "Age 5" (classic ELI5).
-
-## Step 2: Read the Source Material
-
-Before explaining, make sure you fully understand what needs to be explained. This could be:
-- **Code**: Read the relevant code files. Understand what the code does at a high level before translating.
-- **A concept**: Break it into its core components.
-- **An error message**: Understand the root cause, not just the surface text.
-- **A technical document**: Extract the key points that matter.
-- **Anything else**: Identify the essential "what" and "why."
-
-## Step 3: Craft the Explanation
-
-Follow these principles, scaled to the audience:
-
-### Structure
-1. **Start with the "what"** — one sentence that captures the essence
-2. **Use an analogy** — connect to something the audience already knows
-3. **Fill in details** — add layers only as appropriate for the audience level
-4. **End with the "so what"** — why does this matter to them specifically?
-
-### Language Calibration
-
-For **simple audiences** (young ages, non-technical roles, family):
-- No jargon. Zero. If a technical term is essential, define it immediately.
-- One idea per sentence.
-- Concrete over abstract. "The server is like a waiter at a restaurant" beats "the server handles client-server communication."
-- Use "you" and "your" — make it personal.
-
-For **technical audiences** (engineers, grad students):
-- Use proper terminology — they'll feel patronized without it.
-- Focus on the *interesting* parts: trade-offs, edge cases, design decisions.
-- Compare to things they already know: "It's like a hash map but with X difference."
-- Be concise — respect their existing knowledge.
-
-For **business audiences** (managers, directors):
-- Lead with impact and outcomes.
-- Quantify where possible.
-- Skip implementation details unless asked.
-- Frame in terms of decisions: "This means we should..."
-
-### Tone Matching
-- Ages 5-10: Enthusiastic, like a favorite teacher. "Oh, this is a cool one!"
-- Teenagers: Slightly casual but not cringey. No "fellow kids" energy.
-- Professionals: Confident and clear. Respect their intelligence while bridging knowledge gaps.
-- Family: Patient, warm, conversational. Like explaining over dinner.
-
-## Examples
-
-**User says**: "ELI5 what a database index is"
-**Audience**: Age 5 (default)
-**Response style**: "Imagine you have a huuuge book with thousands of pages. Now, if I asked you to find the page about dinosaurs, you could flip through every single page... or you could look at the table of contents at the front! A database index is like that table of contents. It helps the computer find things really fast without looking through everything."
-
-**User says**: "Explain this API rate limiting to my manager"
-**Audience**: Manager
-**Response style**: "The API has a speed limit — we can only make 100 requests per minute. Right now we're hitting that limit during peak hours, which means some user requests are failing. We have two options: optimize our code to make fewer calls (1-2 days of work), or pay for a higher tier ($X/month). I'd recommend..."
-
-**User says**: "Break down this React useEffect hook for a college student"
-**Audience**: College Student
-**Response style**: "useEffect is React's way of handling side effects — things that happen outside the normal render cycle, like API calls, subscriptions, or DOM manipulation. Think of it as a lifecycle hook (if you've seen class components) that combines componentDidMount, componentDidUpdate, and componentWillUnmount. The dependency array controls when it re-runs..."
-
-## Important Reminders
-
-- Never talk down to anyone. A 5-year-old explanation should feel delightful, not dumbing-down. A manager explanation should feel empowering, not dismissive of their intelligence.
-- When explaining code, always explain the *purpose* first, then the mechanism. Nobody cares about syntax until they know why it exists.
-- If the topic is genuinely complex and the audience is very non-technical, it's OK to simplify ruthlessly. Getting the core idea across at 80% accuracy is better than a 100% accurate explanation that loses the audience.
-- Match the length to the audience: short and sweet for young kids, more detailed for technical audiences who want depth.
+Stop after the explanation and the next-level line. Do not rewrite the
+user's material, fix the code, or start another task unless asked.

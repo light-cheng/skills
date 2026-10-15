@@ -61,7 +61,7 @@ class CollectionContractTests(unittest.TestCase):
         for name in sorted(EXPECTED):
             skill = package_dir(ROOT, name)
             body = (skill / "SKILL.md").read_text(encoding="utf-8")
-            # eli5 has no agents/openai.yaml by design (migrated explain skill) — skip metadata check for it
+            # eli5 has no agents/openai.yaml by design — skip metadata check for it
             if name == "eli5":
                 self.check(re.search(rf"^name:\s*{re.escape(name)}\s*$", body, re.M) is not None, f"{name} frontmatter name")
                 continue

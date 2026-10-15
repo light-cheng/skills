@@ -152,11 +152,11 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     for package in EXPECTED:
         package_root = package_dir(root, package)
         skill_file = package_root / "SKILL.md"
-        # eli5 intentionally has no agents/openai.yaml (migrated, uses frontmatter only) — check only if present
+        # eli5 intentionally has no agents/openai.yaml (frontmatter only) — check only if present
         metadata_file = package_root / "agents" / "openai.yaml"
         body = ""
         c.check(skill_file.is_file(), f"{package} is missing SKILL.md.")
-        # metadata required for all except eli5 which is a migrated explain skill without host policy
+        # metadata required for all except eli5, which uses frontmatter only
         if package != "eli5":
             c.check(metadata_file.is_file(), f"{package} is missing agents/openai.yaml.")
 

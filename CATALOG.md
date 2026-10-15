@@ -96,8 +96,8 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** User asks "explain like I'm 5", "to my boss", or needs a non-technical framing.
 - **Invocation:** Model-invoked (explain on explicit request).
 - **Package:** [skills/knowledge/eli5/](skills/knowledge/eli5)
-- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from upstream `DreambigOu/ELI5` @ `a766623`, via temporary migration fork `LightDevCoder/ELI5`).
-- **Evidence:** [SKILL.md](skills/knowledge/eli5/SKILL.md), [ATTRIBUTION.md](skills/knowledge/eli5/ATTRIBUTION.md).
+- **Status:** Admitted first-party; owner-authored (rewritten from scratch in v0.2.8; replaces the earlier migrated copy).
+- **Evidence:** [SKILL.md](skills/knowledge/eli5/SKILL.md), [audiences.md](skills/knowledge/eli5/references/audiences.md).
 - **Installation path:** `<skills-root>/eli5/`.
 
 ### generic-review

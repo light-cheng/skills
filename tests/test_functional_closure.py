@@ -45,7 +45,8 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             if not match:
                 continue
             expected, relative = match.groups()
-            if relative == "skills/recap/SKILL.md":
+            # recap and eli5 were changed on purpose by their owner after the freeze.
+            if relative in ("skills/recap/SKILL.md", "skills/eli5/SKILL.md"):
                 continue
             actual = hashlib.sha256(relocated_path(ROOT, relative).read_bytes()).hexdigest()
             if relative in amendments:
