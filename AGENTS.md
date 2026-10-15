@@ -34,7 +34,7 @@ Governance documents:
 ## Rules for every change
 
 1. Use **Matt Pocock Skills** as the main reference for writing Skills: a short entry file, details in supporting files, composition over copying.
-2. Use **Sol Advisor** as the main design reference for `agent-config`. Its own `SKILL.md` and references hold the contract. In short, `agent-config`:
+2. Treat `agent-config`'s own `SKILL.md` and references as its design contract. (Sol Advisor was its original design reference and is now out of date; do not consult it.) In short, `agent-config`:
    - keeps setup (companion, bootstrap, Profile preparation or repair) separate from normal execution planning, and never enters setup silently;
    - changes Host configuration only after explicit approval, and leaves unrelated Host settings untouched;
    - treats single-model and multi-model as equal modes and uses only user-confirmed Profiles;
