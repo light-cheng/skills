@@ -300,15 +300,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/thinking/light-research/SKILL.md), [ATTRIBUTION.md](skills/thinking/light-research/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-research/`.
 
-### resolving-merge-conflicts
+### light-merge-conflicts
 
 - **Purpose:** Resolve an in-progress `git` merge or rebase conflict.
 - **When to use:** Merge/rebase halted with conflicts.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/engineering/resolving-merge-conflicts/](skills/engineering/resolving-merge-conflicts)
-- **Status:** Admitted first-party; PORT — NO REDESIGN.
-- **Evidence:** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md), [ATTRIBUTION.md](skills/engineering/resolving-merge-conflicts/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/resolving-merge-conflicts/`.
+- **Package:** [skills/engineering/light-merge-conflicts/](skills/engineering/light-merge-conflicts)
+- **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `resolving-merge-conflicts`; renamed in v0.2.8).
+- **Evidence:** [SKILL.md](skills/engineering/light-merge-conflicts/SKILL.md), [ATTRIBUTION.md](skills/engineering/light-merge-conflicts/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-merge-conflicts/`.
 
 ### review-loop
 

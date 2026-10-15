@@ -33,7 +33,7 @@ EXPECTED = {
     "recap",
     "release-workflow",
     "light-research",
-    "resolving-merge-conflicts",
+    "light-merge-conflicts",
     "review-loop",
     "socratic",
     "light-tdd",

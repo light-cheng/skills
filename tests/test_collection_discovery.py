@@ -52,7 +52,7 @@ EXPECTED = sorted(
         "recap",
         "release-workflow",
         "light-research",
-        "resolving-merge-conflicts",
+        "light-merge-conflicts",
         "review-loop",
         "socratic",
         "light-tdd",
@@ -394,7 +394,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(bool(re.search(r"allow_implicit_invocation:\s*false", read(root, "skills/productivity/recap/agents/openai.yaml"))), "recap must declare explicit-only metadata policy.")
 
     # Additional SPEC §24 checks: no Matt/sol runtime dependency, ATTRIBUTION, supporting refs resolve
-    for skill in ("light-research", "light-prototype", "light-tdd", "light-handoff", "light-diagnosing-bugs", "light-wizard", "light-teach", "light-wait-what", "light-to-questionnaire", "light-writing-for-agents", "resolving-merge-conflicts"):
+    for skill in ("light-research", "light-prototype", "light-tdd", "light-handoff", "light-diagnosing-bugs", "light-wizard", "light-teach", "light-wait-what", "light-to-questionnaire", "light-writing-for-agents", "light-merge-conflicts"):
         c.check((package_dir(root, skill) / "ATTRIBUTION.md").is_file(), f"PORT {skill} must have ATTRIBUTION.md.")
         text = (package_dir(root, skill) / "SKILL.md").read_text(encoding="utf-8")
         # Ensure no hard requirement to install upstream at runtime

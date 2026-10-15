@@ -27,7 +27,7 @@
 
 未获 SPEC 授权、未经修改的第三方或上游副本一律拒绝，并引导用户使用原上游安装方式。改过但主体仍是第三方能力、又未获 SPEC 授权的包，放进 `skills-3rdParty`，并须满足该仓库的来源与 fork 必要性规则。
 
-**本仓库已批准的 Port（SPEC §14）：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`、`project-retro`。每个都是带 `ATTRIBUTION.md` 的自包含第一方包，运行时不需要安装 `mattpocock/skills`。Light 的改动只限于运行时解耦、命名和交接串联，不允许实质性重新设计。
+**本仓库已批准的 Port（SPEC §14）：** `light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`light-merge-conflicts`、`project-retro`。每个都是带 `ATTRIBUTION.md` 的自包含第一方包，运行时不需要安装 `mattpocock/skills`。Light 的改动只限于运行时解耦、命名和交接串联，不允许实质性重新设计。
 
 > **Port 不等于随意复制。** 架构层面的迁入授权不免除署名、许可证与 notice 保留，也不免除"自包含、无需安装上游运行时"的要求。没有 SPEC 授权的任意上游快照仍不合格。
 

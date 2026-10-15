@@ -10,7 +10,7 @@ This document explains the **Execution** composition: entry, routing, and handof
 - [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked profile-driven cross-harness execution configurator
 - [`light-tdd`](../../skills/engineering/light-tdd/SKILL.md) — model-invoked test-driven loop
 - [`light-diagnosing-bugs`](../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked diagnosis loop
-- [`resolving-merge-conflicts`](../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked merge/rebase resolver
+- [`light-merge-conflicts`](../../skills/engineering/light-merge-conflicts/SKILL.md) — model-invoked merge/rebase resolver
 
 All are first-party and self-contained; no install of `mattpocock/skills` or `sol-advisor` is required.
 
@@ -22,7 +22,7 @@ All are first-party and self-contained; no install of `mattpocock/skills` or `so
 | Need to configure model, effort, or execution topology | [`agent-config`](../../skills/engineering/agent-config/SKILL.md) — model-invoked | requires: bounded task description + acceptance criteria + current host evidence + confirmed profile; determines provider mode and task complexity, right-sizes model tier & effort across execution modes | execution plan, not direct execution; executor performs work per plan |
 | Code feature/fix should be test-first | [`light-tdd`](../../skills/engineering/light-tdd/SKILL.md) — model-invoked | `red → green → refactor` test-first cycle | test suite + implementation slice |
 | Hard bug / regression | [`light-diagnosing-bugs`](../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked | build a tight `pass/fail` signal → reproduce → hypothesize → instrument → fix → cleanup | fix accompanied by diagnostic evidence |
-| Merge/rebase conflict | [`resolving-merge-conflicts`](../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | resolve conflicted files per git guidance | clean working tree ready for verification |
+| Merge/rebase conflict | [`light-merge-conflicts`](../../skills/engineering/light-merge-conflicts/SKILL.md) — model-invoked | resolve conflicted files per git guidance | clean working tree ready for verification |
 
 ## Two-Repository Architecture: Skill and Companion
 

@@ -13,7 +13,7 @@ The repository holds only:
 
 Do not import an unmodified upstream Skill for convenience. If upstream already does the job, recommend installing it directly. If it needs local changes, compatibility work or a pinned variant, evaluate it for the separate `skills-3rdParty` repository.
 
-The approved Matt Pocock Ports (SPEC §14/§16) are the exception: `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`. Each is self-contained, carries `ATTRIBUTION.md`, and has no upstream runtime dependency.
+The approved Matt Pocock Ports (SPEC §14/§16) are the exception: `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `light-merge-conflicts`, `project-retro`. Each is self-contained, carries `ATTRIBUTION.md`, and has no upstream runtime dependency.
 
 `project-workflow` is retired. Do not add a shim, dependency or package with that name unless a separately approved change shows a real external need.
 

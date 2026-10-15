@@ -51,7 +51,7 @@ At the final step of the workflow (after `project-review` or `release-workflow`)
 
 If friction was detected, the Agent invokes `project-retro` to surface actionable environment improvements. If the run was clean and smooth, the Agent skips `project-retro` cleanly without creating noise.
 
-**Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `light-implement` may call `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`light-code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
+**Optional / parallel:** `decision-map` may replace/augment `project-clarify` for large, foggy, multi-session work — see [clarification-system](clarification-system.md). `light-implement` may call `light-tdd`, `light-diagnosing-bugs`, `light-merge-conflicts` as needed — see [execution](execution.md). Review uses `generic-review`/`light-code-review`/domain reviewers via `review-loop` — see [review-system](review-system.md).
 
 ## Optional capabilities along the flow
 

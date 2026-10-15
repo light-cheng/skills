@@ -11,7 +11,7 @@ Categories help you browse related skills; they do not enforce a rigid pipeline.
 - **[agent-config](agent-config/SKILL.md)** — Inspect current host capabilities and task requirements to configure appropriate model tiers, reasoning effort, and execution topology, with optional MCP support across 10 agent harnesses.
 - **[light-diagnosing-bugs](light-diagnosing-bugs/SKILL.md)** — Investigate difficult bugs and performance regressions with hypothesis testing and immediate feedback loops.
 - **[light-prototype](light-prototype/SKILL.md)** — Build throwaway code or UI mockups to test an idea or answer a technical design question quickly.
-- **[resolving-merge-conflicts](resolving-merge-conflicts/SKILL.md)** — Resolve git merge or rebase conflicts cleanly using repository context.
+- **[light-merge-conflicts](light-merge-conflicts/SKILL.md)** — Resolve git merge or rebase conflicts cleanly using repository context.
 - **[light-tdd](light-tdd/SKILL.md)** — Practice test-driven development through test-first cycles: write a failing test, make it pass, then refactor.
 
 [All categories](../README.md) · [Full catalog](../../CATALOG.md)

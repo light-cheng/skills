@@ -8,7 +8,7 @@ This directory explains repository-level Skill composition. Each document shows 
 
 - [Project Workflow](project-workflow.md) — `project-init → project-clarify → project-spec → project-tickets → light-implement → project-review → release-workflow` (with agent self-evaluation → `project-retro`)
 - [Clarification System](clarification-system.md) — `socratic` engine with `clarify` / `project-clarify` / `decision-map` + `light-research` / `light-prototype` / `light-to-questionnaire`
-- [Execution](execution.md) — `light-implement` + `agent-config` + `light-tdd` / `light-diagnosing-bugs` / `resolving-merge-conflicts`
+- [Execution](execution.md) — `light-implement` + `agent-config` + `light-tdd` / `light-diagnosing-bugs` / `light-merge-conflicts`
 - [Review System](review-system.md) — `review-loop` (engine) + `generic-review` / `light-code-review` + `project-review` (acceptance owner)
 - [Specialized Workflows](specialized-workflows.md) — `manuscript-ops` / `kb-init` / `learn-anything` / `language-learning` / `kanban-worker` / `recap` / `eli5` / `release-workflow`
 

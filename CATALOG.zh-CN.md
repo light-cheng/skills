@@ -300,15 +300,15 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **证据：** [SKILL.md](skills/thinking/light-research/SKILL.md)；[ATTRIBUTION.md](skills/thinking/light-research/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-research/`。
 
-### resolving-merge-conflicts
+### light-merge-conflicts
 
 - **作用：** 解决进行中的 `git` merge/rebase 冲突。
 - **什么时候用：** Git merge 或 rebase 遇到代码冲突停滞时。
 - **调用方式：** Model-invoked。
-- **包位置：** [skills/engineering/resolving-merge-conflicts/](skills/engineering/resolving-merge-conflicts)
-- **状态：** 第一方已准入；PORT — NO REDESIGN。
-- **证据：** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md)；[ATTRIBUTION.md](skills/engineering/resolving-merge-conflicts/ATTRIBUTION.md)。
-- **安装路径：** `<skills-root>/resolving-merge-conflicts/`。
+- **包位置：** [skills/engineering/light-merge-conflicts/](skills/engineering/light-merge-conflicts)
+- **状态：** 第一方已准入；PORT — NO REDESIGN（Matt `resolving-merge-conflicts`；v0.2.8 改名）。
+- **证据：** [SKILL.md](skills/engineering/light-merge-conflicts/SKILL.md)；[ATTRIBUTION.md](skills/engineering/light-merge-conflicts/ATTRIBUTION.md)。
+- **安装路径：** `<skills-root>/light-merge-conflicts/`。
 
 ### review-loop
 

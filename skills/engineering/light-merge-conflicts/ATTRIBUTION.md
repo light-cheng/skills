@@ -1,4 +1,4 @@
-# Attribution — resolving-merge-conflicts
+# Attribution — light-merge-conflicts
 
 This package is a Light first-party port of an upstream Skill.
 
@@ -13,8 +13,12 @@ This package is a Light first-party port of an upstream Skill.
   4. Added this `ATTRIBUTION.md` as required by SPEC §22.
   5. No runtime dependency on `https://github.com/mattpocock/skills` remains; the package is self-contained and does not require `install Matt skills first`.
 
-Verification: `SKILL.md` frontmatter `name: resolving-merge-conflicts` matches, `agents/openai.yaml` is valid, and aside from this attribution no `mattpocock/skills` runtime coupling remains in executable content.
+Verification: `SKILL.md` frontmatter `name` matches, `agents/openai.yaml` is valid, and aside from this attribution no `mattpocock/skills` runtime coupling remains in executable content.
 
 ## Description note (2026-10-16)
 
 The `description` keeps the upstream trigger wording and adds one sentence naming the upstream Skill, so an Agent that sees both copies can tell them apart. Install one or the other, not both.
+
+## Light name migration (v0.2.8)
+
+The current Light package is `light-merge-conflicts` (formerly `resolving-merge-conflicts`, the same name as the upstream Skill). Only package identity, UI source labeling, and Light capability references changed. Original upstream paths, pinned revisions, license notices, and responsibilities above remain applicable.

@@ -1,5 +1,5 @@
 ---
-name: resolving-merge-conflicts
+name: light-merge-conflicts
 description: "Use when you need to resolve an in-progress git merge/rebase conflict. Light Skills version of mattpocock/skills `resolving-merge-conflicts`; install one or the other, not both."
 ---
 

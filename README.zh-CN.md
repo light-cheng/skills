@@ -168,7 +168,7 @@ $ask-light workflow
 | --- | --- | --- |
 | **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`light-implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 | **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`light-research`、`light-prototype`、`light-to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
-| **任务执行** | `light-implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
+| **任务执行** | `light-implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`light-tdd`、`light-diagnosing-bugs`、`light-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
 | **质量审阅** | `review-loop`（引擎）、`generic-review`、`light-code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
 | **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
 | **协作效率** | `light-handoff`、`humanizer`、`light-wizard`、`light-wait-what`、`light-writing-for-agents`、`light-travelpage` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
@@ -185,7 +185,7 @@ $ask-light workflow
 | 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
-经批准的 Matt Port（共 12 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`、`project-retro`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
+经批准的 Matt Port（共 12 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`light-merge-conflicts`、`project-retro`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
 改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md) 中保留。
 

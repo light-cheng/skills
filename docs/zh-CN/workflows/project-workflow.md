@@ -51,7 +51,7 @@ project-retro
 
 若检测到上述摩擦，Agent 调用 `project-retro` 提出具体改进建议；若流程顺畅无摩擦，则干净跳过，不增加额外干扰。
 
-**可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`light-implement` 可按需调用 `light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`light-code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
+**可选 / 并行：** 大型模糊任务可用 `decision-map` 替代/增强 `project-clarify`，见 [clarification-system](clarification-system.md)。`light-implement` 可按需调用 `light-tdd`、`light-diagnosing-bugs`、`light-merge-conflicts`，见 [execution](execution.md)。Review 经 `generic-review`/`light-code-review`/领域 reviewer 走 `review-loop`，见 [review-system](review-system.md)。
 
 ## 流程中的可选能力
 
