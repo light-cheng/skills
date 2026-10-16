@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/profile.schema.json",
+  "$id": "https://raw.githubusercontent.com/light-cheng/agent-config/main/schemas/profile.schema.json",
   "title": "AgentConfigProfile",
   "description": "Canonical schema for user-confirmed, host-scoped and workspace-scoped execution profiles. Strictly separates host availability from user-confirmed tier mappings, and abstract effort policies from host-resolved discrete values.",
   "type": "object",

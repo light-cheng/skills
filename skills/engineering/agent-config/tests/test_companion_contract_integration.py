@@ -67,7 +67,7 @@ class CompanionContractIntegrationTest(unittest.TestCase):
         self.assertTrue(meta_file.is_file(), f"Hermetic schema snapshot metadata missing: {meta_file}")
 
         meta = json.loads(meta_file.read_text(encoding="utf-8"))
-        self.assertEqual(meta.get("source_repository"), "LightDevCoder/agent-config")
+        self.assertEqual(meta.get("source_repository"), "light-cheng/agent-config")
         self.assertEqual(len(meta.get("source_revision", "")), 40)
         self.assertTrue(meta.get("contract_version"))
         self.assertTrue(meta.get("snapshot_date"))

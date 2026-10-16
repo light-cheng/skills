@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/companion-contract.schema.json",
+  "$id": "https://raw.githubusercontent.com/light-cheng/agent-config/main/schemas/companion-contract.schema.json",
   "title": "CompanionContract",
   "description": "Canonical machine-readable contract specification for Agent Config companion MCP server, tools, requests, responses, and errors.",
   "type": "object",

@@ -1,8 +1,8 @@
 {
-  "source_repository": "LightDevCoder/agent-config",
-  "source_revision": "3c97180219ed1dfef8f80a9fd4be05f8f4f32077",
+  "source_repository": "light-cheng/agent-config",
+  "source_revision": "08e212208b45059b4e82636f9b3c444354ae9efe",
   "contract_version": "1.0.0",
-  "snapshot_date": "2026-09-20",
+  "snapshot_date": "2026-10-16",
   "role": "Hermetic Layer 1 schema contract snapshot for agent-config tests",
   "schemas": [
     "apply.schema.json",
