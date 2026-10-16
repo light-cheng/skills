@@ -655,8 +655,13 @@ def check_release_receipt_consistency(
     release_revision: str | None = None,
     revision: str | None = None,
     repo_root: Path = REPO_ROOT,
+    repo: str | None = None,
 ) -> VerificationResult:
-    """Verify mechanical consistency of release receipt and evidence files."""
+    """Verify mechanical consistency of release receipt and evidence files.
+
+    With ``repo``, the receipt's Release URL must be on that repository; without it
+    (historical audits), any GitHub owner/name is accepted.
+    """
     # Backwards compatibility: if receipt_revision is None and revision is provided
     if receipt_revision is None and revision is not None:
         receipt_revision = revision
@@ -950,9 +955,9 @@ def check_release_receipt_consistency(
     # 9. Release URL
     url_m_en = re.search(r"\|\s*\*\*Release URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_en)
     url_m_zh = re.search(r"\|\s*\*\*发布 URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_zh)
-    # The receipt keeps the repository name that was current at publication.
-    expected_url = f"https://github.com/<owner>/<name>/releases/tag/{tag}"
-    if not url_m_en or not is_release_url(url_m_en.group(1), tag):
+    # Historical receipts keep the repository name that was current at publication.
+    expected_url = f"https://github.com/{repo or '<owner>/<name>'}/releases/tag/{tag}"
+    if not url_m_en or not is_release_url(url_m_en.group(1), tag, repo):
         return VerificationResult(
             passed=False,
             status="RECEIPT_URL_MISMATCH",
@@ -1375,6 +1380,7 @@ def main() -> int:
             receipt_revision=head_sha,
             release_revision=rel_rev,
             repo_root=repo_root,
+            repo=args.repo if args.mode == "current" else None,
         )
         print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
         if not res_receipt.passed:

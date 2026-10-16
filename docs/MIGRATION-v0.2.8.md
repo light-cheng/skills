@@ -2,7 +2,7 @@
 
 [简体中文](MIGRATION-v0.2.8.zh-CN.md)
 
-**Status:** candidate. v0.2.8 is not released yet; this page describes what will change.
+**Status:** v0.2.8 is published. Exact-candidate CI, the protected tag and fresh installs from the released source passed; see the [release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md).
 
 ## Renamed package
 
@@ -26,7 +26,7 @@ The optional AI assistant now connects to any service that speaks the OpenAI or 
 
 ## Before upgrading
 
-Record the target Host and its Skill root. For an installed `resolving-merge-conflicts`, check where it came from before touching it: open its `SKILL.md` and `ATTRIBUTION.md`, or the symlink target. A Light copy names `LightDevCoder/skills`; Matt's original does not. Leave a package from another source in place.
+Record the target Host and its Skill root. For an installed `resolving-merge-conflicts`, check where it came from before touching it: open its `SKILL.md` and `ATTRIBUTION.md`, or the symlink target. A Light copy names `light-cheng/skills` or its old name `LightDevCoder/skills`; Matt's original does not. Leave a package from another source in place.
 
 Search project prompts, `AGENTS.md`, availability declarations, scripts, automations and installer `--skill` arguments for `resolving-merge-conflicts` when it refers to the Light package.
 
@@ -38,8 +38,8 @@ Search project prompts, `AGENTS.md`, availability declarations, scripts, automat
 4. Refresh discovery and check that the Host lists `light-merge-conflicts` from the Light source.
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.8
-npx skills add LightDevCoder/skills#v0.2.8 --skill light-merge-conflicts
+npx skills add light-cheng/skills#v0.2.8
+npx skills add light-cheng/skills#v0.2.8 --skill light-merge-conflicts
 ```
 
 ## Recovery

@@ -2,7 +2,7 @@
 
 [English](MIGRATION-v0.2.8.md)
 
-**状态：** 候选版。v0.2.8 尚未发布；本页说明将要发生的变化。
+**状态：** v0.2.8 已发布。准确候选 CI、受保护标签和实际发布源的新鲜安装均已通过；见[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 改名的包
 
@@ -26,7 +26,7 @@ SPEC 现在在标题下用一行 `Approval:` 记录批准，`project-tickets` �
 
 ## 升级之前
 
-记下目标 Host 和它的 Skill 根目录。动已安装的 `resolving-merge-conflicts` 之前，先确认它的来源：打开它的 `SKILL.md` 和 `ATTRIBUTION.md`，或查看符号链接指向。Light 的副本会写明 `LightDevCoder/skills`，Matt 的原版不会。其他来源的包保持不动。
+记下目标 Host 和它的 Skill 根目录。动已安装的 `resolving-merge-conflicts` 之前，先确认它的来源：打开它的 `SKILL.md` 和 `ATTRIBUTION.md`，或查看符号链接指向。Light 的副本会写明 `light-cheng/skills` 或旧名 `LightDevCoder/skills`，Matt 的原版不会。其他来源的包保持不动。
 
 在项目提示、`AGENTS.md`、可用性声明、脚本、自动化任务和安装器的 `--skill` 参数里，查找指向 Light 包的 `resolving-merge-conflicts`。
 
@@ -38,8 +38,8 @@ SPEC 现在在标题下用一行 `Approval:` 记录批准，`project-tickets` �
 4. 刷新发现，确认 Host 列出的 `light-merge-conflicts` 来自 Light 源。
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.8
-npx skills add LightDevCoder/skills#v0.2.8 --skill light-merge-conflicts
+npx skills add light-cheng/skills#v0.2.8
+npx skills add light-cheng/skills#v0.2.8 --skill light-merge-conflicts
 ```
 
 ## 恢复

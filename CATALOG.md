@@ -6,7 +6,7 @@ This catalog is synchronized from the 39 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-Release snapshot v0.2.8: the inventory lists 39 packages. v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
+The inventory shows the published v0.2.8 names: 39 packages. v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
 
 The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
@@ -16,11 +16,13 @@ The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIG
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 39 admitted first-party Skills |
-| Release snapshot | v0.2.8 (39 packages; adds light-decide, light-redirect and light-html-plan) |
-| Previous release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages) |
+| Current state | 39 packages; v0.2.8 is the current stable release |
+| Stable release | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) (39 packages; adds light-decide, light-redirect and light-html-plan; previous stable was v0.2.7 with 36) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md); observed publication and installation facts go into the v0.2.8 release receipt on `main` · previous: [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
+| Evidence | [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) · [v0.2.8 release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) · previous: [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
+
+`v0.2.8` publication and fresh installation are verified; package count is 39.
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 

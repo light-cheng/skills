@@ -6,6 +6,11 @@
 
 ## 未发布
 
+- 发布工具：`LightDevCoder` 账号改名为 `light-cheng` 后，发布检查接受 GitHub 返回的新发布 URL（只接受本仓库的新旧两个账号名）。文档和收据仍写 `LightDevCoder/skills`，GitHub 会重定向。
+
+## 0.2.8 — 2026-10-16
+
+- 已发布：准确候选 CI、受保护的 annotated tag 和实际发布源的新鲜安装均已通过；见[发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)。标签指向 `c522857`。
 - v0.2.8 发布准备：README、CATALOG、INSTALLATION、MAINTENANCE（中英）改为 v0.2.8 版本快照；在 `docs/evidence/releases/v0.2.8/` 新增发布说明与发布清单。集合测试改为从目录推出包数，并接受"上一版本"一行，不再要求冻结的当前稳定版本表述。
 - `light-travelpage`（行为变化）：可选 AI 助手可连接 OpenAI 格式（chat completions 或 Responses）和 Anthropic Messages API；删除专为 CPA 写的连接方式和本机地址。新增 `scripts/ai-setup.mjs`，由页面主人在部署时选服务和模型：从 `/models` 识别格式，没有模型列表时接受手填模型 ID，要求一次真实的工具调用，然后把 `AI_BASE_URL`、`AI_API_KEY`、`AI_MODEL`、`AI_API_FORMAT` 写入 `.dev.vars` 或 Pages secrets；key 来自 `AI_API_KEY` 或隐藏输入。公开开关为 `provider: off|on`（`openai` 仍读作 `on`），旧的 `OPENAI_*` 设置继续有效，旅行者不能选择模型、格式或地址。自建或本机网关归可选能力 `light-travelpage-gw`（单独仓库）；`tests/test_composition.py` 接受这一外部可选目标。
 - `eli5`：description 改为"a non-technical explanation"，并排除"为读者改写文档"；触发率评测发现 pi 会在这类改写时加载它。7 个 Port、`eli5` 与阶段 3 能力在 Claude Code 和 pi 上的触发率结果见 `docs/evidence/maintenance/2026-10-16-trigger-eval/`。

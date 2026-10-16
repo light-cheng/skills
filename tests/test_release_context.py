@@ -578,7 +578,8 @@ def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tm
     assert published.returncode == 0 and "SIMULATED_PASS" in published.stdout, published.stdout + published.stderr
     for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
         write(tmp_path, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
-              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, timestamp=data["release"]["publishedAt"]) +
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, timestamp=data["release"]["publishedAt"],
+                          release_url=f"https://github.com/{REPO}/releases/tag/{TAG}") +
               "\nEvidence class: local rehearsal; external results are test doubles.\n")
     for path in PUBLIC_RELEASE_DOCS:
         destination = tmp_path / path
@@ -677,3 +678,18 @@ def test_publication_gate_fails_when_no_repository_can_be_found(tmp_path: Path) 
     env["PATH"] = str(tmp_path / "no-gh") + os.pathsep + "/usr/bin:/bin"  # no gh; the fixture has no origin
     result = integrity(tmp_path, "ci_verified", "--observations", str(observations), "--simulate", repo=None, env=env)
     assert result.returncode == 1 and "REPOSITORY_UNRESOLVED" in result.stdout, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("url, accepted", [
+    (f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}", False),  # old owner: redirects, never live
+    (f"https://github.com/light-cheng/skills/releases/tag/{TAG}", True),
+    (f"https://github.com/Light-Cheng/Skills/releases/tag/{TAG}", True),
+    (f"https://github.com/someone-else/skills/releases/tag/{TAG}", False),
+    (f"https://github.com/light-cheng/other/releases/tag/{TAG}", False),
+    ("https://github.com/light-cheng/skills/releases/tag/v9.8.6", False),
+])
+def test_live_publication_accepts_only_the_resolved_repository(url: str, accepted: bool) -> None:
+    from release_context import validate_publication_observation
+    record = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
+              "publishedAt": "2026-10-16T07:22:12Z", "url": url}
+    assert (validate_publication_observation(record, TAG, "fixture", "light-cheng/skills") == []) is accepted

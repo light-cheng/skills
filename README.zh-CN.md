@@ -4,11 +4,11 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`light-cheng/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **版本快照 v0.2.8：** 本页描述 v0.2.8，共 39 个 Skill，新增 `light-decide`、`light-redirect`、`light-html-plan`。[v0.2.8 发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围和证据；实际观察到的发布与安装事实记录在 `main` 上的发布收据中。见 [v0.2.8 发布说明](docs/evidence/releases/v0.2.8/RELEASE_NOTES.zh-CN.md)和 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
+> **发布：** [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) 是全部 39 个第一方 Skill 的当前稳定版本，新增 `light-decide`、`light-redirect`、`light-html-plan`。不可变的[发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)记录范围与验证。见 [v0.2.8 发布说明](docs/evidence/releases/v0.2.8/RELEASE_NOTES.zh-CN.md)和 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
 
-> **名称迁移：** v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`。[v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) 中 12 个 Skill 改用 `light-` 新名称，见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
+> **名称迁移：** v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`。[v0.2.7](https://github.com/light-cheng/skills/releases/tag/v0.2.7) 中 12 个 Skill 改用 `light-` 新名称，见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 按分类浏览
 
@@ -39,29 +39,31 @@
 
 ## 安装
 
-### 当前 main / latest（安装命令模板）
+### 当前 main / latest
 
 从默认分支 `main` 安装最新集合：
 
 ```bash
-npx skills add LightDevCoder/skills
+npx skills add light-cheng/skills
 ```
 
 从 `main` 安装指定单个 Skill（例如更新后的 `agent-config` Skill）：
 
 ```bash
-npx skills add LightDevCoder/skills --skill agent-config
-npx skills add LightDevCoder/skills --skill project-review
-npx skills add LightDevCoder/skills --skill light-research
+npx skills add light-cheng/skills --skill agent-config
+npx skills add light-cheng/skills --skill project-review
+npx skills add light-cheng/skills --skill light-research
 ```
 
-> **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
+> **说明：** 不带 fragment 的仓库源（`light-cheng/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 锁定 v0.2.8（安装命令模板）
+### 稳定版本快照（v0.2.8）
+
+锁定 `#v0.2.8` tag 可复现安装当前稳定版本：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.8
-npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement
+npx skills add light-cheng/skills#v0.2.8
+npx skills add light-cheng/skills#v0.2.8 --skill light-implement
 ```
 
 ### 历史版本
@@ -69,17 +71,17 @@ npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement
 锁定 `#v0.2.7` tag 可复现安装 v0.2.7：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.7
-npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
+npx skills add light-cheng/skills#v0.2.7
+npx skills add light-cheng/skills#v0.2.7 --skill light-implement
 ```
 
 更早的 tag（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.4
-npx skills add LightDevCoder/skills#v0.2.2
-npx skills add LightDevCoder/skills#v0.2.1
-npx skills add LightDevCoder/skills#v0.2.0
+npx skills add light-cheng/skills#v0.2.4
+npx skills add light-cheng/skills#v0.2.2
+npx skills add light-cheng/skills#v0.2.1
+npx skills add light-cheng/skills#v0.2.0
 ```
 
 > **说明：** `#v0.2.0` tag 保持为 v0.2.0 发布线的不可变可复现快照，不会被 `main` 上的后续工作修改。
@@ -87,7 +89,7 @@ npx skills add LightDevCoder/skills#v0.2.0
 ### 直接指定目标 Agent（命令模板）
 
 ```bash
-npx skills add LightDevCoder/skills --agent claude-code
+npx skills add light-cheng/skills --agent claude-code
 ```
 
 ### Companion MCP 运行时
@@ -207,5 +209,5 @@ $ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)（上一版本）
+- [发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md) · [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)（上一版本）
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)
