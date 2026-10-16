@@ -1,0 +1,200 @@
+<!doctype html>
+<!--
+  light-html-plan page skeleton. Copy it, inline assets/plan.css in <style>,
+  and replace every [bracketed placeholder] with text from the records.
+  Repeat a block once per item; delete a block's items when the records have
+  none and keep its "目前没有" line instead. Do not add classes or colours;
+  the visual system is plan.css. Fixed labels and the lang attribute follow
+  the reader's language; classes and layout stay as they are.
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="light-html-plan">
+<title>[项目名] · 进度</title>
+<style>/* inline assets/plan.css here */</style>
+</head>
+<body>
+
+<!-- Sticky part bar: the dot on 03 appears only when something waits on the user. -->
+<div class="bar"><div class="wrap">
+  <span class="title">[项目名]</span>
+  <nav aria-label="页面分区">
+    <a href="#what"><span class="n">01</span>项目是什么</a>
+    <a href="#progress"><span class="n">02</span>做到哪一步</a>
+    <a href="#decide"><span class="n">03</span>等你决定<span class="dot" aria-label="有 [N] 件"></span></a>
+    <a href="#changed"><span class="n">04</span>哪里变了</a>
+    <a href="#judged"><span class="n">05</span>系统的判断</a>
+    <a href="#sources"><span class="n">··</span>来源</a>
+  </nav>
+  <button class="theme" type="button" id="themeBtn">深色 / 浅色</button>
+</div></div>
+
+<div class="wrap">
+
+<!-- Hero: state on the left, what waits on the user on the right.
+     With nothing waiting, the right card says "目前没有等你决定的事" without the accent class. -->
+<header class="hero">
+  <div>
+    <p class="eyebrow">记录快照 · 截至 [最新记录日期] · 生成于 [生成日期] · 不会自动更新</p>
+    <h1>[项目名]</h1>
+    <p class="lede">[状态句：每项做到哪里；有没有发布。]</p>
+  </div>
+  <div class="card youcard">
+    <p class="k">等你决定 · [N] 件</p>
+    <p class="q">[最要紧的一个决定，写成问题]</p>
+    <p class="s">[它挡住了什么]</p>
+    <a href="#decide">去决定 →</a>
+  </div>
+</header>
+
+<!-- 01: one card per component, in a row. Set --n to the number of components (2-5). -->
+<section id="what" aria-labelledby="h-what">
+  <div class="head">
+    <h2 id="h-what"><span class="no">01</span>这个项目是什么</h2>
+    <p class="claim">[一句话：做完以后谁能做什么；谁在哪天批准了 SPEC。]</p>
+  </div>
+  <div class="lane-label"><span>[这次要做的几块]</span></div>
+  <div class="cols" style="--n:[组件数]" role="list">
+    <!-- size class: major 重点改动 | minor 小改 | new 新能力 | keep 不改 | unk 改动大小未记录 -->
+    <div class="card comp new" role="listitem">
+      <div class="row1"><span class="size">[改动大小]</span><span class="ref">[R1]</span></div>
+      <p class="name">[组件或技能名]</p>
+      <p class="what">[它改了什么 / 能做什么]</p>
+      <p class="acc"><b>验收</b> [验收标准，或"SPEC 没有写"]</p>
+      <!-- optional: <a class="flag" href="#ask-[n]">[这里有一件等你决定的事] →</a> -->
+    </div>
+  </div>
+  <div class="out">
+    <span class="k">明确不做</span><s>[不做的项]</s>
+    <span class="legend"><span class="new"><i></i>[只列图里用到的改动大小]</span><span>划线：SPEC 写明不做</span></span>
+  </div>
+  <p class="src">来源：<code>[spec 路径]</code></p>
+</section>
+
+<!-- 02: when tickets map one-to-one to the 01 components, keep the same order and --n so
+     each progress card sits under its component; a component without a ticket gets a gapcard.
+     Track states: done ● · (none) ○ for 写完 / 验收 / 发布; part ◐ only on 写完 when the newest report records partial work,
+     labelled with the recorded word ("部分完成"), never an amount. -->
+<section id="progress" aria-labelledby="h-progress">
+  <div class="head">
+    <h2 id="h-progress"><span class="no">02</span>做到哪一步</h2>
+    <p class="claim">[一句话：几项验收、几项在做、几项没开始；有没有发布。]</p>
+  </div>
+  <div class="tally"><span><b>[n]</b>已验收</span><span><b>[n]</b>在做</span><span><b>[n]</b>没开始</span><span><b>[n]</b>还没有工单</span><span><b>[n]</b>已发布</span></div>
+  <div class="cols" style="--n:[组件数]">
+    <div class="card prog">
+      <div class="t"><b>[交付的东西]</b><small>[工单号 · 状态]</small></div>
+      <div class="track" aria-label="[三个状态的文字说明]">
+        <span class="st done"><i></i>写完<br>[日期]</span><span class="st"><i></i>验收<br>—</span><span class="st"><i></i>发布<br>—</span>
+      </div>
+      <dl class="facts">
+        <div><dt>在做什么</dt><dd>[短句]</dd></div>
+        <div><dt>已完成</dt><dd>[短句]</dd></div>
+        <div class="wide"><dt>没完成</dt><dd>[短句]</dd></div>
+        <div class="wide"><dt>证据</dt><dd>[实现报告或验收结论里的结果]</dd></div>
+      </dl>
+      <p class="src"><code>[工单路径]</code> · [实现报告日期]</p>
+    </div>
+    <div class="card gapcard">
+      <b>还没有工单</b>
+      <p>[哪个组件没有工单，所以没有进度记录]</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03: question and why on the left, options and what it blocks on the right. One .ask per decision. -->
+<section id="decide" aria-labelledby="h-decide">
+  <div class="head">
+    <h2 id="h-decide"><span class="no">03</span>等你决定的事</h2>
+    <p class="claim">[一句话：有几件，最要紧的是什么。或"目前没有。"]</p>
+  </div>
+  <div class="card ask" id="ask-[n]">
+    <div>
+      <p class="k">[待你批准 · 改动提案 NN / 工单 NN 等你决定 / 验收未通过]</p>
+      <h3>[决定写成问题]</h3>
+      <p class="why">[起因，引用原话或记录]</p>
+      <p class="src"><code>[来源路径]</code></p>
+    </div>
+    <div>
+      <div class="opts">
+        <div class="opt"><small>选项 1</small>[记录里的选项]</div>
+        <div class="opt"><small>选项 2</small>[记录里的选项]</div>
+      </div>
+      <div class="blocks"><span>等它的事</span><div>[被挡住的工单或步骤]</div></div>
+    </div>
+  </div>
+  <div class="none"><span>[没有被阻塞等你的工单]</span><span>[没有未通过的验收]</span></div>
+</section>
+
+<!-- 04: one card per change proposal, two per row. pending = not yet approved. -->
+<section id="changed" aria-labelledby="h-changed">
+  <div class="head">
+    <h2 id="h-changed"><span class="no">04</span>跟当初相比哪里变了</h2>
+    <p class="claim">[一句话：哪些已生效，哪些在等你。或"目前没有。"]</p>
+  </div>
+  <div class="two">
+    <div class="card chg">
+      <div class="top"><b>[改了什么]</b><span class="pill ok">[已生效 · 谁在哪天批准]</span></div>
+      <div class="ba">
+        <div class="was"><small>原计划</small><span>[原来的]</span></div>
+        <span class="arr" aria-hidden="true">→</span>
+        <div class="now"><small>现在</small>[现在的]</div>
+      </div>
+      <p class="note">[原因；写进了哪些记录]</p>
+      <p class="src"><code>[提案路径]</code></p>
+    </div>
+    <div class="card chg">
+      <div class="top"><b>[改了什么]</b><span class="pill wait">等你批准</span></div>
+      <div class="ba">
+        <div class="was"><small>原计划</small><span>[原来的]</span></div>
+        <span class="arr" aria-hidden="true">→</span>
+        <div class="now pending"><small>提议</small>[提议的]</div>
+      </div>
+      <p class="note">[谁在哪天提出]</p>
+      <p class="src"><code>[提案路径]</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- 05: one card per logged judgment, two per row; rows whose reason is not "none" first.
+     The bar width is the logged confidence; .unc (dashed) when the source is uncalibrated.
+     No confidence logged: leave the scale empty and say so. -->
+<section id="judged" aria-labelledby="h-judged">
+  <div class="head">
+    <h2 id="h-judged"><span class="no">05</span>系统替你做了哪些判断</h2>
+    <p class="claim">[一句话：几次判断，哪次没被采用、为什么。或"目前没有。"]</p>
+  </div>
+  <div class="two">
+    <div class="card jg">
+      <p class="q">[白话的问题]</p>
+      <dl class="grid">
+        <div class="meter"><dt>判断器的答案</dt><dd>[答案] · <b>[0.xx]</b><div class="scale"><span class="fill unc" style="width:[xx]%"></span></div><small>[虚线：判断器未校准]</small></dd></div>
+        <div><dt>实际怎么做</dt><dd class="used no">[没采用 / 已采用]：<b>[final]</b></dd><dt class="mt">谁判断</dt><dd>[来源 · 数据去向]</dd></div>
+      </dl>
+    </div>
+  </div>
+  <details class="raw"><summary>判断日志原始记录</summary>
+    <p>[原始行]</p>
+  </details>
+</section>
+
+<section id="sources" aria-labelledby="h-src">
+  <div class="head">
+    <h2 id="h-src"><span class="no">··</span>来源</h2>
+    <p class="claim">本页于 [生成日期] 读取下列记录生成，只反映当时的内容；原记录才是准的。</p>
+  </div>
+  <div class="srcs">
+    <div><code>[路径]</code><span class="d">[该文件里写的日期，或 无日期]</span><span class="h">[SHA-256]</span></div>
+  </div>
+</section>
+
+<footer>[刷新方式一句话]。本页不批准、不验收、不发布任何东西。</footer>
+</div>
+<script>
+(function(){var b=document.getElementById('themeBtn'),r=document.documentElement;
+b.addEventListener('click',function(){var dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';});})();
+</script>
+</body>
+</html>

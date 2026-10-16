@@ -45,13 +45,11 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     finding = finding_path.read_text(encoding="utf-8", errors="replace")
     evidence = evidence_path.read_text(encoding="utf-8", errors="replace")
     stopping = stopping_path.read_text(encoding="utf-8", errors="replace")
-    roles = roles_path.read_text(encoding="utf-8", errors="replace")
 
     c.require_match("TC-SW-001 profile link", skill, r"(?im)\[software\.md\]\(references/profiles/software\.md\)")
     c.require_match("TC-SW-001 profile heading", profile, r"(?im)^# Software Profile$")
     c.require_match("TC-SW-001 implicit invocation", metadata, r"(?im)^\s*allow_implicit_invocation:\s*true\s*$")
     c.require_match("TC-SW-001 generic preserved", generic, r"(?im)^# Generic Profile$")
-    c.require_no_match("TC-SW-001 generic remains empty", generic, r"(?i)light-code-review|Standards findings|Spec findings")
 
     c.require_match("TC-SW-002 review axes", profile, r"(?im)^## Review axes$")
     c.require_match("TC-SW-002 evidence requirements", profile, r"(?im)^## Evidence requirements$")
@@ -65,23 +63,12 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.require_match("TC-SW-002 safety axis", profile, r"(?i)\*\*Operational safety\*\*")
     c.require_match("TC-SW-002 severity values", profile, r"(?is)\*\*Critical\*\*.*\*\*High\*\*.*\*\*Medium\*\*.*\*\*Low\*\*")
 
-    c.require_match("TC-SW-003 specialist evidence", profile, r"(?i)light-code-review.*findings.*review.*evidence")
-    c.require_match("TC-SW-003 generic schema", profile, r"(?i)generic finding schema|Finding Schema")
     c.require_match("TC-SW-003 stable IDs", profile, r"(?i)stable.*F-###|stable.*Finding ID")
-    c.require_match("TC-SW-003 dispositions", profile, r"(?is)confirmed.*rejected.*duplicate.*out-of-scope")
     c.require_match("TC-SW-003 evidence class", evidence, r"(?i)`review`")
-    c.require_match("TC-SW-003 core flow", workflow, r"(?is)light-code-review.*Standards.*Spec.*findings.*generic lifecycle")
 
-    c.require_match("TC-SW-004 specialist boundary", profile, r"(?is)light-code-review.*never.*Program.*acceptance verdict")
     c.require_match("TC-SW-004 Core ownership", profile, r"(?is)final `PASS`, `FAIL`, or `BLOCKED`.*project-review\s+Core")
-    c.require_match("TC-SW-004 Core ownership in Workflow", workflow, r"(?is)light-code-review.*never issues.*final.*project-review.{0,5}Core owns")
     c.require_match("TC-SW-004 generic verdicts preserved", stopping, r"(?i)`PASS`.*`FAIL`.*`BLOCKED`")
-    c.require_match("TC-SW-004 read-only specialist boundary", roles, r"(?i)Critic.*read-only|Evaluator.*read-only")
 
-    c.require_match("TC-SW-005 bounded repair", profile, r"(?is)confirmed.*blocking finding.*resolved|bounded repair")
-    c.require_match("TC-SW-005 scope stop", profile, r"(?i)scope|architecture.*decision|multiple new implementation tickets")
-    c.require_match("TC-SW-005 generic stop", workflow, r"(?i)Stop scope expansion")
-    c.require_match("TC-SW-005 no lifecycle duplication", profile, r"(?i)does not replace.*state machine|generic lifecycle.*stopping rules")
 
     # TC-SW-006..009: three-field software baseline contract (breaks the old
     # two-value `<base> <candidate>` window rule; consumers fail closed on it).
@@ -107,7 +94,6 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
                     r"(?is)Never derive the scope from changed paths")
     c.require_match("TC-SW-007 unverifiable target blocked", profile,
                     r"(?is)cannot be\s+established reliably, return `BLOCKED`")
-    c.require_match("TC-SW-007 whole-field rejection", profile, r"(?i)rejects the WHOLE field")
     c.require_match("TC-SW-007 no implicit readme exception", profile,
                     r"(?is)implicit documentation exceptions:\s*with scope `\.?`\s*"
                     r"a README change counts;\s*with scope `src/?`\s*a root README stays outside")

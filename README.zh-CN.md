@@ -4,20 +4,20 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-`LightDevCoder/skills` 包含 36 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
+`LightDevCoder/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布版本：** v0.2.7 是包含全部 36 个第一方 Skill 的当前稳定版本。阅读[中文发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)或[English GitHub Release](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)；不可变的[发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)与发布后的[发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)记录范围和验证事实。
+> **版本快照 v0.2.8：** 本页描述 v0.2.8，共 39 个 Skill，新增 `light-decide`、`light-redirect`、`light-html-plan`。[v0.2.8 发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围和证据；实际观察到的发布与安装事实记录在 `main` 上的发布收据中。见 [v0.2.8 发布说明](docs/evidence/releases/v0.2.8/RELEASE_NOTES.zh-CN.md)和 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
 
-> **名称迁移：** 12 个Skill使用 `light-` 新名称，其他24个名称及36个包总数保留。见[迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)和[发布说明](docs/evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)。准确CI、受保护标签及真实Codex/Claude项目与Codex全局安装已验证。
+> **名称迁移：** v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`。[v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) 中 12 个 Skill 改用 `light-` 新名称，见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 按分类浏览
 
-[全部分类与集合说明](skills/README.zh-CN.md)。36 个技能的源文件已按用途分类，调用方式不变；候选名称见迁移说明。
+[全部分类与集合说明](skills/README.zh-CN.md)。39 个技能的源文件已按用途分类，调用方式不变；候选名称见迁移说明。
 
-- [项目执行](skills/project/README.zh-CN.md) — 8 个技能
+- [项目执行](skills/project/README.zh-CN.md) — 10 个技能
 - [工程开发](skills/engineering/README.zh-CN.md) — 5 个技能
 - [审阅验收](skills/review/README.zh-CN.md) — 4 个技能
-- [澄清研究](skills/thinking/README.zh-CN.md) — 5 个技能
+- [澄清研究](skills/thinking/README.zh-CN.md) — 6 个技能
 - [学习知识](skills/knowledge/README.zh-CN.md) — 5 个技能
 - [写作编辑](skills/writing/README.zh-CN.md) — 3 个技能
 - [日常工具](skills/productivity/README.zh-CN.md) — 6 个技能
@@ -39,7 +39,7 @@
 
 ## 安装
 
-### 当前 main / latest（包含更新后的 Agent Config）
+### 当前 main / latest（安装命令模板）
 
 从默认分支 `main` 安装最新集合：
 
@@ -57,16 +57,23 @@ npx skills add LightDevCoder/skills --skill light-research
 
 > **说明：** 不带 fragment 的仓库源（`LightDevCoder/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.7）
+### 锁定 v0.2.8（安装命令模板）
 
-若需安装可复现的稳定发布快照，请锁定 `#v0.2.7` tag：
+```bash
+npx skills add LightDevCoder/skills#v0.2.8
+npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement
+```
+
+### 历史版本
+
+锁定 `#v0.2.7` tag 可复现安装 v0.2.7：
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
 npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
 ```
 
-历史版本（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
+更早的 tag（如 `#v0.2.4`、`#v0.2.2`、`#v0.2.1` 与 `#v0.2.0`）依然保留供复现：
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.4
@@ -77,7 +84,7 @@ npx skills add LightDevCoder/skills#v0.2.0
 
 > **说明：** `#v0.2.0` tag 保持为 v0.2.0 发布线的不可变可复现快照，不会被 `main` 上的后续工作修改。
 
-### 直接指定目标 Agent
+### 直接指定目标 Agent（命令模板）
 
 ```bash
 npx skills add LightDevCoder/skills --agent claude-code
@@ -93,15 +100,9 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
-### 可选语义加速（TypeSafe Jev）
+### 可选的判定来源
 
-`ask-light` 与 `agent-config` 支持通过 TypeSafe Jev System One 模型进行可选的语义加速，用于快速意图校准、歧义检测与抽象任务画像：
-
-```bash
-export TYPESAFE_API_KEY="your-api-key"
-```
-
-配置后，Jev 在确定性代码安全边界内完成语义裁决。未配置或离线时，两项技能平滑降级至零外部依赖的确定性规则基准，保持 Fail-Closed 硬安全保障。
+`ask-light` 与 `agent-config` 可以通过 `light-decide` 把有界判断（在合法选项中选一个、是或否、在等级上打分）交给判定模型。每个项目在 `docs/agents/light-project.md` 里用 `Decision data:` 一行规定问题状态最远能发到哪里（`on-device`、`private-network`、`third-party` 或 `off`）。没写这一行时，只问本机上的模型。只有你的策略文件 `~/.config/light/decision-policy.json` 为某个问题做过校准，模型的答案才会被采用；否则沿用确定性基准。找不到来源时，`light-decide` 可以提出设置，等你同意再做。
 
 详细安装选项（指定 Agent、独立复制模式、非交互式 CI 安装）、手动复制方式与验证记录见[安装指南](docs/INSTALLATION.zh-CN.md)。
 
@@ -112,7 +113,7 @@ $ask-light next        # 根据当前上下文推荐合适的 Skill
 $project-init          # 初始化项目基础结构与任务跟踪
 $clarify               # 通过针对性提问澄清模糊需求
 $project-clarify       # 结合已有代码与文档澄清项目决策
-$light-implement             # 执行明确的开发任务并完成验证
+$light-implement       # 执行明确的开发任务并完成验证
 $project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
@@ -148,11 +149,11 @@ project-retro（Agent 评估摩擦信号）
 常用单项任务路径：
 
 ```text
-clarify                          # 独立需求澄清与共识确认
-implement                        # 直接执行明确的任务
-light-diagnosing-bugs → light-implement      # 定位疑难问题并完成修复
-release-workflow                 # 仅执行发布流程
-$ask-light                       # 任务不确定时获取路由建议
+clarify                                  # 独立需求澄清与共识确认
+light-implement                          # 直接执行明确的任务
+light-diagnosing-bugs → light-implement  # 定位疑难问题并完成修复
+release-workflow                         # 仅执行发布流程
+$ask-light                               # 任务不确定时获取路由建议
 ```
 
 完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows)。
@@ -174,7 +175,7 @@ $ask-light workflow
 | --- | --- | --- |
 | **项目流程** | `project-init`、`project-clarify`、`project-spec`、`project-tickets`、`light-implement`、`project-review`、`release-workflow` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
 | **澄清与调研** | `socratic`（引擎）、`clarify`、`project-clarify`、`decision-map`、`light-research`、`light-prototype`、`light-to-questionnaire` | [clarification-system](docs/zh-CN/workflows/clarification-system.md) |
-| **任务执行** | `light-implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`light-tdd`、`light-diagnosing-bugs`、`resolving-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
+| **任务执行** | `light-implement`、`agent-config`（原生支持主要编码 Harness：10 种原生适配器与通用回退）、`light-tdd`、`light-diagnosing-bugs`、`light-merge-conflicts` | [execution](docs/zh-CN/workflows/execution.md) |
 | **质量审阅** | `review-loop`（引擎）、`generic-review`、`light-code-review`、`project-review`（验收） | [review-system](docs/zh-CN/workflows/review-system.md) |
 | **专项工具** | `manuscript-ops`、`kb-init`、`learn-anything`、`language-learning`、`kanban-worker`、`eli5`、`recap` | [specialized-workflows](docs/zh-CN/workflows/specialized-workflows.md) |
 | **协作效率** | `light-handoff`、`humanizer`、`light-wizard`、`light-wait-what`、`light-writing-for-agents`、`light-travelpage` | [CATALOG.zh-CN.md](CATALOG.zh-CN.md) |
@@ -191,7 +192,7 @@ $ask-light workflow
 | 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
-经批准的 Matt Port（共 11 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`resolving-merge-conflicts`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
+经批准的 Matt Port（共 12 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`light-merge-conflicts`、`project-retro`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。
 
 改编来源（2 个包）：`humanizer` 是基于 blader/humanizer（2.11.2）实质性转换的第一方能力，外加参考 op7418/Humanizer-zh 的薄中文适配层；两份 MIT 许可均在其 [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md) 中保留。
 
@@ -206,5 +207,5 @@ $ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)
+- [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)（上一版本）
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)

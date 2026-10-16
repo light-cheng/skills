@@ -25,13 +25,13 @@ def resolve_reasoning_effort(
 
     Precedence:
       1. Host capability constraints: if host does not support reasoning controls, returns None.
-      2. Explicit user reasoning policy / profile policy: authoritative; Jev cannot lower or override.
-      3. Jev reasoning judgment (profile_reasoning_need): maps to nearest verified supported value.
+      2. Explicit user reasoning policy / profile policy: authoritative; a typed decision cannot lower or override.
+      3. Typed reasoning judgment (profile_reasoning_need): maps to nearest verified supported value.
       4. Deterministic fallback: None.
 
     Invariants:
       - NEVER emit unverified literal 'max'.
-      - Host-supported effort strictly bounds output (Jev cannot invent unsupported effort).
+      - Host-supported effort strictly bounds output (a typed decision cannot invent unsupported effort).
     """
     if not host.supported_effort:
         return None
@@ -66,7 +66,7 @@ def resolve_reasoning_effort(
         # Unknown explicit values require confirmation at the public entry point.
         return None
 
-    # Precedence 2: Jev semantic reasoning judgment
+    # Precedence 2: typed reasoning judgment
     if profile_reasoning_need:
         need = profile_reasoning_need.lower()
         if need == "high":

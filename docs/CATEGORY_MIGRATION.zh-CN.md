@@ -35,7 +35,7 @@ v0.2.2 将 36 个源码包从平铺目录迁移到分类目录，当时名称与
 | `recap` | `skills/recap/` | [skills/productivity/recap/](../skills/productivity/recap/) |
 | `release-workflow` | `skills/release-workflow/` | [skills/project/release-workflow/](../skills/project/release-workflow/) |
 | `light-research` | `skills/research/` | [skills/thinking/light-research/](../skills/thinking/light-research/) |
-| `resolving-merge-conflicts` | `skills/resolving-merge-conflicts/` | [skills/engineering/resolving-merge-conflicts/](../skills/engineering/resolving-merge-conflicts/) |
+| `light-merge-conflicts` | `skills/resolving-merge-conflicts/` | [skills/engineering/light-merge-conflicts/](../skills/engineering/light-merge-conflicts/) |
 | `review-loop` | `skills/review-loop/` | [skills/review/review-loop/](../skills/review/review-loop/) |
 | `socratic` | `skills/socratic/` | [skills/thinking/socratic/](../skills/thinking/socratic/) |
 | `light-tdd` | `skills/tdd/` | [skills/engineering/light-tdd/](../skills/engineering/light-tdd/) |

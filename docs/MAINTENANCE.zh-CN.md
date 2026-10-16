@@ -6,25 +6,35 @@
 
 ## 权威记录
 
-每个事实只保留一个权威位置，其他位置链接过去：包行为/触发/调用/输入/输出/资源以 `skills/<category>/<skill-name>/SKILL.md`（及 supporting files）为准；Port/变换包的来源在 `ATTRIBUTION.md`；可读目录是 [CATALOG.md](../CATALOG.md)；安装与验证是 [docs/INSTALLATION.md](INSTALLATION.md)；审查与 verdict 是 [docs/REVIEW_POLICY.md](REVIEW_POLICY.md) 与 [REVIEWER_CONTRACT.md](REVIEWER_CONTRACT.md)；历史是 [CHANGELOG.md](../CHANGELOG.md) 与真实 release；组合验证资产在 [docs/workflows/](workflows)。
+每个事实只放在一个权威位置，其他地方链接过去：
+
+| 事实 | 权威位置 |
+| --- | --- |
+| 包的行为、触发条件、调用方式、输入、输出、资源 | `skills/<category>/<skill-name>/SKILL.md`（及其配套文件） |
+| Port 或改造包的来源 | `skills/<category>/<skill-name>/ATTRIBUTION.md` |
+| 给人看的包清单 | [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)，由包元数据同步 |
+| 安装步骤和验证要求 | [docs/INSTALLATION.zh-CN.md](INSTALLATION.zh-CN.md) |
+| 何时审查；审查者、引擎与验收的分工 | [docs/REVIEW_POLICY.zh-CN.md](REVIEW_POLICY.zh-CN.md) · [docs/REVIEWER_CONTRACT.zh-CN.md](REVIEWER_CONTRACT.zh-CN.md) |
+| 仓库变更历史 | [CHANGELOG.zh-CN.md](../CHANGELOG.zh-CN.md) 和真实的发布记录 |
+| 组合验证素材 | [docs/zh-CN/workflows/](zh-CN/workflows) 和链接的证据 |
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **36 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.7`（36 个包；上一稳定版为 `v0.2.6`）。
+准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。版本快照 v0.2.8：本页说明 v0.2.8（39 个包，新增 `light-decide`、`light-redirect`、`light-html-plan`）。其[发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围；实际观察到的发布与安装事实记入 `main` 上的发布收据。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 
-已发布的 v0.2.7 按[迁移说明](MIGRATION-v0.2.7.zh-CN.md)调整 12 个名称；验证见[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)。先前 v0.2.6 尝试的证据保留为历史。
+v0.2.8 改名一个包（[v0.2.8 迁移说明](MIGRATION-v0.2.8.zh-CN.md)）。此前 v0.2.7 调整 12 个名称，见 [v0.2.7 迁移说明](MIGRATION-v0.2.7.zh-CN.md)和上一版本的 [v0.2.7 发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)；v0.2.6 尝试的证据保留为历史。
 
 ## 变更流程
 
 每次 **新增 / 更新 / 改名 / 弃用 / 移除 / Port / Adapt**：
 
-1. 先执行 [Skill 准入](SKILL_ADMISSION.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
+1. 先执行 [Skill 准入](SKILL_ADMISSION.zh-CN.md) 的 reuse-before-invention 与 ownership gate——已批准的 Matt PORT（SPEC §14）只要带 `ATTRIBUTION.md` 且无运行时依赖即获架构授权。
 2. 保留包边界、invocation direction、attribution 与必要资源。
-3. 判断是否符合低风险纯提示型快速通道，否则走完整路径；只收集对应路线要求的 evidence。
-4. 执行[审查策略](REVIEW_POLICY.md) 的 review trigger——`review-loop` 为引擎，`project-review` 拥有最终验收。
-5. 同步 README、目录、安装说明、治理链接、受影响组合示例、discovery/composition 测试、attribution 与 changelog。
+3. 按 [审查策略](REVIEW_POLICY.zh-CN.md#一项改动需要多重的审查) 选审查分量：日常改动、仅文档、完整审查或发布；只收集该分量要求的证据。完整审查时 `review-loop` 为引擎，`project-review` 拥有最终验收。
+4. 新准入再判断走低风险纯提示型快速通道还是完整路径，见 [Skill 准入](SKILL_ADMISSION.zh-CN.md)。
+5. 只更新受改动影响的部分：README、目录、安装说明、治理链接、组合示例、discovery/composition 测试、attribution 与 changelog。
 6. 先写未发布变更记录；未通过真实 release gate 前不宣称版本/tag/已验证命令。
 
 ## 同步矩阵
@@ -43,7 +53,7 @@
 
 目录条目须写明作用、when to use（适用时）、调用方式、包路径、状态、安装范围与证据。以包 metadata 为准，不另建静态路由表。
 
-发布示例必须指向真实已发布来源并与当前目录一致。针对 fresh 环境验证全仓与单包安装，保留精确命令、已发布 revision、host 与离线 discovery 结果；未验证前保持模板标记。
+发布示例必须指向真实发布过的来源并与当前目录一致。针对 fresh 环境验证全仓与单包安装，保留精确命令、发布的 revision、host 与离线 discovery 结果；未验证前保持模板标记。
 
 ## 上游归属与兼容性
 
@@ -59,13 +69,19 @@
 
 弃用需显式标记目录与安装指引、写明替代或声明无替代、在发布支持期内保留迁移信息并记入 changelog。
 
-候选发布验证失败时停止 promotion，按适用 review 流程修复；不重写已发布历史或删除证据。稳定发布仅需已准入包、同步文档、已验证安装命令、必需 review 证据与真实版本/tag。
+候选发布验证失败时停止 promotion，按适用 review 流程修复；不重写发布过的历史或删除证据。稳定发布仅需已准入包、同步文档、经验证的安装命令、必需 review 证据与真实版本/tag。
 
 ## Closeout 记录
 
-收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（36）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。Historical closeout must be recorded with exact identifiers and limitations — closeout is not structural proof. 历史证据（`docs/evidence/`）保持不变。
+收尾时记录最终仓库位置、已发版本/tag、已验证命令、第一方目录（当前包数）、已批准 Port / direct upstream / modified third-party 区分、证据、限制与迁移/归档指引。不得把结构或模拟证据写成 runtime proof。历史收尾必须写明确切的标识和局限——收尾不是结构证明。历史证据（`docs/evidence/`）保持不变。
+
+v0.2.7 之后新增的证据不写出任何人的机器信息。提交证据文件前，运行 `python3 scripts/check_evidence_paths.py --apply <文件>...`：它把仓库根改成 `<repo>`、临时目录改成 `<tmp>`、主目录改成 `~`，形似 key 的值改成 `<redacted>`。只要 v0.2.7 之后新增的证据里还有个人路径或形似 key 的值，`python3 scripts/check_evidence_paths.py --check` 就失败；发布前运行它。更早的证据不改写。
 
 
 ## 分类目录的验证入口
 
 从仓库根目录运行 `python3 -m pytest -q`。单独运行冻结包中的测试脚本时，使用 `PYTHONPATH=tests python3 <test-path>`；CI 同样设置 `PYTHONPATH=tests`。这保留冻结文件内容，同时让增加分类层后的脚本找到共享辅助模块。
+
+## 发布文档的语境
+
+冻结版本快照说明自身内容，当前 main 按已确认的双语收据说明稳定版本，发布清单保留准备时历史。使用共同的[文档状态契约](../skills/project/release-workflow/references/DOCUMENT-STATE.md)和固定树阶段检查；历史复核保持原范围。实际安装、发布和最终 main CI 与本地模拟分别记录。

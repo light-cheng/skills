@@ -56,7 +56,7 @@ contract and evidence boundary.
 
 ## Evidence and status
 
-- Package contracts: the 36 `skills/*/*/SKILL.md` files (see [CATALOG.md](../../CATALOG.md)).
+- Package contracts: the `skills/*/*/SKILL.md` files (see [CATALOG.md](../../CATALOG.md)).
 - Discovery contract: [ask-light discovery contract](../../skills/productivity/ask-light/references/discovery-contract.md).
 - Executable discovery check: [collection discovery](../../tests/test_collection_discovery.py) + [composition](../../tests/test_composition.py).
 - Package admission evidence: existing release records plus specialized evidence under `docs/evidence/admissions/` and `docs/evidence/releases/`.

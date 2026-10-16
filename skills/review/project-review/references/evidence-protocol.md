@@ -47,7 +47,9 @@ Write `producer-evidence.md` with:
 ```
 
 State that this is Producer evidence, not final acceptance. Missing evidence is
-missing; do not infer a pass.
+missing; do not infer a pass. When a ticket carries an implementation report,
+take its commands as the starting list and record this round's re-run results
+([Implementation report intake](WORKFLOW.md#implementation-report-intake)).
 
 ## Repair evidence
 

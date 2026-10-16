@@ -20,11 +20,11 @@ Keep each fact in one authoritative location and link elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection contains **36 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Current stable release is `v0.2.7` (36 packages; previous stable was `v0.2.6`).
+The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Release snapshot v0.2.8: this page describes v0.2.8 (39 packages, adding `light-decide`, `light-redirect` and `light-html-plan`). Its [release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records the preparation-time scope; observed publication and installation facts go into the release receipt on `main`.
 
 History markers: `v0.1.1` (five), `v0.1.2` (seven), `v0.1.3` toolchain migration, `v0.1.4` (`kanban-worker` as `light-kanban-worker`), `v0.1.5` scheduling + identity hardening, `v0.1.6` (`kb-init`). Structural/discovery checks live in [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) and [tests/test_composition.py](../tests/test_composition.py); they are structural evidence, not fresh-install proof.
 
-Published v0.2.7 changes 12 names as recorded in the [migration guide](MIGRATION-v0.2.7.md) and [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md). Evidence for the earlier v0.2.6 attempt remains historical.
+v0.2.8 renames one package ([v0.2.8 migration guide](MIGRATION-v0.2.8.md)). The earlier v0.2.7 changes to 12 names are in the [v0.2.7 migration guide](MIGRATION-v0.2.7.md) and the previous [v0.2.7 release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md); evidence for the v0.2.6 attempt remains historical.
 
 ## Change workflow
 
@@ -32,9 +32,9 @@ For every **add / update / rename / deprecation / removal / port / adapt**:
 
 1. Re-check ownership and reuse-before-invention in [Skill admission](SKILL_ADMISSION.md) — approved Matt PORTs (SPEC §14) are architecture-authorized when they carry `ATTRIBUTION.md` and no runtime dependency.
 2. Preserve package boundary, invocation direction, and required attribution.
-3. Classify as eligible low-risk prompt-only fast track or full path; collect only the evidence that route requires.
-4. Apply the review trigger in [review policy](REVIEW_POLICY.md) — `review-loop` is the engine, `project-review` owns final acceptance.
-5. Synchronize README, catalog, installation guide, governance links, affected composition examples, discovery/composition tests, attribution records, and changelog together.
+3. Pick the review weight in [review policy](REVIEW_POLICY.md#how-much-review-a-change-needs): everyday change, documentation only, full review, or a release. Collect only the evidence that weight requires. For full review, `review-loop` is the engine and `project-review` owns final acceptance.
+4. For a new admission, classify it as the prompt-only fast track or the full path in [Skill admission](SKILL_ADMISSION.md).
+5. Update only the surfaces the change affects: README, catalog, installation guide, governance links, composition examples, discovery/composition tests, attribution records, and changelog.
 6. Prepare an unreleased changelog entry. Do not claim a version, tag, or verified release command until the release gate passes.
 
 ## Synchronization matrix
@@ -73,9 +73,15 @@ If a release candidate fails verification, stop promotion and repair through the
 
 ## Closeout record
 
-At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (36), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.
+At closeout, record final repository location, released versions/tags, verified commands, first-party catalog (current package count), approved Ports vs direct upstream vs modified third-party distinctions, evidence, limitations, and migration/archive guidance. Do not label structural or simulated evidence as runtime proof. Historical evidence (`docs/evidence/`) stays immutable.
+
+Evidence added after v0.2.7 names no one's machine. Before you commit an evidence file, run `python3 scripts/check_evidence_paths.py --apply <file>...`: it turns the repository root into `<repo>`, temporary directories into `<tmp>`, the home directory into `~`, and key-shaped values into `<redacted>`. `python3 scripts/check_evidence_paths.py --check` fails while any evidence added since v0.2.7 still holds a personal path or a key-shaped value; run it before a release. Older evidence is not rewritten.
 
 
 ## Validation entry points after categorization
 
 From the repository root, run `python3 -m pytest -q`. For standalone frozen package test scripts, use `PYTHONPATH=tests python3 <test-path>`; CI sets the same `PYTHONPATH=tests`. This preserves frozen file bytes while resolving the shared helpers after adding a category level.
+
+## Release document views
+
+A frozen version snapshot describes its own content. Current main identifies the stable version from confirmed bilingual Receipts. A Manifest records preparation-time history. Use the common [document-state contract](../skills/project/release-workflow/references/DOCUMENT-STATE.md) and fixed-tree stage gates; historical audits preserve their original scope. Installation/publication facts and final-main CI remain distinct from local simulation.

@@ -1,0 +1,9 @@
+diff --git a/docs/agents/light-project.md b/docs/agents/light-project.md
+index dfbfbf1..9cad384 100644
+--- a/docs/agents/light-project.md
++++ b/docs/agents/light-project.md
+@@ -2,3 +2,4 @@
+ 
+ - Goal: publish a weekly status note for the team.
+ - Outputs: one note per week in `notes/`.
++- Decision data: off

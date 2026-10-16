@@ -35,8 +35,7 @@ At the limit, hand the outstanding findings to the caller. Do not run another
 round to obtain a favorable result. Returning at the limit ends this loop,
 not the caller's entire task; the caller may continue independent authorized
 work, but cannot restart the same loop to evade the limit or report unresolved
-review as complete. `review-loop` never writes `PASS`, `FAIL`,
-or `BLOCKED`; those verdicts belong to `project-review`.
+review as complete.
 
 ## Handoff and stop
 

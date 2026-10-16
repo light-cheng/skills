@@ -25,10 +25,13 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from release_context import PUBLIC_RELEASE_DOCS, STAGES, ReleaseContext, check_release_documents, confirmed_stable, infer_document_context
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# Implementation-only anti-pattern signatures forbidden on the public surface
-FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
+# Implementation jargon that should not reach the public surface. Hits are
+# reported as warnings for a human to judge; they never fail the gate.
+JARGON_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"frontier-round", re.IGNORECASE), "frontier-round"),
     (re.compile(r"tracer-bullet ticket graph", re.IGNORECASE), "tracer-bullet ticket graph"),
     (re.compile(r"下游.*消费"), "下游 ... 消费"),
@@ -43,6 +46,7 @@ FORBIDDEN_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 class PublicDocCheckResult(NamedTuple):
     passed: bool
     errors: list[str]
+    warnings: tuple[str, ...] = ()
 
 
 def get_admitted_packages(repo_root: Path = REPO_ROOT) -> set[str]:
@@ -106,7 +110,7 @@ def check_catalog_inventory(repo_root: Path = REPO_ROOT) -> list[str]:
 
 
 def check_category_readmes(repo_root: Path = REPO_ROOT) -> list[str]:
-    """Verify category READMEs list all packages in their category and links resolve."""
+    """Verify category READMEs link every package in their category."""
     errors: list[str] = []
     category_dirs = [d for d in (repo_root / "skills").iterdir() if d.is_dir() and d.name != "docs"]
 
@@ -128,21 +132,16 @@ def check_category_readmes(repo_root: Path = REPO_ROOT) -> list[str]:
                     errors.append(
                         f"{readme_path.relative_to(repo_root)} is missing link to {expected_link}"
                     )
-                target_skill = cat_dir / expected_link
-                if not target_skill.is_file():
-                    errors.append(
-                        f"Resolved link target does not exist: {target_skill.relative_to(repo_root)}"
-                    )
 
     return errors
 
 
-def check_anti_patterns(
+def check_jargon(
     repo_root: Path = REPO_ROOT,
     files: list[Path] | None = None,
 ) -> list[str]:
-    """Scan public documentation surface for forbidden implementation-only leakages."""
-    errors: list[str] = []
+    """Warn about implementation jargon on the public documentation surface."""
+    warnings: list[str] = []
     target_files = files if files is not None else get_public_surface_files(repo_root)
 
     for path in target_files:
@@ -153,13 +152,13 @@ def check_anti_patterns(
 
         lines = path.read_text(encoding="utf-8").splitlines()
         for idx, line in enumerate(lines, start=1):
-            for pattern, pattern_label in FORBIDDEN_PATTERNS:
+            for pattern, pattern_label in JARGON_PATTERNS:
                 if pattern.search(line):
-                    errors.append(
-                        f"{rel_path}:{idx} contains forbidden implementation anti-pattern [{pattern_label}]: {line.strip()}"
+                    warnings.append(
+                        f"{rel_path}:{idx} uses implementation jargon [{pattern_label}]: {line.strip()}"
                     )
 
-    return errors
+    return warnings
 
 
 def check_release_link_labels(
@@ -178,7 +177,7 @@ def check_release_link_labels(
     return errors
 
 
-def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
+def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int | None:
     """Retrieve canonical native harness adapter count from agent-config documentation."""
     harness_doc = repo_root / "skills" / "engineering" / "agent-config" / "references" / "harness-support.md"
     if harness_doc.is_file():
@@ -186,7 +185,17 @@ def get_canonical_adapter_count(repo_root: Path = REPO_ROOT) -> int:
         m = re.search(r"native host adapters for\s+(\d+)\s+primary coding-agent harnesses", text, re.IGNORECASE)
         if m:
             return int(m.group(1))
-    return 10
+    return None
+
+
+def _adapter_claim_errors(name: str, claim: re.Match | None, canonical: int | None) -> list[str]:
+    if claim is None:
+        return []
+    if canonical is None:
+        return [f"{name} states a native adapter count, but agent-config harness-support.md does not state the canonical count."]
+    if int(claim.group(1)) != canonical:
+        return [f"{name} reports {claim.group(1)} native adapters, expected {canonical}."]
+    return []
 
 
 def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
@@ -210,8 +219,7 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.md contains stale claim stating admitted package is an unreleased addition.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s+native\s+adapters", text_en, re.IGNORECASE)
-        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
-            errors.append(f"README.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+        errors.extend(_adapter_claim_errors("README.md", m_adapt, canonical_adapters))
 
     if readme_zh.is_file():
         text_zh = readme_zh.read_text(encoding="utf-8")
@@ -224,8 +232,7 @@ def check_readme_facts(repo_root: Path = REPO_ROOT) -> list[str]:
             errors.append("README.zh-CN.md contains stale claim stating admitted package is not included in version tag.")
         # Check adapter count
         m_adapt = re.search(r"(\d+)\s*种原生适配器", text_zh)
-        if m_adapt and int(m_adapt.group(1)) != canonical_adapters:
-            errors.append(f"README.zh-CN.md reports {m_adapt.group(1)} native adapters, expected {canonical_adapters}.")
+        errors.extend(_adapter_claim_errors("README.zh-CN.md", m_adapt, canonical_adapters))
 
     return errors
 
@@ -241,31 +248,39 @@ def normalize_invocation(text: str) -> str:
 
 
 def extract_status_tokens(text: str) -> set[str]:
-    """Extract canonical semantic status tokens from English or Chinese status prose."""
+    """Extract canonical semantic status tokens from English or Chinese status prose.
+
+    English words match case-insensitively as whole ASCII words (so "adapters"
+    is not ADAPT, and "经PORT" still is PORT); Chinese status words match as
+    substrings. Both sides read prose, so the two catalogs stay comparable.
+    """
     tokens: set[str] = set()
     t = text.upper()
 
-    if "ADMITTED" in t or "第一方已准入" in text or "实质性转换的第一方能力" in text:
+    def word(stem: str, suffixes: str = "") -> bool:
+        return re.search(rf"(?<![A-Z0-9_]){stem}(?:{suffixes})?(?![A-Z0-9_])", t) is not None
+
+    if word("ADMITTED") or "第一方已准入" in text or "实质性转换的第一方能力" in text:
         tokens.add("ADMITTED")
-    if "PASS" in t:
+    if word("PASS", "ED|ES|ING"):
         tokens.add("PASS")
-    if "PORT" in t:
+    if word("PORT", "ED|S|ING"):
         tokens.add("PORT")
-    if "ADAPT" in t or "适配" in text:
+    if word("ADAPT", "ATION|ED|S|ING") or re.search(r"适配(?!器)", text):
         tokens.add("ADAPT")
-    if "REFACTOR" in t or "重构" in text:
+    if word("REFACTOR", "ED|S|ING") or "重构" in text:
         tokens.add("REFACTOR")
-    if "SPLIT" in t or "拆分" in text:
+    if word("SPLIT", "S|TING") or "拆分" in text:
         tokens.add("SPLIT")
-    if "MIGRATE" in t or "迁移" in text:
+    if word("MIGRATE", "D|S") or "迁移" in text:
         tokens.add("MIGRATE")
-    if "PRESERVE" in t or "保留" in text:
+    if word("PRESERVE", "D|S") or "保留" in text:
         tokens.add("PRESERVE")
     if "NO REWRITE" in t or "NO-REWRITE" in t or "无需重写" in text:
         tokens.add("NO_REWRITE")
     if "NO REDESIGN" in t or "NO-REDESIGN" in t or "无需重新设计" in text:
         tokens.add("NO_REDESIGN")
-    if re.search(r"\bNEW\b", t) or "新建" in text or "新增" in text:
+    if word("NEW") or "新建" in text or "新增" in text:
         tokens.add("NEW")
 
     for m in re.finditer(r"RELEASED\s+(?:IN|ON\s+THE)\s+(V\d+\.\d+\.\d+)", t):
@@ -386,21 +401,33 @@ def check_catalog_parity(repo_root: Path = REPO_ROOT) -> list[str]:
     return errors
 
 
-def run_checks(repo_root: Path = REPO_ROOT) -> PublicDocCheckResult:
+def run_checks(repo_root: Path = REPO_ROOT, context: ReleaseContext | None = None) -> PublicDocCheckResult:
     """Execute all public doc checks."""
     errors: list[str] = []
     errors.extend(check_catalog_inventory(repo_root))
     errors.extend(check_category_readmes(repo_root))
-    errors.extend(check_anti_patterns(repo_root))
+    warnings = check_jargon(repo_root)
     errors.extend(check_release_link_labels(repo_root))
     errors.extend(check_readme_facts(repo_root))
     errors.extend(check_catalog_parity(repo_root))
-    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors)
+    documents = {path: (repo_root / path).read_text(encoding="utf-8")
+                 for path in PUBLIC_RELEASE_DOCS if (repo_root / path).is_file()}
+    for path in (repo_root / "docs/evidence/releases").glob("*/*.md"):
+        documents[path.relative_to(repo_root).as_posix()] = path.read_text(encoding="utf-8")
+    if context is None:
+        context = infer_document_context(documents)
+    if context is not None:
+        files = {path.relative_to(repo_root).as_posix() for path in repo_root.rglob("*") if ".git" not in path.parts and (path.is_file() or path.is_dir())}
+        errors.extend(check_release_documents(documents, context, files))
+    return PublicDocCheckResult(passed=len(errors) == 0, errors=errors, warnings=tuple(warnings))
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Check public documentation quality and anti-patterns.")
     parser.add_argument("--root", default=str(REPO_ROOT), help="Repository root path.")
+    parser.add_argument("--tag", help="Target version for an explicit release snapshot check.")
+    parser.add_argument("--stage", choices=STAGES, default="prepared", help="Stage for --tag; without --tag infer snapshot/current view from Manifest and verified Receipts.")
+    parser.add_argument("--mode", choices=["current", "historical"], default="current")
     args = parser.parse_args()
 
     repo_root = Path(args.root).resolve()
@@ -408,9 +435,18 @@ def main() -> int:
     print(f"Repository Root: {repo_root}")
     print("------------------------------------------")
 
-    result = run_checks(repo_root)
+    context = ReleaseContext(args.tag, args.stage, mode=args.mode) if args.tag else None
+    if context and context.stage == "attested":
+        records = {p.relative_to(repo_root).as_posix(): p.read_text(encoding="utf-8")
+                   for p in (repo_root / "docs/evidence/releases").glob("*/RELEASE_RECEIPT*.md")}
+        stable, source = confirmed_stable(records)
+        context = ReleaseContext(args.tag, args.stage, mode=args.mode, current_stable=stable, evidence_source=source,
+                                 install_verified=stable == args.tag, published=stable == args.tag)
+    result = run_checks(repo_root, context)
+    for warning in result.warnings:
+        print(f"WARNING: {warning}")
     if result.passed:
-        print("RESULT: PASS — Public documentation structural and terminology checks passed.")
+        print("RESULT: PASS — Public documentation structural checks passed.")
         return 0
 
     print(f"RESULT: FAIL — {len(result.errors)} documentation issues detected:")

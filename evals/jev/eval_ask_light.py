@@ -35,7 +35,11 @@ if str(ASK_LIGHT_SCRIPTS) not in sys.path:
 
 from ask_light_models import AskLightRecommendation, CompactProjectState, LegalActionsResult
 from state_extractor import compute_legal_actions
-from semantic_router import route_with_jev
+from semantic_router import route_with_decisions
+
+# Set by run_eval: an evaluation policy that applies every answer, and a project root
+# whose Decision data line allows the endpoint under test.
+EVAL_CONTEXT: Dict[str, Any] = {"policy": None, "project_root": None}
 
 
 @dataclass
@@ -67,10 +71,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-parser.md"],
         ),
         user_request="What should I do next?",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=False,
         notes="Standard recommendation frontier without explicit command.",
     ),
@@ -116,10 +120,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-feature.md"],
         ),
         user_request="立刻开始执行工单。 Go ahead and implement now.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="TRANSITION",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=True,
         notes="Deterministic command authorizes TRANSITION.",
     ),
@@ -134,10 +138,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-feature.md"],
         ),
         user_request="Should we start implementing? 现在开始做吗？",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=False,
         notes="Questioning intent must remain RECOMMEND (Jev cannot upgrade to TRANSITION).",
     ),
@@ -152,10 +156,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-feature.md"],
         ),
         user_request="I only want advice, please do not start anything yet.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=False,
         notes="Advice only; remains RECOMMEND.",
     ),
@@ -221,10 +225,10 @@ SCENARIOS: List[AskLightScenario] = [
             blocked_tickets=["04-backend.md"],
         ),
         user_request="Next step please.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=False,
         notes="Unblocked ready ticket -> implement.",
     ),
@@ -326,10 +330,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01.md"],
         ),
         user_request="Maybe we should do auth, or maybe redesign the storage layer first, or just start writing code?",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         expected_ambiguity=True,
         expected_escalation=None,
         is_authorized=False,
@@ -346,10 +350,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["05-distributed-consensus.md"],
         ),
         user_request="Implement the distributed consensus engine with Raft leader election, multi-raft log replication, and split-brain recovery.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         expected_ambiguity=None,
         expected_escalation=True,
         is_authorized=False,
@@ -385,10 +389,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-parser.md"],
         ),
         user_request="Should we implement ticket 01 or tell me if ticket 01 is ready?",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         expected_ambiguity=False,
         is_authorized=False,
         notes="Phrasing contains ' or ' but semantics are clear (not material ambiguity).",
@@ -404,10 +408,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-parser.md"],
         ),
         user_request="Implement ticket 01: simple refactor to fix typo in README doc comments.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         expected_escalation=False,
         is_authorized=False,
         notes="Phrasing contains 'refactor' but task is simple typo fix (not deep architectural escalation).",
@@ -423,10 +427,10 @@ SCENARIOS: List[AskLightScenario] = [
             ready_tickets=["01-parser.md"],
         ),
         user_request="What's next? Do not execute.",
-        expected_legal_actions=["implement"],
-        expected_fallback_action="implement",
+        expected_legal_actions=["light-implement"],
+        expected_fallback_action="light-implement",
         expected_status="RECOMMEND",
-        expected_primary_skill="implement",
+        expected_primary_skill="light-implement",
         is_authorized=False,
         notes="Explicit negative execution constraint; planner plans 0 queries.",
     ),
@@ -456,7 +460,7 @@ def evaluate_scenario(scenario: AskLightScenario, client: Optional[Any] = None) 
     explicit_tgt = "99" if "99" in scenario.user_request else None
     legal = compute_legal_actions(scenario.state, scenario.user_request, explicit_target=explicit_tgt)
 
-    rec = route_with_jev(legal, scenario.user_request, client=client)
+    rec = route_with_decisions(legal, scenario.user_request, client=client, **EVAL_CONTEXT)
 
     legal_ok = legal.allowed_actions == scenario.expected_legal_actions
     fallback_ok = legal.fallback_action == scenario.expected_fallback_action
@@ -493,7 +497,7 @@ def evaluate_scenario(scenario: AskLightScenario, client: Optional[Any] = None) 
             if scenario.expected_ambiguity is not None:
                 observed_ambig = (
                     rec.semantic_judgments.ambiguity_probability is not None
-                    and rec.semantic_judgments.ambiguity_probability >= 0.65
+                    and rec.semantic_judgments.ambiguity_probability >= 0.5
                 )
                 ambiguity_matched = (observed_ambig == scenario.expected_ambiguity)
                 if not ambiguity_matched:
@@ -575,7 +579,7 @@ def run_ask_light_eval(client: Optional[Any] = None) -> Dict[str, Any]:
             continue
 
         if sc.expected_ambiguity is not None and sj.get("ambiguity_probability") is not None:
-            obs = sj["ambiguity_probability"] >= 0.65
+            obs = sj["ambiguity_probability"] >= 0.5
             exp = sc.expected_ambiguity
             confusion_matrices["ambiguity"]["total"] += 1
             if exp and obs: confusion_matrices["ambiguity"]["tp"] += 1

@@ -1,4 +1,4 @@
-// Synthetic-only local Functions + D1 integration. No remote resources or CPA.
+// Synthetic-only local Functions + D1 integration. No remote resources or AI service.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -32,7 +32,7 @@ const command = (args, cwd) => {
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 try {
   await new Promise((resolve, reject) => { upstream.once("error", reject); upstream.listen(0, "127.0.0.1", resolve); });
-  const project = path.join(temporary, "site"); command([create, project, "--ai", "openai"]);
+  const project = path.join(temporary, "site"); command([create, project, "--ai", "on"]);
   const file = path.join(project, "trip-data.json"), data = JSON.parse(fs.readFileSync(file));
   data.metadata.tripId = "local-ai-fixture"; data.metadata.title = "Synthetic local integration";
   Object.assign(data.trip, { status: "draft", startDate: "2026-10-01", endDate: "2026-10-01", dayCount: 1 });
@@ -43,7 +43,7 @@ try {
     vars: { TRIP_ID: data.metadata.tripId },
     d1_databases: [{ binding: "DB", database_name: "local-ai-fixture", database_id: "00000000-0000-0000-0000-000000000001", migrations_dir: "migrations" }] };
   fs.writeFileSync(path.join(project, "wrangler.jsonc"), JSON.stringify(settings));
-  const secrets = `ACCESS_CODE_HASH=${await digest("synthetic-local-code")}\nSESSION_SECRET=${"synthetic-local-session-".repeat(3)}\nOPENAI_BASE_URL=http://127.0.0.1:${upstream.address().port}/v1\nOPENAI_API_KEY=synthetic-upstream-key\nOPENAI_MODEL=synthetic-tool-model\n`;
+  const secrets = `ACCESS_CODE_HASH=${await digest("synthetic-local-code")}\nSESSION_SECRET=${"synthetic-local-session-".repeat(3)}\nAI_BASE_URL=http://127.0.0.1:${upstream.address().port}/v1\nAI_API_KEY=synthetic-upstream-key\nAI_MODEL=synthetic-tool-model\nAI_API_FORMAT=openai-chat\n`;
   fs.writeFileSync(path.join(project, ".dev.vars"), secrets, { mode: 0o600 });
   command(["scripts/build.mjs"], project);
   command([wrangler, "d1", "migrations", "apply", "local-ai-fixture", "--local"], project);

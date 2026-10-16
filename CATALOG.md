@@ -2,25 +2,25 @@
 
 [中文目录](CATALOG.zh-CN.md)
 
-This catalog is synchronized from the 36 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
+This catalog is synchronized from the 39 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory shows the published v0.2.7 names: 36 packages, 12 renamed and 24 retained. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
+Release snapshot v0.2.8: the inventory lists 39 packages. v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
+
+The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Collection status
 
 | Field | Value |
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
-| Package count | 36 admitted first-party Skills |
-| Current state | 36 packages; v0.2.7 is the current stable release |
-| Stable release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages; previous stable was v0.2.6) |
+| Package count | 39 admitted first-party Skills |
+| Release snapshot | v0.2.8 (39 packages; adds light-decide, light-redirect and light-html-plan) |
+| Previous release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.7 release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) · [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
-
-`v0.2.7` publication and fresh installation are verified; package count remains 36.
+| Evidence | [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md); observed publication and installation facts go into the v0.2.8 release receipt on `main` · previous: [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 
@@ -42,7 +42,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### ask-light
 
-- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval (enhanced with optional TypeSafe Jev System One semantic acceleration).
+- **Purpose:** Act as the Light workflow advisor, navigator, and router: inspect project/workflow state, recommend the next Skill with reasoning, and transition safely after user approval (optionally through `light-decide` for bounded judgments).
 - **When to use:** The next step is unclear; you need project-aware routing, collection navigation, or standalone routing.
 - **Invocation:** User-invoked only; read-only before approval. After approval, model-invoked targets may begin where supported; user-invoked targets follow Host transition policy and render the exact invocation when direct transition is unavailable.
 - **Package:** [skills/productivity/ask-light/](skills/productivity/ask-light)
@@ -96,8 +96,8 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** User asks "explain like I'm 5", "to my boss", or needs a non-technical framing.
 - **Invocation:** Model-invoked (explain on explicit request).
 - **Package:** [skills/knowledge/eli5/](skills/knowledge/eli5)
-- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from upstream `DreambigOu/ELI5` @ `a766623`, via temporary migration fork `LightDevCoder/ELI5`).
-- **Evidence:** [SKILL.md](skills/knowledge/eli5/SKILL.md), [ATTRIBUTION.md](skills/knowledge/eli5/ATTRIBUTION.md).
+- **Status:** Admitted first-party; owner-authored (rewritten from scratch in v0.2.8; replaces the earlier migrated copy).
+- **Evidence:** [SKILL.md](skills/knowledge/eli5/SKILL.md), [audiences.md](skills/knowledge/eli5/references/audiences.md).
 - **Installation path:** `<skills-root>/eli5/`.
 
 ### generic-review
@@ -192,8 +192,8 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### manuscript-ops
 
-- **Purpose:** Route and govern manuscript engineering from notes to multilingual, multi-format deliverables.
-- **When to use:** Manuscript scope, risk, batches, reviews, or formats need governing.
+- **Purpose:** Complete bounded writing with relevant checks, or manage batched/locked manuscript editions.
+- **When to use:** Notes, SOPs and reports need writing/checks, or actual manuscript lifecycle management is required.
 - **Invocation:** Model-invoked; manual entry point is supported.
 - **Package:** [skills/writing/manuscript-ops/](skills/writing/manuscript-ops)
 - **Status:** Admitted first-party; PRESERVE — NO REWRITE.
@@ -237,7 +237,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked (Agent self-evaluation at workflow conclusion); manual entry supported.
 - **Package:** [skills/project/project-retro/](skills/project/project-retro)
 - **Status:** Admitted first-party; PORT & LIGHT WORKFLOW ADAPTATION (Matt Pocock `retro`).
-- **Evidence:** Contract and behavior tests under [skills/project/project-retro/tests/](skills/project/project-retro/tests); [SKILL.md](skills/project/project-retro/SKILL.md), [ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md).
+- **Evidence:** Contract tests under [skills/project/project-retro/tests/](skills/project/project-retro/tests); [SKILL.md](skills/project/project-retro/SKILL.md), [ATTRIBUTION.md](skills/project/project-retro/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/project-retro/`.
 
 ### project-spec
@@ -282,7 +282,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 
 ### release-workflow
 
-- **Purpose:** Publish a completed project — synchronize docs, run quality gates, tag, and release.
+- **Purpose:** Prepare, verify and attest a Skills release, including snapshot, current-state and Release-body semantics.
 - **When to use:** Project has passed `project-review` and is ready to publish.
 - **Invocation:** Model-invoked (or manual entry where supported).
 - **Package:** [skills/project/release-workflow/](skills/project/release-workflow)
@@ -300,15 +300,15 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Evidence:** [SKILL.md](skills/thinking/light-research/SKILL.md), [ATTRIBUTION.md](skills/thinking/light-research/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-research/`.
 
-### resolving-merge-conflicts
+### light-merge-conflicts
 
 - **Purpose:** Resolve an in-progress `git` merge or rebase conflict.
 - **When to use:** Merge/rebase halted with conflicts.
 - **Invocation:** Model-invoked.
-- **Package:** [skills/engineering/resolving-merge-conflicts/](skills/engineering/resolving-merge-conflicts)
-- **Status:** Admitted first-party; PORT — NO REDESIGN.
-- **Evidence:** [SKILL.md](skills/engineering/resolving-merge-conflicts/SKILL.md), [ATTRIBUTION.md](skills/engineering/resolving-merge-conflicts/ATTRIBUTION.md).
-- **Installation path:** `<skills-root>/resolving-merge-conflicts/`.
+- **Package:** [skills/engineering/light-merge-conflicts/](skills/engineering/light-merge-conflicts)
+- **Status:** Admitted first-party; PORT — NO REDESIGN (Matt `resolving-merge-conflicts`; renamed in v0.2.8).
+- **Evidence:** [SKILL.md](skills/engineering/light-merge-conflicts/SKILL.md), [ATTRIBUTION.md](skills/engineering/light-merge-conflicts/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-merge-conflicts/`.
 
 ### review-loop
 
@@ -389,6 +389,36 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Status:** Admitted first-party; PORT — NO REDESIGN.
 - **Evidence:** [SKILL.md](skills/writing/light-writing-for-agents/SKILL.md), [ATTRIBUTION.md](skills/writing/light-writing-for-agents/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-writing-for-agents/`.
+
+### light-decide
+
+- **Purpose:** Answer a bounded judgment inside a workflow (choice, yes/no or score) through an allowed, available typed decision source or the Agent's own judgment, and log it.
+- **When to use:** Another Skill reaches a judgment with a fixed set of legal answers. Never for user decisions, approvals, verdicts or permissions.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/thinking/light-decide/](skills/thinking/light-decide)
+- **Status:** Admitted first-party; new in v0.2.8.
+- **Evidence:** [admission record](docs/evidence/admissions/light-decide/README.md), [references/selection.md](skills/thinking/light-decide/references/selection.md), [references/formats.md](skills/thinking/light-decide/references/formats.md).
+- **Installation path:** `<skills-root>/light-decide/`.
+
+### light-redirect
+
+- **Purpose:** Write a change proposal when the approved plan no longer holds, and record the user's approval or rejection.
+- **When to use:** Work finds a requirement missing or wrong, a review fails on direction, the user changes their mind after approval, or tickets contradict each other or the SPEC.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/project/light-redirect/](skills/project/light-redirect)
+- **Status:** Admitted first-party; new in v0.2.8.
+- **Evidence:** [admission record](docs/evidence/admissions/light-redirect/README.md), [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md), [references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md).
+- **Installation path:** `<skills-root>/light-redirect/`.
+
+### light-html-plan
+
+- **Purpose:** Show where a plan stands as one offline HTML page: what the project is, how far it got, what waits on the user, what changed and what the system judged.
+- **When to use:** The user asks for an HTML view of a plan, or `.scratch/<feature>/plan.html` exists and a stage finished, work stopped, or an acceptance result arrived.
+- **Invocation:** Model-invoked.
+- **Package:** [skills/project/light-html-plan/](skills/project/light-html-plan)
+- **Status:** Admitted first-party; new in v0.2.8; built-in visual system (`assets/`).
+- **Evidence:** [admission record](docs/evidence/admissions/light-html-plan/README.md), [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md), [references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md), [ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md).
+- **Installation path:** `<skills-root>/light-html-plan/`.
 
 ## Source-state boundaries
 

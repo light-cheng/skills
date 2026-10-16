@@ -5,7 +5,7 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 
 # Agent Config
 
-`agent-config` maps verified Agent Host capabilities and user-confirmed profile tiers to a right-sized execution topology, model, and effort. It never guesses model intelligence, never mutates host config silently, and treats single-model as a first-class peer topology. It provides native support for primary coding-agent harnesses (Codex, Claude Code, Antigravity, DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) with safe generic/manual fallback for others. It has no required companion capability, no external Skill, and no external service requirements.
+`agent-config` maps verified Agent Host capabilities and user-confirmed profile tiers to a right-sized execution topology, model, and effort. It provides native support for primary coding-agent harnesses (Codex, Claude Code, Antigravity, DSH, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi) with safe generic/manual fallback for others. It has no required companion capability, no external Skill, and no external service requirements.
 
 ## When to use
 - Before complex multi-agent or partitioned work where topology, model tier, or effort matters.
@@ -16,22 +16,13 @@ description: Map the current Agent Host's evidenced capabilities and confirmed p
 - Bounded task, SPEC, or ticket graph.
 - Evidenced host capabilities and confirmed profile (via companion MCP or session input).
 
-The standalone Python entry `scripts/agent_config.py` accepts canonical
-`--host-json` and `--profile-json` from the companion schemas. Missing, stale,
-or mismatched evidence returns `NEED_INPUT`; a legacy flat Host dictionary or
-unproven Python dataclass is not treated as confirmed evidence.
-`--active-session-json` may supply separately observed, fresh current-session
-model evidence; the canonical Host inventory alone does not identify that model.
-For a fixed-model Host, the entry can identify the current model only when the
-verified inventory contains exactly one model. A single-model Profile on a Host
-that can select among models remains supported, but direct execution requires
-fresh, matching current-session model evidence after any approved selection.
-Unsupported explicit effort values return `NEED_INPUT` instead of being
-silently substituted.
+The script entry `scripts/agent_config.py` takes canonical Host and Profile
+evidence; missing, stale or mismatched evidence returns `NEED_INPUT`. Flags
+and rules: [host-evidence-schema.md](references/host-evidence-schema.md#script-entry).
 
 ## Setup Gate
 - **Explicit setup:** If invoked with setup intent (`agent-config setup`), run setup mode to prepare or repair the runtime environment and Profile (see [`references/setup.md`](references/setup.md)). Setup never plans execution for the current task.
-- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`. Companion health requires compatible MCP transport protocol, Agent Config Companion contract `protocol_version === 1`, all 8 canonical tools present with matching schemas, and reachable responsive process; missing tools or schema mismatch is classified as `stale` or `unsupported`, not healthy. If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
+- **Normal invocation:** `agent-config` is the only mode that plans execution topology and routing for current work. Check setup status via companion `get_setup_status`; health rules are in [companion-contract.md](references/companion-contract.md). If companion is missing/stale, offer setup or continue plan-only. If Profile is missing or stale, offer setup or continue session-local where safely possible. Never silently enter setup, auto-install MCP tools, or mutate host files.
 
 ## Output Contract: AgentConfigResult
 `agent-config` yields a canonical `AgentConfigResult` envelope:
@@ -42,11 +33,11 @@ silently substituted.
 - `execution_config`: `ExecutionConfig | null` (strictly present when `readiness === "READY"`; strictly `null` for all non-ready states).
 
 ## Core flow
-1. **Setup check:** Verify confirmed profile via companion MCP or session input (never guess single-model without profile). Companion health requires compatible MCP transport protocol, Agent Config contract `protocol_version === 1`, all 8 canonical tools, and responsiveness.
+1. **Setup check:** Verify a confirmed profile via a healthy companion or session input. Never guess single-model without a profile.
 2. **Inspect host:** Read active models, supported effort values, and concurrency limits.
 3. **Determine task shape:** Classify as `single-pass` or `decomposed` (never by word count).
 4. **Decomposition gate:** If decomposed and formal tickets do not exist, emit `readiness: NEED_PROJECT_TICKETS`, `handoff: "project-tickets"`, `execution_config: null`, and return the ticketing recommendation to the caller.
-5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`). Optional TypeSafe Jev System One semantic profiling may classify abstract task tiers without vendor coupling.
+5. **Difficulty & tier:** For multi-model, map work difficulty (`routine`..`critical`) to user-confirmed profile tiers (`routine`, `standard`, `high`, `review`). When the difficulty or reasoning need is not stated, the script may ask a typed decision source (see Optional capabilities).
 6. **Resolve effort:** Resolve abstract policies (e.g. `highest-supported`) strictly to verified host-supported strings (e.g. `high`), never emitting unverified literal `max`.
 7. **Select execution mode:**
    - **Case A (Fixed Single-model + Single-pass):** Direct execution in main session, single model, resolved effort, no fake roles.
@@ -66,6 +57,18 @@ silently substituted.
 - An already active `light-implement` caller may resume its authorized bounded item when `readiness === "READY"`.
 - For standalone invocation, recommend explicit `$light-implement` when ready or `$project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
 - Code review converges via `review-loop`; final acceptance belongs to `project-review`.
+
+## Optional capabilities
+
+- **Complexity or reasoning need is not stated** → the task profiler asks
+  through the light-decide script path; when you judge without the script,
+  call `light-decide` with question ids `agent-config/task-complexity` or
+  `agent-config/reasoning-need`. It asks only within the project's
+  `Decision data:` limit (no line means on-device), applies an answer only when the user's policy file
+  calibrates that question, and applies a downgrade only when the score sits
+  clearly inside the lower bin. Unavailable or uncalibrated → keep the
+  deterministic profile. A judgment never confirms a Profile or changes Host
+  configuration.
 
 ## References
 - [`references/setup.md`](references/setup.md) — Setup questionnaire and tier binding flow

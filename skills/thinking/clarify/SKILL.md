@@ -47,7 +47,6 @@ clarify → socratic
 ```
 
 `clarify` composes `socratic`; it does not copy the engine’s state or unknown
-routing contract. Session transitions are specified by
-[session_state.py](scripts/session_state.py), full turn mechanics are in
+routing contract. Full turn mechanics are in
 [WORKFLOW.md](references/WORKFLOW.md), and examples are in
 [EXAMPLES.md](references/EXAMPLES.md).

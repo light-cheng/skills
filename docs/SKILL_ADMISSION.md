@@ -2,7 +2,7 @@
 
 [中文准入契约](SKILL_ADMISSION.zh-CN.md)
 
-This document is the admission and evidence contract for a first-party Skill. It applies before a package is added to `skills/` and whenever a change alters the package's behavior, invocation boundary, dependencies, resources, or ownership claim.
+This document is the admission and evidence contract for a first-party Skill. It applies before a package is added to `skills/` and to any change that [review policy](REVIEW_POLICY.md#how-much-review-a-change-needs) classifies as full review. Everyday changes to an admitted package do not repeat admission.
 
 ## Reuse-before-invention decision
 
@@ -25,9 +25,11 @@ A candidate is eligible only when one of these is true:
 - It is substantially transformed into a distinct, owned capability and includes `ATTRIBUTION.md` with the original repository and path, pinned revision or tag, applicable license or notice, and a precise transformation summary; or
 - It is an **approved upstream Port** — the SPEC (§14/§16) explicitly authorizes it, it carries `ATTRIBUTION.md`, it has a Light-specific integration (handoff/naming/decoupling), and it has **no upstream runtime dependency**. (Approved PORT)
 
+A candidate's name must differ from every Skill name in [external-skill-names.json](reference/external-skill-names.json) and from every package in the private `skills-3rdParty` repository, so all collections can be installed side by side. The owner may keep a clashing name only by recording the reason under `accepted` in that file. `python3 scripts/check_skill_names.py` checks this; it reads the private checkout from `../skills-3rdParty`, or from `LIGHT_PRIVATE_SKILLS_ROOT` when that is set.
+
 Reject an unmodified third-party or upstream copy that is not SPEC-authorized. Point users to the original upstream installation path instead. A modified third-party package that remains principally a third-party capability belongs in `skills-3rdParty` when not SPEC-authorized; it must satisfy that repository's provenance and fork-necessity rules.
 
-**Approved Ports in this repository (SPEC §14):** `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
+**Approved Ports in this repository (SPEC §14):** `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `light-merge-conflicts`, `project-retro` — each is a self-contained first-party package with `ATTRIBUTION.md` and no required install of `mattpocock/skills`. Light-specific changes are limited to runtime decoupling, naming, and handoff wiring; substantive redesign is not permitted.
 
 > **Port ≠ arbitrary copying.** An architecture-level import authorization does not waive attribution, license/notice preservation, or the requirement that the Port be self-contained without upstream runtime installation. Arbitrary upstream snapshots without SPEC authorization remain ineligible.
 

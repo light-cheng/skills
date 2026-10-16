@@ -112,7 +112,7 @@ Use these categories when analyzing session friction and extracting durable impr
   - Missing error traces or hidden server crashes.
   - Secrets leaked or unmasked in debug outputs.
 - **Typical durable improvements:**
-  - Add canonical reference files (e.g. `skills_cli_conventions.md`) documenting verified upstream provenance.
+  - Add canonical reference files documenting verified upstream provenance.
   - Tee development server logs to inspectable log files.
   - Document local environment variables and reproduction commands in reference docs.
 

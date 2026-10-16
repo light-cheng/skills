@@ -39,7 +39,8 @@ question per round.
 ## Boundaries
 
 - No formal SPEC or tickets are produced.
-- No project files are written.
+- No project files are written, except the optional handoff file below after
+  the user confirms it.
 - No automatic chaining to another user-invoked Skill. Check the target's actual
   invocation policy: a model-invoked capability can serve an authorized fact
   request, while a user-invoked entry requires its explicit invocation boundary.
@@ -56,7 +57,10 @@ question per round.
 ## Handoff options
 
 - If the clarified thread now has enough context to become a project stage,
-  recommend `$project-clarify` and stop.
+  recommend `$project-clarify` and stop. When that stage may run in another
+  session, offer to save the confirmed synthesis at
+  `.scratch/<feature>/clarify-handoff.md`; write only after the user confirms.
+  `project-clarify` reads it as prior material.
 - If the user wants a questionnaire for another person, recommend
   `$light-to-questionnaire` and stop.
 - Otherwise the user replies normally until the synthesis is confirmed or the

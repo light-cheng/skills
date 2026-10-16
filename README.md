@@ -4,20 +4,20 @@
 
 # Light Skills — Composable Agent Workflows
 
-`LightDevCoder/skills` provides 36 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
+`LightDevCoder/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) is the current stable release of all 36 first-party Skills. Its immutable [release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) record the scope and verification.
+> **Release snapshot v0.2.8:** this page describes v0.2.8 with 39 Skills, adding `light-decide`, `light-redirect` and `light-html-plan`. The [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records its preparation-time scope and evidence; observed publication and installation facts are recorded in the release receipt on `main`. See the [v0.2.8 release notes](docs/evidence/releases/v0.2.8/RELEASE_NOTES.md) and [v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md).
 
-> **Name migration:** Twelve Skills now use `light-` names; 24 names and the 36-package total are retained. See the [migration guide](docs/MIGRATION-v0.2.7.md) and [release notes](docs/evidence/releases/v0.2.7/RELEASE_NOTES.md). Exact CI, protected tag and actual Codex/Claude project and Codex global installs are verified.
+> **Name migration:** v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts`. In [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7), twelve Skills took `light-` names; see the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Browse by category
 
-[All categories and collection guides](skills/README.md). The 36 source packages are grouped by purpose; invocation modes are unchanged; candidate names follow the migration guide.
+[All categories and collection guides](skills/README.md). The 39 source packages are grouped by purpose; invocation modes are unchanged; candidate names follow the migration guide.
 
-- [project](skills/project/README.md) — 8 skills
+- [project](skills/project/README.md) — 10 skills
 - [engineering](skills/engineering/README.md) — 5 skills
 - [review](skills/review/README.md) — 4 skills
-- [thinking](skills/thinking/README.md) — 5 skills
+- [thinking](skills/thinking/README.md) — 6 skills
 - [knowledge](skills/knowledge/README.md) — 5 skills
 - [writing](skills/writing/README.md) — 3 skills
 - [productivity](skills/productivity/README.md) — 6 skills
@@ -39,7 +39,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Current main / latest (includes updated Agent Config)
+### Current main / latest (install command template)
 
 Install the latest collection from the default branch `main`:
 
@@ -57,16 +57,23 @@ npx skills add LightDevCoder/skills --skill light-research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.7)
+### Pinned v0.2.8 (install command template)
 
-To install the reproducible stable release snapshot, pin the `#v0.2.7` tag:
+```bash
+npx skills add LightDevCoder/skills#v0.2.8
+npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement
+```
+
+### Previous releases
+
+Pin the `#v0.2.7` tag for a reproducible v0.2.7 install:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.7
 npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
 ```
 
-Previous releases (such as `#v0.2.4`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:
+Earlier tags (such as `#v0.2.4`, `#v0.2.2`, `#v0.2.1`, and `#v0.2.0`) remain available for reproducible installs:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.4
@@ -77,7 +84,7 @@ npx skills add LightDevCoder/skills#v0.2.0
 
 > **Note:** The `#v0.2.0` tag remains an immutable, reproducible snapshot of the v0.2.0 release line and is not modified by subsequent work on `main`.
 
-### Target a specific Agent directly
+### Target a specific Agent directly (command template)
 
 ```bash
 npx skills add LightDevCoder/skills --agent claude-code
@@ -93,15 +100,9 @@ cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
 
-### Optional Semantic Acceleration (TypeSafe Jev)
+### Optional decision sources
 
-`ask-light` and `agent-config` support optional semantic acceleration using TypeSafe Jev System One models for fast intent calibration, ambiguity detection, and abstract task profiling:
-
-```bash
-export TYPESAFE_API_KEY="your-api-key"
-```
-
-When configured, Jev enhances candidate choices within deterministic boundaries. When unconfigured or offline, both Skills gracefully fall back to zero-dependency deterministic baselines with no change in fail-closed safety.
+`ask-light` and `agent-config` can hand bounded judgments (choose among legal options, yes/no, a level on a scale) to a typed decision model through `light-decide`. Each project sets how far that question state may travel with a `Decision data:` line in `docs/agents/light-project.md` (`on-device`, `private-network`, `third-party` or `off`). Without the line, only a model on this machine is asked. An answer is used only when your policy file `~/.config/light/decision-policy.json` calibrates that question; otherwise the deterministic baseline stands. When no source is found, `light-decide` can offer setup and waits for your yes.
 
 See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent targets, copy mode, non-interactive CI flags), manual file copying, and verification notes.
 
@@ -112,7 +113,7 @@ $ask-light next        # Suggest the next appropriate Skill from current context
 $project-init          # Bootstrap project workspace and task tracker settings
 $clarify               # Clarify requirements through targeted questions
 $project-clarify       # Clarify project decisions using repository context
-$light-implement             # Execute a ready ticket with verification
+$light-implement       # Execute a ready ticket with verification
 $project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
@@ -148,11 +149,11 @@ project-retro (agent evaluates friction)
 Direct paths for common tasks:
 
 ```text
-clarify                          # Standalone brainstorming and clarification
-implement                        # Implement a well-defined ticket directly
-light-diagnosing-bugs → light-implement      # Diagnose an issue, then apply the fix
-release-workflow                 # Publish an approved release
-$ask-light                       # Route unclear tasks to the right Skill
+clarify                                  # Standalone brainstorming and clarification
+light-implement                          # Implement a well-defined ticket directly
+light-diagnosing-bugs → light-implement  # Diagnose an issue, then apply the fix
+release-workflow                         # Publish an approved release
+$ask-light                               # Route unclear tasks to the right Skill
 ```
 
 See [docs/workflows/](docs/workflows) for full workflow guides.
@@ -174,7 +175,7 @@ See [ask-light](skills/productivity/ask-light/SKILL.md) and [docs/workflows/](do
 | --- | --- | --- |
 | **Project** | `project-init`, `project-clarify`, `project-spec`, `project-tickets`, `light-implement`, `project-review`, `release-workflow` | [CATALOG.md](CATALOG.md) |
 | **Clarification & Research** | `socratic` (engine), `clarify`, `project-clarify`, `decision-map`, `light-research`, `light-prototype`, `light-to-questionnaire` | [clarification-system](docs/workflows/clarification-system.md) |
-| **Execution** | `light-implement`, `agent-config` (primary harnesses: 10 native adapters + fallback), `light-tdd`, `light-diagnosing-bugs`, `resolving-merge-conflicts` | [execution](docs/workflows/execution.md) |
+| **Execution** | `light-implement`, `agent-config` (primary harnesses: 10 native adapters + fallback), `light-tdd`, `light-diagnosing-bugs`, `light-merge-conflicts` | [execution](docs/workflows/execution.md) |
 | **Review** | `review-loop` (engine), `generic-review`, `light-code-review`, `project-review` (acceptance) | [review-system](docs/workflows/review-system.md) |
 | **Specialized** | `manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `eli5`, `recap` | [specialized-workflows](docs/workflows/specialized-workflows.md) |
 | **Productivity** | `light-handoff`, `humanizer`, `light-wizard`, `light-wait-what`, `light-writing-for-agents`, `light-travelpage` | [CATALOG.md](CATALOG.md) |
@@ -191,7 +192,7 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 | Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
-Approved Matt Ports (11 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
+Approved Matt Ports (12 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `light-merge-conflicts`, `project-retro`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.
 
 Adapted origin (2 packages): `humanizer` is a substantially transformed first-party capability based on blader/humanizer (2.11.2) with a thin Chinese adaptation layer informed by op7418/Humanizer-zh; both MIT licenses are preserved in its [ATTRIBUTION.md](skills/writing/humanizer/ATTRIBUTION.md).
 
@@ -206,5 +207,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md)
+- [v0.2.7 Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) (previous release)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

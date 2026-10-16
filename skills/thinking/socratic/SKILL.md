@@ -63,10 +63,6 @@ When no decision or dependency remains, return a concise synthesis for shared-
 understanding confirmation. `confirmed` means done; a correction updates state
 and recomputes the frontier.
 
-The machine-readable helper in [frontier.py](scripts/frontier.py) models
-frontier computation, batch parsing, and next-step classification for tests
-and deterministic checks.
-
 ## Unknown routing
 
 Declare the next capability; the calling wrapper decides whether to pause for

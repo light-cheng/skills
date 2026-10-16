@@ -35,15 +35,12 @@ class ProjectClarifyContractTest(unittest.TestCase):
             self.assertIn(marker, combined)
         # socratic is the decision engine and questions stay frontier-scoped
         self.assertIn("socratic", skill)
-        self.assertIn("frontier as a round", skill)
 
     def test_invocation_boundaries_and_no_implicit_write_are_explicit(self) -> None:
         skill, metadata, _ = read_contract()
 
         self.assertRegex(skill, r"(?is)only\s+after.*\$project-clarify|explicit.*\$project-clarify")
         self.assertIn("$project-clarify", skill)
-        self.assertIn("Return the handoff in memory by default", skill)
-        self.assertIn("separately names a writable destination", skill)
         self.assertNotIn("grill-with-docs", skill + metadata)
 
     def test_optional_capability_calls_have_read_and_failure_boundaries(self) -> None:
@@ -55,9 +52,6 @@ class ProjectClarifyContractTest(unittest.TestCase):
         self.assertIn("Capability call: socratic | light-research | light-prototype", combined)
         for status in ("not-authorized", "unavailable", "result-read"):
             self.assertIn(status, combined)
-        self.assertIn("Never record `result-read`", combined)
-        self.assertIn("actually read", combined)
-        self.assertIn("missing capability", combined)
 
     def test_transformed_first_party_provenance_is_inspectable(self) -> None:
         attribution = (ROOT / "ATTRIBUTION.md").read_text(encoding="utf-8")

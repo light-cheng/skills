@@ -1,4 +1,4 @@
-"""Unit and contract tests for ask-light bounded Jev semantic routing and fail-closed invariants."""
+"""Unit and contract tests for ask-light bounded typed-decision routing and fail-closed invariants."""
 
 from __future__ import annotations
 
@@ -20,13 +20,54 @@ from ask_light_models import (
     LegalActionsResult,
     SemanticJudgments,
 )
-from compact_state_builder import build_compact_jev_state
+from compact_state_builder import build_compact_decision_state
 from state_extractor import (
     CANDIDATE_DESCRIPTIONS,
     compute_legal_actions,
     extract_compact_state_from_dict,
 )
-from semantic_router import route_with_jev
+from semantic_router import route_with_decisions
+from decision_source import read_decision_limit, resolve_source, within_limit
+
+LOCAL_ENV = {"TYPESAFE_BASE_URL": "http://127.0.0.1:8001"}
+NORMALIZED_KEYS = {
+    "question_id", "question", "kind", "options", "answer", "score", "probabilities", "confidence",
+    "provider_confidence", "method", "data", "backend", "calibrated", "applied", "fallback_reason", "final",
+}
+CALIBRATED = {
+    "version": 1,
+    "backends": {
+        "local-decider": {
+            "names": ["127.0.0.1:8001"],
+            "data": "on-device",
+            "questions": {
+                qid: {"min_confidence": 0.6, "calibration": "test fixture"}
+                for qid in ("ask-light/next-action", "ask-light/material-ambiguity", "ask-light/reasoning-escalation")
+            },
+        }
+    },
+}
+
+
+def route_calibrated(*args, **kwargs):
+    kwargs.setdefault("policy", CALIBRATED)
+    return route_with_decisions(*args, **kwargs)
+
+
+def two_actions():
+    return LegalActionsResult(
+        status="RECOMMEND",
+        allowed_actions=["light-implement", "agent-config"],
+        fallback_action="light-implement",
+        candidate_descriptions={"light-implement": "Implement ticket", "agent-config": "Configure agent"},
+    )
+
+
+def choice_client(choice, p):
+    ans = MagicMock(choice=choice, confidence=p, probabilities={choice: p, "light-implement": round(1 - p, 4)} if choice != "light-implement" else {choice: p})
+    client = MagicMock()
+    client.system_one.return_value = MagicMock(choices={"next_action": ans}, nouls={}, scores={})
+    return client
 from advisor import ask_light_semantic_recommend
 
 
@@ -42,7 +83,7 @@ class AskLightSemanticTest(unittest.TestCase):
             resolved_tickets=[".scratch/feat/issues/00.md"],
         )
         legal = compute_legal_actions(state, "What next?")
-        compact = build_compact_jev_state(legal, "What next?")
+        compact = build_compact_decision_state(legal, "What next?")
 
         self.assertEqual(
             set(compact.keys()),
@@ -168,18 +209,20 @@ class AskLightSemanticTest(unittest.TestCase):
         self.assertEqual(res_exec.status, "TRANSITION")
         self.assertEqual(res_exec.allowed_actions, ["light-implement"])
 
-    def test_fallback_when_typesafe_sdk_or_key_unavailable(self) -> None:
-        """Verify seamless fallback to deterministic baseline when API key is missing."""
-        with patch.dict(os.environ, {}, clear=True):
-            state = CompactProjectState(initialized=True, spec_exists=False)
-            legal = compute_legal_actions(state)
-            rec = route_with_jev(legal, "What next?")
-            self.assertTrue(rec.fallback_used)
-            self.assertEqual(rec.primary_skill, "project-clarify")
-            self.assertIn("unavailable", rec.fallback_reason.lower())
+    def test_hosted_endpoint_is_beyond_the_default_limit(self) -> None:
+        """No Decision data line means on-device: the hosted service is never asked."""
+        client = choice_client("agent-config", 0.95)
+        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}, clear=True):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(two_actions(), "What next?", client=client)
+        client.system_one.assert_not_called()
+        self.assertTrue(rec.fallback_used)
+        self.assertEqual(rec.primary_skill, "light-implement")
+        self.assertEqual(rec.decisions[0]["method"], "self-judgment")
+        self.assertEqual(rec.decisions[0]["fallback_reason"], "unavailable")
 
-    def test_mock_jev_system_one_response(self) -> None:
-        """Verify multi-primitive Jev judgments: Ambiguity & Escalation with active consumers."""
+    def test_calibrated_escalation_recommends_agent_config(self) -> None:
+        """Verify calibrated yes/no judgments: Ambiguity & Escalation with active consumers."""
         mock_choice = MagicMock()
         mock_choice.choice = "light-implement"
         mock_choice.confidence = 0.95
@@ -205,13 +248,13 @@ class AskLightSemanticTest(unittest.TestCase):
         state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
         legal = compute_legal_actions(state)
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 # Request contains complexity keywords -> triggers escalation check with consumer
-                rec = route_with_jev(legal, "Should we refactor the consensus engine now?", client=mock_client)
+                rec = route_calibrated(legal, "Should we refactor the consensus engine now?", client=mock_client)
                 self.assertEqual(rec.primary_skill, "light-implement")
                 self.assertFalse(rec.fallback_used)
-                # Hard invariant: Jev output cannot grant TRANSITION authority
+                # Hard invariant: a typed answer cannot grant TRANSITION authority
                 self.assertEqual(rec.status, "RECOMMEND")
                 self.assertTrue(rec.escalated)  # Escalation detected
                 self.assertEqual(rec.alternative_skill, "agent-config")
@@ -219,7 +262,7 @@ class AskLightSemanticTest(unittest.TestCase):
                 self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)  # singleton candidate skips Choice
 
     def test_defense_in_depth_unauthorized_action_rejected(self) -> None:
-        """Verify that if Jev hallucinates or selects an unauthorized action among multiple choices, it is blocked and falls back."""
+        """Verify that if the source selects an unauthorized action among multiple choices, it is blocked and falls back."""
         mock_choice = MagicMock()
         mock_choice.choice = "unauthorized-external-skill"
         mock_choice.confidence = 0.99
@@ -241,15 +284,16 @@ class AskLightSemanticTest(unittest.TestCase):
             candidate_descriptions={"light-implement": "Implement ticket", "agent-config": "Configure agent"},
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "What next?", client=mock_client)
+                rec = route_calibrated(legal, "What next?", client=mock_client)
                 self.assertTrue(rec.fallback_used)
                 self.assertEqual(rec.primary_skill, "light-implement")  # Baseline fallback preserved
-                self.assertIn("unauthorized", rec.fallback_reason.lower())
+                self.assertIn("malformed", rec.fallback_reason)
+                self.assertEqual(rec.decisions[0]["fallback_reason"], "malformed")
 
-    def test_jev_cannot_grant_transition_authority(self) -> None:
-        """Hard Invariant (Section 12): Jev cannot change status to TRANSITION without deterministic authorization."""
+    def test_typed_answer_cannot_grant_transition_authority(self) -> None:
+        """Hard Invariant (Section 12): a typed answer cannot change status to TRANSITION without deterministic authorization."""
         mock_resp = MagicMock()
         mock_resp.choices = {}
         mock_resp.nouls = {}
@@ -262,9 +306,9 @@ class AskLightSemanticTest(unittest.TestCase):
         legal = compute_legal_actions(state, user_request="Advice only, do not run.")
         self.assertEqual(legal.status, "RECOMMEND")
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "Advice only, do not run.", client=mock_client)
+                rec = route_calibrated(legal, "Advice only, do not run.", client=mock_client)
                 self.assertEqual(rec.status, "RECOMMEND")
 
     def test_single_legal_action_causes_zero_choice_request(self) -> None:
@@ -283,14 +327,14 @@ class AskLightSemanticTest(unittest.TestCase):
             fallback_action="light-implement",
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "What next?", client=mock_client)
+                rec = route_calibrated(legal, "What next?", client=mock_client)
                 self.assertNotIn("next_action", rec.semantic_judgments.questions_sent)
                 self.assertEqual(rec.primary_skill, "light-implement")
 
     def test_zero_legal_actions_causes_zero_choice_request(self) -> None:
-        """Section 13: len(allowed_actions) == 0 returns immediately without calling Jev."""
+        """Section 13: len(allowed_actions) == 0 returns immediately without asking any source."""
         mock_client = MagicMock()
 
         legal = LegalActionsResult(
@@ -299,7 +343,7 @@ class AskLightSemanticTest(unittest.TestCase):
             blocked_reason="All tickets blocked",
         )
 
-        rec = route_with_jev(legal, "What next?", client=mock_client)
+        rec = route_calibrated(legal, "What next?", client=mock_client)
         self.assertEqual(rec.status, "BLOCKED")
         mock_client.system_one.assert_not_called()
 
@@ -313,7 +357,7 @@ class AskLightSemanticTest(unittest.TestCase):
         )
 
         with patch.dict(os.environ, {}, clear=True):
-            rec = route_with_jev(legal, "What next?")
+            rec = route_calibrated(legal, "What next?")
             self.assertEqual(rec.primary_skill, "preferred-fallback")
             self.assertTrue(rec.fallback_used)
 
@@ -330,39 +374,216 @@ class AskLightSemanticTest(unittest.TestCase):
         state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
         legal = compute_legal_actions(state)
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "What next?", client=mock_client)
+                rec = route_calibrated(legal, "What next?", client=mock_client)
                 self.assertNotIn("readiness_score", rec.semantic_judgments.questions_sent)
 
-    def test_shadow_evaluation_mode(self) -> None:
-        """Section 37: Shadow mode executes Jev, records judgments, but retains deterministic baseline."""
-        mock_choice = MagicMock()
-        mock_choice.choice = "agent-config"
-        mock_choice.confidence = 0.95
-        mock_choice.probabilities = {"agent-config": 0.95}
-
-        mock_resp = MagicMock()
-        mock_resp.choices = {"next_action": mock_choice}
-        mock_resp.nouls = {}
-        mock_resp.scores = {}
-
-        mock_client = MagicMock()
-        mock_client.system_one.return_value = mock_resp
-
-        legal = LegalActionsResult(
-            status="RECOMMEND",
-            allowed_actions=["light-implement", "agent-config"],
-            fallback_action="light-implement",
-            candidate_descriptions={"light-implement": "Do work", "agent-config": "Config"},
-        )
-
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+    def test_uncalibrated_answer_is_recorded_not_applied(self) -> None:
+        """Without calibration the typed answer is kept on record and the baseline stands."""
+        client = choice_client("agent-config", 0.95)
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "What next?", client=mock_client, shadow_mode=True)
-                self.assertEqual(rec.primary_skill, "light-implement")  # Deterministic baseline preserved
-                self.assertIn("Shadow mode", rec.justification)
-                self.assertEqual(rec.semantic_judgments.action_choice, "agent-config")
+                rec = route_with_decisions(two_actions(), "What next?", client=client, policy={})
+        self.assertEqual(rec.primary_skill, "light-implement")
+        self.assertEqual(rec.semantic_judgments.action_choice, "agent-config")
+        result = rec.decisions[0]
+        self.assertEqual(set(result), NORMALIZED_KEYS)
+        self.assertEqual((result["applied"], result["fallback_reason"], result["final"]), (False, "uncalibrated", "light-implement"))
+        self.assertEqual((result["data"], result["backend"]), ("on-device", "127.0.0.1:8001"))
+
+    def test_calibrated_answer_is_applied_only_at_threshold(self) -> None:
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                applied = route_calibrated(two_actions(), "What next?", client=choice_client("agent-config", 0.9))
+                low = route_calibrated(two_actions(), "What next?", client=choice_client("agent-config", 0.55))
+        self.assertEqual(applied.primary_skill, "agent-config")
+        self.assertEqual(applied.decisions[0]["backend"], "local-decider")
+        self.assertFalse(applied.fallback_used)
+        self.assertEqual(low.primary_skill, "light-implement")
+        self.assertEqual(low.decisions[0]["fallback_reason"], "low-confidence")
+
+    def test_decision_data_off_and_unrecognized_skip_the_source(self) -> None:
+        import tempfile
+        for line, reason in (("Decision data: off", "off"), ("Decision data: cloud-please", "off")):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                (root / "docs/agents").mkdir(parents=True)
+                (root / "docs/agents/light-project.md").write_text(f"# Project\n\n{line}\n", encoding="utf-8")
+                client = choice_client("agent-config", 0.95)
+                with patch.dict(os.environ, LOCAL_ENV, clear=True):
+                    with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                        rec = route_calibrated(two_actions(), "What next?", client=client, project_root=root)
+                client.system_one.assert_not_called()
+                self.assertEqual(rec.decisions[0]["fallback_reason"], reason)
+
+    def test_third_party_limit_allows_the_hosted_service(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "docs/agents").mkdir(parents=True)
+            (root / "docs/agents/light-project.md").write_text("Decision data: third-party\n", encoding="utf-8")
+            client = choice_client("agent-config", 0.95)
+            with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}, clear=True):
+                with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                    rec = route_calibrated(two_actions(), "What next?", client=client, project_root=root)
+            client.system_one.assert_called_once()
+            self.assertEqual(rec.decisions[0]["data"], "third-party")
+
+    def test_source_error_falls_back_without_retry(self) -> None:
+        client = MagicMock()
+        client.system_one.side_effect = TimeoutError("slow")
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
+            with patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(two_actions(), "What next?", client=client)
+        client.system_one.assert_called_once()
+        self.assertEqual(rec.primary_skill, "light-implement")
+        self.assertEqual(rec.decisions[0]["fallback_reason"], "timeout")
+
+    def _project(self, tmp, text):
+        root = Path(tmp)
+        (root / "docs/agents").mkdir(parents=True)
+        (root / "docs/agents/light-project.md").write_text(text, encoding="utf-8")
+        return root
+
+    def test_decision_data_variants_never_lift_off(self) -> None:
+        import tempfile
+        cases = {
+            "Decision data: off.\n": ("off", False),
+            "Decision data: `off` (no model)\n": ("off", False),
+            "- **Decision data:** off\n": ("off", True),
+            "decision data: OFF\n": ("off", True),
+            "| Decision data | off |\n": ("off", True),
+            "Decision data: third party\n": ("off", False),
+            "- Decision data: private-network\n": ("private-network", True),
+            "```\nDecision data: third-party\n```\n": ("on-device", True),
+            "- Constraints: keep decision data local\n- Decision data: third-party\n": ("third-party", True),
+            "## Decision data\n\nSee below.\n": ("off", False),
+            "## Decision data\n\noff\n": ("off", True),
+            "## Decision data\n\n- Decision data: private-network\n": ("private-network", True),
+            "Decision data \u2014 off\n": ("off", True),
+            "Decision data \u2013 off\n": ("off", True),
+            "| Decision data | Value |\n| --- | --- |\n| x | y |\n": ("on-device", True),
+            "| Decision data | Value |\n|---|---|\n": ("on-device", True),
+            "- Decision data: on-device (default)\n": ("off", False),
+            "## Decision data: off\n": ("off", True),
+            "1. Decision data: off\n": ("off", True),
+            "> Decision data: off\n": ("off", True),
+            "Decision data = off\n": ("off", True),
+            "Decision data: third-party\nDecision data: off\n": ("off", True),
+            "Decision data: third-party\nDecision data: on-device\n": ("on-device", True),
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as tmp:
+                self.assertEqual(read_decision_limit(self._project(tmp, text)), expected)
+
+    def test_limit_is_found_from_a_subdirectory_or_cwd(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = self._project(tmp, "Decision data: off\n")
+            (root / ".git").mkdir()
+            sub = root / "src" / "pkg"
+            sub.mkdir(parents=True)
+            self.assertEqual(read_decision_limit(sub), ("off", True))
+            cwd = os.getcwd()
+            try:
+                os.chdir(sub)
+                self.assertEqual(read_decision_limit(None), ("off", True))
+            finally:
+                os.chdir(cwd)
+
+    def test_backend_name_drops_credentials_and_bad_policy_is_uncalibrated(self) -> None:
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://user:token@127.0.0.1:8001/v1"}, clear=True):
+            self.assertEqual(resolve_source(None, True, {}).backend, "127.0.0.1:8001")
+        bad_policies = (
+            {"backends": [{"names": ["127.0.0.1:8001"]}]},
+            {"backends": {"x": {"names": "127.0.0.1:8001x", "questions": {"ask-light/next-action": {"min_confidence": 0.1, "calibration": "c"}}}}},
+            {"backends": {"x": {"names": ["127.0.0.1:8001"], "questions": ["ask-light/next-action"]}}},
+            {"backends": {"x": {"names": ["127.0.0.1:8001"], "questions": {"ask-light/next-action": {"min_confidence": True, "calibration": "c"}}}}},
+        )
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
+            for policy in bad_policies:
+                with self.subTest(policy=policy):
+                    self.assertIsNone(resolve_source(None, True, policy).min_confidence("ask-light/next-action"))
+
+    def test_malformed_answers_mark_fallback_and_unapplied_choice_keeps_baseline_numbers(self) -> None:
+        legal = LegalActionsResult(
+            status="RECOMMEND", allowed_actions=["light-implement", "project-clarify"], fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Implement", "project-clarify": "Clarify"},
+        )
+        empty = MagicMock()
+        empty.system_one.return_value = MagicMock(choices={}, nouls={}, scores={})
+        with patch.dict(os.environ, LOCAL_ENV, clear=True), patch("semantic_router.TYPESAFE_AVAILABLE", True):
+            rec = route_calibrated(legal, "What next?", client=empty)
+            self.assertTrue(rec.fallback_used)
+            self.assertIn("malformed", rec.fallback_reason)
+            rec = route_with_decisions(legal, "What next?", client=choice_client("project-clarify", 0.9), policy={})
+        self.assertEqual(rec.primary_skill, "light-implement")
+        self.assertIsNone(rec.confidence)
+        self.assertEqual(rec.probabilities, {"light-implement": 1.0})
+        self.assertEqual(rec.semantic_judgments.action_probabilities["project-clarify"], 0.9)
+
+    def test_malformed_choice_and_yes_no_replies_fall_back(self) -> None:
+        legal = LegalActionsResult(
+            status="RECOMMEND", allowed_actions=["light-implement", "project-clarify"], fallback_action="light-implement",
+            candidate_descriptions={"light-implement": "Implement", "project-clarify": "Clarify"},
+        )
+        bad_choices = (None, {"project-clarify": "high", "light-implement": 0.1}, {"project-clarify": 0.9},
+                       {"project-clarify": 0.9, "light-implement": 0.9}, {"project-clarify": float("nan"), "light-implement": 0.1})
+        for probs in bad_choices:
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(
+                choices={"next_action": MagicMock(choice="project-clarify", confidence=0.9, probabilities=probs)},
+                nouls={}, scores={})
+            with self.subTest(probs=probs), patch.dict(os.environ, LOCAL_ENV, clear=True), \
+                    patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(legal, "What next?", client=client)
+                self.assertEqual(rec.primary_skill, "light-implement")
+                self.assertEqual(rec.decisions[0]["fallback_reason"], "malformed")
+        for value in (True, 7, -0.1, float("nan")):
+            client = MagicMock()
+            client.system_one.return_value = MagicMock(
+                choices={"next_action": MagicMock(choice="light-implement", confidence=0.6,
+                                                  probabilities={"light-implement": 0.6, "project-clarify": 0.4})},
+                nouls={"has_material_ambiguity": MagicMock(noul=value)}, scores={})
+            with self.subTest(noul=value), patch.dict(os.environ, LOCAL_ENV, clear=True), \
+                    patch("semantic_router.TYPESAFE_AVAILABLE", True):
+                rec = route_calibrated(legal, "What next?", client=client)
+                self.assertEqual(rec.primary_skill, "light-implement")
+                amb = next(d for d in rec.decisions if d["question_id"] == "ask-light/material-ambiguity")
+                self.assertEqual(amb["fallback_reason"], "malformed")
+
+    def test_sdk_timeout_class_counts_as_timeout_and_lan_server_needs_no_key(self) -> None:
+        class APITimeoutError(Exception):
+            pass
+        client = MagicMock()
+        client.system_one.side_effect = APITimeoutError("slow")
+        with patch.dict(os.environ, LOCAL_ENV, clear=True), patch("semantic_router.TYPESAFE_AVAILABLE", True):
+            rec = route_calibrated(two_actions(), "What next?", client=client)
+        self.assertEqual(rec.decisions[0]["fallback_reason"], "timeout")
+        lan = {"backends": {"lan": {"names": ["192.168.1.20:8001"], "data": "private-network"}}}
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://192.168.1.20:8001"}, clear=True):
+            source = resolve_source(None, True, lan)
+        self.assertIsNotNone(source.api_key)
+
+    def test_destination_and_limit_rules(self) -> None:
+        self.assertEqual(read_decision_limit(None), ("on-device", True))
+        self.assertTrue(within_limit("on-device", "private-network"))
+        self.assertFalse(within_limit("private-network", "on-device"))
+        self.assertFalse(within_limit("on-device", "off"))
+        # A private address is the user's own network only when the policy names it so.
+        for url, dest in (("http://localhost:8001", "on-device"), ("http://192.168.1.20:8001", "third-party"),
+                          ("https://decider.example.com", "third-party")):
+            with patch.dict(os.environ, {"TYPESAFE_BASE_URL": url}, clear=True):
+                self.assertEqual(resolve_source(None, True, {}).data, dest)
+        lan = {"backends": {"lan": {"names": ["192.168.1.20:8001"], "data": "private-network"}}}
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://192.168.1.20:8001"}, clear=True):
+            self.assertEqual(resolve_source(None, True, lan).data, "private-network")
+        # A policy entry that declares a farther destination wins over the address.
+        policy = {"backends": {"tunnel": {"names": ["localhost:9000"], "data": "third-party"}}}
+        with patch.dict(os.environ, {"TYPESAFE_BASE_URL": "http://localhost:9000"}, clear=True):
+            source = resolve_source(None, True, policy)
+        self.assertEqual((source.data, source.usable, source.reason), ("third-party", False, "unavailable"))
 
     def test_advisor_end_to_end_from_dict(self) -> None:
         """Verify ask_light_semantic_recommend accepting standard evidence dict."""
@@ -372,20 +593,20 @@ class AskLightSemanticTest(unittest.TestCase):
             "tickets": {"exists": True, "ready": [{"path": "01.md"}], "blocked": [], "resolved": []},
             "review": {"exists": False},
         }
-        rec = ask_light_semantic_recommend(evidence, user_request="下一步做什么？", use_jev=False)
+        rec = ask_light_semantic_recommend(evidence, user_request="下一步做什么？", use_typed_decisions=False)
         self.assertEqual(rec.status, "RECOMMEND")
         self.assertEqual(rec.primary_skill, "light-implement")
         self.assertEqual(rec.target_item, "01.md")
 
     def test_query_planner_zero_questions_on_plain_query_and_single_action(self) -> None:
-        """P1 (Section 13-15): Standard query with single legal action skips Jev API calls completely."""
+        """P1 (Section 13-15): Standard query with single legal action skips the decision source completely."""
         state = CompactProjectState(initialized=True, spec_exists=True, spec_active=True, tickets_exist=True, ready_tickets=["01.md"])
         legal = compute_legal_actions(state)
 
         mock_client = MagicMock()
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "What should I do next?", client=mock_client)
+                rec = route_calibrated(legal, "What should I do next?", client=mock_client)
                 self.assertEqual(rec.primary_skill, "light-implement")
                 self.assertEqual(rec.confidence, 1.0)
                 # Query planner emitted 0 questions -> system_one was never called!
@@ -403,18 +624,18 @@ class AskLightSemanticTest(unittest.TestCase):
         mock_client = MagicMock()
         mock_client.system_one.return_value = mock_resp
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec = route_with_jev(legal, "Maybe we should redesign auth or database first?", client=mock_client)
+                rec = route_calibrated(legal, "Maybe we should redesign auth or database first?", client=mock_client)
                 self.assertIn("has_material_ambiguity", rec.semantic_judgments.questions_sent)
                 self.assertEqual(rec.alternative_skill, "project-clarify")
 
         # Invariant (Section 17): Unambiguous query on project-clarify sends 0 questions
         state_no_spec = CompactProjectState(initialized=True, spec_exists=False)
         legal_clarify = compute_legal_actions(state_no_spec)
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
-                rec2 = route_with_jev(legal_clarify, "What is the next step?", client=mock_client)
+                rec2 = route_calibrated(legal_clarify, "What is the next step?", client=mock_client)
                 self.assertEqual(rec2.primary_skill, "project-clarify")
                 self.assertEqual(rec2.semantic_judgments.questions_sent, [])
 
@@ -428,17 +649,17 @@ class AskLightSemanticTest(unittest.TestCase):
             nouls={"wants_immediate_execution": MagicMock(noul=0.15)}
         )
 
-        with patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
+        with patch.dict(os.environ, LOCAL_ENV, clear=True):
             with patch("semantic_router.TYPESAFE_AVAILABLE", True):
                 # 1. "Don't implement anything; just tell me what comes next."
                 legal_neg = compute_legal_actions(state, user_request="Don't implement anything; just tell me what comes next.")
-                rec_neg = route_with_jev(legal_neg, "Don't implement anything; just tell me what comes next.", client=mock_client)
+                rec_neg = route_calibrated(legal_neg, "Don't implement anything; just tell me what comes next.", client=mock_client)
                 self.assertEqual(rec_neg.status, "RECOMMEND")
                 self.assertEqual(rec_neg.primary_skill, "light-implement")
 
                 # 2. "Should I implement now?"
                 legal_hes = compute_legal_actions(state, user_request="Should I implement now?")
-                rec_hes = route_with_jev(legal_hes, "Should I implement now?", client=mock_client)
+                rec_hes = route_calibrated(legal_hes, "Should I implement now?", client=mock_client)
                 self.assertEqual(rec_hes.status, "RECOMMEND")  # Hesitant inquiry cannot grant transition
 
                 # 3. "Implement now."

@@ -19,5 +19,7 @@
 - **[kanban-worker](kanban-worker/SKILL.md)** — 在定时运行中认领并执行一张看板任务，优先处理已有修改意见或进行中的工作。
 - **[release-workflow](release-workflow/SKILL.md)** — 负责项目的受控发布，涵盖文档同步、质量检查、标签打标和正式发布。
 - **[project-retro](project-retro/SKILL.md)** — 在项目或长会话结束后进行复盘，分析环境阻力、自动化检查、导航效率与命令开销，提出具体改进建议。
+- **[light-redirect](light-redirect/SKILL.md)** — 已批准的计划不再成立时写改动提案，并记录你是否批准。
+- **[light-html-plan](light-html-plan/SKILL.md)** — 用一个离线 HTML 页面讲清计划做到哪一步，工作推进时刷新它。
 
 [全部分类](../README.zh-CN.md) · [完整目录](../../CATALOG.zh-CN.md)

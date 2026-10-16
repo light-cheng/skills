@@ -1,6 +1,6 @@
 ---
 name: light-tdd
-description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
+description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests. Light Skills version of mattpocock/skills `tdd`; install one or the other, not both.
 ---
 
 # Test-Driven Development

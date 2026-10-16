@@ -10,7 +10,7 @@
 - [`agent-config`](../../../skills/engineering/agent-config/SKILL.md) — model-invoked Profile 驱动跨 Harness 执行配置器
 - [`light-tdd`](../../../skills/engineering/light-tdd/SKILL.md) — model-invoked 测试驱动环
 - [`light-diagnosing-bugs`](../../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked 诊断环
-- [`resolving-merge-conflicts`](../../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked 合并冲突解决
+- [`light-merge-conflicts`](../../../skills/engineering/light-merge-conflicts/SKILL.md) — model-invoked 合并冲突解决
 
 均为第一方自包含包，运行时不要求 `mattpocock/skills` 或 `sol-advisor`。
 
@@ -22,7 +22,7 @@
 | 需配置模型、effort 或执行拓扑 | [`agent-config`](../../../skills/engineering/agent-config/SKILL.md) — model-invoked | 需：明确的任务描述 + 验收标准 + 当前宿主环境信息 + 确认的 Profile；判断环境模式与任务复杂度，在多种模式下精准适配模型层级与推理强度 | 产出可落地的执行计划，不直接执行；执行者依计划实施 |
 | 代码功能应测试先行 | [`light-tdd`](../../../skills/engineering/light-tdd/SKILL.md) — model-invoked | `red → green → refactor` 测试先行循环 | 测试用例 + 功能代码实现 |
 | 难 bug / 回退 | [`light-diagnosing-bugs`](../../../skills/engineering/light-diagnosing-bugs/SKILL.md) — model-invoked | 建立明确的 pass/fail 判定 → 复现 → 提出假设 → 打印排查 → 修复 → 清理 | 带诊断过程与复现证据的修复代码 |
-| 合并/变基冲突 | [`resolving-merge-conflicts`](../../../skills/engineering/resolving-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引理清冲突并逐步解决 | 干净的工作区，准备提交验证 |
+| 合并/变基冲突 | [`light-merge-conflicts`](../../../skills/engineering/light-merge-conflicts/SKILL.md) — model-invoked | 按 git 指引理清冲突并逐步解决 | 干净的工作区，准备提交验证 |
 
 ## 双仓架构：Skill 与 Companion
 

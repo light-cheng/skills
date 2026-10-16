@@ -54,9 +54,10 @@ Project clarification handoff
 - Status: ready-for-next-stage | waiting-for-user | blocked
 ```
 
-Return the handoff in memory by default. Write it to a file only when the user
-separately names a writable destination and confirms the write. Then stop; the
-user chooses the next invocation.
+Return the handoff in memory by default. When the next stage may run in
+another session, offer to save it at `.scratch/<feature>/clarify-handoff.md`
+(or a destination the user names). Write only after the user confirms. Then
+stop; the user chooses the next invocation.
 
 ## Composition and upgrade
 
@@ -68,5 +69,4 @@ If the effort is large, multi-session, or has many dependent decisions,
 recommend `$decision-map` and stop. The full contract is in
 [project-clarification-contract.md](references/project-clarification-contract.md);
 workflow and examples are in [WORKFLOW.md](references/WORKFLOW.md) and
-[EXAMPLES.md](references/EXAMPLES.md). Session transitions are specified by
-[session_state.py](scripts/session_state.py).
+[EXAMPLES.md](references/EXAMPLES.md).

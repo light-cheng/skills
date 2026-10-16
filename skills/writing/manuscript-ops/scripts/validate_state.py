@@ -9,6 +9,7 @@ import hashlib
 import json
 import re
 import subprocess
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -17,10 +18,15 @@ from manuscript_ops_core import (
     ContractError,
     DIMENSIONS,
     HARD_TRIGGERS,
+    LEGACY_ROUTING_POLICY,
+    ROUTING_POLICY,
+    REVIEW_AXIS_IDS,
     dump_json,
     ensure_within_root,
     load_json,
     parse_timestamp,
+    resolve_semantic_route,
+    routing_review_axes,
     select_route,
     sha256_file,
     utc_now,
@@ -57,17 +63,6 @@ ALLOWED_CAPABILITIES = {"supported", "conditional", "unsupported", "not_applicab
 OPERATION_KEYS = {"read", "edit", "generate", "render", "visual_qa", "round_trip"}
 TIER1_IDS = {"txt", "markdown", "docx", "pdf", "html", "epub", "pptx"}
 SOURCE_ADAPTER_IDS = {"web", "email", "image-scan", "audio", "video", "transcript"}
-REVIEW_AXIS_IDS = {
-    "intent-structure",
-    "factual-sources",
-    "terminology-localization",
-    "reader-accessibility",
-    "safety-privacy-legal",
-    "format-layout",
-    "images",
-    "reproducibility-recovery",
-    "compatibility-round-trip",
-}
 CORE_PROJECT_REVIEW_AXES = REVIEW_AXIS_IDS - {"images"}
 GATE_ALIASES = {
     "brief-approved": "current-brief",
@@ -180,6 +175,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--check-jj", action="store_true")
+    parser.add_argument("--check-vcs", action="store_true", help="Check the declared Project version backend")
     parser.add_argument("--now", help="RFC 3339 UTC timestamp for reproducible validation")
     parser.add_argument("--format", choices=("json", "text"), default="json")
     return parser.parse_args()
@@ -746,7 +742,30 @@ def validate_routing(
             report.error("ROUTING_DERIVED_TRIGGER", "scale score 2 requires large_volume=true")
         if normalized_dimensions["risk"]["score"] == 2 and not hard_triggers["high_risk_facts"]:
             report.error("ROUTING_DERIVED_TRIGGER", "risk score 2 requires high_risk_facts=true")
-        total, route, _, _ = select_route(normalized_dimensions, hard_triggers, unknowns)
+        policy = snapshot.get("routing_policy", LEGACY_ROUTING_POLICY)
+        if policy not in {LEGACY_ROUTING_POLICY, ROUTING_POLICY}:
+            report.error("ROUTING_POLICY", f"unsupported routing policy: {policy!r}")
+            return
+        total, route, _, _ = select_route(normalized_dimensions, hard_triggers, unknowns, policy=policy)
+        if policy == ROUTING_POLICY:
+            route, judgment = resolve_semantic_route(
+                route, normalized_dimensions, hard_triggers,
+                snapshot.get("semantic_result"), snapshot.get("semantic_policy"),
+            )
+            if snapshot.get("semantic_judgment") != judgment:
+                report.error("ROUTING_SEMANTIC", "stored judgment differs from the bounded decision replay")
+            if snapshot.get("needs_initialization") is not (route == "Project"):
+                report.error("ROUTING_INITIALIZATION", "initialization is required only for Project")
+            axes = snapshot.get("required_review_axes")
+            if not isinstance(axes, list) or any(not isinstance(axis, str) or axis not in REVIEW_AXIS_IDS for axis in axes):
+                report.error("ROUTING_REVIEW_AXES", "required_review_axes must name manuscript axes")
+            else:
+                try:
+                    expected_axes = routing_review_axes(route, normalized_dimensions, hard_triggers, snapshot.get("task", {}))
+                    if axes != expected_axes:
+                        report.error("ROUTING_REVIEW_AXES", f"required_review_axes must match the task's mandatory checks: {expected_axes}")
+                except ContractError as exc:
+                    report.error("ROUTING_TASK", str(exc))
         if snapshot.get("total") != total:
             report.error("ROUTING_TOTAL", f"stored total does not match recomputed total {total}")
         if snapshot.get("route") != route:
@@ -1768,6 +1787,34 @@ def validate_review_report(
     return validate_project_review_report(path_value, report, _visited)
 
 
+def check_document_source_identity(source_id: str, adapter_id: str, path: Path, report: Report) -> None:
+    """Check intake identity only; source reading and content acceptance are separate."""
+    try:
+        path = ensure_within_root(report.root, path)
+        if not path.is_file():
+            return  # Normal hash/path validation reports the missing source.
+        with path.open("rb") as handle:
+            prefix = handle.read(1024)
+        ole = bytes.fromhex("d0cf11e0a1b11ae1")
+        valid = True
+        containers = {"docx": "word/document.xml", "pptx": "ppt/presentation.xml", "xlsx": "xl/workbook.xml"}
+        if adapter_id == "legacy-doc":
+            valid = prefix.startswith(ole)
+        elif adapter_id == "pdf":
+            valid = prefix.startswith(b"%PDF-")
+        elif adapter_id in containers:
+            with zipfile.ZipFile(path) as archive:
+                valid = containers[adapter_id] in archive.namelist()
+        elif adapter_id in {"txt", "markdown"}:
+            valid = not prefix.startswith((ole, b"PK\x03\x04", b"%PDF-"))
+        elif adapter_id == "rtf":
+            valid = prefix.lstrip().startswith(b"{\\rtf")
+        if not valid:
+            report.error("SOURCE_FORMAT", f"{source_id} bytes do not match declared {adapter_id} intake identity")
+    except (ContractError, OSError, zipfile.BadZipFile) as exc:
+        report.error("SOURCE_FORMAT", f"{source_id}: {exc}")
+
+
 def validate_source_register(
     path_value: Any,
     registry: dict[str, Any],
@@ -1798,9 +1845,28 @@ def validate_source_register(
         "derived_artifacts_json",
     }
     adapters = {
+        item["id"]: {
+            **item,
+            "required_metadata": ["path", "sha256"],
+            "derivatives": ["converted_document", "extracted_text", "page_text_extract", "processed_image"],
+        }
+        for item in registry.get("adapters", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+        and item.get("extensions")
+    }
+    adapters.update({
         item["id"]: item
         for item in registry.get("source_adapters", [])
         if isinstance(item, dict) and isinstance(item.get("id"), str)
+    })
+    # Legacy Word is an intake identity, not a generation adapter or a DOCX alias.
+    adapters["legacy-doc"] = {
+        "extensions": [".doc"], "required_metadata": ["path", "sha256"],
+        "derivatives": ["converted_document", "extracted_text", "processed_image"],
+    }
+    adapters["json-text-extract"] = {
+        "extensions": [".json"], "required_metadata": ["path", "sha256"],
+        "derivatives": [],
     }
     with path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, delimiter="\t")
@@ -1817,6 +1883,40 @@ def validate_source_register(
             seen.add(source_id)
             row_adapters[source_id] = row["adapter_id"]
 
+        def artifact_key(path_value: Any, digest: Any) -> tuple[str, str] | None:
+            if not isinstance(path_value, str) or not isinstance(digest, str):
+                return None
+            try:
+                local = ensure_within_root(report.root, Path(path_value))
+            except ContractError:
+                return None
+            return (str(local), digest)
+
+        row_by_id = {row["source_id"].strip(): row for row in rows}
+        declared_derivatives: dict[tuple[str, str], list[dict[str, str]]] = {}
+        declared_extractions: dict[tuple[str, str], list[dict[str, str]]] = {}
+        for parent in rows:
+            try:
+                artifacts = json.loads(parent["derived_artifacts_json"] or "[]")
+            except json.JSONDecodeError:
+                continue  # The parent's normal metadata validation reports this.
+            if not isinstance(artifacts, list):
+                continue
+            for artifact in artifacts:
+                if not isinstance(artifact, dict):
+                    continue
+                parent_ids = artifact.get("parent_source_ids")
+                if not isinstance(parent_ids, list) or parent["source_id"].strip() not in parent_ids:
+                    continue
+                key = artifact_key(artifact.get("path"), artifact.get("sha256"))
+                if key is None:
+                    continue
+                parents = [row_by_id[source_id] for source_id in parent_ids
+                           if isinstance(source_id, str) and source_id in row_by_id]
+                declared_derivatives.setdefault(key, []).extend(parents)
+                if artifact.get("kind") in ("page_text_extract", "extracted_text"):
+                    declared_extractions.setdefault(key, []).extend(parents)
+
         for line_number, row in enumerate(rows, start=2):
             source_id = row["source_id"].strip()
             if row["class"] not in {"authoritative", "reference-only", "incoming-draft"}:
@@ -1826,6 +1926,27 @@ def validate_source_register(
             if adapter is None:
                 report.error("SOURCE_ADAPTER", f"{source_id} has unknown adapter {adapter_id!r}")
                 continue
+            if adapter_id == "json-text-extract":
+                parents = [
+                    parent for parent in declared_extractions.get(artifact_key(row["path_or_url"], row["sha256"]), [])
+                    if parent["source_id"] != source_id and parent["adapter_id"] != adapter_id
+                ]
+                if not parents:
+                    report.error("SOURCE_LINEAGE", f"{source_id} JSON extraction requires a declared, hash-bound source parent")
+                try:
+                    extracted = load_json(ensure_within_root(report.root, Path(row["path_or_url"])))
+                    if not isinstance(extracted, (dict, list)):
+                        report.error("SOURCE_FORMAT", f"{source_id} extraction must contain a JSON object or array")
+                except ContractError as exc:
+                    report.error("SOURCE_FORMAT", str(exc))
+            if adapter.get("extensions"):
+                local_source = row["path_or_url"]
+                if re.match(r"^[a-z]+://", local_source, re.I):
+                    report.error("SOURCE_FORMAT", f"{source_id} document requires a hash-bound local snapshot")
+                elif Path(local_source).suffix.lower() not in adapter["extensions"]:
+                    report.error("SOURCE_FORMAT", f"{source_id} file suffix does not match {adapter_id}")
+                else:
+                    check_document_source_identity(source_id, adapter_id, Path(local_source), report)
             for field in (
                 "path_or_url",
                 "publisher_or_owner",
@@ -1847,6 +1968,17 @@ def validate_source_register(
                 for token in row["exclusions"].split(",")
                 if token.strip()
             }
+            parents = declared_derivatives.get(artifact_key(row["path_or_url"], row["sha256"]), [])
+            authority_rank = {"incoming-draft": 0, "reference-only": 1, "authoritative": 2}
+            for parent in parents:
+                if parent["source_id"].strip() == source_id:
+                    continue
+                if authority_rank.get(row["class"], -1) > authority_rank.get(parent["class"], -1):
+                    report.error("SOURCE_CLASS", f"{source_id} derivative cannot promote parent {parent['source_id']}'s authority")
+                parent_uses = {token.strip().lower() for token in parent["permitted_use"].split(",") if token.strip()}
+                parent_exclusions = {token.strip().lower() for token in parent["exclusions"].split(",") if token.strip() and token.strip().lower() != "none"}
+                if not permitted_tokens.issubset(parent_uses) or not parent_exclusions.issubset(excluded_tokens):
+                    report.error("SOURCE_POLICY", f"{source_id} derivative must retain parent {parent['source_id']}'s permitted uses and exclusions")
             if (
                 not permitted_tokens
                 or "none" in permitted_tokens
@@ -3916,6 +4048,24 @@ def run_jj_bytes(
         return None
 
 
+def validate_version_control(
+    profile: dict[str, Any],
+    receipts: list[dict[str, Any]],
+    report: Report,
+) -> None:
+    if profile.get("route") != "Project":
+        report.ok("VCS_NOT_APPLICABLE", "lightweight writing has no version gate")
+        return
+    system = profile.get("version_control", {}).get("system")
+    if system == "jj":
+        validate_jj(profile, receipts, report)
+    else:
+        report.error(
+            "VCS_GATES_UNSUPPORTED",
+            f"no receipt-bound gate verifier for declared backend {system!r}; do not substitute Jujutsu checks or snapshot PASS",
+        )
+
+
 def validate_jj(
     profile: dict[str, Any],
     receipt_index: dict[str, Any],
@@ -4404,8 +4554,8 @@ def main() -> int:
         source_result,
         report,
     )
-    if args.check_jj and profile:
-        validate_jj(profile, receipts, report)
+    if (args.check_jj or args.check_vcs) and profile:
+        validate_version_control(profile, receipts, report)
 
     result = report.as_dict()
     print(render_text(result) if args.format == "text" else dump_json(result))

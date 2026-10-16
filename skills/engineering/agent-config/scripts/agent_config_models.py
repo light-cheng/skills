@@ -67,7 +67,7 @@ class DimensionProvenance:
     dimension: str  # "complexity", "reasoning", "tier"
     value: str
     confidence: Optional[float] = None
-    source: str = "deterministic-fallback"  # "explicit-user", "profile-policy", "jev", "deterministic-fallback", "host-bound"
+    source: str = "deterministic-fallback"  # "explicit-user", "profile-policy", "typed-decision", "deterministic-fallback", "host-bound"
     fallback_used: bool = False
     fallback_reason: Optional[str] = None
 
@@ -91,6 +91,7 @@ class AbstractTaskProfile:
     cost_sensitivity: str = "medium"  # "low", "medium", "high"
     recommended_tier: str = "standard"  # "routine", "standard", "high", "review"
     dimension_provenance: Dict[str, DimensionProvenance] = field(default_factory=dict)
+    decisions: List[Dict[str, Any]] = field(default_factory=list)  # light-decide normalized results
 
     def model_dump(self) -> Dict[str, Any]:
         return asdict(self)
@@ -127,7 +128,7 @@ class AgentConfigResult:
     execution_config: Optional[ExecutionConfig] = None
     justification: str = ""
     abstract_profile: Optional[AbstractTaskProfile] = None
-    jev_confidence: Optional[float] = None
+    decision_confidence: Optional[float] = None
     fallback_used: bool = False
     fallback_reason: Optional[str] = None
 

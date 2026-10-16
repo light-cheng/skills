@@ -20,11 +20,10 @@ FIXTURES = ROOT / "tests" / "fixtures"
 
 
 def find_companion_repo() -> Path | None:
-    candidates = [
-        Path(os.environ.get("AGENT_CONFIG_COMPANION_PATH", "")),
-        Path(__file__).resolve().parent.parent.parent.parent.parent / "agent-config",
-        Path("/Users/light/Documents/Projects/Configurations/agent-config"),
-    ]
+    parents = Path(__file__).resolve().parents
+    candidates = [Path(os.environ.get("AGENT_CONFIG_COMPANION_PATH", ""))]
+    if len(parents) > 5:
+        candidates.append(parents[5] / "agent-config")  # sibling checkout of this repository
     for c in candidates:
         if c.is_dir() and (c / "schemas").is_dir():
             return c
@@ -249,7 +248,7 @@ class ProductionRoutingMatrixTest(unittest.TestCase):
         self.fixed = fresh_host("case-c-fixed-single-pass.json", workspace)
 
     def route(self, host: dict, profile: dict | None, **task: object):
-        return agent_config_recommend(host, task, profile=profile, use_jev=False)
+        return agent_config_recommend(host, task, profile=profile, use_typed_decisions=False)
 
     def test_routine_uses_confirmed_tier(self) -> None:
         result = self.route(self.tiered, self.multi, difficulty="routine", difficulty_source="explicit-user")
@@ -310,7 +309,7 @@ class ProductionRoutingMatrixTest(unittest.TestCase):
         self.assertEqual(self.route(host, self.multi).readiness, "NEED_INPUT")
 
     def test_declined_preview_without_active_model_stops(self) -> None:
-        result = agent_config_recommend(self.tiered, {}, profile=self.multi, approval="declined", use_jev=False)
+        result = agent_config_recommend(self.tiered, {}, profile=self.multi, approval="declined", use_typed_decisions=False)
         self.assertEqual(result.readiness, "NEED_INPUT")
         self.assertIsNone(result.execution_config)
 

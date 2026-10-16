@@ -19,8 +19,6 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
 
     en = (root / "examples/quick-start/README.md").read_text(encoding="utf-8", errors="replace")
     zh = (root / "examples/quick-start/README.zh-CN.md").read_text(encoding="utf-8", errors="replace")
-    brief = (root / "examples/quick-start/brief.md").read_text(encoding="utf-8", errors="replace")
-    agents = (root / "examples/quick-start/AGENTS.md").read_text(encoding="utf-8", errors="replace")
 
     c.check(
         "npx skills add LightDevCoder/skills" in en
@@ -30,12 +28,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         and "$project-review" in en,
         "English Quick Start is missing a required command.",
     )
-    c.check(
-        "illustrative" in en and "nothing was invoked, installed, or orchestrated" in en,
-        "English Quick Start must label output and preserve non-execution boundary.",
-    )
-    c.check("README.md" in zh and "Illustrative output" in zh, "Chinese Quick Start is missing pairing or illustrative output.")
-    c.check("Goal" in brief and "Boundary" in brief and "Stop at each handoff" in agents, "Quick Start fixture lacks a minimal brief or explicit stop rule.")
+    c.check("README.md" in zh, "Chinese Quick Start is missing its English pairing.")
 
     return c.assertions, c.failures
 

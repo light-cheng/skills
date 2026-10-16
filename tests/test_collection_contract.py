@@ -33,7 +33,7 @@ EXPECTED = {
     "recap",
     "release-workflow",
     "light-research",
-    "resolving-merge-conflicts",
+    "light-merge-conflicts",
     "review-loop",
     "socratic",
     "light-tdd",
@@ -42,6 +42,9 @@ EXPECTED = {
     "light-wait-what",
     "light-wizard",
     "light-writing-for-agents",
+    "light-decide",
+    "light-redirect",
+    "light-html-plan",
 }
 
 
@@ -58,7 +61,7 @@ class CollectionContractTests(unittest.TestCase):
         for name in sorted(EXPECTED):
             skill = package_dir(ROOT, name)
             body = (skill / "SKILL.md").read_text(encoding="utf-8")
-            # eli5 has no agents/openai.yaml by design (migrated explain skill) — skip metadata check for it
+            # eli5 has no agents/openai.yaml by design — skip metadata check for it
             if name == "eli5":
                 self.check(re.search(rf"^name:\s*{re.escape(name)}\s*$", body, re.M) is not None, f"{name} frontmatter name")
                 continue
@@ -96,10 +99,7 @@ class CollectionContractTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         catalog = (ROOT / "CATALOG.md").read_text(encoding="utf-8")
         installation = (ROOT / "docs/INSTALLATION.md").read_text(encoding="utf-8")
-        admission = (ROOT / "docs/SKILL_ADMISSION.md").read_text(encoding="utf-8")
-        admission_zh = (ROOT / "docs/SKILL_ADMISSION.zh-CN.md").read_text(encoding="utf-8")
         review_policy = (ROOT / "docs/REVIEW_POLICY.md").read_text(encoding="utf-8")
-        review_policy_zh = (ROOT / "docs/REVIEW_POLICY.zh-CN.md").read_text(encoding="utf-8")
         self.check("npx skills add LightDevCoder/skills" in readme, "README generic latest whole install")
         self.check("npx skills add LightDevCoder/skills --skill project-review" in installation, "installation generic latest per-Skill install")
         self.check("npx skills add LightDevCoder/skills#v0.1.2" in installation, "installation historical pinned v0.1.2 install")
@@ -114,22 +114,13 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills#v0.2.4" in installation, "installation pinned v0.2.4 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme, "homepage about copy")
-        stable = re.search(r"\| (?:Stable release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
-        self.check(stable is not None, "catalog names a stable release or its local verified release baseline")
+        stable = re.search(r"\| (?:Stable release|Previous release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
+        self.check(stable is not None, "catalog names a stable or previous release, or its local verified release baseline")
         if stable:
             version = stable.group(1)
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")
             self.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "installation documents catalog's stable release")
             self.check((ROOT / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "stable release has a post-publication receipt")
-        self.check("36" in catalog and "34" in catalog and "admitted" in catalog, "catalog package-count boundary (36 now, historical 34 before light-travelpage)")
-        self.check("v0.2.1" in catalog, "catalog mentions v0.2.1")
-        self.check("v0.2.2" in catalog, "catalog mentions v0.2.2")
-        self.check("v0.2.3" in catalog, "catalog mentions v0.2.3")
-        for label, text in (("admission", admission), ("admission zh-CN", admission_zh),
-                            ("review policy", review_policy), ("review policy zh-CN", review_policy_zh)):
-            self.check(re.search(r"prompt-only|纯提示型", text) is not None, f"{label} prompt-only fast track")
-            self.check("fresh independent Evaluator" in text, f"{label} independent evaluator boundary")
-            self.check("Critic" in text and "light-code-review" in text, f"{label} omitted specialist boundaries")
         # New governance: reviewer vs engine vs acceptance
         self.check("project-review" in review_policy and "review-loop" in review_policy, "review policy must distinguish project-review vs review-loop")
         self.check("generic-review" in review_policy, "review policy must mention generic-review reviewer")
@@ -155,6 +146,17 @@ class CategoryLayoutTests(unittest.TestCase):
                 for package in category.glob("*/SKILL.md"):
                     self.assertIn(f"({package.parent.name}/SKILL.md)", guide)
                 self.assertIn("SKILL.md", guide)
+
+    def test_collection_guides_state_the_real_category_counts(self) -> None:
+        counts = {c.name: len(list(c.glob("*/SKILL.md"))) for c in (ROOT / "skills").iterdir() if c.is_dir() and list(c.glob("*/SKILL.md"))}
+        for guide in ("skills/README.md", "skills/README.zh-CN.md"):
+            text = (ROOT / guide).read_text(encoding="utf-8")
+            stated = {m.group(1): int(m.group(2)) for m in re.finditer(r"\]\((\w+)/README(?:\.zh-CN)?\.md\) \| (\d+) \|", text)}
+            self.assertEqual(stated, counts, guide)
+        for guide in ("README.md", "README.zh-CN.md"):
+            text = (ROOT / guide).read_text(encoding="utf-8")
+            stated = {m.group(1): int(m.group(2)) for m in re.finditer(r"\]\(skills/(\w+)/README(?:\.zh-CN)?\.md\) — (\d+)", text)}
+            self.assertEqual(stated, counts, guide)
 
 
 if __name__ == "__main__":

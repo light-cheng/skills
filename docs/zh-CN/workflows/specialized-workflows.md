@@ -28,6 +28,12 @@
 When this workflow reaches <state>, the caller may continue with <skill>.
 ```
 
+或
+
+```text
+Return <artifact/result> to the calling workflow.
+```
+
 加一句 handoff 不是重写。
 
 ## Entry → Handoff → Stop

@@ -4,7 +4,7 @@ Verifies:
   1. ask-light recommends implement on ticket frontier -> agent-config configures execution.
   2. Fail-closed invariants in ask-light prevent agent-config invocation.
   3. Decomposition gate in agent-config hands off to project-tickets.
-  4. Graceful degradation when Jev or API keys are unavailable.
+  4. Graceful degradation when no typed decision source is available.
 """
 
 from __future__ import annotations
@@ -52,7 +52,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
             tickets_exist=True,
             ready_tickets=["issue-01.md"],
         )
-        ask_rec = ask_light_semantic_recommend(ask_state, user_request="下一步做什么？", use_jev=False)
+        ask_rec = ask_light_semantic_recommend(ask_state, user_request="下一步做什么？", use_typed_decisions=False)
         self.assertEqual(ask_rec.status, "RECOMMEND")
         self.assertEqual(ask_rec.primary_skill, "light-implement")
         self.assertEqual(ask_rec.target_item, "issue-01.md")
@@ -67,7 +67,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
             "difficulty": "standard",
             "reasoning_policy": "standard",
         }
-        cfg_res = agent_config_recommend(host_capabilities, task_chars, profile=confirmed_profile, use_jev=False)
+        cfg_res = agent_config_recommend(host_capabilities, task_chars, profile=confirmed_profile, use_typed_decisions=False)
         self.assertEqual(cfg_res.readiness, "READY")
         self.assertEqual(cfg_res.execution_config.topology, "Case C")
         self.assertEqual(cfg_res.execution_config.model, "model-beta")
@@ -81,11 +81,11 @@ class IntegratedWorkflowTest(unittest.TestCase):
         for capability in host["capabilities"].values():
             if "evidence" in capability:
                 capability["evidence"]["kind"] = "fallback-default"
-        self.assertEqual(agent_config_recommend(host, task, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, task, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
 
         host, profile = canonical_host_and_profile()
         host["capabilities"]["reasoning"]["state"] = "unknown"
-        result = agent_config_recommend(host, task, profile=profile, use_jev=False)
+        result = agent_config_recommend(host, task, profile=profile, use_typed_decisions=False)
         self.assertEqual(result.readiness, "NEED_INPUT")
         self.assertIsNone(result.execution_config)
 
@@ -93,7 +93,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
         host, profile = canonical_host_and_profile()
         result = agent_config_recommend(
             host, {"shape": "single-pass", "reasoning_policy": "ultra"},
-            profile=profile, use_jev=False,
+            profile=profile, use_typed_decisions=False,
         )
         self.assertEqual(result.readiness, "NEED_INPUT")
         self.assertIsNone(result.execution_config)
@@ -102,12 +102,12 @@ class IntegratedWorkflowTest(unittest.TestCase):
         single_host["capabilities"]["model_selection"]["state"] = "available"
         self.assertEqual(
             agent_config_recommend(single_host, {"shape": "single-pass"},
-                                   profile=single_profile, use_jev=False).readiness,
+                                   profile=single_profile, use_typed_decisions=False).readiness,
             "NEED_INPUT",
         )
         approved = agent_config_recommend(
             single_host, {"shape": "single-pass"}, profile=single_profile,
-            approval="approved", use_jev=False,
+            approval="approved", use_typed_decisions=False,
         )
         self.assertEqual(approved.readiness, "NEED_INPUT")
         self.assertIsNone(approved.execution_config)
@@ -119,24 +119,24 @@ class IntegratedWorkflowTest(unittest.TestCase):
         }
         verified = agent_config_recommend(
             single_host, {"shape": "single-pass"}, profile=single_profile,
-            active_session=active_session, use_jev=False,
+            active_session=active_session, use_typed_decisions=False,
         )
         self.assertEqual(verified.readiness, "READY")
         self.assertEqual(verified.execution_config.topology, "Case A")
         wrong_session = {**active_session, "adapter_id": "other-adapter"}
         self.assertEqual(agent_config_recommend(
             single_host, {"shape": "single-pass"}, profile=single_profile,
-            active_session=wrong_session, use_jev=False,
+            active_session=wrong_session, use_typed_decisions=False,
         ).readiness, "NEED_INPUT")
         stale_session = {**active_session, "observed_at": "2026-01-01T00:00:00Z"}
         self.assertEqual(agent_config_recommend(
             single_host, {"shape": "single-pass"}, profile=single_profile,
-            active_session=stale_session, use_jev=False,
+            active_session=stale_session, use_typed_decisions=False,
         ).readiness, "NEED_INPUT")
         single_host["capabilities"]["model_selection"]["scopes"] = ["new-session"]
         self.assertEqual(agent_config_recommend(
             single_host, {"shape": "single-pass"}, profile=single_profile,
-            approval="approved", use_jev=False,
+            approval="approved", use_typed_decisions=False,
         ).readiness, "NEED_INPUT")
         single_host["capabilities"]["model_selection"]["state"] = "unavailable"
         extra = json.loads(json.dumps(single_host["available_models"][0]))
@@ -144,42 +144,42 @@ class IntegratedWorkflowTest(unittest.TestCase):
         single_host["available_models"].append(extra)
         self.assertEqual(
             agent_config_recommend(single_host, {"shape": "single-pass"},
-                                   profile=single_profile, use_jev=False).readiness,
+                                   profile=single_profile, use_typed_decisions=False).readiness,
             "NEED_INPUT",
         )
 
     def test_malformed_canonical_host_or_profile_stops_cleanly(self) -> None:
         host, profile = canonical_host_and_profile()
         host["capabilities"] = []
-        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
         host, profile = canonical_host_and_profile()
         profile["host"] = []
-        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
         host, profile = canonical_host_and_profile()
         del profile["profile_version"]
-        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
         host, profile = canonical_host_and_profile()
         self.assertEqual(agent_config_recommend(
-            host, {"reasoning_policy": ["high"]}, profile=profile, use_jev=False,
+            host, {"reasoning_policy": ["high"]}, profile=profile, use_typed_decisions=False,
         ).readiness, "NEED_INPUT")
 
     def test_custom_effort_requires_value_and_host_literal_is_preserved(self) -> None:
         host, profile = canonical_host_and_profile()
         profile["tiers"]["standard"]["effort"] = {"policy": "custom"}
-        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
         host, profile = canonical_host_and_profile()
         host["supported_effort_values"] = ["Low", "Deep"]
-        result = agent_config_recommend(host, {"reasoning_policy": "Deep"}, profile=profile, use_jev=False)
+        result = agent_config_recommend(host, {"reasoning_policy": "Deep"}, profile=profile, use_typed_decisions=False)
         self.assertEqual(result.readiness, "READY")
         self.assertEqual(result.execution_config.resolved_effort, "Deep")
         host, profile = canonical_host_and_profile()
         profile["tiers"]["standard"]["effort"] = {"policy": "custom", "value": ""}
-        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
 
     def test_new_session_only_selector_cannot_claim_current_session_ready(self) -> None:
         host, profile = canonical_host_and_profile()
         host["capabilities"]["model_selection"]["scopes"] = ["new-session"]
-        result = agent_config_recommend(host, {"shape": "single-pass"}, profile=profile, use_jev=False)
+        result = agent_config_recommend(host, {"shape": "single-pass"}, profile=profile, use_typed_decisions=False)
         self.assertEqual(result.readiness, "NEED_INPUT")
         self.assertIsNone(result.execution_config)
 
@@ -193,7 +193,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
         }
         result = agent_config_recommend(host, {"shape": "single-pass"},
                                         profile=profile, active_session=active_session,
-                                        use_jev=False)
+                                        use_typed_decisions=False)
         self.assertEqual(result.readiness, "READY")
         self.assertEqual(result.execution_config.topology, "Case C")
 
@@ -204,7 +204,7 @@ class IntegratedWorkflowTest(unittest.TestCase):
             active_efforts=["feat-1", "feat-2"],
             current_effort=None,
         )
-        ask_rec = ask_light_semantic_recommend(ask_state, user_request="下一步做什么？", use_jev=False)
+        ask_rec = ask_light_semantic_recommend(ask_state, user_request="下一步做什么？", use_typed_decisions=False)
         self.assertEqual(ask_rec.status, "NEED_INPUT")
         self.assertTrue(ask_rec.fail_closed)
         # In a workflow orchestrator, non-RECOMMEND/non-TRANSITION stops here.
@@ -218,26 +218,26 @@ class IntegratedWorkflowTest(unittest.TestCase):
             "shape": "decomposed",
             "formal_tickets_exist": False,
         }
-        cfg_res = agent_config_recommend(host_capabilities, task_chars, profile=confirmed_profile, use_jev=False)
+        cfg_res = agent_config_recommend(host_capabilities, task_chars, profile=confirmed_profile, use_typed_decisions=False)
         self.assertEqual(cfg_res.readiness, "NEED_PROJECT_TICKETS")
         self.assertEqual(cfg_res.handoff, "project-tickets")
         self.assertIsNone(cfg_res.execution_config)
 
     def test_agent_config_rejects_missing_stale_or_mismatched_evidence(self) -> None:
         host, profile = canonical_host_and_profile()
-        self.assertEqual(agent_config_recommend({}, {}, use_jev=False).readiness, "NEED_INPUT")
-        self.assertEqual(agent_config_recommend(HostCapabilities(active_model="model-alpha", available_models=["model-alpha"], profile_tiers={"high": "model-alpha"}), {}, use_jev=False).readiness, "NEED_INPUT")
-        self.assertEqual(agent_config_recommend(host, {}, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend({}, {}, use_typed_decisions=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(HostCapabilities(active_model="model-alpha", available_models=["model-alpha"], profile_tiers={"high": "model-alpha"}), {}, use_typed_decisions=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, use_typed_decisions=False).readiness, "NEED_INPUT")
         stale = {**host, "observed_at": "2020-01-01T00:00:00Z"}
-        self.assertEqual(agent_config_recommend(stale, {}, profile=profile, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(stale, {}, profile=profile, use_typed_decisions=False).readiness, "NEED_INPUT")
         wrong = json.loads(json.dumps(profile))
         wrong["host"]["adapter"] = "other-adapter"
-        self.assertEqual(agent_config_recommend(host, {}, profile=wrong, use_jev=False).readiness, "NEED_INPUT")
+        self.assertEqual(agent_config_recommend(host, {}, profile=wrong, use_typed_decisions=False).readiness, "NEED_INPUT")
 
     def test_high_tier_never_falls_back_to_lower_model(self) -> None:
         host, profile = canonical_host_and_profile()
         host["available_models"] = [model for model in host["available_models"] if model["id"] != "model-gamma"]
-        result = agent_config_recommend(host, {"difficulty": "critical", "difficulty_source": "explicit-user"}, profile=profile, use_jev=False)
+        result = agent_config_recommend(host, {"difficulty": "critical", "difficulty_source": "explicit-user"}, profile=profile, use_typed_decisions=False)
         self.assertEqual(result.readiness, "NEED_INPUT")
         self.assertIsNone(result.execution_config)
 

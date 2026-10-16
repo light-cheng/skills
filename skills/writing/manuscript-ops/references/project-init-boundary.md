@@ -1,5 +1,11 @@
 # Project-init boundary
 
+Read only on Project. Bounded Quick/Structured writing needs only an authorized
+output location, not generic project bootstrap. A delegated task inherits its
+confirmed inputs and authority; do not require the same approval again.
+A stopped Skill returns its stage result to the caller, which continues any
+remaining authorized work without bypassing user-invoked boundaries.
+
 `manuscript-ops` does not perform generic project bootstrap or invoke another
 user-invoked Skill. It hands missing generic bootstrap to `project-init`, then
 creates its own manuscript-specific state after the approved Brief.

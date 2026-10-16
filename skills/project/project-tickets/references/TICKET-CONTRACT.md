@@ -34,8 +34,8 @@ user's perspective — not a layer-by-layer implementation list.
 
 **Status:** ready-for-agent
 
-- [ ] Acceptance criterion 1 (observable, verifiable)
-- [ ] Acceptance criterion 2 (…)
+- [ ] Acceptance criterion 1 (observable, verifiable) (US-1)
+- [ ] Acceptance criterion 2 (…) (US-1, US-3)
 
 ## Comments
 
@@ -71,8 +71,9 @@ Per the configured `docs/agents/issue-tracker.md` contract:
 |-----------|-------------------------|
 | `Blocked by:` near top | The edge set. Unblocked when every listed `NN` file is `resolved`. |
 | **Frontier** | Scan `.scratch/<feature>/issues/` for files that are `ready-for-agent` or `open`, unblocked, and not `claimed`; first by number wins. Independent frontier tickets are parallelizable. |
-| **Claim** | Before any work, set `**Status:** claimed` and save so concurrent sessions skip it. |
-| **Resolve** | Append `## Answer` with the verification pointer, set `**Status:** resolved`, and (when the effort maintains a map) append a gist+link to the map's `Decisions so far` or to the SPEC evidence section. |
+| **Claim** | `light-implement` sets `**Status:** claimed` and saves before any work so concurrent sessions skip it. |
+| **Report** | When its run ends, `light-implement` appends `### Implementation report — <date>` under `## Comments` with scope, fixed point, verification, remaining findings, and `Plan gap:`. The newest report is current. |
+| **Resolve** | After a `PASS`, `project-review` appends `## Answer` with the verdict pointer, sets `**Status:** resolved`, and (when the effort maintains a map) appends a gist+link to the map's `Decisions so far`. |
 
 Alias rule: `ready-for-agent` means "open and unclaimed" for frontier
 purposes. Claiming rewrites it to `claimed`; resolving rewrites it to
@@ -92,6 +93,11 @@ confirm after the slice lands. Typical styles:
 
 A criterion is not a line-numbered code instruction or a paragraph from the
 SPEC; it is the slice's demo.
+
+End each criterion with the SPEC user stories it serves, such as `(US-2)`.
+Every user story in the SPEC is served by at least one ticket criterion or is
+listed in the SPEC's Out of Scope. A SPEC without `US-` numbers gets them
+cited by position (`US-3` = the third story).
 
 ## Dependency hygiene
 

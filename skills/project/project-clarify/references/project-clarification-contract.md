@@ -13,8 +13,8 @@ material that is applicable and readable:
 - source and tests: entry points relevant to the topic
 - documents/specs: `docs/specs/`, existing specs
 - task/tracker state: `.scratch/<effort>/`, issues, `map.md`
-- prior handoff: a previous `Project clarification handoff` or readiness record
-  when present
+- prior handoff: `.scratch/<feature>/clarify-handoff.md`, a previous `Project
+  clarification handoff`, or a readiness record when present
 
 Record a path plus a stable location for every fact used (heading, symbol,
 file, line). Mark an absent path, unreadable location, or outside-scope
@@ -84,9 +84,12 @@ It is not a formal SPEC or a ticket set, but its fields are sufficient for
 `project-spec` to produce a SPEC without re-asking the inspection-answered
 facts.
 
-No project file is written merely to retain the handoff. A user may separately
-name a destination and confirm that write; validate that it is inside the
-target root and report the created path. One explicit invocation starts the
+No project file is written merely to retain the handoff. The recommended
+destination is `.scratch/<feature>/clarify-handoff.md`, where `project-spec`
+looks for it by slug; the user may name another destination instead. Offer
+the write, wait for the user's confirmation, validate that the destination is
+inside the target root, and report the created path. A later confirmed
+handoff replaces an earlier one at the same path. One explicit invocation starts the
 session; ordinary replies continue through frontier rounds, and the session
 stops only after confirmed shared understanding, an explicit exit, or a
 workflow switch. The handoff is returned at that completion boundary.

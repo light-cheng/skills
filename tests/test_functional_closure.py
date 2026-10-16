@@ -32,14 +32,6 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             ],
         )
 
-    def test_recap_output_is_one_unlabeled_line_with_a_400_character_limit(self) -> None:
-        def valid(text: str) -> bool:
-            return bool(text.strip()) and not re.search(r"[\r\n]", text) and len(text) <= 400
-
-        self.assertTrue(valid("x" * 400))
-        self.assertFalse(valid("x" * 401))
-        self.assertFalse(valid("first line\nsecond line"))
-
     def test_frozen_hashes_allow_only_recorded_name_token_amendments(self) -> None:
         baseline = ROOT / ".scratch/light-skills-lean-refactor/frozen-baseline.sha256"
         amendments = json.loads((ROOT / "docs/evidence/namespace-v0.2.6/frozen-name-amendments.json").read_text())
@@ -53,7 +45,8 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
             if not match:
                 continue
             expected, relative = match.groups()
-            if relative == "skills/recap/SKILL.md":
+            # recap and eli5 were changed on purpose by their owner after the freeze.
+            if relative in ("skills/recap/SKILL.md", "skills/eli5/SKILL.md"):
                 continue
             actual = hashlib.sha256(relocated_path(ROOT, relative).read_bytes()).hexdigest()
             if relative in amendments:

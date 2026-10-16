@@ -15,6 +15,10 @@ This package is a Light first-party port of an upstream Skill.
 
 Verification: `SKILL.md` frontmatter `name: light-tdd` matches, `agents/openai.yaml` is valid, and aside from this attribution no `mattpocock/skills` runtime coupling remains in executable content.
 
-## Light canonical name migration (v0.2.7 candidate)
+## Light canonical name migration
 
 The current Light package is `light-tdd` (formerly `tdd`). Only package identity, UI source labeling, and Light capability references changed. Original upstream paths, pinned revisions, license notices, and responsibilities above remain applicable. Upstream names identify provenance, not current Light invocation.
+
+## Description note (2026-10-16)
+
+The `description` keeps the upstream trigger wording and adds one sentence naming the upstream Skill, so an Agent that sees both copies can tell them apart. Install one or the other, not both.

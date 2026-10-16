@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light Decide"
+  short_description: "Answer a bounded workflow judgment through an allowed decision source and log it"
+  default_prompt: "Use light-decide for this bounded judgment: frame it, respect the project's data limit, pick a verified source, apply the user's policy, log one row and return the normalized result."
+
+policy:
+  allow_implicit_invocation: true

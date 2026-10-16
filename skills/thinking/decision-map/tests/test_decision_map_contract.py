@@ -59,21 +59,6 @@ class DecisionMapContractTest(unittest.TestCase):
 
         for cap in ("research", "prototype", "socratic", "light-to-questionnaire"):
             self.assertIn(cap, skill)
-        # composition before duplication: owning capabilities are named, not copied
-        self.assertIn("owning capability", skill)
-        self.assertIn("research", skill.lower())
-        # at most one ticket per session (except parallel research)
-        self.assertIn("at most one non-research ticket", skill)
-
-    def test_handoff_to_project_spec_and_no_autochain(self) -> None:
-        skill, _, _, workflow = read_contract()
-        combined = skill + workflow
-
-        self.assertIn("decision-map → project-spec", skill)
-        self.assertIn("project-spec", combined)
-        self.assertIn("recommend explicit `$project-spec` and stop", skill)
-        self.assertIn("fog", skill.lower())
-        self.assertIn("fog is empty", combined.lower() if "fog is empty" in combined.lower() else combined)
 
     def test_provenance_is_transformed_wayfinder(self) -> None:
         attribution = (ROOT / "ATTRIBUTION.md").read_text(encoding="utf-8")

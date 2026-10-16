@@ -32,6 +32,7 @@ the ledger shape and [EXAMPLES.md](EXAMPLES.md) for handoff examples that
 
 ## Stopping
 
-Return the handoff as an in-memory record. Write to a file only when the user
-names a destination and confirms. Recommend the next explicit invocation
+Return the handoff as an in-memory record. Offer to save it at
+`.scratch/<feature>/clarify-handoff.md` (or a destination the user names) and
+write only after the user confirms. Recommend the next explicit invocation
 (`project-spec`, `decision-map`, or `none`) and stop; do not auto-chain.

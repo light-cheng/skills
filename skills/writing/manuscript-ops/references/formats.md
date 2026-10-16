@@ -45,6 +45,28 @@ which platform performed the operation and whether fidelity was checked.
 Cloud-native documents require a stable document identity, revision or export
 snapshot, permission boundary, and deterministic export where possible.
 
+## Document sources
+
+Source Register accepts the existing local format IDs (PDF, Markdown, DOCX,
+TXT and the other registered local formats) as well as the source-layer IDs.
+Keep the canonical format ID, real suffix, hash, authority and permitted uses;
+do not create aliases such as `document-pdf`. Document URLs need a captured,
+hash-bound local file before registration.
+
+`legacy-doc` records an original OLE `.doc` intake identity. Keep its original
+bytes and declare conversion or extraction artifacts with their hashes and
+parent source IDs. It is not a DOCX generation adapter. A `json-text-extract`
+row is permitted only when another registered source declares the same path
+and hash as a page/text extraction; it cannot promote that parent's authority.
+Intermediate artifacts do not acquire independent factual authority.
+Every registered derivative retains all parents' authority limits, permitted
+uses and exclusions, including converted documents, TXT and Markdown extracts.
+Path aliases refer to the same hash-bound derivative; they cannot bypass lineage.
+
+These intake rules extend source resolution without weakening or rewriting the
+six canonical source-layer definitions or any canonical format capability.
+Source registration proves identity/provenance, not content or layout acceptance.
+
 ## Source-layer formats
 
 Web pages, emails, images/scans, audio, video, and transcripts are sources, not

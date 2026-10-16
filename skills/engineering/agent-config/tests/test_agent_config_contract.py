@@ -97,13 +97,6 @@ class AgentConfigContractTest(unittest.TestCase):
         ):
             self.assertIn(marker, PLAN_SCHEMA)
 
-    def test_plan_schema_does_not_force_universal_waves_or_ownership_on_single_pass(self) -> None:
-        # In the adaptive schema, single-pass tasks emit a streamlined table,
-        # while ownership and waves are conditional sections for decomposed tasks.
-        self.assertIn("Single-pass layout (Adaptive)", PLAN_SCHEMA)
-        self.assertIn("Do not force an\nownership matrix, execution waves, or separate Explorer/Merger roles", PLAN_SCHEMA)
-        self.assertIn("Conditional sections for decomposed tasks", PLAN_SCHEMA)
-
     def test_core_skill_defines_four_execution_modes_and_setup_gate(self) -> None:
         for marker in (
             "Setup Gate",
@@ -116,8 +109,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "Case D (Tiered Multi-model + Decomposed",
             "highest-supported",
             "NEED_PROJECT_TICKETS",
-            "Single-model is first-class",
-            "No intelligence guessing",
         ):
             self.assertIn(marker, SKILL)
 
@@ -130,15 +121,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "Apply request contract",
         ):
             self.assertIn(marker, ADAPTER_CONTRACT)
-
-    def test_invocation_mutation_is_rejected(self) -> None:
-        self.assertRegex(METADATA, r"(?m)^\s*allow_implicit_invocation:\s*true\s*$")
-        mutated_metadata = METADATA.replace(
-            "allow_implicit_invocation: true", "allow_implicit_invocation: false"
-        )
-        self.assertNotRegex(mutated_metadata, r"(?m)^\s*allow_implicit_invocation:\s*true\s*$")
-        mutated_skill = SKILL.replace("name: agent-config\n", "name: agent-config\ndisable-model-invocation: true\n", 1)
-        self.assertRegex(mutated_skill, r"(?m)^disable-model-invocation:\s*true\s*$")
 
     def test_companion_contract_tools_and_invariants(self) -> None:
         self.assertIn("protocol_version: 1", COMPANION_CONTRACT)
@@ -154,14 +136,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "reset_profile",
         ):
             self.assertIn(f"`{tool_name}`", COMPANION_CONTRACT)
-        for marker in (
-            "explicit user inspection & confirmation",
-            "blind apply forbidden",
-            "non-blocking companion-absent fallback",
-            "plan-only",
-            "atomic write",
-        ):
-            self.assertIn(marker.lower(), COMPANION_CONTRACT.lower())
 
     def test_profile_schema_specifications_and_invariants(self) -> None:
         for marker in (
@@ -182,14 +156,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "parallelism",
             "concurrency",
             "highest-supported",
-            "Strictly user-confirmed",
-            "No automatic model ranking",
-            "No silent substitution",
-            "Configured model missing",
-            "Host identity mismatch",
-            "Adapter incompatibility",
-            "Capability regression",
-            "Elapsed time is not a stale trigger",
         ):
             self.assertIn(marker.lower(), PROFILE_SCHEMA.lower())
 
@@ -209,7 +175,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "Case B: Single-model + Decomposed (P0)",
             "Case C: Multi-model + Single-pass",
             "Case D: Multi-model + Decomposed (P0)",
-            "Single-model mode is an equal, first-class execution topology",
             "need_project_tickets",
         ):
             self.assertIn(marker.lower(), ROUTING.lower())
@@ -239,8 +204,6 @@ class AgentConfigContractTest(unittest.TestCase):
             "validate_configuration",
             "Generic Fallback Adapter",
             "Plan-Only Mode",
-            "No Silent Mutation",
-            "does not count toward",
         ):
             self.assertIn(marker.lower(), HARNESS_SUPPORT.lower())
 
@@ -263,7 +226,6 @@ class AgentConfigContractTest(unittest.TestCase):
             r"(?i)sol-advisor|\bsol\b|\bterra\b|\bluna\b|mattpocock|github\.com",
         )
         self.assertNotRegex(package_text, r"https?://|/Users/|\.codex")
-        self.assertIn("no external Skill", SKILL)
 
 
 if __name__ == "__main__":

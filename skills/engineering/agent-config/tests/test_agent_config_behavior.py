@@ -22,7 +22,7 @@ class AgentConfigBehaviorTest(unittest.TestCase):
             [sys.executable, str(ROOT / "scripts/agent_config.py"),
              "--host-json", json.dumps(host), "--profile-json", json.dumps(profile),
              "--task-json", json.dumps({"difficulty": "high", "difficulty_source": "explicit-user"}),
-             "--no-jev"],
+             "--no-typed-decisions"],
             capture_output=True, text=True, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)

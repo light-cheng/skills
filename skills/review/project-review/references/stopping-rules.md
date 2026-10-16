@@ -31,8 +31,9 @@ Producer evidence.
   evidence, no blocking confirmed finding remains, and the required fresh
   Evaluator accepts the baseline.
 - `FAIL`: a frozen criterion is unmet and no permitted bounded repair can
-  resolve it. Include the unmet criterion and why the repair path is not
-  allowed or cannot converge.
+  resolve it. Include the unmet criterion, why the repair path is not
+  allowed or cannot converge, and its `Cause:` (`implementation` or
+  `direction`, see [WORKFLOW.md](WORKFLOW.md#safe-closeout-ordering)).
 - `BLOCKED`: required acceptance source, authority, access, environment,
   evidence, or independent context is unavailable; state and evidence disagree;
   or the configured repair limit prevents safe convergence.

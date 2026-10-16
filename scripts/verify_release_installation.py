@@ -13,6 +13,7 @@ from pathlib import Path
 
 REPOSITORY = "https://github.com/LightDevCoder/skills.git"
 SOURCE = "LightDevCoder/skills"
+COLLECTION_SIZE = 39  # admitted packages in the release this script verifies
 
 
 def validate_identity(tag: str, commit: str) -> None:
@@ -49,8 +50,8 @@ def source_packages(root: Path) -> dict[str, dict[str, str]]:
 
 
 def require_collection_size(packages: dict) -> None:
-    if len(packages) != 36:
-        raise ValueError("whole collection must contain exactly 36 admitted packages")
+    if len(packages) != COLLECTION_SIZE:
+        raise ValueError(f"whole collection must contain exactly {COLLECTION_SIZE} admitted packages")
 
 
 def verify_destination(root: Path, expected: dict[str, dict[str, str]]) -> dict:
@@ -120,7 +121,7 @@ def main() -> None:
     _, pinned_sha, pinned = clone(args.tag, "pinned-source")
     require_collection_size(pinned)
     if pinned_sha != args.expected_commit:
-        raise ValueError("published tag does not match the expected 36-package candidate")
+        raise ValueError(f"published tag does not match the expected {COLLECTION_SIZE}-package candidate")
     _, default_sha, latest = clone("main", "default-source")
     require_collection_size(latest)
     cli = ["npx", "--yes", "--cache", str(args.output / "npm-cache"), "skills"]

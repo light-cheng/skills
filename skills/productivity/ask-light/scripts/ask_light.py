@@ -31,8 +31,8 @@ from typing import Any
 try:
     from .ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
     from .state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
-    from .compact_state_builder import build_compact_jev_state
-    from .semantic_router import route_with_jev
+    from .compact_state_builder import build_compact_decision_state
+    from .semantic_router import route_with_decisions
     from .advisor import ask_light_semantic_recommend
 except (ImportError, ValueError):
     import sys
@@ -41,8 +41,8 @@ except (ImportError, ValueError):
         sys.path.insert(0, _scripts_dir)
     from ask_light_models import CompactProjectState, LegalActionsResult, SemanticJudgments, AskLightRecommendation
     from state_extractor import compute_legal_actions, extract_compact_state_from_dict, CANDIDATE_DESCRIPTIONS
-    from compact_state_builder import build_compact_jev_state
-    from semantic_router import route_with_jev
+    from compact_state_builder import build_compact_decision_state
+    from semantic_router import route_with_decisions
     from advisor import ask_light_semantic_recommend
 
 MAP_PATH = Path(__file__).resolve().parents[1] / "references" / "light-skill-map.json"
@@ -1309,12 +1309,17 @@ EFFORT_EVIDENCE_PATTERNS = (
     "map.md",
     "issues/*.md",
 )
+# A saved handoff (`project-clarify`) marks an effort before any SPEC exists.
+# `clarify` may save a plain synthesis under the same name; that does not count.
+SAVED_HANDOFF_NAME = "clarify-handoff.md"
 
 
 def _effort_has_evidence(path: Path) -> bool:
     if not path.is_dir():
         return False
-    return any(_has_glob(path, pattern) for pattern in EFFORT_EVIDENCE_PATTERNS)
+    if any(_has_glob(path, pattern) for pattern in EFFORT_EVIDENCE_PATTERNS):
+        return True
+    return _is_clarification_handoff(_small_text(path / SAVED_HANDOFF_NAME))
 
 
 def _root_active_spec(root: Path) -> bool:
@@ -1358,7 +1363,7 @@ def _explicit_effort_references(root: Path) -> set[str]:
         text = _small_text(path)
         for match in effort_field.finditer(text):
             value = match.group(1).strip().strip("`*_")
-            if not value or "<effort>" in value or value.lower() in {"none", "none recorded", "?"}:
+            if not value or "<effort>" in value or "<feature>" in value or value.lower() in {"none", "none recorded", "?"}:
                 continue
             name = value.split()[0].strip("():-")
             if name:
@@ -1494,6 +1499,15 @@ CLARIFICATION_STATUS_STATES = {
 CLARIFICATION_RECOMMENDED_FIELD = "Recommended next explicit invocation"
 
 
+def _is_clarification_handoff(text: str) -> bool:
+    """True when ``text`` follows the project-clarify handoff contract."""
+    if CLARIFICATION_HANDOFF_MARKER in text.lower():
+        return True
+    statuses = _field_values(text, ("Status",))
+    recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD, "Recommended next invocation"))
+    return any(status in CLARIFICATION_STATUS_STATES for status in statuses) and bool(recommended)
+
+
 def _clarification_candidate_files(root: Path, current_effort: str | None) -> list[Path]:
     """Bounded candidate scan for persisted clarification handoffs."""
     directories = [root / "docs" / "agents"]
@@ -1535,14 +1549,12 @@ def _classify_clarification_signals(root: Path, current_effort: str | None) -> l
     records: list[dict[str, Any]] = []
     for path in _clarification_candidate_files(root, current_effort):
         text = _small_text(path)
-        if not text.strip():
+        if not text.strip() or not _is_clarification_handoff(text):
             continue
         marker = CLARIFICATION_HANDOFF_MARKER in text.lower()
         statuses = _field_values(text, ("Status",))
         recognized = [status for status in statuses if status in CLARIFICATION_STATUS_STATES]
         recommended = _field_values(text, (CLARIFICATION_RECOMMENDED_FIELD, "Recommended next invocation", "Recommended next explicit invocation"))
-        if not marker and not (recognized and recommended):
-            continue
         raw_status = recognized[0] if recognized else ""
         raw_state = CLARIFICATION_STATUS_STATES.get(raw_status, "unknown")
         rec_next = recommended[0] if recommended else ""
@@ -2311,6 +2323,25 @@ def validate_selected(candidate: dict[str, Any]) -> tuple[int, int, str]:
     return 1, reference_reads, ""
 
 
+def detect_host() -> str:
+    """The Host running this script, from its own environment. Claude Code sets CLAUDECODE."""
+    if os.environ.get("CLAUDECODE"):
+        return "claude-code"
+    return "codex"
+
+
+def running_collection() -> Path | None:
+    """The collection this ask-light was loaded from, or None when it cannot be confirmed.
+
+    A flat install keeps packages side by side; a source checkout adds one category level.
+    """
+    package = Path(__file__).resolve().parents[1]
+    for root in (package.parent, package.parent.parent):
+        if _has_collection_package(root, "ask-light") and _has_collection_package(root, "socratic"):
+            return root
+    return None
+
+
 def invocation(name: str, host: str) -> str:
     if host.lower() == "codex":
         return f"${name}"
@@ -2637,6 +2668,7 @@ def validate_recommendation(
             "inLightMap": False,
             "available": False,
             "uniqueCopy": False,
+            "runningCollectionCopy": False,
             "metadataReadable": False,
             "hostPermits": False,
             "invocationCompatible": False,
@@ -2728,6 +2760,14 @@ def validate_recommendation(
             f"logical recommendation: {selected}; status: BLOCKED; the selected Skill is unavailable "
             "on this host. ask-light does not substitute another Skill."
         )
+    if len(installed) > 1:
+        # The copy in the collection this ask-light was loaded from is the one the Host is using.
+        own = running_collection()
+        local = [c for c in installed if own is not None and is_under(Path(c["packagePath"]), own)]
+        if len(local) == 1:
+            installed = local
+            result["checks"]["uniqueCopy"] = True
+            result["checks"]["runningCollectionCopy"] = True
     if len(installed) > 1:
         return blocked(
             f"logical recommendation: {selected}; status: BLOCKED; multiple available first-party copies "
@@ -2912,6 +2952,7 @@ def route(roots: list[dict[str, Any]] | None, context: dict[str, Any], host: str
             user_request=str(context.get("goal", "") or ""),
             scope=str(context.get("scope", "current-workflow")),
             explicit_target=context.get("target"),
+            project_root=Path(str(project_root_value)) if project_root_value and str(project_root_value).strip() else None,
         )
         result = rec.model_dump()
         if rec.primary_skill:
@@ -2932,7 +2973,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--roots-json", default="[]")
     parser.add_argument("--context-json", required=True)
-    parser.add_argument("--host-name", default="codex")
+    parser.add_argument("--host-name", default=None)
     # Public modes: choices=("next", "workflow", "navigate") + internal validate
     parser.add_argument("--mode", choices=("next", "workflow", "navigate", "validate", "semantic"), default="next")
     parser.add_argument("--skill", default="")
@@ -2942,6 +2983,8 @@ def main() -> int:
         choices=CONSTRAINT_SCOPES,
     )
     args = parser.parse_args()
+    if not args.host_name:
+        args.host_name = detect_host()
     context = json.loads(args.context_json)
     skill_map = load_map()
     roots = json.loads(args.roots_json)

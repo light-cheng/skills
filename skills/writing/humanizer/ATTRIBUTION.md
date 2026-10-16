@@ -29,14 +29,38 @@ were applied:
    `short_description`/`default_prompt` for the bilingual scope and set
    `policy.allow_implicit_invocation: true` (model-invoked).
 5. Added this `ATTRIBUTION.md`.
-6. No runtime dependency on `https://github.com/blader/humanizer` or
+6. Progressive disclosure (2026-10-10): the numbered pattern book (§1–§35)
+   and the false-positive checks moved unchanged from `SKILL.md` to
+   `references/patterns.md`; `SKILL.md` keeps the rewrite rules, voice
+   guidance, output modes and rewrite process.
+7. No runtime dependency on `https://github.com/blader/humanizer` or
    `https://github.com/op7418/Humanizer-zh` remains; the package is
    self-contained.
 
 Verification: `SKILL.md` frontmatter `name: humanizer` matches the package
 directory; `agents/openai.yaml` is valid; all pattern sections and examples
-outside the numbered changes above are carried from the pinned upstream
+(now in `references/patterns.md`) outside the numbered changes above are carried from the pinned upstream
 revision unchanged.
+
+## Wikipedia text check (2026-10-15)
+
+`references/patterns.md` was compared with "Wikipedia:Signs of AI writing"
+revisions `1319759909` (2025-10-31) and `1380244576` (2026-10-14) using
+shared 8-word sequences. About 2–3% of its words match, and every match sits
+inside a quoted example: the "before" passages that Wikipedia quotes as
+AI-generated text, and a few rewrites that reuse their wording. The pattern
+names, descriptions, word lists and rewrite rules do not match Wikipedia text.
+
+The matching examples are in the patterns about the Statistical Institute of
+Catalonia, the temple colors (Texas bluebonnets), Alamata Raya Kobo, the
+Haolai River, Korattur, "Our journey through the universe", the
+"Netherlands, Europe" passage, and the "maintains a low profile" passage.
+These quoted examples come from Wikipedia and are available under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); attribution:
+"Wikipedia:Signs of AI writing", Wikipedia contributors,
+<https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing>. The rest of
+the package stays under the MIT terms below. This is a record of the check,
+not legal advice.
 
 ## MIT notice (blader/humanizer)
 

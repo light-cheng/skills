@@ -44,8 +44,6 @@ class ProjectInitBehaviorTest(unittest.TestCase):
         for k in list(os.environ.keys()):
             if k.startswith("PI_") or k.startswith("CLAUDE_") or k.startswith("CURSOR_") or k.startswith("CODEX_"):
                 del os.environ[k]
-        os.environ.pop("TYPESAFE_API_KEY", None)
-        os.environ.pop("SKILLS_AGENT_TARGET", None)
 
         # Network and external installer guard
         self._orig_subprocess_run = subprocess.run
@@ -130,6 +128,34 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             self.assertIn("Keep this user-authored setup note.", second)
             self.assertIn("## Testing\n\nRun tests.", second)
             self.assertEqual(second.count(BOOTSTRAP.POINTER_START), 1)
+
+    def test_rerun_adds_the_redirect_line_to_an_older_pointer_once(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            agents = root / "AGENTS.md"
+            older = f"{BOOTSTRAP.POINTER_START}\nRead `docs/agents/light-project.md` before Light Project workflows.\n{BOOTSTRAP.POINTER_END}"
+            agents.write_text(f"# Rules\n\n## Project Initialization\n\nKeep this note.\n\n{older}\n", encoding="utf-8")
+
+            BOOTSTRAP.bootstrap(root, config())
+            BOOTSTRAP.bootstrap(root, config())
+
+            updated = agents.read_text(encoding="utf-8")
+            self.assertEqual(updated.count(BOOTSTRAP.REDIRECT_LINE), 1)
+            pointer = updated[updated.index(BOOTSTRAP.POINTER_START):updated.index(BOOTSTRAP.POINTER_END)]
+            self.assertIn(BOOTSTRAP.REDIRECT_LINE, pointer)
+            self.assertIn("Keep this note.", updated)
+
+    def test_tracker_names_the_shared_effort_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            BOOTSTRAP.bootstrap(root, config())
+            tracker = (root / "docs/agents/issue-tracker.md").read_text(encoding="utf-8")
+            managed = tracker[tracker.index(BOOTSTRAP.START):tracker.index(BOOTSTRAP.END)]
+            self.assertIn("<working-area>/<effort>/changes/NN-<slug>.md", managed)
+            self.assertIn("<working-area>/<effort>/plan.html", managed)
+            self.assertIn("<working-area>/<effort>/plan-history/", managed)
+            self.assertIn("<working-area>/<effort>/clarify-handoff.md", managed)
+            self.assertIn("Tickets approved", managed)
 
     def test_fenced_initialization_heading_is_not_treated_as_a_live_section(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
@@ -218,6 +244,14 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "supported .scratch/<effort>/issues"):
                 BOOTSTRAP.bootstrap(root, unsupported)
             self.assertEqual(list(root.iterdir()), [])
+
+    def test_feature_placeholder_is_accepted_as_the_tracker_path(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
+            root = Path(tmp)
+            aliased = config()
+            aliased["issueTracker"] = {"kind": "local-markdown", "path": ".scratch/<feature>/issues"}
+            BOOTSTRAP.bootstrap(root, aliased)
+            self.assertTrue((root / "docs/agents/light-project.md").is_file())
 
     def test_empty_domain_context_is_recorded_without_blocking_bootstrap(self) -> None:
         with tempfile.TemporaryDirectory(prefix="project-init-") as tmp:
@@ -496,612 +530,29 @@ class ProjectInitBehaviorTest(unittest.TestCase):
             for field in fields:
                 self.assertIn(field, text, f"{name} does not consume {field}")
 
-    def test_default_invocation_has_no_jev_side_effects(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-no-jev-") as tmp:
+    def test_decision_data_is_recorded_when_given_and_kept_on_rerun(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            report = BOOTSTRAP.bootstrap(root, config())
+            BOOTSTRAP.bootstrap(root, config() | {"decisionData": "private-network"})
             project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertNotIn("typesafe-ai", project)
-            self.assertNotIn("TypeSafe Jev", project)
-            self.assertFalse((root / ".env").exists())
-            self.assertFalse((root / ".gitignore").exists())
-            self.assertFalse((root / ".pi").exists())
-            self.assertNotIn("jev", report)
-
-    def test_detect_typesafe_key_from_env_and_dotenv(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-key-") as tmp:
-            root = Path(tmp)
-            # 1. Neither env nor .env
-            with mock.patch.dict(os.environ, {}, clear=True):
-                found, source = BOOTSTRAP.detect_typesafe_key(root)
-                self.assertFalse(found)
-                self.assertEqual(source, "missing")
-
-            # 2. From os.environ
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-12345"}):
-                found, source = BOOTSTRAP.detect_typesafe_key(root)
-                self.assertTrue(found)
-                self.assertEqual(source, "os.environ")
-
-            # 3. From project-level .env
-            (root / ".env").write_text("TYPESAFE_API_KEY=dotenv-key-67890\nOTHER=1\n", encoding="utf-8")
-            with mock.patch.dict(os.environ, {}, clear=True):
-                found, source = BOOTSTRAP.detect_typesafe_key(root)
-                self.assertTrue(found)
-                self.assertEqual(source, ".env")
-
-    def test_check_global_skill(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-global-") as tmp:
-            skill_root = Path(tmp)
-            # Missing skill
-            self.assertFalse(BOOTSTRAP.check_global_skill("typesafe-ai", search_roots=[skill_root]))
-
-            # Present skill
-            skill_dir = skill_root / "typesafe-ai"
-            skill_dir.mkdir(parents=True)
-            (skill_dir / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n", encoding="utf-8")
-            self.assertTrue(BOOTSTRAP.check_global_skill("typesafe-ai", search_roots=[skill_root]))
-
-    def test_ensure_gitignored(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-ignore-") as tmp:
-            root = Path(tmp)
-            # Creates .gitignore if missing
-            added = BOOTSTRAP.ensure_gitignored(root, ".env")
-            self.assertTrue(added)
-            self.assertTrue((root / ".gitignore").is_file())
-            self.assertIn(".env\n", (root / ".gitignore").read_text(encoding="utf-8"))
-
-            # Does not duplicate if already present
-            added_again = BOOTSTRAP.ensure_gitignored(root, ".env")
-            self.assertFalse(added_again)
-            self.assertEqual((root / ".gitignore").read_text(encoding="utf-8").count(".env"), 1)
-
-            # Appends to existing .gitignore with other content
-            (root / ".gitignore").write_text("node_modules/\n", encoding="utf-8")
-            added_to_existing = BOOTSTRAP.ensure_gitignored(root, ".env")
-            self.assertTrue(added_to_existing)
-            content = (root / ".gitignore").read_text(encoding="utf-8")
-            self.assertIn("node_modules/", content)
-            self.assertIn(".env", content)
-
-    def test_configure_typesafe_key_enforces_gitignore_and_masks_output(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-cfg-") as tmp:
-            root = Path(tmp)
-            secret = "ts-test-secret-abcdef123456"
-            BOOTSTRAP.configure_typesafe_key(root, secret)
-
-            # Enforces gitignore
-            self.assertTrue((root / ".gitignore").is_file())
-            self.assertIn(".env", (root / ".gitignore").read_text(encoding="utf-8"))
-
-            # Writes .env correctly
-            self.assertTrue((root / ".env").is_file())
-            self.assertIn(f"TYPESAFE_API_KEY={secret}", (root / ".env").read_text(encoding="utf-8"))
-
-            # Masking never leaks secret
-            masked = BOOTSTRAP.mask_secret(secret)
-            self.assertNotIn(secret, masked)
-            self.assertEqual(masked, "[REDACTED]")
-
-    def test_jev_opt_in_with_global_key_and_global_skill_reuses_without_local_duplication(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-jev-global-") as tmp:
-            root = Path(tmp)
-            global_skills = Path(tmp) / "global_skills"
-            (global_skills / "typesafe-ai").mkdir(parents=True)
-            (global_skills / "typesafe-ai" / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n", encoding="utf-8")
-
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-global"}):
-                report = BOOTSTRAP.bootstrap(
-                    root,
-                    config(),
-                    capability_roots=[global_skills],
-                    jev=True,
-                    agent_target="pi",
-                )
-
+            self.assertIn("- Decision data: private-network", project)
+            BOOTSTRAP.bootstrap(root, config("Second goal"))
             project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertIn("typesafe-ai", project)
-            self.assertIn("TypeSafe Jev System One semantic acceleration", project)
+            self.assertIn("- Decision data: private-network", project)
+            self.assertIn("Second goal", project)
 
-            # No local skill duplication
-            self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
-            self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
-
-            # Report asserts
-            self.assertIn("jev", report)
-            self.assertTrue(report["jev"]["enabled"])
-            self.assertTrue(report["jev"]["keyDetected"])
-            self.assertEqual(report["jev"]["keySource"], "os.environ")
-            self.assertIn(report["jev"]["skillLocation"], ("canonical-global", "global"))
-
-    def test_jev_opt_in_without_global_skill_installs_local_skill(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-jev-local-") as tmp:
-            root = Path(tmp)
-            target_skill_dir = root / ".pi" / "skills" / "typesafe-ai"
-
-            def fake_installer(project_root: Path, agent_target=None, installer_cmd=None):
-                target_skill_dir.mkdir(parents=True, exist_ok=True)
-                (target_skill_dir / "SKILL.md").write_text("---\nname: typesafe-ai\ndescription: official\n---\n# TypeSafe\n", encoding="utf-8")
-                return True, target_skill_dir, "installed-local"
-
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key-local"}):
-                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", side_effect=fake_installer):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-
-            local_skill = root / ".pi" / "skills" / "typesafe-ai" / "SKILL.md"
-            self.assertTrue(local_skill.is_file())
-            self.assertIn("typesafe-ai", local_skill.read_text(encoding="utf-8"))
-            self.assertEqual(report["jev"]["skillLocation"], "installed-local")
-            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertIn("typesafe-ai", project)
-
-    def test_project_init_never_generates_fake_typesafe_ai_skill(self) -> None:
-        """Verify that missing official skill never generates a stub DEFAULT_TYPESAFE_SKILL_MD."""
-        self.assertFalse(hasattr(BOOTSTRAP, "DEFAULT_TYPESAFE_SKILL_MD"))
-        with tempfile.TemporaryDirectory(prefix="project-init-no-fake-") as tmp:
-            root = Path(tmp)
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
-                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-
-            self.assertFalse((root / ".pi" / "skills" / "typesafe-ai").exists())
-            self.assertFalse((root / ".agents" / "skills" / "typesafe-ai").exists())
-            self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
-            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
-
-    def test_official_skill_install_failure_reports_incomplete_setup(self) -> None:
-        """Verify official installer failure marks Jev onboarding as incomplete without failing project-init."""
-        with tempfile.TemporaryDirectory(prefix="project-init-fail-") as tmp:
-            root = Path(tmp)
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
-                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-
-            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
-            self.assertEqual(report["jev"]["skillLocation"], "JEV_SKILL_SETUP_INCOMPLETE")
-            self.assertTrue((root / "docs/agents/light-project.md").is_file())
-
-    def test_relevant_skills_updated_only_after_verified_skill_availability(self) -> None:
-        """Verify typesafe-ai is added to Relevant Skills ONLY after verified skill setup."""
-        with tempfile.TemporaryDirectory(prefix="project-init-rel-") as tmp:
-            root = Path(tmp)
-            # Case 1: Skill installation fails -> NOT added to Relevant Skills
-            with mock.patch.dict(os.environ, {"TYPESAFE_API_KEY": "test-key"}):
-                with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                        report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-            project_content = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertNotIn("typesafe-ai", project_content)
-
-            # Case 2: Skill verified globally -> added to Relevant Skills
-            global_skills = Path(tmp) / "global_skills"
-            (global_skills / "typesafe-ai").mkdir(parents=True)
-            (global_skills / "typesafe-ai" / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# Valid\n", encoding="utf-8")
-            report2 = BOOTSTRAP.bootstrap(root, config(), capability_roots=[global_skills], jev=True, agent_target="pi")
-            project_content2 = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertIn("typesafe-ai", project_content2)
-
-    def test_optional_jev_setup_failure_preserves_core_bootstrap_success(self) -> None:
-        """Core project-init remains SUCCESS even if optional Jev onboarding fails."""
-        with tempfile.TemporaryDirectory(prefix="project-init-core-success-") as tmp:
-            root = Path(tmp)
-            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(False, None, "JEV_SKILL_SETUP_INCOMPLETE")):
-                    report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-
-            self.assertTrue((root / "docs/agents/light-project.md").is_file())
-            self.assertTrue((root / "docs/agents/issue-tracker.md").is_file())
-            self.assertTrue((root / "AGENTS.md").is_file())
-            self.assertEqual(report["jev"]["status"], "SKILL_INCOMPLETE")
-
-    def test_raw_api_key_never_echoed(self) -> None:
-        """Verify raw API key never appears in report, stdout, or contracts."""
-        with tempfile.TemporaryDirectory(prefix="project-init-secret-") as tmp:
-            root = Path(tmp)
-            secret = "ts-live-secret-test-key-998877"
-            BOOTSTRAP.configure_typesafe_key(root, secret)
-
-            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=True):
-                report = BOOTSTRAP.bootstrap(root, config(), jev=True, agent_target="pi")
-            report_str = json.dumps(report)
-            self.assertNotIn(secret, report_str)
-
-            project_content = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertNotIn(secret, project_content)
-
-    def test_prompt_typesafe_key_uses_getpass(self) -> None:
-        """Verify prompt_typesafe_key uses getpass instead of echoing input."""
-        with tempfile.TemporaryDirectory(prefix="project-init-getpass-") as tmp:
-            root = Path(tmp)
-            with mock.patch("sys.stdin.isatty", return_value=True):
-                with mock.patch.dict(os.environ, {}, clear=True):
-                    with mock.patch("getpass.getpass", return_value="ts-secret-pass") as mock_getpass:
-                        found, source = BOOTSTRAP.prompt_typesafe_key(root)
-                        self.assertTrue(found)
-                        self.assertEqual(source, ".env")
-                        mock_getpass.assert_called_once()
-                        self.assertTrue((root / ".env").is_file())
-                        self.assertIn("ts-secret-pass", (root / ".env").read_text(encoding="utf-8"))
-
-    def test_non_interactive_fallback_defaults_to_no_jev(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="project-init-fallback-") as tmp:
-            root = Path(tmp)
-            with mock.patch("sys.stdin.isatty", return_value=False):
-                report = BOOTSTRAP.bootstrap(root, config(), jev=None)
-            self.assertNotIn("jev", report)
-            project = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertNotIn("typesafe-ai", project)
-
-    def test_cli_flags_jev_and_no_jev(self) -> None:
-        parser = BOOTSTRAP.build_argument_parser()
-        args_jev = parser.parse_args(["--project-root", ".", "--config-json", "{}", "--jev"])
-        self.assertIs(args_jev.jev, True)
-
-        args_no_jev = parser.parse_args(["--project-root", ".", "--config-json", "{}", "--no-jev"])
-        self.assertIs(args_no_jev.jev, False)
-
-        args_default = parser.parse_args(["--project-root", ".", "--config-json", "{}"])
-        self.assertIsNone(args_default.jev)
-
-    def test_active_agent_target_resolution(self) -> None:
-        """Verify host target resolution across Pi, Claude, Cursor, Codex, and fail-closed unknown."""
-        # Explicit target
-        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(explicit_target="pi"), "pi")
-        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(explicit_target="claude"), "claude")
-
-        # Config target
-        self.assertEqual(BOOTSTRAP.resolve_active_agent_target(config={"agentTarget": "cursor"}), "cursor")
-
-        # Environment target
-        with mock.patch.dict(os.environ, {"SKILLS_AGENT_TARGET": "codex"}, clear=True):
-            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "codex")
-
-        # Pi environment variable detection
-        with mock.patch.dict(os.environ, {"PI_APP_NAME": "pi"}, clear=True):
-            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "pi")
-
-        # Claude environment variable detection
-        with mock.patch.dict(os.environ, {"CLAUDE_CODE_ENTRY": "1"}, clear=True):
-            self.assertEqual(BOOTSTRAP.resolve_active_agent_target(), "claude")
-
-        # Unknown environment without evidence fails closed
-        with mock.patch.dict(os.environ, {}, clear=True):
-            with mock.patch.object(Path, "is_dir", return_value=False):
-                self.assertIsNone(BOOTSTRAP.resolve_active_agent_target(config={"instructionFile": "OTHER.md"}))
-
-    def test_unknown_agent_target_fails_closed_without_calling_installer(self) -> None:
-        """P0 (Section 4): Unknown agent target must fail closed and never run installer."""
-        with tempfile.TemporaryDirectory(prefix="project-init-unknown-") as tmp:
-            root = Path(tmp)
-            cfg = config()
-
-            with mock.patch("subprocess.run") as mock_sub:
-                with mock.patch.dict(os.environ, {}, clear=True):
-                    with mock.patch.object(BOOTSTRAP, "resolve_active_agent_target", return_value=None):
-                        report = BOOTSTRAP.bootstrap(root, cfg, jev=True)
-
-            self.assertEqual(report["jev"]["status"], "TARGET_UNRESOLVED")
-            for call_args in mock_sub.call_args_list:
-                cmd = call_args[0][0]
-                self.assertNotIn("skills", cmd)
-                self.assertNotIn("npx", cmd)
-
-    def test_installer_invokes_correct_agent_flags(self) -> None:
-        """P0: Installer commands must include exact --agent <cli_agent> and --yes without real execution."""
-        with tempfile.TemporaryDirectory(prefix="project-init-cmd-") as tmp:
-            root = Path(tmp)
-
-            # Test Pi target -> --agent pi
-            with mock.patch("subprocess.run") as mock_sub:
-                mock_sub.return_value = mock.MagicMock(returncode=0)
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
-                mock_sub.assert_called_once()
-                called_cmd = mock_sub.call_args[0][0]
-                self.assertIn("--agent", called_cmd)
-                self.assertEqual(called_cmd[called_cmd.index("--agent") + 1], "pi")
-                self.assertIn("--yes", called_cmd)
-
-            # Test Claude target -> --agent claude-code
-            with mock.patch("subprocess.run") as mock_sub:
-                mock_sub.return_value = mock.MagicMock(returncode=0)
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="claude")
-                called_cmd = mock_sub.call_args[0][0]
-                self.assertIn("--agent", called_cmd)
-                self.assertEqual(called_cmd[called_cmd.index("--agent") + 1], "claude-code")
-
-    def test_pi_cli_mapping(self) -> None:
-        """Mapping contract: Pi maps to official --agent pi."""
+    def test_no_decision_data_line_unless_given(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "pi")
+            BOOTSTRAP.bootstrap(root, config())
+            self.assertNotIn("Decision data", (root / "docs/agents/light-project.md").read_text(encoding="utf-8"))
 
-    def test_codex_cli_mapping(self) -> None:
-        """Mapping contract: Codex maps to official --agent codex with canonical project path .agents/skills."""
+    def test_unknown_decision_data_fails_before_writes(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="codex")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "codex")
-            self.assertEqual(
-                BOOTSTRAP.AGENT_TARGETS["codex"]["canonical_project_paths"],
-                [Path(".agents/skills")],
-            )
-
-    def test_cursor_cli_mapping(self) -> None:
-        """Mapping contract: Cursor maps to official --agent cursor with canonical project path .agents/skills."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "cursor")
-            self.assertEqual(
-                BOOTSTRAP.AGENT_TARGETS["cursor"]["canonical_project_paths"],
-                [Path(".agents/skills")],
-            )
-
-    def test_claude_code_cli_mapping(self) -> None:
-        """Mapping contract: Claude maps to official --agent claude-code."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="claude")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "claude-code")
-
-    def test_antigravity_cli_mapping(self) -> None:
-        """Mapping contract: Antigravity (agy) maps to official --agent antigravity."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="agy")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "antigravity")
-
-    def test_grok_build_cli_mapping(self) -> None:
-        """Mapping contract: Grok Build (grok-build) maps to official --agent grok."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="grok-build")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "grok")
-
-    def test_hermes_cli_mapping(self) -> None:
-        """Mapping contract: Hermes (hermes) maps to official --agent hermes-agent."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)) as mock_sub:
-                BOOTSTRAP.install_official_typesafe_skill(root, agent_target="hermes")
-                cmd = mock_sub.call_args[0][0]
-                self.assertEqual(cmd[cmd.index("--agent") + 1], "hermes-agent")
-
-    def test_dsh_fails_closed(self) -> None:
-        """P0 (Sections 9, 32): DSH is unsupported by official skills CLI and must fail closed with 0 installer calls."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            with mock.patch("subprocess.run") as mock_sub:
-                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="dsh")
-                self.assertFalse(ok)
-                self.assertIsNone(path)
-                self.assertIn("TARGET_UNRESOLVED", msg)
-                # Must not call installer
-                mock_sub.assert_not_called()
-
-            # Resolver must fail closed
-            self.assertIsNone(BOOTSTRAP.resolve_active_agent_target(root, explicit_target="dsh"))
-            self.assertIsNone(BOOTSTRAP.normalize_agent_target("dsh"))
-
-    def test_internal_host_key_differs_from_cli_agent(self) -> None:
-        """P0 (Sections 3, 5, 40): Enforce abstraction contract internal_host != cli_agent."""
-        expected_mappings = {
-            "claude": "claude-code",
-            "cursor": "cursor",
-            "pi": "pi",
-            "codex": "codex",
-            "agy": "antigravity",
-            "grok-build": "grok",
-            "hermes": "hermes-agent",
-        }
-        for internal_host, expected_cli_agent in expected_mappings.items():
-            self.assertIn(internal_host, BOOTSTRAP.AGENT_TARGETS)
-            self.assertEqual(BOOTSTRAP.AGENT_TARGETS[internal_host]["cli_agent"], expected_cli_agent)
-
-    def test_cursor_canonical_and_legacy_path_scope_verification(self) -> None:
-        """P0 (Sections 7, 12): Cursor canonical project path is .agents/skills, NOT .cursor/skills."""
-        with tempfile.TemporaryDirectory(prefix="cursor-scope-") as tmp:
-            root = Path(tmp)
-
-            # 1. Non-canonical/legacy path only: .cursor/skills
-            legacy_cursor_skill = root / ".cursor" / "skills" / "typesafe-ai"
-            legacy_cursor_skill.mkdir(parents=True)
-            (legacy_cursor_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
-                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
-                # Canonical install verification must NOT falsely pass on legacy path
-                self.assertFalse(ok)
-                self.assertIsNone(path)
-                self.assertIn("expected agent scope", msg)
-
-            # 2. Canonical path: .agents/skills
-            canonical_cursor_skill = root / ".agents" / "skills" / "typesafe-ai"
-            canonical_cursor_skill.mkdir(parents=True)
-            (canonical_cursor_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
-                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="cursor")
-                self.assertTrue(ok)
-                self.assertEqual(path, canonical_cursor_skill)
-
-    def test_global_reuse_distinguishes_canonical_from_legacy(self) -> None:
-        """P0 (Section 13): Distinguish canonical global install from legacy discoverable global."""
-        with tempfile.TemporaryDirectory(prefix="global-scope-") as tmp:
-            fake_home = Path(tmp) / "user_home"
-            fake_home.mkdir()
-
-            # Create skill in legacy global location (.agents/skills)
-            legacy_skill = fake_home / ".agents" / "skills" / "typesafe-ai"
-            legacy_skill.mkdir(parents=True)
-            (legacy_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            # Canonical only should NOT find it for Claude
-            path_can, scope_can = BOOTSTRAP.find_global_skill(
-                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True, canonical_only=True
-            )
-            self.assertIsNone(path_can)
-            self.assertEqual(scope_can, "none")
-
-            # Non-canonical allowed should find it as legacy-global
-            path_leg, scope_leg = BOOTSTRAP.find_global_skill(
-                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True, canonical_only=False
-            )
-            self.assertEqual(path_leg, legacy_skill)
-            self.assertEqual(scope_leg, "legacy-global")
-
-            # Now create in canonical Claude global (~/.claude/skills)
-            can_skill = fake_home / ".claude" / "skills" / "typesafe-ai"
-            can_skill.mkdir(parents=True)
-            (can_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            path_found, scope_found = BOOTSTRAP.find_global_skill(
-                "typesafe-ai", agent_target="claude", home=fake_home, include_scope=True
-            )
-            self.assertEqual(path_found, can_skill)
-            self.assertEqual(scope_found, "canonical-global")
-
-    def test_target_scope_verification(self) -> None:
-        """P0 (Section 5): Installation must verify expected agent scope only."""
-        with tempfile.TemporaryDirectory(prefix="project-init-scope-") as tmp:
-            root = Path(tmp)
-
-            # Create skill in Claude directory, but target is Pi
-            claude_skill = root / ".claude" / "skills" / "typesafe-ai"
-            claude_skill.mkdir(parents=True)
-            (claude_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
-                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
-                # Must fail because it was not installed in Pi scope!
-                self.assertFalse(ok)
-                self.assertIsNone(path)
-                self.assertIn("expected agent scope", msg)
-
-            # Now create in Pi directory
-            pi_skill = root / ".pi" / "skills" / "typesafe-ai"
-            pi_skill.mkdir(parents=True)
-            (pi_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            with mock.patch("subprocess.run", return_value=mock.MagicMock(returncode=0)):
-                ok, path, msg = BOOTSTRAP.install_official_typesafe_skill(root, agent_target="pi")
-                self.assertTrue(ok)
-                self.assertEqual(path, pi_skill)
-
-    def test_canonical_credential_resolution_and_cross_process_availability(self) -> None:
-        """P0 (Sections 7, 8, 49): Canonical credential resolution across simulated processes."""
-        with tempfile.TemporaryDirectory(prefix="project-init-creds-") as tmp:
-            root = Path(tmp)
-            secret = "ts-test-secret-key-12345"
-
-            # 1. Configured via project-init
-            BOOTSTRAP.configure_typesafe_key(root, secret)
-
-            # 2. Re-read without python-dotenv or process env
-            with mock.patch.dict(os.environ, {}, clear=True):
-                key, source = BOOTSTRAP.resolve_typesafe_credentials(root)
-                self.assertEqual(key, secret)
-                self.assertEqual(source, ".env")
-
-                # Test ask-light resolver finds the same project key
-                al_script = ROOT.parent.parent / "productivity" / "ask-light" / "scripts"
-                import sys
-                if str(al_script) not in sys.path:
-                    sys.path.insert(0, str(al_script))
-                from semantic_router import resolve_typesafe_key as ask_light_key_resolver
-                al_key, al_src = ask_light_key_resolver(root)
-                self.assertEqual(al_key, secret)
-                self.assertEqual(al_src, ".env")
-
-                # Test agent-config resolver finds the same project key
-                ac_script = ROOT.parent.parent / "engineering" / "agent-config" / "scripts"
-                if str(ac_script) not in sys.path:
-                    sys.path.insert(0, str(ac_script))
-                from abstract_profiler import resolve_typesafe_key as agent_config_key_resolver
-                ac_key, ac_src = agent_config_key_resolver(root)
-                self.assertEqual(ac_key, secret)
-                self.assertEqual(ac_src, ".env")
-
-    def test_end_to_end_local_integration_without_network(self) -> None:
-        """Section 49: Full local integration test verifying contracts, credentials, and downstream resolvers."""
-        with tempfile.TemporaryDirectory(prefix="project-init-e2e-") as tmp:
-            root = Path(tmp)
-            pi_skill = root / ".pi" / "skills" / "typesafe-ai"
-            pi_skill.mkdir(parents=True)
-            (pi_skill / "SKILL.md").write_text("---\nname: typesafe-ai\n---\n# TypeSafe\n", encoding="utf-8")
-
-            secret_key = "ts-mock-e2e-key-7788"
-            BOOTSTRAP.configure_typesafe_key(root, secret_key)
-
-            fake_client = mock.MagicMock()
-            fake_client.system_one.return_value = mock.MagicMock(
-                nouls={"readiness_check": mock.MagicMock(noul=1.0)}
-            )
-
-            with mock.patch.object(BOOTSTRAP, "check_global_skill", return_value=False):
-                with mock.patch.object(BOOTSTRAP, "verify_typesafe_sdk", return_value=True):
-                    with mock.patch.object(BOOTSTRAP, "install_official_typesafe_skill", return_value=(True, pi_skill, "installed-local")):
-                        report = BOOTSTRAP.bootstrap(
-                            root,
-                            config(),
-                            jev=True,
-                            agent_target="pi",
-                            smoke_client=fake_client,
-                        )
-
-            # Contract checks
-            self.assertEqual(report["jev"]["status"], "READY")
-            self.assertEqual(report["jev"]["agentTarget"], "pi")
-            self.assertTrue(report["jev"]["keyDetected"])
-            self.assertEqual(report["jev"]["keySource"], ".env")
-
-            proj_md = (root / "docs/agents/light-project.md").read_text(encoding="utf-8")
-            self.assertIn("typesafe-ai", proj_md)
-            self.assertIn("TypeSafe Jev System One semantic acceleration", proj_md)
-
-            # New simulated process without process env
-            with mock.patch.dict(os.environ, {}, clear=True):
-                al_script = ROOT.parent.parent / "productivity" / "ask-light" / "scripts"
-                ac_script = ROOT.parent.parent / "engineering" / "agent-config" / "scripts"
-                import sys
-                if str(al_script) not in sys.path:
-                    sys.path.insert(0, str(al_script))
-                if str(ac_script) not in sys.path:
-                    sys.path.insert(0, str(ac_script))
-                from semantic_router import resolve_typesafe_key as al_res
-                from abstract_profiler import resolve_typesafe_key as ac_res
-                k1, _ = al_res(root)
-                k2, _ = ac_res(root)
-                self.assertEqual(k1, secret_key)
-                self.assertEqual(k2, secret_key)
-
-    def test_skills_cli_conventions_provenance_document_and_matrix_parity(self) -> None:
-        """Verify references/skills_cli_conventions.md exists and documents upstream provenance."""
-        ref_doc = ROOT / "references" / "skills_cli_conventions.md"
-        self.assertTrue(ref_doc.is_file(), f"Reference doc missing: {ref_doc}")
-        content = ref_doc.read_text(encoding="utf-8")
-        self.assertIn("vercel-labs/skills", content)
-        self.assertIn("v1.7.0", content)
-        self.assertIn("2026-09-20", content)
-        # Verify all AGENT_TARGETS keys are documented in reference table
-        for key in BOOTSTRAP.AGENT_TARGETS:
-            self.assertIn(f"`{key}`", content)
+            with self.assertRaises(ValueError):
+                BOOTSTRAP.bootstrap(root, config() | {"decisionData": "cloud"})
+            self.assertFalse((root / "docs").exists())
 
 
 if __name__ == "__main__":

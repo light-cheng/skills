@@ -1,8 +1,14 @@
-# Local Jujutsu gates
+# Project version gates
 
 ## Selection
 
-Inherit an existing project version system. For a new Project route, prefer
+Inherit a supported existing project version system. Quick and Structured have
+no version gate. `validate_state.py --check-vcs` dispatches on the declared
+backend; `--check-jj` is a compatibility spelling for that dispatch. A backend
+without receipt-bound gate verification is reported as `VCS_GATES_UNSUPPORTED`,
+not as missing Jujutsu and not as PASS. This package currently verifies the
+Jujutsu gate backend; it does not claim full Git or timestamp-snapshot gate
+support. Return a known dependency gap once, with the resume condition. For a new Project route, prefer
 non-colocated local Jujutsu:
 
 ```text

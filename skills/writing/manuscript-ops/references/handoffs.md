@@ -1,5 +1,9 @@
 # Explicit Skill handoffs
 
+This dependency protocol applies only to Project. A handoff stop returns to the
+caller; it is not evidence that the whole requested task is complete. Consume
+an already explicit, scope-matching authorization without repeating the request.
+
 `manuscript-ops` coordinates dependencies; it does not impersonate or install
 them. Read `assets/dependency-contracts.json` before a Project handoff and run:
 

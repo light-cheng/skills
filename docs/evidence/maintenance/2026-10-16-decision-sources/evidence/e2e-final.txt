@@ -1,0 +1,7 @@
+# e2e on final code (bd25baf, 2026-10-11T12:39:49Z)
+AC calibrated routine high 2.447 0.3942960798740387 deterministic-fallback Upgrade from routine to high not applied: low-confidence (confidence 0.39)
+AC uncalibrated routine low 2.447 0.3942960798740387 deterministic-fallback Upgrade from routine to high not applied: uncalibrated (confidence 0.39)
+ASK agent-config None None
+   ask-light/next-action agent-config 0.9099 on-device local True none agent-config
+   ask-light/reasoning-escalation no 0.637 on-device local True none no
+Total Passed    : 35

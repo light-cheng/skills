@@ -39,6 +39,13 @@ the executor to Light's `.scratch` tracker, introduced host-aware routing via
 non-code artifacts, and separated the concise entry from the detailed
 workflow in `references/`.
 
+## Light changes for optional capabilities (2026-10-11)
+
+These Light changes have no upstream counterpart:
+
+- Implementation reports gain `Plan gap: none | <one sentence>`; a plan gap calls `light-redirect`.
+- `## Optional capabilities` calls `light-decide` (offer agent-config), `light-redirect` and `light-html-plan` (refresh `plan.html` when it exists).
+
 ## MIT notice
 
 MIT License
@@ -63,6 +70,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-## Light canonical name migration (v0.2.7 candidate)
+## Light canonical name migration
 
 The current Light package is `light-implement` (formerly `implement`). Only package identity, UI source labeling, and Light capability references changed. Original upstream paths, pinned revisions, license notices, and responsibilities above remain applicable. Upstream names identify provenance, not current Light invocation.

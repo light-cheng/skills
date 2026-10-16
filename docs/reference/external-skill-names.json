@@ -1,0 +1,39 @@
+{
+  "note": "Skill names used by other collections. A Light package must not reuse one unless it is listed under accepted with the owner's reason. Refresh when a source moves; keep old revisions whose names are still installed in the wild.",
+  "sources": [
+    {
+      "repository": "mattpocock/skills",
+      "revision": "6acc160e4e0cd062dbbbd7a1b26ae92855edf07e",
+      "names": ["ask-matt", "claude-handoff", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "git-guardrails-claude-code", "grill-me", "grill-with-docs", "grilling", "handoff", "implement", "improve-codebase-architecture", "loop-me", "migrate-to-shoehorn", "prototype", "research", "resolving-merge-conflicts", "scaffold-exercises", "setup-matt-pocock-skills", "setup-pre-commit", "setup-ts-deep-modules", "tdd", "teach", "to-questionnaire", "to-spec", "to-tickets", "triage", "wait-what", "wayfinder", "wizard", "writing-beats", "writing-for-agents", "writing-fragments", "writing-shape"]
+    },
+    {
+      "repository": "mattpocock/skills",
+      "revision": "49dd158d1076134a641b33efb035946536778336",
+      "names": ["ask-matt", "chief-of-staff", "claude-handoff", "code-review", "codebase-design", "diagnosing-bugs", "domain-modeling", "git-guardrails-claude-code", "grill-me", "grill-with-docs", "grilling", "handoff", "implement", "implement-spec", "improve-codebase-architecture", "loop-me", "migrate-to-shoehorn", "pr", "prototype", "research", "retro", "scaffold-exercises", "setup-matt-pocock-skills", "setup-pre-commit", "setup-ts-deep-modules", "tdd", "teach", "to-questionnaire", "to-spec", "to-tickets", "triage", "wait-what", "wayfinder", "wizard", "writing-beats", "writing-for-agents", "writing-fragments", "writing-shape"]
+    },
+    {
+      "repository": "anthropics/skills",
+      "revision": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "names": ["academy-guide", "algorithmic-art", "brand-guidelines", "canvas-design", "claude-api", "discernment-nudge", "doc-coauthoring", "docx", "frontend-design", "internal-comms", "mcp-builder", "pdf", "pptx", "skill-creator", "slack-gif-creator", "template", "theme-factory", "web-artifacts-builder", "webapp-testing", "xlsx"]
+    },
+    {
+      "repository": "blader/humanizer",
+      "revision": "e2e92e7b4b8229253ed5c8e81dc65463fdeddda5",
+      "names": ["humanizer"]
+    },
+    {
+      "repository": "op7418/Humanizer-zh",
+      "revision": "91f3d394db8419c20d67ebe22a96cf8fee0a404b",
+      "names": ["humanizer-zh"]
+    },
+    {
+      "repository": "DreambigOu/ELI5",
+      "revision": "a766623b062331fdde53467001379b4ddf3acc2f",
+      "names": ["eli5"]
+    }
+  ],
+  "accepted": {
+    "humanizer": "Owner decision 2026-10-16: the Light humanizer merges humanizer and humanizer-zh into the owner's own Skill. The owner installs only this one; the upstream copies, including the reference copies kept in private skills-3rdParty, are not installed alongside it.",
+    "eli5": "Owner decision 2026-10-16: rewritten from scratch as the owner's own Skill; the owner does not install the upstream copy."
+  }
+}

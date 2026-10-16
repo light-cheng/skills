@@ -37,9 +37,11 @@ def agent_config_recommend(
     approved_preview: Optional[bool] = None,
     setup_intent: bool = False,
     client: Optional[Any] = None,
-    use_jev: bool = True,
+    use_typed_decisions: bool = True,
     profile: Optional[Dict[str, Any]] = None,
     active_session: Optional[Dict[str, Any]] = None,
+    project_root: Optional[Path] = None,
+    decision_policy: Optional[Dict[str, Any]] = None,
 ) -> AgentConfigResult:
     """Recommend right-sized topology, model, and effort for task on current host."""
     if setup_intent:
@@ -62,7 +64,8 @@ def agent_config_recommend(
     if not isinstance(task, (dict, TaskCharacteristics)):
         return AgentConfigResult(readiness="NEED_INPUT", mode="plan-only",
                                  justification="Task characteristics must be an object.")
-    task_obj = TaskCharacteristics.from_dict(task) if isinstance(task, dict) else task
+    # Copy the caller's task: Profile effort below applies to this plan only.
+    task_obj = TaskCharacteristics.from_dict(task if isinstance(task, dict) else task.model_dump())
     if task_obj.reasoning_policy is not None and not isinstance(task_obj.reasoning_policy, str):
         return AgentConfigResult(readiness="NEED_INPUT", mode="plan-only",
                                  justification="Task reasoning policy must be a string.")
@@ -70,7 +73,9 @@ def agent_config_recommend(
     abstract_profile, confidence, fallback_used, fallback_reason = extract_abstract_task_profile(
         task=task_obj,
         client=client,
-        use_jev=use_jev,
+        use_typed_decisions=use_typed_decisions,
+        project_root=project_root,
+        policy=decision_policy,
     )
     if not task_obj.reasoning_policy and isinstance(profile, dict):
         try:
@@ -110,7 +115,7 @@ def agent_config_recommend(
     return select_configuration(
         host=host_obj, task=task_obj, profile=abstract_profile,
         approval=approval, approved_preview=approved_preview,
-        setup_intent=setup_intent, jev_confidence=confidence,
+        setup_intent=setup_intent, decision_confidence=confidence,
         fallback_used=fallback_used, fallback_reason=fallback_reason,
     )
 
@@ -240,7 +245,8 @@ def main() -> int:
     parser.add_argument("--setup", action="store_true", help="Explicit setup intent")
     parser.add_argument("--approval", choices=["unknown", "approved", "declined"], default=None, help="Explicit preview approval state")
     parser.add_argument("--no-preview-approval", action="store_true", help="Simulate user declining preview")
-    parser.add_argument("--no-jev", action="store_true", help="Disable Jev System One judgments")
+    parser.add_argument("--no-typed-decisions", action="store_true", help="Do not ask a typed decision source")
+    parser.add_argument("--project-root", type=Path, default=None, help="Project whose Decision data line limits the decision source")
 
     args = parser.parse_args()
     host_data = json.loads(args.host_json)
@@ -257,7 +263,8 @@ def main() -> int:
         active_session=json.loads(args.active_session_json),
         approval=approval_arg,
         setup_intent=args.setup,
-        use_jev=not args.no_jev,
+        use_typed_decisions=not args.no_typed_decisions,
+        project_root=args.project_root,
     )
 
     print(json.dumps(result.model_dump(), ensure_ascii=False, indent=2))

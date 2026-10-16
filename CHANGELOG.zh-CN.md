@@ -6,7 +6,55 @@
 
 ## 未发布
 
+- v0.2.8 发布准备：README、CATALOG、INSTALLATION、MAINTENANCE（中英）改为 v0.2.8 版本快照；在 `docs/evidence/releases/v0.2.8/` 新增发布说明与发布清单。集合测试改为从目录推出包数，并接受"上一版本"一行，不再要求冻结的当前稳定版本表述。
+- `light-travelpage`（行为变化）：可选 AI 助手可连接 OpenAI 格式（chat completions 或 Responses）和 Anthropic Messages API；删除专为 CPA 写的连接方式和本机地址。新增 `scripts/ai-setup.mjs`，由页面主人在部署时选服务和模型：从 `/models` 识别格式，没有模型列表时接受手填模型 ID，要求一次真实的工具调用，然后把 `AI_BASE_URL`、`AI_API_KEY`、`AI_MODEL`、`AI_API_FORMAT` 写入 `.dev.vars` 或 Pages secrets；key 来自 `AI_API_KEY` 或隐藏输入。公开开关为 `provider: off|on`（`openai` 仍读作 `on`），旧的 `OPENAI_*` 设置继续有效，旅行者不能选择模型、格式或地址。自建或本机网关归可选能力 `light-travelpage-gw`（单独仓库）；`tests/test_composition.py` 接受这一外部可选目标。
+- `eli5`：description 改为"a non-technical explanation"，并排除"为读者改写文档"；触发率评测发现 pi 会在这类改写时加载它。7 个 Port、`eli5` 与阶段 3 能力在 Claude Code 和 pi 上的触发率结果见 `docs/evidence/maintenance/2026-10-16-trigger-eval/`。
+- 证据：`light-decide`、`light-redirect`、`light-html-plan` 及其联合接入的准入记录移入 `docs/evidence/admissions/`，决策来源审查移入 `docs/evidence/maintenance/2026-10-16-decision-sources/`。新增 `scripts/check_evidence_paths.py`：为证据脱敏（`<repo>`、`<tmp>`、`~`、形似 key 的值），并在 v0.2.7 之后新增的证据仍含个人路径或形似 key 的值时失败；`docs/MAINTENANCE.md` 写明何时运行。
+- 跨会话交接与批准记录（阶段 4）：`project-clarify`（以及推荐 `project-clarify` 时的 `clarify`）提议把交接存到 `.scratch/<feature>/clarify-handoff.md`，用户确认后才写；`project-spec` 只拿到 slug 时读这个文件。SPEC 新增 `Approval:` 行（谁、何时、用户原话；批准前写 `pending`），`project-tickets` 在 SPEC 的 `## Comments` 下追加一行 `Tickets approved`，`project-review` 把两者原样引作 Charter 的批准证据。`project-tickets` 不接受写着 `Approval: pending` 的 SPEC，遇到没有这一行的旧 SPEC 先问用户，并且在所有工单文件写完后才加 `Tickets approved` 行。`ask-light` 能识别只放着 `clarify-handoff.md` 的 effort 目录，并路由到 `project-spec`。`project-init` 的 tracker 契约和 `docs/agents/issue-tracker.md` 都列出了它们；重跑 `project-init` 即可补上。新增 `tests/test_handoff_contracts.py`（阶段 6），检查包与包之间的交接：每个产物的写入方和读取方指向同一个路径或字段（clarify 交接、SPEC、批准记录、`US-<n>`、实现报告、`Plan gap:`、`Cause:`、`changes/`、`decisions.md`、`plan.html`）；只有 `docs/agents/triage-labels.md` 列出的负责方会把工单设为 `claimed` 或 `resolved`；只有 `light-redirect` 按用户的答复把变更提案设为 `approved` 或 `rejected`；`project-init` 的 tracker 块使用同一组工单状态。`project-tickets` 的 Wayfinding 说明现在写明由谁认领、由谁 resolve。
+- 项目流程（阶段 4–5 对齐）：software-feature 流程以可选的 `project-clarify` 开头，`light-code-review` 在 `light-implement` 内经 `review-loop` 运行；SPEC 用户故事编号为 `US-<n>`，工单验收项引用它们，Charter 的每条 `AC-<n>` 写明覆盖的故事和工单；`project-review` 的发现登记表写明 `review-loop` 的 state 与 severity 如何对应；`<feature>` 为 `.scratch/` 下的规范占位名，`<effort>` 作为别名仍被接受（`project-init`、`ask-light`）；`docs/agents/triage-labels.md` 列出工单状态值。
+- 准入（新检查）：`scripts/check_skill_names.py` 与 `tests/test_skill_names.py` 在包名与 `docs/reference/external-skill-names.json`（固定版本的 mattpocock/skills、anthropics/skills 及各 Port 的上游）或私有 `skills-3rdParty` 检出（如存在）中的 Skill 重名时失败。`humanizer` 和 `eli5` 记为已接受：两者都是所有者自己的 Skill。
+- **改名（需迁移）：** `resolving-merge-conflicts` 改名为 `light-merge-conflicts`，不再与 mattpocock/skills 原版同名。行为和调用方式不变；旧名没有别名。见 [v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)。
+- `eli5`（重写）：从零重写为所有者编写的 Skill，结构全新（一个核心意思、一个类比、说明类比在哪里不成立），听众表放在 `references/audiences.md`。删除之前迁移来的副本及其 `ATTRIBUTION.md`。名称和模型调用方式不变。
+- `ask-light`（真实 Claude Code 运行中发现）：不传 `--host-name` 时，脚本从环境识别 Claude Code，不再默认当作 Codex，调用写法显示为 `/skill`。项目安装和另一个 Host 的全局安装里都有同一个 Skill 时，校验采用 ask-light 所在集合里的那份，不再返回 `BLOCKED`；其他位置的重复副本仍然阻塞。
+- `ask-light`、`agent-config`（`decision_source.py`）：`Decision data` 表头行不再被读成取值 `off`；能识别 `Decision data — off`（长短破折号）和标题 `## Decision data` 下一行写值的写法。标题后接普通文字时仍按 `off` 处理（失败时关闭）。
+- 判定来源（行为变化）：`ask-light` 与 `agent-config` 不再依赖 TypeSafe Jev。脚本只在项目 `Decision data:` 允许的范围内询问判定客户端；**没写这一行时只问本机上的模型，所以原来用托管 Jev 服务的项目会停止调用它，直到加上 `Decision data: third-party`。** 阈值从代码移到用户策略文件 `~/.config/light/decision-policy.json`；只有问题 id 在那里校准过，答案才会被采用，否则沿用确定性基准，答案按 light-decide 格式保留（ask-light 在 `decisions`，agent-config 在 `abstract_profile.decisions`）。没给项目根时，脚本从当前目录往上找最近的 `docs/agents/light-project.md`；`Decision data:` 写成四个值以外的任何内容都按关闭处理；私网地址只有策略文件写明时才算 `private-network`；调用失败不重试。`agent-config` 保留一条结构规则：降档时分数还要明确落在下一档里。改名：`use_jev` → `use_typed_decisions`，`jev_confidence` → `decision_confidence`，`--no-jev` → `--no-typed-decisions`，来源标记 `jev` → `typed-decision`；`ask-light` 去掉 shadow 模式（未校准的来源现在就是这样工作）。
+- `agent-config`：`agent_config_recommend` 新增 `project_root`（命令行 `--project-root`）和 `decision_policy`，分档时读取项目的 `Decision data:`；不传时只问本机来源。`evals/jev` 改用新接口，用临时项目和评测专用策略运行（`--decision-data`），本机判定服务不需要 key。
+- `light-decide`：找不到来源且确实有用时，提出一次设置（`references/setup.md`）：先探查，再问用户，再推荐云端 API 或本机跑得动的本地模型，需要人手做的步骤推荐 `light-wizard`。用户同意前什么都不开始；拒绝会被记住。
+- `project-init`：移除 TypeSafe Jev 接入（`--jev`、`--no-jev`、`--agent-target`、`--auto-install-sdk`、key 与 SDK 设置、`references/skills_cli_conventions.md`）。用户给出时记录 `Decision data:`（`decisionData`）。
+- `manuscript-ops`：评估脚本把 `light-decide` 对问题 `manuscript-ops/route` 的结果作为 `semantic_result` 接收，只有 light-decide 已采用时才用；校准移到用户策略文件，新输入不再需要 `semantic_policy`。旧快照保留原来的 `decide` 结果和策略，照原样重放。
+- `ask-light`：工作流与导航模式、批准后的转换、结果记录移到 `references/`；`SKILL.md` 从 206 行减到约 140 行。
+- 删除 `docs/architecture/jev-integration-contract.md`。
+
+- 新增 Skill（共 39 个包）：`light-decide`（`thinking/`）在工作流内回答有界判断，用允许的判定来源或 Agent 自己判断，并记到 `.scratch/<feature>/decisions.md`；`light-redirect`（`project/`）在已批准的计划不再成立时把改动提案写到 `.scratch/<feature>/changes/`，并记录用户的答复；`light-html-plan`（`project/`）用 `.scratch/<feature>/plan.html` 一个离线页面讲清计划现状，`assets/` 自带视觉系统。三者都由模型调用、都是可选的：缺少时调用方照原样工作。
+- 计划信号：实现报告新增 `Plan gap:`；`project-review` 的 `FAIL` 记录 `Cause: implementation | direction`。`light-implement` 和 `project-review` 遇到计划缺口或方向性失败时调用 `light-redirect`，`plan.html` 存在时刷新它；`project-spec`、`project-tickets` 应用已批准的改动提案并标为 `applied`。
+- `project-init`：指令文件指针多一行常驻说明（已批准的计划不再成立时，先调用 `light-redirect` 再改其要求），tracker 契约写明 `changes/`、`plan.html`、`plan-history/`。已有项目重跑 `project-init` 即可补上。
+- `decision-map`：等用户答复的改动提案放在 `Not yet specified`，答复后移到 `Decisions so far`。
+- 发布检查：`verify_release_installation.py` 按 39 个包检查；已发布版本的清单按它自己的 tag 计数。
+- 维护流程：增加审查分量。已准入包的日常改动只需本地测试和所有者真实使用；完整审查只用于新准入、调用方式/依赖/attribution 变化、可执行脚本和发布。`AGENTS.md` 改用短句和主动语态，保留全部规则，并新增写作风格规则。
+- `humanizer`：模式清单（§1–§35）和误报检查原样移到 `references/patterns.md`；`SKILL.md` 保留改写规则和流程。
+- `ask-light`：决策原则和证据读法原样移到 `references/routing-judgment.md`。
+- `light-implement`：`AgentConfigResult` 的处理改为指向 `references/WORKFLOW.md`，不在 `SKILL.md` 里重复。
+- 测试：`tests/test_composition.py` 不再断言关键词，改为检查组合图——目标存在、Skill 只调用可由模型调用的能力、路由名称真实、公开示例不用旧名。
+- README：Matt Port 改为 12 个（含 `project-retro`），旧名 `implement` 改为 `light-implement`，对齐快速上手注释。
+- 工单生命周期：`light-implement` 改文件前先写 `Status: claimed`；`project-review` 在 `PASS` 后把工单标为 resolved（`FAIL`/`BLOCKED` 时在评论里写明阻塞原因）。此前没有任何 Skill 负责 resolve，被阻塞的工单永远进不了 frontier。
+- 实现报告：`light-implement` 在已认领的工单下追加实现报告（范围、fixed point、验证、审查剩余 findings）。`project-review` 重跑其中的验证，并把未解决的 findings 作为 `Previous findings` 读入，换新会话后实现阶段的 findings 也能进入终审。
+- Jev 评测：`evals/jev` 的 fixture 仍用旧名 `implement`，已修正；agent-config 的 14 个场景改写为规范 Host 证据加用户确认的 Profile，重新检查配置正确性（model、topology、effort）。effort 标注改为跟随 Profile 确认的 effort 策略，并受 Host 支持值约束。
+- `agent-config`：`agent_config_recommend` 不再把 Profile 的 effort 写进调用方传入的任务对象，同一任务再规划时不会沿用上一次的 effort。
+
+- `manuscript-ops`：按文稿管理需求选择路线，单独确定内容审阅；保留旧 Project 快照，修复普通文档与提取来源登记，提供可选的宿主决策 MCP 判断。本地回归和独立验收证据与发布、全局安装事实分别记录。
+- `release-workflow`：增加双语固定树快照、当前 main 和 Release 正文的版本与状态检查；绑定外部观察及最终 main CI，明确区分本地模拟。没有发布新版本或全局部署。
+
 - `release-workflow`：每次推送前核对最终暂存产物及收据/归档链接；绑定准确候选和最终证明提交等待 CI 成功，交代失败、修复和文件历史红叉。同一阶段的完整修复先收齐审阅和全部产物，再一次最终提交/推送；候选与收据阶段以及真实推送后故障分别记录。保留发布历史及通知设置。
+
+- 测试（发布前审计）：删除只钉措辞、只断言自己写入的夹具文字、只转调另一个测试，或把被测逻辑写在测试文件里的测试（`review-loop`、`generic-review`、`project-retro`、`light-implement`、`decision-map` 和 `project-review` 各 profile 的"行为"测试）。检查路径、字段、状态码和组合边的测试保留。新增一条全集合测试，检查包文件里没有本机主目录路径；包数改为从 `skills/*/*/SKILL.md` 推出，不再写在多处。
+- `check_public_docs.py`（行为变化）：命中实现术语时只打印 `WARNING:`，不再让检查失败。目录状态词按整词匹配，"adapters" 不再算作 ADAPT。README 写了适配器数量而 `harness-support.md` 没写时报错，不再和内置的 10 比较。
+- `clarify`、`project-clarify`、`socratic`：删除 `scripts/session_state.py` 和 `scripts/frontier.py`。Agent 从不运行它们，只有测试调用。澄清流程写在各包的 `SKILL.md` 和 `references/` 里。`manuscript-ops` 在项目交接前改为通过 `references/WORKFLOW.md` 检查 `clarify`，通过 `references/conversation-contract.json` 检查 `socratic`。
+- 中文文档（发布前审计）：`SKILL_ADMISSION.zh-CN.md` 和 `docs/zh-CN/workflows/recipes.md` 改为完整翻译，不再是指向英文页的摘要。`REVIEW_POLICY`、`MAINTENANCE`、`INSTALLATION`、`CATALOG`、`first-party-composition`、`specialized-workflows` 补回缺少的规则、链接和示例。中文页面改为链接中文页面，0.2.1 条目补上缺少的 TravelPage 一行。
+- `light-diagnosing-bugs`、`light-tdd`、`light-prototype`、`light-research`、`light-wizard`、`light-writing-for-agents`、`light-merge-conflicts`：`description` 写明对应的 mattpocock/skills 原版，并提示二者只装一个。`docs/INSTALLATION.zh-CN.md` 说明原因：两份触发说法相同，合并冲突 Port 还曾与上游同名。
+- `ask-light`：`SKILL.md` 从 124 行缩到 73 行。会话流程保留各步骤和硬规则；校验范围、顾问式解释清单和"不得虚构状态"的例子移到 `references/routing-judgment.md`。行为不变。
+- `project-review`、`agent-config`、`light-redirect`：缩短 `SKILL.md`（106→84、94→82、89→77 行）。重复的规则改为链接：companion 健康检查指向 `companion-contract.md`，脚本入口参数移到 `host-evidence-schema.md#script-entry`，redirect 的答复处理和手工编辑移到 `PROPOSAL.md`。行为不变。
+- 来源记录：`project-retro` 不再声称有行为测试套件（已在审计中删除），并记下 `AWAITING_SELECTION` 工作流状态；`project-clarify`、`decision-map`、`socratic` 改用当前包名称呼其路由（`light-research`、`light-prototype`、`light-to-questionnaire`）。
+- `humanizer`：记录 `references/patterns.md` 里哪些引用示例来自维基百科（CC BY-SA 4.0）。
 
 ## 0.2.7 — 2026-10-07
 
@@ -91,6 +139,7 @@
 
 - **Light-TravelPage：** 收录第 35 个第一方包 `light-travelpage`（模型调用）：移动优先旅行页面生成与展示，支持中英双语切换、航班/住宿卡片、区域地图生成、离线优先费用账本及 Cloudflare Pages/Functions/D1 协同多端同步。
 - 保留上游 MIT 素材和固定版本 ATTRIBUTION；增加冲突/幂等恢复、严格校验和 34 项测试。
+- 更新：中英文切换、航班与住宿卡片、区域地图、精致衬线字体，以及固定位置的行程菜单。
 
 ### 重构 — agent-config Profile 权威、执行配置与 Companion 运行时
 
@@ -168,6 +217,64 @@
 - **Review 所有权：** 轻量 reviewer packet 只归 `review-loop`；acceptance registry 与 verdict 归 `project-review`；migration reference 明确为历史材料。
 - **测试：** 新增代表性 top routing、空仓库 bootstrap/rerun、clarification lifecycle、本地 pointer、所有权与历史/runtime 边界测试；通过行为测试消除已修复的 prose coupling，而非恢复旧措辞。
 - **recap：** 根据用户明确修订，`SKILL.md` 现在只含必需 frontmatter 与一条手动 `$recap` 执行语句；输出当前 session 的一句简洁摘要，不替换或压缩对话历史。
+
+### 变更 — 核心工作流与 Socratic 修复
+
+- **ask-light 工作流顾问：** `ask-light` 现在检查项目与工作流证据，说明当前阶段，带理由推荐下一个 Skill，支持集合导航，无需调用方注入根目录即可发现 Light 根，区分第一方来源与同目录的第三方包，并在用户批准后安全转换（Codex 上直接执行是中间状态；未发布版本的最终行为以上文当前 Host 转换策略为准）。
+- **Socratic 前沿轮次：** `socratic` 现在把完整的可行动前沿作为一轮带编号的独立问题提出，附选项与推荐，并接受 `1B, 2A, 3C` 这样的批量回复；`clarify` 和 `project-clarify` 使用相同的轮次交互。
+- **project-init 可用性：** bootstrap 现在把声明的相关能力分为 `available`、`unavailable` 或 `unknown`，从不静默把 `unknown` 提升为 `available`。
+- **Reviewer 所有权：** `review-loop/references/reviewer-contract.md` 是唯一的规范运行时契约；`docs/REVIEWER_CONTRACT.md`（及 zh-CN）现在是面向人的摘要与指针。
+- **页头：** README 主图仍为 `Assets/header.png`，作为新的仓库页头图。
+
+### 变更 — Review 基线完整性
+
+- **ask-light 软件固定点：** `software` Profile 的 verdict 现在只有在当前树仍与 Charter 产出的 `- Fixed point:` 身份一致时才可消费，且只看所记录的实现窗口触及的路径；窗口内的未提交或已提交漂移会把旧 verdict 判为过期，转入 `review-stale → project-review`；窗口外的改动从不使其失效；固定点缺失、无法解析或无法界定（repository-first）时失败关闭（`review-freshness-unknown`）。
+- **ask-light 目录基线：** Charter 引用目录来源时，整个目录就是被审查的基线——记录的修订之后在目录内出现的文件（包括未跟踪文件）现在会让 verdict 过期；被引用目录之外的未跟踪文件，以及只引用文件时的同级文件，仍视为无关。
+- **project-review 产出方契约：** `references/profiles/software.md` 记录持久的双基线记录；Charter 模板（`acceptance-charter.md`）新增仅限 software 的 `- Fixed point:` 行，`init` 工作流把它与基线一起冻结。
+- **测试：** 新增 11 个基于 Git 的回归测试（17 个用例），覆盖 §13/§14 矩阵：新鲜 PASS、实现的未提交/已提交改动、无关改动隔离、过期 FAIL/BLOCKED、固定点缺失/无法解析/无法验证、目录内已跟踪文件修改/删除、新的未跟踪子文件、目录外噪声，以及文件来源的同级隔离。
+
+> 历史说明：本节所述固定点规则经审计为失败开放（监控改动文件集合，且身份可被挽救），
+> 已在**任何发布之前**被下文"软件 review 基线契约"取代。本节原样保留，
+> 因为审计记录必须显示早先规则声称了什么，而不是重新标注它。
+
+### 变更 — 软件 review 基线契约（在任何发布之前取代上文的双值固定点规则）
+
+人工审计在早先未发布的规则下复现了错误的 `accepted` verdict：审查 diff 未触及的、早已存在的范围内文件，以及 PASS 之后在组件内新建的文件，都逃过了新鲜度检查，因为监控集合来自窗口内的改动路径；格式错误的固定点被部分挽救（丢弃无效 token、去重重复项）；而把候选版本冻结进不可变的 Charter，与已授权的"审查 → 有界修复 → 复审"生命周期相矛盾。作为产出方 + 消费方契约修复，全程失败关闭：
+
+- **三字段软件基线（产出方 `project-review`）：** Charter 冻结 `- Fixed point:`（恰好一个完整提交 SHA——不可变的代码审查基点；冻结实际起界定作用的提交，绝不是可变的分支名）和 `- Implementation scope:`（以 `';'` 分隔的仓库相对字面路径——已批准的软件 `In scope` 的机器投影；稳定的组件根，绝不从改动路径、扩展名或公共目录推断；无法验证的目标为 `BLOCKED`，任一无效条目使整个字段被拒）。最终候选版本不在 `init` 时冻结：每个持久的 `PASS`/`FAIL`/`BLOCKED` 都在 `verdict.md` 上记录 `- Reviewed implementation revision:`，因此合法的 C1→C2 修复可以重新绑定验收而不修改 Charter。
+- **消费方新鲜度不变量（`ask-light`）：** 软件 verdict 只有在以下条件全部满足时才可消费：三个身份都严格解析（不挽救、不去重）；基点与最终修订不同、能界定最终修订，且范围内改动非空；在冻结的范围内，已跟踪、已暂存、已提交和未跟踪的新增内容都仍与被审查的修订一致。范围内漂移会让任何旧 verdict 过期（`review-stale`）；范围外改动仍视为无关；整库范围 `.` 有意在 README 改动时过期（没有隐藏例外）；旧格式记录从不被接受（`review-freshness-unknown`），需要重新运行 `project-review`。
+- **测试：** 基于 Git 的矩阵重写为 22 个方法、约 45 个用例：§10–§14 新鲜度矩阵（范围内改动/早已存在/新增/删除、范围外隔离、单文件范围、整库范围）、严格的固定点与最终修订语法、包括有效/无效混合的范围校验、基点/最终修订关系检查、FAIL/BLOCKED 绑定、旧记录不兼容、§16 自我过期防护，以及强制的"审查→修复→PASS"生命周期绑定到 C2。
+- **文档：** `project-review` 的 references（software profile、Charter 模板、workflow、证据协议、迁移说明）定义该契约；`ask-light` 的 discovery-contract 只保留简明的消费方摘要。
+
+### 变更 — 持久基线加固（单例字段、无歧义身份、被忽略文件的完整性）
+
+人工审计在 `52d8638` 复现了三类错误 `accepted`：重复的规范持久字段按"首个匹配胜出"被消费（重复或缺失的 `Profile` 会静默跳过软件新鲜度检查）；多候选的 `Source revision or identity` 值被挽救为第一个可解析的 SHA；被 `.gitignore` / `.git/info/exclude` 从 `git status` 中隐藏的文件逃过了目录来源与实现范围的新鲜度检查。已失败关闭地修复：
+
+- **单例持久字段：** 产出方拥有的规范字段（Charter 中的 `Source:`、`Source revision or identity:`、`Profile:`、`Fixed point:`、`Implementation scope:`；verdict 上的 `Reviewed implementation revision:`）是单例字段——出现次数是有效性的一部分。恰好出现一次才解析；零次或多次（即使是完全相同的重复）都失败关闭为 `review-freshness-unknown` / `review-ownership-unknown`，与字段顺序无关。`ask-light` 从不对权威字段采用"第一个值胜出"。
+- **无歧义来源身份：** `Source revision or identity` 只有在恰好携带一个无歧义、可在本地解析的 Git 提交时才可用；无效+有效、有效+有效、重复值或重复字段都失败关闭，不做部分挽救。非 Git 身份仍不被消费方支持（失败关闭，未变）。
+- **被忽略文件的完整性：** 目录来源与实现范围的新文件检测现在使用 `git ls-files --others`（字面 pathspec，不带 `--exclude-standard`），因此范围内被忽略的文件会像其他新增内容一样让 verdict 过期。Git ignore 控制的是状态展示，而不是范围归属；单文件范围、只引用文件的来源和范围外路径保持原有的窄语义。
+- **产出方文档：** `project-review` 的 references（Charter 模板、software profile、workflow）写明单例规则，以及被审查范围的完整性包括被 Git 忽略的文件；`ask-light` 的 discovery-contract 记录消费方摘要。
+- **测试：** 新增 19 个基于 Git 的回归方法（ask-light 套件共 122 个）：单例出现次数矩阵（含顺序无关性，以及经真实路由路径的持久记录篡改）、来源修订歧义矩阵、被忽略文件矩阵（范围内/范围外、单文件、整库、目录来源的子文件），以及有效基线的正向对照。
+
+### 变更 — 持久 review 事务一致性（charter.md + state.md + verdict.md）
+
+人工审计在 `38f4f9b` 复现了错误的 `accepted` verdict：`state.md` 处于活动/非终态（READY、CRITIC、REPAIR、EVALUATE）、缺失，或已更新到新的 Charter 修订但仍保留之前的 PASS verdict。`ask-light` 现在把 `charter.md` + `state.md` + `verdict.md` 作为一个一致的 review 事务来评估：
+
+- **必须有状态文件：** `state.md` 必须存在，并给出规范的单例字段（`Status:`、`Charter revision:`、`Profile:`）。字段缺失或重复时失败关闭为 `review-state-unknown`。
+- **活动状态压过旧 verdict：** 活动的 review 状态（`INIT`、`READY`、`CRITIC`、`REPAIR`、`EVALUATE`）立即路由到 `project-review`（阶段 `project-review`）；之前的任何 `verdict.md` 都不具权威性，从不被接受。
+- **终态 State/Verdict 一致：** 终态 review 状态（`PASS`、`FAIL`、`BLOCKED`）要求有一致的 `verdict.md`；冲突时失败关闭为 `acceptance-unknown`。
+- **Charter 修订与 Profile 一致：** `state.md` 的 `Charter revision` 和 `Profile` 都必须与 `charter.md` 一致；不一致时失败关闭为 `review-state-unknown`。
+- **测试与冒烟：** 新增 15 个测试方法（pytest 套件共 300 个测试，ask-light 套件 137 个），覆盖完整的事务矩阵、重新打开生命周期、Charter 更新生命周期、C1→修复→C2 生命周期，以及在真实持久状态上的 24 个手动冒烟场景。
+
+### 变更 — 终态 review 事务身份绑定（State 与 Verdict 的 Round、强制的 Verdict 身份、唯一结论）
+
+修复了 `d414a3b` 处的错误 `accepted` 缺陷：终态 State（例如第 2 轮 PASS）可能接受旧轮次的 PASS verdict（第 1 轮），因为 `Round` 未被绑定，且 Verdict 侧的 Charter 修订和 Profile 是可选的。完成了持久 review 事务契约：
+
+- **Round 绑定（`state.md` + `verdict.md`）：** `Round` 是 `state.md`（缺失/重复/格式错误时为 `review-state-unknown`）和终态 `verdict.md`（缺失/重复/格式错误/不一致时为 `acceptance-unknown`）中强制的规范单例字段。规范的产出方语法（`1`、`2`、`round-01`、`round-01 (final)`）被解析为规范化的 review 轮次身份。
+- **强制的 Verdict 身份：** `Charter revision:` 和 `Profile:` 是终态 `verdict.md` 上强制的单例字段；缺失、重复或不一致时失败关闭为 `acceptance-unknown`。
+- **唯一的终态结论语义：** 终态结论集合（`PASS`、`FAIL`、`BLOCKED`）必须解析为恰好一个无歧义的结论；多个或相互冲突的结论（`PASS+FAIL`、`PASS+BLOCKED`、`FAIL+BLOCKED`、`PASS+FAIL+BLOCKED`）失败关闭为 `acceptance-unknown`。
+- **安全的收尾顺序：** 产出方文档（`WORKFLOW.md`）明确规定失败安全的收尾顺序（`写当前轮次 verdict → 校验持久字段 → 把状态设为终态`），确保中间状态失败关闭。
+- **测试与冒烟：** 新增 6 个测试方法（pytest 套件共 306 个测试，ask-light 套件 143 个），覆盖完整的事务身份矩阵、Round 不一致、Verdict 身份要求、终态结论唯一性、SPEC §14 重新打开轮次生命周期，以及 24 个手动冒烟场景。
 
 ### No-Redesign 验证
 
@@ -315,4 +422,4 @@
 - 稳定 tag：v0.1.0。
 - v0.1.0 的整集合与单 Skill 安装命令曾针对 fresh destination 和已发布包内容完成验证；这份历史证据与 v0.1.1 release 证据一并保留。
 - 历史命令：`npx skills add LightDevCoder/skills` 和 `npx skills add LightDevCoder/skills --skill review-loop`。
-- 历史安装明细：[v0.1.0 摘要](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v0.1.0-摘要)。
+- 历史安装明细：[v0.1.0 摘要](docs/evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v010-摘要)。

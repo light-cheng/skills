@@ -1,11 +1,12 @@
-"""Bounded Jev multi-primitive semantic router for ask-light.
+"""Bounded semantic router for ask-light, on the light-decide script path.
 
-Connects TypeSafe Jev System One judgments with deterministic fallbacks:
-  1. Choice: Constrained strictly to code-computed legal candidates when >1 candidate exists.
-  2. Noul: Bounded ambiguity detection and reasoning escalation queries where an active consumer exists.
-  3. Conditional query planning: Skips Choice for singleton candidate sets; tracks query reasons.
-  4. Defense-in-depth: Unauthorized selections rejected; fails closed on hard bounds.
-  5. Soft dependency: Graceful fallback when typesafe-sdk is not installed or TYPESAFE_API_KEY is unset.
+Asks a typed decision client only within the project's `Decision data:` limit:
+  1. Choice: constrained to code-computed legal candidates when >1 candidate exists.
+  2. Yes/no: ambiguity and reasoning-escalation questions, only where a consumer exists.
+  3. Policy: a typed answer is applied only when the user's policy file calibrates
+     its question id and the answer meets that threshold; otherwise the
+     deterministic baseline stands and the typed answer is kept on record.
+  4. Every judgment is returned in the light-decide normalized format.
 """
 
 from __future__ import annotations
@@ -13,39 +14,6 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-def resolve_typesafe_key(project_root: Optional[Path] = None) -> tuple[Optional[str], str]:
-    """Canonical credential resolution for TypeSafe API key.
-
-    Order:
-      1. Current process environment: os.environ["TYPESAFE_API_KEY"]
-      2. Explicit active project .env (parsed line-by-line, no python-dotenv dependency)
-      3. Unavailable (None, "missing")
-
-    Never scans arbitrary parents or unrelated current-working-directory .env files.
-    """
-    env_key = os.environ.get("TYPESAFE_API_KEY", "").strip()
-    if env_key:
-        return env_key, "os.environ"
-
-    if project_root is not None:
-        env_path = project_root / ".env"
-        if env_path.is_file():
-            try:
-                for line in env_path.read_text(encoding="utf-8").splitlines():
-                    line = line.strip()
-                    if not line or line.startswith("#") or "=" not in line:
-                        continue
-                    k, v = line.split("=", 1)
-                    if k.strip() == "TYPESAFE_API_KEY":
-                        clean_v = v.strip().strip("'\"")
-                        if clean_v:
-                            return clean_v, ".env"
-            except Exception:
-                pass
-
-    return None, "missing"
-
 
 try:
     from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
@@ -70,23 +38,19 @@ except ImportError:
             raise RuntimeError("TypeSafe SDK is not installed.")
 
 try:
-    from .compact_state_builder import build_compact_jev_state
-    from .ask_light_models import (
-        AskLightRecommendation,
-        JevPolicy,
-        LegalActionsResult,
-        SemanticJudgments,
-    )
+    from .compact_state_builder import build_compact_decision_state
+    from .ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
+    from .decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution, valid_probability, yes_no_probabilities
 except ImportError:
-    from compact_state_builder import build_compact_jev_state
-    from ask_light_models import (
-        AskLightRecommendation,
-        JevPolicy,
-        LegalActionsResult,
-        SemanticJudgments,
-    )
+    from compact_state_builder import build_compact_decision_state
+    from ask_light_models import AskLightRecommendation, LegalActionsResult, SemanticJudgments
+    from decision_source import is_timeout, make_client, own_result, resolve_source, typed_result, valid_distribution, valid_probability, yes_no_probabilities
 
-DEFAULT_POLICY = JevPolicy()
+QUESTION_IDS = {
+    "next_action": "ask-light/next-action",
+    "has_material_ambiguity": "ask-light/material-ambiguity",
+    "needs_deep_reasoning_escalation": "ask-light/reasoning-escalation",
+}
 
 
 def plan_semantic_queries(
@@ -94,7 +58,7 @@ def plan_semantic_queries(
     user_request: str,
     enable_expanded_judgments: bool = True,
 ) -> tuple[Dict[str, Any], List[str], Dict[str, str], Dict[str, str]]:
-    """Plan minimal necessary Jev questions based on deterministic facts, active consumers, and request phrasing.
+    """Plan the minimal necessary decision questions based on deterministic facts, active consumers, and request phrasing.
 
     Invariants:
       1. Non-executable queries (BLOCKED, NEED_INPUT, EXPLAIN) send 0 questions.
@@ -104,7 +68,7 @@ def plan_semantic_queries(
          - If allowed_actions == ["light-implement"] and user phrasing contains explicit ambiguity keywords (recommends clarify alternative).
          - If allowed_actions == ["project-clarify"] alone, NO question is sent (clarify is already the only action; zero-value inference).
       4. Escalation Noul is sent ONLY when "light-implement" is in allowed_actions and task complexity warrants agent-config alternative.
-      5. Execution intent Noul is REMOVED: authorization is 100% deterministic code; Jev output cannot grant transition authority.
+      5. Execution intent Noul is REMOVED: authorization is 100% deterministic code; a typed answer cannot grant transition authority.
     """
     questions: Dict[str, Any] = {}
     questions_sent: List[str] = []
@@ -173,268 +137,201 @@ def plan_semantic_queries(
     return questions, questions_sent, reasons_needed, consumers
 
 
-def route_with_jev(
+def _question_text(questions: Dict[str, Any], key: str) -> str:
+    return getattr(questions[key], "instructions", key)
+
+
+def _own_results(
+    questions: Dict[str, Any],
+    legal_result: LegalActionsResult,
+    baseline_skill: str,
+    reason: str,
+) -> List[Dict[str, Any]]:
+    results = []
+    for key in questions:
+        if key == "next_action":
+            results.append(own_result(QUESTION_IDS[key], _question_text(questions, key), "choice",
+                                      legal_result.allowed_actions, baseline_skill, reason))
+        else:
+            results.append(own_result(QUESTION_IDS[key], _question_text(questions, key), "yes_no",
+                                      ["yes", "no"], "no", reason))
+    return results
+
+
+def route_with_decisions(
     legal_result: LegalActionsResult,
     user_request: str,
     client: Optional[Any] = None,
-    confidence_threshold: Optional[float] = None,
-    policy: Optional[JevPolicy] = None,
+    policy: Optional[Dict[str, Any]] = None,
     enable_expanded_judgments: bool = True,
-    shadow_mode: bool = False,
     project_root: Optional[Path] = None,
 ) -> AskLightRecommendation:
-    """Judge legal candidate actions using bounded Jev semantic primitives with calibrated fallback.
+    """Judge legal candidate actions through a typed decision source within the data limit.
 
     Invariants:
-      1. Never called if legal_result is BLOCKED, NEED_INPUT, or EXPLAIN.
-      2. Choice is invoked ONLY when len(allowed_actions) > 1. Singleton candidates skip Choice.
-      3. Jev output CANNOT grant transition authority (final_status remains legal_result.status).
-      4. Degrades gracefully to explicit fallback_action on error, low confidence, or missing credentials.
-      5. Calibrated uncertainty policy governs escalation and fallbacks.
+      1. Never asks for BLOCKED, NEED_INPUT, EXPLAIN or TERMINAL states.
+      2. Choice is asked ONLY when len(allowed_actions) > 1.
+      3. A typed answer CANNOT grant transition authority (status stays legal_result.status).
+      4. An answer outside the legal options, an uncalibrated question, a low
+         confidence, an error or a disallowed destination keeps the baseline.
     """
-    effective_policy = policy or DEFAULT_POLICY
-    min_choice_conf = confidence_threshold if confidence_threshold is not None else effective_policy.action_choice_min_confidence
-
-    # Guard 1: Non-executable or blocked states return deterministic decision immediately
     if legal_result.status in ["BLOCKED", "NEED_INPUT", "EXPLAIN"]:
         return AskLightRecommendation(
             status=legal_result.status,
-            primary_skill=None,
-            alternative_skill=None,
             target_item=legal_result.target_item,
-            confidence=None,
-            probabilities={},
-            fallback_used=False,
-            fallback_reason=None,
             fail_closed=legal_result.fail_closed,
             justification=legal_result.blocked_reason or "Non-execution query resolved deterministically.",
         )
 
-    # Guard 2: Terminal state for accepted review
     if legal_result.status == "TERMINAL":
         return AskLightRecommendation(
             status="TERMINAL",
-            primary_skill=None,
             alternative_skill="release-workflow",
-            target_item=None,
             confidence=1.0,
-            probabilities={},
-            fallback_used=False,
-            fail_closed=False,
             justification="Current effort accepted and complete; no mandatory next workflow step.",
         )
 
-    # Guard 3: If no allowed actions exist, halt
     if not legal_result.allowed_actions:
         return AskLightRecommendation(
             status="BLOCKED",
-            primary_skill=None,
-            target_item=None,
-            fallback_used=False,
             fail_closed=True,
             justification="No legal workflow actions available for current project state.",
         )
 
-    # Baseline deterministic action (explicit fallback_action preferred over list order)
     baseline_skill = legal_result.fallback_action or legal_result.allowed_actions[0]
-    baseline_justification = f"Deterministic baseline selected {baseline_skill} from legal candidates."
-
-    # If TypeSafe is not installed or no API key, fall back immediately
-    api_key, _ = resolve_typesafe_key(project_root)
-    if not TYPESAFE_AVAILABLE or not api_key:
-        return AskLightRecommendation(
-            status=legal_result.status,
-            primary_skill=baseline_skill,
-            alternative_skill=None,
-            target_item=legal_result.target_item,
-            confidence=None,
-            probabilities={baseline_skill: 1.0},
-            fallback_used=True,
-            fallback_reason="TypeSafe SDK or TYPESAFE_API_KEY unavailable; used deterministic baseline.",
-            fail_closed=legal_result.fail_closed,
-            justification=baseline_justification,
-        )
-
-    # Build compact token-efficient state
-    compact_state = build_compact_jev_state(legal_result, user_request)
-
-    # Query planning: Only ask what is needed
-    questions, questions_sent, reasons_needed, consumers = plan_semantic_queries(
-        legal_result,
-        user_request,
-        enable_expanded_judgments=enable_expanded_judgments,
+    questions, questions_sent, reasons_needed, _ = plan_semantic_queries(
+        legal_result, user_request, enable_expanded_judgments=enable_expanded_judgments,
     )
-    need_choice = "next_action" in questions
 
-    # If query planning determined zero semantic questions needed, return deterministic baseline
     if not questions:
         return AskLightRecommendation(
             status=legal_result.status,
             primary_skill=baseline_skill,
-            alternative_skill=None,
             target_item=legal_result.target_item,
             confidence=1.0,
             probabilities={baseline_skill: 1.0},
-            semantic_judgments=SemanticJudgments(
-                action_choice=None,
-                action_confidence=None,
-                action_probabilities={},
-                questions_sent=[],
-                reason_each_question_needed={},
-            ),
-            fallback_used=False,
-            fallback_reason=None,
+            semantic_judgments=SemanticJudgments(),
             fail_closed=legal_result.fail_closed,
             justification=f"Deterministic action {baseline_skill} selected; query planner determined zero semantic queries needed.",
         )
 
-    try:
-        ts_client = client or TypeSafeClient(api_key=api_key)
-        response = ts_client.system_one(state=compact_state, questions=questions)
+    source = resolve_source(project_root, TYPESAFE_AVAILABLE or client is not None, policy)
 
-        if need_choice:
-            choice_ans = response.choices.get("next_action")
-            if not choice_ans:
-                raise ValueError("Choice answer 'next_action' missing from Jev response")
-            selected_skill = choice_ans.choice
-            confidence = choice_ans.confidence
-            probabilities = dict(choice_ans.probabilities)
-        else:
-            selected_skill = baseline_skill
-            confidence = 1.0
-            probabilities = {baseline_skill: 1.0}
-
-        ambiguity_prob = 0.0
-        escalation_prob = 0.0
-
-        if enable_expanded_judgments and hasattr(response, "nouls") and response.nouls:
-            noul_ambig = response.nouls.get("has_material_ambiguity")
-            noul_escala = response.nouls.get("needs_deep_reasoning_escalation")
-
-            if noul_ambig and hasattr(noul_ambig, "noul") and isinstance(noul_ambig.noul, (int, float)):
-                ambiguity_prob = float(noul_ambig.noul)
-            if noul_escala and hasattr(noul_escala, "noul") and isinstance(noul_escala.noul, (int, float)):
-                escalation_prob = float(noul_escala.noul)
-
-        semantic_judgments = SemanticJudgments(
-            action_choice=selected_skill if need_choice else None,
-            action_confidence=confidence if need_choice else None,
-            action_probabilities=probabilities if need_choice else {},
-            execution_intent_probability=None,
-            ambiguity_probability=ambiguity_prob if "has_material_ambiguity" in questions_sent else None,
-            escalation_probability=escalation_prob if "needs_deep_reasoning_escalation" in questions_sent else None,
-            questions_sent=questions_sent,
-            reason_each_question_needed=reasons_needed,
-        )
-
-        # Defense-in-depth: Verify Jev selected strictly from legal allowed_actions
-        if selected_skill not in legal_result.allowed_actions:
-            return AskLightRecommendation(
-                status=legal_result.status,
-                primary_skill=baseline_skill,
-                alternative_skill=None,
-                target_item=legal_result.target_item,
-                confidence=None,
-                probabilities={},
-                semantic_judgments=semantic_judgments,
-                fallback_used=True,
-                fallback_reason=f"Jev selected unauthorized action '{selected_skill}' not in allowed set.",
-                fail_closed=legal_result.fail_closed,
-                justification=f"Jev unauthorized action prevented; defaulted to legal action {baseline_skill}.",
-            )
-
-        # Escalation policy check: high complexity/escalation signal
-        escalated = False
-        escalation_reason = None
-        alternative_skill = None
-        if escalation_prob >= effective_policy.escalation_threshold:
-            escalated = True
-            escalation_reason = f"High reasoning escalation need detected (p={escalation_prob:.2f})."
-            if selected_skill == "light-implement":
-                alternative_skill = "agent-config"
-
-        # Material ambiguity routing: if high ambiguity detected and clarify is an option or alternative
-        if ambiguity_prob >= effective_policy.ambiguity_threshold:
-            if "project-clarify" in legal_result.allowed_actions:
-                selected_skill = "project-clarify"
-            elif "light-implement" in legal_result.allowed_actions:
-                alternative_skill = "project-clarify"
-
-        # HARD INVARIANT (Section 12): Jev output cannot grant TRANSITION authority!
-        final_status = legal_result.status
-
-        # Shadow mode evaluation: record judgments, return deterministic baseline
-        if shadow_mode:
-            return AskLightRecommendation(
-                status=legal_result.status,
-                primary_skill=baseline_skill,
-                alternative_skill=alternative_skill,
-                target_item=legal_result.target_item,
-                confidence=confidence,
-                probabilities=probabilities,
-                semantic_judgments=semantic_judgments,
-                fallback_used=False,
-                fallback_reason="Shadow mode: deterministic baseline returned; Jev judgments recorded.",
-                escalated=escalated,
-                escalation_reason=escalation_reason,
-                fail_closed=legal_result.fail_closed,
-                justification=f"Shadow mode active: baseline {baseline_skill} retained (Jev judged {selected_skill}).",
-            )
-
-        # Calibrated uncertainty threshold policy check for Choice
-        if need_choice and confidence < min_choice_conf:
-            return AskLightRecommendation(
-                status=final_status,
-                primary_skill=baseline_skill,
-                alternative_skill=selected_skill if selected_skill != baseline_skill else None,
-                target_item=legal_result.target_item,
-                confidence=confidence,
-                probabilities=probabilities,
-                semantic_judgments=semantic_judgments,
-                fallback_used=True,
-                fallback_reason=f"Jev confidence {confidence:.2f} below threshold {min_choice_conf:.2f}.",
-                escalated=escalated,
-                escalation_reason=escalation_reason,
-                fail_closed=legal_result.fail_closed,
-                justification=f"Borderline Jev confidence ({confidence:.2f}); safely preserved baseline {baseline_skill}.",
-            )
-
-        # Success: Bounded Jev judgment accepted
-        if need_choice:
-            justification_msg = f"Jev selected {selected_skill} (confidence {confidence:.2f}) from legal candidates."
-        else:
-            justification_msg = f"Deterministic action {selected_skill} selected (single legal candidate)."
-
-        if escalated:
-            justification_msg += f" Note: Escalation recommended ({escalation_reason}); recommend higher reasoning effort or agent-config."
-
-        return AskLightRecommendation(
-            status=final_status,
-            primary_skill=selected_skill,
-            alternative_skill=alternative_skill,
-            target_item=legal_result.target_item,
-            confidence=confidence,
-            probabilities=probabilities,
-            semantic_judgments=semantic_judgments,
-            fallback_used=False,
-            fallback_reason=None,
-            escalated=escalated,
-            escalation_reason=escalation_reason,
-            fail_closed=legal_result.fail_closed,
-            justification=justification_msg,
-        )
-
-    except Exception as exc:
-        # Graceful fallback on any API / network / auth failure
+    def baseline(reason: str, note: str) -> AskLightRecommendation:
         return AskLightRecommendation(
             status=legal_result.status,
             primary_skill=baseline_skill,
-            alternative_skill=None,
             target_item=legal_result.target_item,
-            confidence=None,
-            probabilities={},
+            probabilities={baseline_skill: 1.0},
             fallback_used=True,
-            fallback_reason=f"Jev call failed ({type(exc).__name__}: {exc}); fell back to deterministic baseline.",
+            fallback_reason=note,
             fail_closed=legal_result.fail_closed,
-            justification=baseline_justification,
+            justification=f"Deterministic baseline selected {baseline_skill} from legal candidates.",
+            decisions=_own_results(questions, legal_result, baseline_skill, reason),
         )
+
+    if not source.usable:
+        if source.reason == "off":
+            note = "Decision data is off" + ("" if source.limit_recognized else " (unrecognized Decision data line)") + "; used deterministic baseline."
+        else:
+            note = f"No typed decision source available within Decision data '{source.limit}'; used deterministic baseline."
+            if source.limit == "private-network" and source.data == "third-party":
+                note += " A machine on your own network counts only when its policy entry declares data: private-network."
+        return baseline(source.reason, note)
+
+    try:
+        ts_client = client or make_client(TypeSafeClient, source)
+        response = ts_client.system_one(
+            state=build_compact_decision_state(legal_result, user_request), questions=questions,
+        )
+    except Exception as exc:
+        reason = "timeout" if is_timeout(exc) else "unavailable"
+        return baseline(reason, f"Decision source call failed ({type(exc).__name__}); used deterministic baseline.")
+
+    decisions: List[Dict[str, Any]] = []
+    selected_skill = baseline_skill
+    choice_confidence: Optional[float] = None
+    probabilities: Dict[str, float] = {baseline_skill: 1.0}
+    finals: Dict[str, str] = {}
+    yes_probs: Dict[str, float] = {}
+
+    if "next_action" in questions:
+        choice_ans = (getattr(response, "choices", None) or {}).get("next_action")
+        raw = getattr(choice_ans, "probabilities", None)
+        if choice_ans is None or not valid_distribution(raw, legal_result.allowed_actions):
+            decisions.append(own_result(QUESTION_IDS["next_action"], _question_text(questions, "next_action"),
+                                        "choice", legal_result.allowed_actions, baseline_skill, "malformed"))
+        else:
+            probabilities = {str(k): float(v) for k, v in raw.items()}
+            result = typed_result(
+                source, QUESTION_IDS["next_action"], _question_text(questions, "next_action"), "choice",
+                legal_result.allowed_actions, str(choice_ans.choice), probabilities, baseline_skill,
+                provider_confidence=getattr(choice_ans, "confidence", None),
+            )
+            decisions.append(result)
+            selected_skill = result["final"]
+            if result["applied"]:
+                choice_confidence = result["confidence"]
+            else:
+                probabilities = {baseline_skill: 1.0}
+
+    nouls = getattr(response, "nouls", None) or {}
+    for key in ("has_material_ambiguity", "needs_deep_reasoning_escalation"):
+        if key not in questions:
+            continue
+        value = getattr(nouls.get(key), "noul", None)
+        if not valid_probability(value):
+            decisions.append(own_result(QUESTION_IDS[key], _question_text(questions, key), "yes_no",
+                                        ["yes", "no"], "no", "malformed"))
+            finals[key] = "no"
+            continue
+        yes_probs[key] = float(value)
+        probs = yes_no_probabilities(value)
+        answer = "yes" if probs["yes"] >= 0.5 else "no"
+        result = typed_result(source, QUESTION_IDS[key], _question_text(questions, key), "yes_no",
+                              ["yes", "no"], answer, probs, "no")
+        decisions.append(result)
+        finals[key] = result["final"]
+
+    alternative_skill = None
+    escalated = finals.get("needs_deep_reasoning_escalation") == "yes"
+    escalation_reason = "Calibrated decision source judged that this request needs deeper reasoning." if escalated else None
+    if escalated and selected_skill == "light-implement":
+        alternative_skill = "agent-config"
+    if finals.get("has_material_ambiguity") == "yes":
+        if "project-clarify" in legal_result.allowed_actions:
+            selected_skill = "project-clarify"
+        elif "light-implement" in legal_result.allowed_actions:
+            alternative_skill = "project-clarify"
+
+    fallen_back = [d for d in decisions if d["fallback_reason"] != "none"]
+    fallback_used = bool(fallen_back)
+    fallback_reason = None
+    if fallback_used:
+        reasons = sorted({d["fallback_reason"] for d in fallen_back})
+        fallback_reason = "Typed answers not used (" + ", ".join(reasons) + "); baseline kept where they were not applied."
+
+    return AskLightRecommendation(
+        status=legal_result.status,
+        primary_skill=selected_skill,
+        alternative_skill=alternative_skill,
+        target_item=legal_result.target_item,
+        confidence=choice_confidence,
+        probabilities=probabilities,
+        semantic_judgments=SemanticJudgments(
+            action_choice=next((d["answer"] for d in decisions if d["question_id"] == QUESTION_IDS["next_action"]), None),
+            action_confidence=choice_confidence,
+            action_probabilities=next((d["probabilities"] for d in decisions if d["question_id"] == QUESTION_IDS["next_action"]), {}),
+            ambiguity_probability=yes_probs.get("has_material_ambiguity"),
+            escalation_probability=yes_probs.get("needs_deep_reasoning_escalation"),
+            questions_sent=questions_sent,
+            reason_each_question_needed=reasons_needed,
+        ),
+        fallback_used=fallback_used,
+        fallback_reason=fallback_reason,
+        escalated=escalated,
+        escalation_reason=escalation_reason,
+        fail_closed=legal_result.fail_closed,
+        justification=f"Selected {selected_skill} from legal candidates; see decisions for each judgment.",
+        decisions=decisions,
+    )

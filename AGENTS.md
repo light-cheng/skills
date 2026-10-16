@@ -1,85 +1,90 @@
-# First-Party Skills Repository Maintenance Contract
+# Light Skills — maintainer guide
 
-> Local workspace tracker: inspect `.scratch/` for the active feature directory — see `docs/agents/issue-tracker.md`. This note is local-only and does not alter the maintenance contract below.
+> Local workspace tracker: inspect `.scratch/` for the active feature directory — see `docs/agents/issue-tracker.md`. This note is local-only.
 
-This file routes maintenance work in this repository. Detailed requirements live in the linked governance documents; do not duplicate their rules into individual Skill packages or project instructions.
+This file tells an Agent how to maintain this repository. The detailed rules live in the linked documents; do not copy them into Skill packages.
 
-## Ownership boundary
+## What belongs here
 
-The repository may contain only:
+The repository holds only:
 
-- Skills authored by the collection owner; or
-- Skills substantially transformed into an owned first-party capability, with clear attribution and any required notice or license preservation.
+- Skills the collection owner wrote; and
+- Skills substantially transformed into an owned capability, with attribution and any required license notice.
 
-Do not import an unmodified upstream or other third-party Skill for convenience. Recommend direct upstream installation when it already satisfies the need. If local modification, compatibility work, repackaging, deliberate version stabilization, or a behaviorally different variant is genuinely needed, evaluate it for the separate `skills-3rdParty` repository instead.
+Do not import an unmodified upstream Skill for convenience. If upstream already does the job, recommend installing it directly. If it needs local changes, compatibility work or a pinned variant, evaluate it for the separate `skills-3rdParty` repository.
 
-Approved architecture-level PORTs (SPEC §14/§16 — `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) are the exception: they are self-contained first-party packages with `ATTRIBUTION.md` and no upstream runtime dependency.
+The approved Matt Pocock Ports (SPEC §14/§16) are the exception: `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `light-merge-conflicts`, `project-retro`. Each is self-contained, carries `ATTRIBUTION.md`, and has no upstream runtime dependency.
 
-`project-workflow` is excluded. Do not add a compatibility shim, dependency, or package bearing that name unless a separately approved change establishes a real external-consumer need.
+`project-workflow` is retired. Do not add a shim, dependency or package with that name unless a separately approved change shows a real external need.
 
-## Repository shape and sources of truth
+## Where things live
 
-Future admitted packages live at `skills/<category>/<skill-name>/`. Each package owns its `SKILL.md` behavior contract and may include only justified resources, scripts, templates, or assets. Do not create empty resource directories or placeholder content.
+- Packages: `skills/<category>/<skill-name>/`. Each owns its `SKILL.md` and only the resources, scripts, templates or assets it needs. No empty directories or placeholders.
+- Provenance for a transformed Port: `ATTRIBUTION.md` in the package (source, path, pinned revision, license, Light changes). Never claim authorship of unmodified material.
+- `CATALOG.md`: human-readable inventory, derived from package metadata. `CHANGELOG.md`: unreleased and released changes.
+- Workflow documents are examples and test assets, not admission gates.
 
-For a substantially transformed Port, `skills/<category>/<skill-name>/ATTRIBUTION.md` is the single provenance record (source, path, pinned revision/tag, license/notice, Light-specific changes). Do not claim original authorship for unmodified material.
-
-Repository-level responsibilities are owned by these documents:
+Governance documents:
 
 - [Admission and evidence](docs/SKILL_ADMISSION.md)
-- [Maintenance, catalog, documentation, release, and closeout](docs/MAINTENANCE.md)
+- [Maintenance, catalog, release and closeout](docs/MAINTENANCE.md)
 - [Installation and fresh-install verification](docs/INSTALLATION.md)
-- [Review triggers, profiles, evidence, and verdict ownership](docs/REVIEW_POLICY.md) · [Reviewer contract](docs/REVIEWER_CONTRACT.md)
+- [Review weight, profiles and verdicts](docs/REVIEW_POLICY.md) · [Reviewer contract](docs/REVIEWER_CONTRACT.md)
 
-`CATALOG.md` is the human-readable inventory, derived from admitted package metadata. `CHANGELOG.md` records unreleased and released changes. Validated workflow documents are examples and test assets only; never admission gates or a required orchestration architecture.
+## Rules for every change
 
-## Authoritative references and maintenance rules
+1. Use **Matt Pocock Skills** as the main reference for writing Skills: a short entry file, details in supporting files, composition over copying.
+2. Treat `agent-config`'s own `SKILL.md` and references as its design contract. (Sol Advisor was its original design reference and is now out of date; do not consult it.) In short, `agent-config`:
+   - keeps setup (companion, bootstrap, Profile preparation or repair) separate from normal execution planning, and never enters setup silently;
+   - changes Host configuration only after explicit approval, and leaves unrelated Host settings untouched;
+   - treats single-model and multi-model as equal modes and uses only user-confirmed Profiles;
+   - relies on real Host evidence: it never infers a model's ability from its name, treats unknown capability as unconfirmed, and maps abstract reasoning levels to values the Host actually supports;
+   - uses the optional companion MCP for persistence and Host changes across 10 native adapters (Codex, Claude Code, Antigravity, DeepSeek Harness, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi with its MCP extension) plus one generic fallback, which is non-native and plan-only; it never claims universal Harness support;
+   - stops at planning: ticket decomposition, implementation, review convergence and final acceptance belong to other Skills.
+3. Read the upstream or reference Skill before changing a Skill derived from it.
+4. Leave the mature Light Skills alone (`manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`) unless their responsibility must change. Several are hash-frozen by tests.
+5. Do not redesign the Ports listed above. Port them, then make only the small changes Light handoff needs.
+6. Keep `SKILL.md` short: when to use it, what it does, how, where to read more, and when to stop or hand off.
+7. Put long workflows, examples, formats and checklists in `references/`, `templates/` or `scripts/`.
+8. Let each package choose its own structure.
+9. Compose instead of copying instructions (`clarify → socratic`, `light-implement → review-loop`).
+10. Do not copy repository architecture into Skill packages.
+11. Update only the documents a change actually affects.
+12. Tests protect behavior and composition, not wording. Do not add words to a `SKILL.md` just to satisfy a test; fix or delete the test instead.
+13. Keep required upstream attribution in `ATTRIBUTION.md`.
+14. Do not guess what an Agent Host can do. Inspect Host evidence first (`agent-config`).
 
-Long-lived rules for every Agent maintaining this repository:
+## Writing style
 
-1. **Matt Pocock Skills** is the primary Skill-writing reference (concise entry, supporting-file progressive disclosure, composition).
-2. **Sol Advisor** is the primary design reference for `agent-config` (separates setup from runtime planning; uses setup only for companion/bootstrap/Profile preparation or repair; uses normal `agent-config` for execution planning; does not silently enter setup or mutate Host configuration; treats single-model and multi-model as peer first-class modes; uses user-confirmed Profiles; does not infer model intelligence from model names; relies on real Host evidence; treats unknown capability as unconfirmed; resolves abstract reasoning policies to actual Host-supported values; preserves unrelated Host configuration; uses optional companion MCP for persistence and Host mutation across primary coding-agent harnesses (10 native adapters [Codex, Claude Code, Antigravity, DeepSeek Harness, OpenCode, ZCode, Cursor, Grok Build, Hermes, Pi (MCP extension required)] + 1 generic fallback) while remaining usable in plan-only mode via generic fallback; does not claim universal harness support; treats generic fallback as non-native; does not own formal ticket decomposition, implementation, review convergence, or final acceptance; requires explicit approval before configuration mutation).
-3. Inspect the relevant upstream/reference Skill before modifying a derived Skill.
-4. Do not rewrite mature Light Skills (`manuscript-ops`, `kb-init`, `learn-anything`, `language-learning`, `kanban-worker`, `recap`, `eli5`, `release-workflow`) unless their actual responsibility must change.
-5. Do not redesign direct Matt PORT Skills (`light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `resolving-merge-conflicts`, `project-retro`) — Port, then only minimal Light-handoff adaptation.
-6. Keep new/refactored `SKILL.md` files concise (when, what, how, where to read more, handoff/stop).
-7. Put detailed workflows, examples, formats, and reusable guidance in supporting files (`references/`, `templates/`, `scripts/`), not in `SKILL.md`.
-8. Do not impose one Skill package shape — each package decides its own structure.
-9. Prefer composition over duplicated instructions (`clarify → socratic`, `implement → review-loop`, etc.).
-10. Do not duplicate repository architecture into Skill packages.
-11. Update only repository documents actually affected by a change.
-12. Tests protect behavior and composition, not prose layout — do not re-add prose to satisfy prose tests.
-13. Preserve required upstream attribution (`ATTRIBUTION.md`).
-14. Do not guess Agent host capabilities — inspect host evidence first (`agent-config`).
-
-Do not bloat this file into SPEC — governance details live in the linked docs.
+Write instructions as short, direct sentences. Name who does what. Say what to do before what to avoid, and give an example when a rule is easy to misread. Agents imitate the prose they read, so this applies to `SKILL.md` files, references and these governance documents alike.
 
 ## Invocation direction
 
-Every package must declare and test one invocation type:
+Every package declares and tests one invocation type:
 
-- **User-invoked:** manually selected entry point. Silent or implicit chaining into another user-invoked Skill is forbidden; an advisor may recommend a next user-invoked Skill and, upon explicit user approval and verified host support, transition into that exact target without auto-chaining past it. It may call a model-invoked capability.
-- **Model-invoked:** reusable capability callable by the model or another Skill.
+- **User-invoked**: the user selects it. It never silently chains into another user-invoked Skill. It may recommend one, and with explicit user approval and verified Host support it may hand over to that exact Skill and stop there. It may call model-invoked capabilities.
+- **Model-invoked**: a reusable capability the model or another Skill may call.
 
-## Lifecycle work
+## Changing a package
 
-For a create, update, rename, deprecation, removal, port, or adapt:
+For a create, update, rename, deprecation, removal, Port or adaptation:
 
-1. Apply the reuse-before-invention decision order in [Skill admission](docs/SKILL_ADMISSION.md).
-2. Preserve package boundary, invocation direction, and required attribution.
-3. Collect evidence appropriate to the change; structure alone is never behavioral proof.
-4. Follow the review trigger and final-verdict rules in [Review policy](docs/REVIEW_POLICY.md).
-5. Perform every affected documentation and catalog update in the maintenance synchronization matrix before release.
+1. Check reuse before invention ([admission](docs/SKILL_ADMISSION.md)).
+2. Keep the package boundary, invocation direction and attribution.
+3. Pick the review weight in [review policy](docs/REVIEW_POLICY.md#how-much-review-a-change-needs) and collect only the evidence it asks for. Structure alone never proves behavior.
+4. Update the affected documents and catalog entries ([maintenance](docs/MAINTENANCE.md)).
 
-Do not silently rename, remove, or deprecate. Preserve a migration path, update discovery/installation surfaces, and record the change in the changelog and release notes.
+Never rename, remove or deprecate silently. Keep a migration path, update discovery and installation docs, and record the change in the changelog and release notes.
 
-## Validation and review
+## Review weight
 
-Classify each Skill admission under [Skill admission](docs/SKILL_ADMISSION.md). An eligible low-risk prompt-only Skill uses the fast track: bounded structural/install/contract/invocation evidence + one fresh independent Evaluator (no separate Critic or `light-code-review`). All other new or significant Skill changes use the full evidence path; executable scripts additionally require focused automated + negative tests, adversarial fixtures where appropriate, and `light-code-review` evidence. Zero-assertion or no-op test is not PASS.
+- **Everyday change** to an admitted package (same invocation type, dependencies, attribution and install surface; no script change): run the package tests and the full suite locally, and the owner tries it in real use.
+- **Documentation only**: run `python scripts/check_public_docs.py` and the full suite.
+- **New admission**: an eligible low-risk prompt-only Skill uses the fast track — structural, install, contract and invocation evidence plus one fresh independent Evaluator, with no separate Critic or `light-code-review`. Everything else uses the full path.
+- **Full path**: `review-loop` with the matching Profile (`agent-skill`, `generic`, `software`, `manuscript`, `specification`) drives convergence; `project-review` owns the frozen baseline and the final `PASS`/`FAIL`/`BLOCKED`. Executable scripts also need focused and negative tests, adversarial fixtures where useful, and `light-code-review` findings. A zero-assertion or no-op test is not a pass. Specialist reviewers (`generic-review`, `light-code-review`, domain) return findings only ([reviewer contract](docs/REVIEWER_CONTRACT.md)).
 
-For the full path, `review-loop` with the appropriate Profile (`agent-skill`, `generic`, `software`, `manuscript`, `specification`) is the convergence engine; `project-review` owns the frozen baseline and final `PASS`/`FAIL`/`BLOCKED`. Specialist reviewers (`generic-review`, `light-code-review`, domain) provide findings only (see [Reviewer contract](docs/REVIEWER_CONTRACT.md)) — not a competing verdict.
+## Installation and release
 
-## Installation, release, and closeout
+Do not publish an installation command as verified until it has worked against the released repository in a fresh environment. Keep a manual fallback and record Host discovery ([installation](docs/INSTALLATION.md)).
 
-Do not publish an installation command as verified until it has succeeded against the actual released repository in a fresh environment. Keep a manual fallback and record host discovery as required by [Installation](docs/INSTALLATION.md).
-
-Before a stable release, synchronize the README, catalog, installation guide, governance references, validated examples, discovery tests, changelog, and attribution records. The release and closeout record must distinguish first-party, approved Port, direct upstream, modified third-party, and deprecated/archived sources; include actual release identifiers, verified commands, evidence, limitations, and migration state. Follow the sequence in [Maintenance](docs/MAINTENANCE.md).
+Before a stable release, bring the README, catalog, installation guide, governance links, workflow examples, discovery tests, changelog and attribution records into line. The release record separates first-party, approved Port, direct upstream, modified third-party and retired sources, and lists the real release identifiers, verified commands, evidence, limits and migration state. Follow [maintenance](docs/MAINTENANCE.md).

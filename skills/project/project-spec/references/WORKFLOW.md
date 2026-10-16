@@ -14,6 +14,10 @@ holds the full step description.
 - Optional argument: a feature slug, an existing handoff path, or a map path.
   When the user passes a reference, fetch it and read its full body and
   comments before proceeding.
+- Given a slug and no handoff in the conversation, look for
+  `.scratch/<feature>/clarify-handoff.md`. Use it when it holds a `Project
+  clarification handoff`. A file holding only a `clarify` synthesis is not a
+  handoff: recommend `$project-clarify` and stop.
 
 Do not start from a general vague prompt and do not auto-chain from a prior
 clarification stage — wait for the explicit `$project-spec` token.
@@ -92,7 +96,12 @@ prose (trim to the decision-rich fragment and note its prototype origin).
 
 ### 6. Publish to the local tracker
 
-Read `docs/agents/light-project.md` when present and write the approved SPEC
+Show the SPEC to the user and ask them to approve it. Record their answer in
+the `Approval:` line ([OUTPUT-FORMAT.md](OUTPUT-FORMAT.md#approval-line)): who,
+the date, and their words. If the user asks to publish before approving, write
+`Approval: pending`.
+
+Read `docs/agents/light-project.md` when present and write the SPEC
 under its working area according to `docs/agents/issue-tracker.md`:
 
 ```text
@@ -109,13 +118,15 @@ Apply no extra triage label here; the SPEC file itself is the artifact that
 
 ### 7. Recommend the next explicit invocation and stop
 
-On success, report the published SPEC path and recommend:
+On success, report the published SPEC path. When its `Approval:` line holds
+the user's approval, recommend:
 
 ```text
 project-spec → project-tickets
 ```
 
-Do not auto-invoke `project-tickets` or any other user-invoked Skill. The
+With `Approval: pending`, say that `project-tickets` waits for approval and
+stop. Do not auto-invoke `project-tickets` or any other user-invoked Skill. The
 handoff is verifiable: the SPEC file exists at the stated path and satisfies
 [OUTPUT-FORMAT.md](OUTPUT-FORMAT.md) without reintroducing settled questions.
 

@@ -33,8 +33,9 @@ necessary repair or hide failure just to claim one commit.
    languages. Keep raw bytes intact; an archive may preserve logs whose
    terminal whitespace cannot pass repository checks.
 2. Inspect all current release authorities: README, catalog, installation,
-   maintenance and migration guidance. Their current stable/candidate state
-   must agree. Preserve historical release snapshots and historical claims.
+   maintenance and migration guidance. PREPARED checks target-version snapshots;
+   ATTESTED checks the confirmed current stable version. Statements must agree
+   with the selected phase. Preserve historical snapshots and claims.
 3. Stage the intended files and check `git diff --exit-code` so tests inspect
    the same tracked content as the index. Record
    `VERIFIED_TREE="$(git write-tree)"`, then run `git diff --cached --check`,
@@ -45,9 +46,10 @@ necessary repair or hide failure just to claim one commit.
 
    ```bash
    VERIFY_DIR="$(mktemp -d)"
+   mkdir "$VERIFY_DIR/exported"
    git archive --output="$VERIFY_DIR/tree.tar" "$VERIFIED_TREE"
-   tar -xf "$VERIFY_DIR/tree.tar" -C "$VERIFY_DIR"
-   (cd "$VERIFY_DIR" && python3 -m pytest -q tests/test_collection_discovery.py)
+   tar -xf "$VERIFY_DIR/tree.tar" -C "$VERIFY_DIR/exported"
+   (cd "$VERIFY_DIR/exported" && python3 -m pytest -q tests/test_collection_discovery.py)
    ```
 
    Retain the result/tree identity, then clean the disposable snapshot with

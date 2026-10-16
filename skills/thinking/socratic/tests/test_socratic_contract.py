@@ -13,7 +13,7 @@ class SocraticPublicContractTest(unittest.TestCase):
         metadata = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
         self.assertIn("name: socratic", skill)
         self.assertIn("model-invoked", skill + metadata)
-        for name in ("WORKFLOW.md", "ROUTING.md", "EXAMPLES.md", "conversation-contract.json", "frontier.py"):
+        for name in ("WORKFLOW.md", "ROUTING.md", "EXAMPLES.md", "conversation-contract.json"):
             self.assertTrue((ROOT / "references" / name).is_file() or (ROOT / "scripts" / name).is_file(), f"missing {name}")
             pointer = f"references/{name}" if (ROOT / "references" / name).is_file() else f"scripts/{name}"
             self.assertIn(pointer, skill)
