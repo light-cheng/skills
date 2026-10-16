@@ -117,13 +117,15 @@ agent-config setup --check
 
 ## 快速上手
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/ask-light next`，在 Codex 中输入 `$ask-light next`。
+
 ```text
-$ask-light next        # 根据当前上下文推荐合适的 Skill
-$project-init          # 初始化项目基础结构与任务跟踪
-$clarify               # 通过针对性提问澄清模糊需求
-$project-clarify       # 结合已有代码与文档澄清项目决策
-$light-implement       # 执行明确的开发任务并完成验证
-$project-review        # 执行最终验收：PASS / FAIL / BLOCKED
+ask-light next        # 根据当前上下文推荐合适的 Skill
+project-init          # 初始化项目基础结构与任务跟踪
+clarify               # 通过针对性提问澄清模糊需求
+project-clarify       # 结合已有代码与文档澄清项目决策
+light-implement       # 执行明确的开发任务并完成验证
+project-review        # 执行最终验收：PASS / FAIL / BLOCKED
 ```
 
 ## 主工作流
@@ -162,7 +164,7 @@ clarify                                  # 独立需求澄清与共识确认
 light-implement                          # 直接执行明确的任务
 light-diagnosing-bugs → light-implement  # 定位疑难问题并完成修复
 release-workflow                         # 仅执行发布流程
-$ask-light                               # 任务不确定时获取路由建议
+ask-light                                # 任务不确定时获取路由建议
 ```
 
 完整组合说明见 [docs/zh-CN/workflows/](docs/zh-CN/workflows)。
@@ -170,8 +172,8 @@ $ask-light                               # 任务不确定时获取路由建议
 ## 任务路由建议
 
 ```text
-$ask-light next
-$ask-light workflow
+ask-light next
+ask-light workflow
 ```
 
 `ask-light` 是 Light 工作流顾问、导航器与路由入口。它检查真实项目与工作流状态，由模型判断最合适的下一 Skill，解释原因，并在用户批准后按 Skill 调用策略与 Host 能力完成安全转换（支持的环境下可直接开始 model-invoked 目标；缺少直接 Host 转换通道时安全降级为渲染精确调用）。

@@ -277,8 +277,8 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 ### recap
 
 - **作用：** 用一句简洁文本展示当前 session，不替换或压缩对话历史。
-- **什么时候用：** 用户显式要求 `$recap`，需要一句话概括当前会话进展且不压缩上下文时。
-- **调用方式：** 仅 user-invoked；唯一入口为 `$recap`。
+- **什么时候用：** 用户显式要求 `recap`，需要一句话概括当前会话进展且不压缩上下文时。
+- **调用方式：** 仅 user-invoked；唯一入口为 `recap`。
 - **包位置：** [skills/productivity/recap/](skills/productivity/recap)
 - **状态：** 第一方已准入；仅手动触发的稳定形式随 v0.2.0 发布；当前 main 分支跟踪集合更新。
 - **证据：** 当前修订由 [tests/test_functional_closure.py](tests/test_functional_closure.py) 验证；冻结历史测试保留在 [skills/productivity/recap/tests/](skills/productivity/recap/tests)；[使用指南](docs/zh-CN/skills/recap.md)。

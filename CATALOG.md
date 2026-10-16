@@ -277,8 +277,8 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 ### recap
 
 - **Purpose:** Show one concise line about the current session without replacing or compacting conversation history.
-- **When to use:** User explicitly invokes `$recap`.
-- **Invocation:** User-invoked only; `$recap` is the sole entry.
+- **When to use:** User explicitly invokes `recap`.
+- **Invocation:** User-invoked only; `recap` is the sole entry.
 - **Package:** [skills/productivity/recap/](skills/productivity/recap)
 - **Status:** Admitted first-party; manual-only form released on the v0.2.0 stable line; current main tracks active collection updates.
 - **Evidence:** Current amendment tests in [tests/test_functional_closure.py](tests/test_functional_closure.py); frozen historical tests remain under [skills/productivity/recap/tests/](skills/productivity/recap/tests); [user guide](docs/skills/recap.md).

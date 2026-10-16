@@ -30,10 +30,12 @@ writing business code or silently chaining Skills.
 
 ## 3. Invoke explicitly
 
+Type each Skill name with your Host's prefix, for example `/ask-light next` in Claude Code or `$ask-light next` in Codex.
+
 ```text
-$ask-light next
-$project-init
-$project-review init using brief.md
+ask-light next
+project-init
+project-review init using brief.md
 ```
 
 Choose only the command that matches the current state. The expected result is
@@ -48,9 +50,9 @@ Execution: recommendation only; nothing was invoked, installed, or orchestrated
 
 ## 4. Stop and hand off
 
-After `$ask-light`, stop and let the user select the next Skill. After
-`$project-init`, stop before discovery/specification/implementation/final
-review. After `$project-review`, stop at its durable `PASS`, `FAIL`, or
+After `ask-light`, stop and let the user select the next Skill. After
+`project-init`, stop before discovery/specification/implementation/final
+review. After `project-review`, stop at its durable `PASS`, `FAIL`, or
 `BLOCKED` verdict. See [workflow recipes](../../docs/workflows/recipes.md) for longer
 handoff examples and [fresh-install evidence](../../docs/evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md)
 for real release verification.

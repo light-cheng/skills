@@ -20,7 +20,7 @@ permanent workflow. Those are later explicit choices.
 
 ## Boundary and inputs
 
-This is `user-invoked only`; the user must select `$project-init`. The target
+This is `user-invoked only`; the user must select `project-init`. The target
 defaults to the current directory. Before writing, it reads root
 `AGENTS.md`/`CLAUDE.md`, README, manifests, project documents, and current
 status. It needs project type, goal, outputs, collaboration, constraints,
@@ -29,10 +29,12 @@ acceptance strategy, working area, and the instruction filename established by
 current host evidence. The supported tracker locator is
 `.scratch/<effort>/issues`; other locators need an adapter. If two presets fit,
 it compares their consequences, recommends one, and asks for the choice. It does not use a separate clarification Skill; deep
-discovery belongs to `$clarify` / `$project-clarify` / `$decision-map`.
+discovery belongs to `clarify` / `project-clarify` / `decision-map`.
+
+Type each Skill name with your Host's prefix, for example `/project-init` in Claude Code or `$project-init` in Codex.
 
 ```text
-$project-init
+project-init
 ```
 
 The output is one instruction pointer plus `docs/agents/light-project.md` and

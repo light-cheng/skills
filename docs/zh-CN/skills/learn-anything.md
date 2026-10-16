@@ -14,8 +14,10 @@
 
 它是 `user-invoked only`：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/learn-anything`，在 Codex 中输入 `$learn-anything`。
+
 ```text
-$learn-anything
+learn-anything
 ```
 
 输入是 source、provenance、必须保留的命令/路径/错误，以及项目或 Skill 规则。完整结果是内部 Method Contract；通过 gate 后才进入 deterministic Package Build Layer，例如：

@@ -23,9 +23,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(
         "npx skills add light-cheng/skills" in en
         and "npx skills add light-cheng/skills --skill ask-light" in en
-        and "$ask-light next" in en
-        and "$project-init" in en
-        and "$project-review" in en,
+        and "ask-light next" in en
+        and "project-init" in en
+        and "project-review" in en,
         "English Quick Start is missing a required command.",
     )
     c.check("README.md" in zh, "Chinese Quick Start is missing its English pairing.")

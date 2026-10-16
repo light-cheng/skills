@@ -20,10 +20,12 @@ Code 验证该项选择。
 
 它是 `user-invoked only`，主要入口为：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/ask-light next`，在 Codex 中输入 `$ask-light next`。
+
 ```text
-$ask-light next
-$ask-light workflow
-$ask-light <category>
+ask-light next
+ask-light workflow
+ask-light <category>
 ```
 
 `next` 返回一个基于证据的建议，最多一个动作不同的并列候选。`workflow` 返回锚定在当前状态的 recipe，包含步骤可用性、handoff 契约与停止点。`navigate` 回答“显示项目 Skills”或精确对比等收藏浏览问题。

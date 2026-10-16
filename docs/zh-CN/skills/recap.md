@@ -12,8 +12,10 @@
 
 必须显式选择：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/recap`，在 Codex 中输入 `$recap`。
+
 ```text
-$recap
+recap
 ```
 
 包 frontmatter 与 host metadata 将该入口保持为 user-invoked。

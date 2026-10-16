@@ -18,14 +18,16 @@ than teaching through a fixed template each time.
 
 Select it explicitly:
 
+Type each Skill name with your Host's prefix, for example `/language-learning` in Claude Code or `$language-learning` in Codex.
+
 ```text
-$language-learning
+language-learning
 ```
 
 Or invoke a mode directly, for example:
 
 ```text
-$language-learning Spanish, flashcards for: perro, gato, casa
+language-learning Spanish, flashcards for: perro, gato, casa
 ```
 
 It must not run automatically. It adapts to the level already established in

@@ -23,9 +23,11 @@ ask only for the decision or source that affects the work.
 
 It is model-invoked and can also be selected explicitly when the Host supports:
 
+Type each Skill name with your Host's prefix, for example `/manuscript-ops` in Claude Code or `$manuscript-ops` in Codex.
+
 ```text
-$manuscript-ops
-$manuscript-ops resume
+manuscript-ops
+manuscript-ops resume
 ```
 
 ## Inputs and checks

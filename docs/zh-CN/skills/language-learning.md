@@ -12,14 +12,16 @@
 
 必须显式选择：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/language-learning`，在 Codex 中输入 `$language-learning`。
+
 ```text
-$language-learning
+language-learning
 ```
 
 也可以直接指定模式，例如：
 
 ```text
-$language-learning Spanish, flashcards for: perro, gato, casa
+language-learning Spanish, flashcards for: perro, gato, casa
 ```
 
 它不能自动运行；会沿用会话中已有的水平，水平未知时默认 beginner，并让学习者持续输出语言。
