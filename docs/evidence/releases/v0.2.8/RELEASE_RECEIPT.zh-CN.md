@@ -11,7 +11,7 @@
 | **发布 Tag** | `v0.2.8` |
 | **Annotated Tag 对象** | `9c59b5823a89d3019afbd8043320b0fe5d1785e5` |
 | **Tag 目标 Commit** | `c522857bd37a1f61fb1af9a4ae5e6892a949f06c` |
-| **发布 URL** | https://github.com/light-cheng/skills/releases/tag/v0.2.8（旧地址 https://github.com/LightDevCoder/skills/releases/tag/v0.2.8 会重定向） |
+| **发布 URL** | https://github.com/light-cheng/skills/releases/tag/v0.2.8 （旧地址 https://github.com/LightDevCoder/skills/releases/tag/v0.2.8 会重定向） |
 | **公开发布时间戳** | `2026-10-16T07:22:12Z` |
 | **集合包数量** | 39 个已准入包，406 个包内文件 |
 | **策略状态** | `PROVISIONAL` |
