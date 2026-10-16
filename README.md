@@ -6,7 +6,7 @@
 
 `light-cheng/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release:** [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) is the current stable release of all 39 first-party Skills, adding `light-decide`, `light-redirect` and `light-html-plan`. Its immutable [release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) record the scope and verification. See the [v0.2.8 release notes](docs/evidence/releases/v0.2.8/RELEASE_NOTES.md) and [v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md).
+> **Release snapshot v0.2.9:** this page describes v0.2.9 with 39 Skills. v0.2.9 moves every live link and install command to `light-cheng/skills` after the GitHub account rename and improves `release-workflow`. The [v0.2.9 release manifest](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.md) records its preparation-time scope and evidence; observed publication and installation facts are recorded in the release receipt on `main`. See the [v0.2.9 release notes](docs/evidence/releases/v0.2.9/RELEASE_NOTES.md) and [v0.2.9 migration guide](docs/MIGRATION-v0.2.9.md).
 
 > **Name migration:** v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts`. In [v0.2.7](https://github.com/light-cheng/skills/releases/tag/v0.2.7), twelve Skills took `light-` names; see the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
@@ -39,7 +39,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Current main / latest
+### Current main / latest (install command template)
 
 Install the latest collection from the default branch `main`:
 
@@ -57,16 +57,21 @@ npx skills add light-cheng/skills --skill light-research
 
 > **Note:** An unqualified repository source (`light-cheng/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Stable release snapshot (v0.2.8)
+### Pinned v0.2.9 (install command template)
 
-To install the reproducible stable release snapshot, pin the `#v0.2.8` tag:
+```bash
+npx skills add light-cheng/skills#v0.2.9
+npx skills add light-cheng/skills#v0.2.9 --skill light-implement
+```
+
+### Previous releases
+
+Pin the `#v0.2.8` tag for a reproducible [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) install:
 
 ```bash
 npx skills add light-cheng/skills#v0.2.8
 npx skills add light-cheng/skills#v0.2.8 --skill light-implement
 ```
-
-### Previous releases
 
 Pin the `#v0.2.7` tag for a reproducible v0.2.7 install:
 
@@ -209,5 +214,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [Release Receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) · [v0.2.7 Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) (previous release)
+- [v0.2.8 Release Receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) (previous release)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

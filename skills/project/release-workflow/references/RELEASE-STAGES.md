@@ -70,16 +70,17 @@ and the owner chooses it for this release.
 
 ### Pull-request path (recommended)
 
-1. Base the candidate on the current tip of main, so the PR's test merge has
-   the same tree as the candidate:
+1. Make sure the candidate contains the current tip of main, so the PR's test
+   merge has the same tree as the candidate. A candidate whose branch merged
+   main passes too; its parent need not be main:
    ```bash
    git fetch origin main
-   test "$(git rev-parse "$CANDIDATE_SHA^")" = "$(git rev-parse origin/main)"
+   git merge-base --is-ancestor origin/main "$CANDIDATE_SHA"
    git push origin "$CANDIDATE_SHA:refs/heads/release/vX.Y.Z"
    PR_URL="$(gh pr create --repo "$REPO" --base main --head release/vX.Y.Z --title "release: prepare vX.Y.Z" --body-file <notes>)"
    ```
-   If main moved, rebase the candidate, repeat the PREPARED checks and use the
-   new `CANDIDATE_SHA`.
+   If main moved, merge or rebase main into the candidate branch, repeat the
+   PREPARED checks and use the new `CANDIDATE_SHA`.
 2. Wait for `collection-quality` on the exact candidate commit and require
    `headSha` = `CANDIDATE_SHA`, `status: completed`, `conclusion: success`:
    ```bash
@@ -220,8 +221,10 @@ on the current repository.
    ```
 5. Only after it passes, push the attestation commit to `origin/main`. If main
    requires pull requests, open a PR instead, wait for CI on `ATTESTATION_SHA`,
-   merge, and prove the merge kept the tree:
+   merge, and prove the merge kept the tree. If main moved first, the tree check
+   blocks: merge main in, rerun the final checks and open the PR again.
    ```bash
+   git merge-base --is-ancestor origin/main "$ATTESTATION_SHA"
    git push origin "$ATTESTATION_SHA:refs/heads/attest/vX.Y.Z"
    ATTEST_PR_URL="$(gh pr create --repo "$REPO" --base main --head attest/vX.Y.Z --title "docs(release): attest vX.Y.Z publication" --body "Receipt for vX.Y.Z.")"
    # after CI on ATTESTATION_SHA passes and the owner merges:
