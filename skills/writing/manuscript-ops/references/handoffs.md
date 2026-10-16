@@ -69,18 +69,20 @@ activate decision-map with: chart this manuscript effort in a local Markdown tas
 ```
 
 After the dependency stops, apply the resume authorization contract above.
-In Codex, the canonical rendering is `$manuscript-ops resume`; do not ask the
-user to repeat a same-session request that already satisfies that contract.
+The logical resume call is `manuscript-ops` with `resume`, rendered for the
+current host; do not ask the user to repeat a same-session request that
+already satisfies that contract.
 
 ## Project initialization recommendation
 
 After Brief approval, check the exact target root for generic `project-init`
 outputs: `docs/agents/light-project.md`, issue tracker, and applicable
 instruction pointer. If that generic bootstrap is missing, recommend the user
-activate `project-init` with the exact root. In Codex:
+activate `project-init` with the exact root. Logical call, rendered for the
+current host:
 
 ```text
-$project-init init in <exact-project-root>
+activate project-init with: init in <exact-project-root>
 ```
 
 `manuscript-ops` must stop after stating the missing generic outcome and its
@@ -90,7 +92,7 @@ resume, it checks the generic outputs and then owns Project Profile,
 fixed initialization gate. The user resumes with:
 
 ```text
-$manuscript-ops resume for <exact-project-root> using <approved-brief-path>
+activate manuscript-ops with: resume for <exact-project-root> using <approved-brief-path>
 ```
 
 ## Independent acceptance
@@ -118,10 +120,11 @@ After `project-review init`, the expected artifacts are
 `<exact-project-root>/.project-review/charter.md` and `state.md`. After a milestone
 review, the expected artifact is the frozen round verdict referenced by
 `state.md`. Once those paths and the reported verdict are checked, logically
-activate `manuscript-ops` with `resume`. In Codex:
+activate `manuscript-ops` with `resume`. Logical call, rendered for the
+current host:
 
 ```text
-$manuscript-ops resume from <exact-project-root>/.project-review/state.md
+activate manuscript-ops with: resume from <exact-project-root>/.project-review/state.md
 ```
 
 ## Dependency closure and order
