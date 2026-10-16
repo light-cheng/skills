@@ -2,7 +2,7 @@
 
 [English](MIGRATION-v0.2.8.md)
 
-**状态：** 候选版。v0.2.8 尚未发布；本页说明将要发生的变化。
+**状态：** v0.2.8 已发布。准确候选 CI、受保护标签和实际发布源的新鲜安装均已通过；见[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 改名的包
 

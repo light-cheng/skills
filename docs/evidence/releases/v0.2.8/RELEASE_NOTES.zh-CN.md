@@ -24,9 +24,9 @@
 
 升级前请阅读 [v0.2.8 迁移说明](https://github.com/LightDevCoder/skills/blob/main/docs/MIGRATION-v0.2.8.zh-CN.md)：更新 `resolving-merge-conflicts` 引用；若项目依赖托管的 Jev 服务，添加 `Decision data: third-party`；重跑 `project-init` 补上新的 tracker 行。
 
-## 安装（命令模板）
+## 安装
 
-以下命令在 v0.2.8 标签出现后选择该标签；是否已在全新环境中检查，以 `main` 上的发布收据为准。
+从实际 v0.2.8 发布源进行的新鲜安装已通过。锁定标签即可复现安装：
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.8
@@ -35,4 +35,4 @@ npx skills add LightDevCoder/skills#v0.2.8 --skill light-decide
 
 ## 验证
 
-准备时的本地证据列在[发布清单](RELEASE_MANIFEST.zh-CN.md)中。完整[变更记录](https://github.com/LightDevCoder/skills/blob/main/CHANGELOG.zh-CN.md)列出全部改动。
+准备时的本地证据列在[发布清单](RELEASE_MANIFEST.zh-CN.md)中。准确候选 CI 和受保护的 annotated tag 均已验证。在新的托管 Linux 用户上，Codex、Claude Code 项目的锁定版与默认分支全量安装、原生 Codex 全局范围和三个单包都与来源逐字节一致（39 个包、406 个文件）。本机 Claude Code 和 pi 安装同样一致，两个 Host 都从新项目发现了新 Skill；pi 需要项目受信任。维护者机器上没有安装 Codex。详情见 main 上的发布后收据。完整[变更记录](https://github.com/LightDevCoder/skills/blob/main/CHANGELOG.zh-CN.md)列出全部改动。

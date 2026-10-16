@@ -2,7 +2,7 @@
 
 [简体中文](MIGRATION-v0.2.8.zh-CN.md)
 
-**Status:** candidate. v0.2.8 is not released yet; this page describes what will change.
+**Status:** v0.2.8 is published. Exact-candidate CI, the protected tag and fresh installs from the released source passed; see the [release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md).
 
 ## Renamed package
 

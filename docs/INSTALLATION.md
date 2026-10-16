@@ -2,7 +2,7 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-Release snapshot v0.2.8: this guide covers v0.2.8, with **39 admitted first-party Skills** across 7 purpose-based categories. The [v0.2.8 release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records its preparation-time scope and local evidence; observed installation and publication facts go into the release receipt on `main`. Until that receipt exists, the v0.2.8 and default-branch commands below are templates. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+The public first-party collection's current stable release is [v0.2.8](https://github.com/LightDevCoder/skills/releases/tag/v0.2.8), published at tag `v0.2.8` (immutable [release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md)). It provides **39 admitted first-party Skills** across 7 purpose-based categories. Fresh installs from the released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 406 files, byte-identical), plus local Claude Code and pi installs that both Hosts discovered. pi loads project Skills only after project trust; Codex runtime was not checked locally. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
@@ -28,7 +28,7 @@ Current `main` uses `skills/<category>/<name>/`. Host installations remain `<ski
 
 ## Recommended installation
 
-### Interactive installation (recommended; command template)
+### Interactive installation (recommended)
 
 Run the interactive installer and choose the Skills and target Agent hosts you want:
 
@@ -36,7 +36,7 @@ Run the interactive installer and choose the Skills and target Agent hosts you w
 npx skills add LightDevCoder/skills
 ```
 
-### Install a single Skill (command template)
+### Install a single Skill
 
 To install a specific Skill without selecting from the entire collection:
 
@@ -49,7 +49,7 @@ npx skills add LightDevCoder/skills --skill light-travelpage
 npx skills add LightDevCoder/skills --skill project-retro
 ```
 
-### Pinned release installation (command template for v0.2.8)
+### Pinned release installation
 
 To install from a specific published release tag (recommended for reproducible setups):
 

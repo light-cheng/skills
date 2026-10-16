@@ -6,6 +6,11 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- Release tooling: the publication check accepts the release URL GitHub reports after the `LightDevCoder` account was renamed to `light-cheng` (both owners for this repository, nothing else). Docs and receipts keep the `LightDevCoder/skills` form, which GitHub redirects.
+
+## 0.2.8 — 2026-10-16
+
+- Published with exact-candidate CI, a protected annotated tag and fresh installs from the released source; see the [release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md). The tag peels to `c522857`.
 - Release preparation for v0.2.8: README, CATALOG, INSTALLATION and MAINTENANCE (both languages) become v0.2.8 release snapshots; v0.2.8 release notes and manifest are added under `docs/evidence/releases/v0.2.8/`. The collection tests derive the package count and accept a previous-release row instead of a frozen current-stable claim.
 - `light-travelpage` (behaviour change): the optional AI assistant connects to OpenAI-format (chat completions or Responses) and Anthropic Messages APIs; the CPA-specific topology and loopback address are removed. New `scripts/ai-setup.mjs` lets the page owner pick the service and model at deployment: it detects the format from `/models`, accepts a typed model ID when no list is available, requires one real tool call, then writes `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`, `AI_API_FORMAT` to `.dev.vars` or Pages secrets; the key comes from `AI_API_KEY` or a hidden prompt. The public switch is `provider: off|on` (`openai` still reads as `on`), older `OPENAI_*` settings keep working, and travelers cannot pick a model, format or endpoint. A self-hosted or local gateway is the optional `light-travelpage-gw` capability (separate repository); `tests/test_composition.py` accepts that external optional target.
 - `eli5`: the description asks for "a non-technical explanation" and excludes rewriting a document for its readers, after a trigger-rate check found pi loading it for such rewrites. Trigger-rate results for the 7 Ports, `eli5` and the stage-3 capabilities on Claude Code and pi are in `docs/evidence/maintenance/2026-10-16-trigger-eval/`.

@@ -24,9 +24,9 @@ All three are optional: callers keep their old behaviour when they are missing.
 
 Read the [v0.2.8 migration guide](https://github.com/LightDevCoder/skills/blob/main/docs/MIGRATION-v0.2.8.md) before upgrading: update `resolving-merge-conflicts` references, add `Decision data: third-party` if a project relied on the hosted Jev service, and rerun `project-init` to add the new tracker lines.
 
-## Installation (command template)
+## Installation
 
-These commands select the v0.2.8 tag once it exists; the release receipt on `main` records whether they were checked in a fresh environment.
+Installation from the actual v0.2.8 source passed in fresh environments. Select the fixed tag for a reproducible install:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.8
@@ -35,4 +35,4 @@ npx skills add LightDevCoder/skills#v0.2.8 --skill light-decide
 
 ## Verification
 
-Local evidence at preparation is listed in the [release manifest](RELEASE_MANIFEST.md). The full [changelog](https://github.com/LightDevCoder/skills/blob/main/CHANGELOG.md) lists every change.
+Local evidence at preparation is listed in the [release manifest](RELEASE_MANIFEST.md). Exact-candidate CI and the protected annotated tag are verified. On a fresh hosted Linux user, pinned and default whole installs for Codex and Claude Code projects, native Codex global scope and three single Skills each matched their source bytes (39 packages, 406 files). Local Claude Code and pi installs matched too, and both Hosts discovered the new Skills from a fresh project; pi needs project trust for that. Codex is not installed on the maintainer's machine. The post-release receipt on main has the details. The full [changelog](https://github.com/LightDevCoder/skills/blob/main/CHANGELOG.md) lists every change.

@@ -147,12 +147,23 @@ def valid_publication_time(value) -> bool:
         return False
 
 
+# The LightDevCoder account was renamed to light-cheng. GitHub reports the new owner
+# and redirects the old one, so both release URLs identify this repository.
+# Receipts and public docs still write the LightDevCoder form; confirmed_stable
+# and the receipt URL check accept only that form.
+RELEASE_OWNERS = ("LightDevCoder", "light-cheng")
+
+
+def release_urls(tag: str) -> set[str]:
+    return {f"https://github.com/{owner}/skills/releases/tag/{tag}" for owner in RELEASE_OWNERS}
+
+
 def validate_publication_observation(record, tag: str, source: str) -> list[str]:
     if not isinstance(record, dict):
         return [f"[PUBLICATION_UNOBSERVED] {source}: include the observed GitHub Release result"]
     if (record.get("tagName") != tag or record.get("isDraft") is not False
             or record.get("isPrerelease") is not False or not valid_publication_time(record.get("publishedAt"))
-            or record.get("url") != f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"):
+            or record.get("url") not in release_urls(tag)):
         return [f"[PUBLICATION_IDENTITY] {source}: require the matching non-draft stable release URL and observed publication time"]
     return []
 

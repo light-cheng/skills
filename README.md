@@ -6,7 +6,7 @@
 
 `LightDevCoder/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release snapshot v0.2.8:** this page describes v0.2.8 with 39 Skills, adding `light-decide`, `light-redirect` and `light-html-plan`. The [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records its preparation-time scope and evidence; observed publication and installation facts are recorded in the release receipt on `main`. See the [v0.2.8 release notes](docs/evidence/releases/v0.2.8/RELEASE_NOTES.md) and [v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md).
+> **Release:** [v0.2.8](https://github.com/LightDevCoder/skills/releases/tag/v0.2.8) is the current stable release of all 39 first-party Skills, adding `light-decide`, `light-redirect` and `light-html-plan`. Its immutable [release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) record the scope and verification. See the [v0.2.8 release notes](docs/evidence/releases/v0.2.8/RELEASE_NOTES.md) and [v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md).
 
 > **Name migration:** v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts`. In [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7), twelve Skills took `light-` names; see the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
@@ -39,7 +39,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Current main / latest (install command template)
+### Current main / latest
 
 Install the latest collection from the default branch `main`:
 
@@ -57,7 +57,9 @@ npx skills add LightDevCoder/skills --skill light-research
 
 > **Note:** An unqualified repository source (`LightDevCoder/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Pinned v0.2.8 (install command template)
+### Stable release snapshot (v0.2.8)
+
+To install the reproducible stable release snapshot, pin the `#v0.2.8` tag:
 
 ```bash
 npx skills add LightDevCoder/skills#v0.2.8
@@ -207,5 +209,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [v0.2.7 Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) (previous release)
+- [Release Receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) · [v0.2.7 Release Receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) (previous release)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

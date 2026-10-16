@@ -614,3 +614,17 @@ def test_existing_v027_tag_is_audited_without_rewriting_main_or_tag() -> None:
     assert result.returncode == 0 and "HISTORICAL_SNAPSHOT" in result.stdout, result.stdout + result.stderr
     assert git(ROOT, "rev-parse", "refs/tags/v0.2.7") == before
     assert (ROOT / "README.md").read_bytes() == main_readme_before
+
+
+@pytest.mark.parametrize("url, accepted", [
+    (f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}", True),
+    (f"https://github.com/light-cheng/skills/releases/tag/{TAG}", True),
+    (f"https://github.com/someone-else/skills/releases/tag/{TAG}", False),
+    (f"https://github.com/light-cheng/other/releases/tag/{TAG}", False),
+    ("https://github.com/light-cheng/skills/releases/tag/v9.8.6", False),
+])
+def test_publication_accepts_the_renamed_owner_and_nothing_else(url: str, accepted: bool) -> None:
+    from release_context import validate_publication_observation
+    record = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
+              "publishedAt": "2026-10-16T07:22:12Z", "url": url}
+    assert (validate_publication_observation(record, TAG, "fixture") == []) is accepted
