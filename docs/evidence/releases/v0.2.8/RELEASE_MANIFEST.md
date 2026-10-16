@@ -23,7 +23,7 @@
 - Repository suite: 586 pytest tests passed; public documentation check passed; evidence redaction check passed for all evidence added since v0.2.7.
 - Admission and review records: [light-decide](../../admissions/light-decide/README.md), [light-redirect](../../admissions/light-redirect/README.md), [light-html-plan](../../admissions/light-html-plan/README.md), [joint integration](../../admissions/joint-integration-v0.2.8/README.md), [decision sources](../../maintenance/2026-10-16-decision-sources/README.md).
 - Trigger rates on Claude Code 2.1.296 and pi 1.2.0: [trigger evaluation](../../maintenance/2026-10-16-trigger-eval/README.md). Codex was not run.
-- `light-travelpage` AI change: full review (Critic, `light-code-review`, fresh Evaluator); the Evaluator found all eight criteria met. A real OpenAI/Anthropic round trip was not run at preparation; template tests 88/88 and local Wrangler Functions + D1 ran against a synthetic upstream on Node 26.7.0.
+- `light-travelpage` AI change: full review (Critic, `light-code-review`, fresh Evaluator); the Evaluator found all eight criteria met. Real round trips through the owner's OpenAI- and Anthropic-format gateway passed for all three formats, both in the setup script and in local Wrangler Functions + D1 ([record](../../maintenance/2026-10-16-light-travelpage-ai/README.md)); template tests 88/88 on Node 26.7.0.
 
 ## Subsequent release gates
 

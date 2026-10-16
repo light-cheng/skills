@@ -23,7 +23,7 @@
 - 仓库测试：586 个 pytest 测试通过；公开文档检查通过；v0.2.7 之后新增证据的脱敏检查通过。
 - 准入与审查记录：[light-decide](../../admissions/light-decide/README.zh-CN.md)、[light-redirect](../../admissions/light-redirect/README.zh-CN.md)、[light-html-plan](../../admissions/light-html-plan/README.zh-CN.md)、[联合接入](../../admissions/joint-integration-v0.2.8/README.zh-CN.md)、[决策来源](../../maintenance/2026-10-16-decision-sources/README.zh-CN.md)。
 - Claude Code 2.1.296 与 pi 1.2.0 上的触发率：[触发率评测](../../maintenance/2026-10-16-trigger-eval/README.zh-CN.md)。未运行 Codex。
-- `light-travelpage` AI 改动：完整审查（Critic、`light-code-review`、新 Evaluator）；Evaluator 判定八条标准全部满足。准备时未运行真实 OpenAI/Anthropic 往返；模板测试 88/88，本地 Wrangler Functions + D1 在 Node 26.7.0 上对模拟上游运行。
+- `light-travelpage` AI 改动：完整审查（Critic、`light-code-review`、新 Evaluator）；Evaluator 判定八条标准全部满足。通过所有者的 OpenAI/Anthropic 格式网关，三种格式的真实往返在配置脚本和本地 Wrangler Functions + D1 中均成功（[记录](../../maintenance/2026-10-16-light-travelpage-ai/README.zh-CN.md)）；模板测试在 Node 26.7.0 上 88/88。
 
 ## 后续发布关口
 

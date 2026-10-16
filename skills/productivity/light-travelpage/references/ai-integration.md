@@ -28,7 +28,7 @@ node <skill>/scripts/ai-setup.mjs <project-directory> --base-url <url> --target 
 The script:
 
 1. checks that the project was generated with v0.2.8 or later and refuses a symlinked `.dev.vars` or `ai-config.json`;
-2. reads `GET <base>/models` with OpenAI-style and Anthropic-style authentication and tells the formats apart (an OpenAI list marks items `object: "model"`, an Anthropic list `type: "model"`). If the service answers both ways, the owner picks one in the terminal, or passes `--format openai-chat|openai-responses|anthropic-messages`; if it answers neither, pass `--format` and `--model`;
+2. reads `GET <base>/models` with OpenAI-style and Anthropic-style authentication and tells the formats apart (an OpenAI list marks items `object: "model"`, an Anthropic list `type: "model"`). If the service answers both ways, the owner picks one in the terminal, or passes `--format openai-chat|openai-responses|anthropic-messages`; if it answers neither, pass `--format` and `--model`. Some gateways serve the Anthropic format but list their models in the OpenAI shape; detection then picks `openai-chat`, and the owner passes `--format anthropic-messages` to use Anthropic;
 3. lists the models for the owner to pick, or takes `--model <id>` when there is no list;
 4. sends one request with one tool and requires a real tool call back. A listed model is only discovery evidence. If chat completions returns no tool call, try `--format openai-responses`;
 5. only after that, writes `AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL` and `AI_API_FORMAT` to ignored `.dev.vars` (mode 0600; older `OPENAI_*` lines are removed) or to Pages secrets through `wrangler pages secret bulk` on stdin, and sets `ai-config.json` to `on`.
@@ -49,7 +49,7 @@ A text-only endpoint cannot perform these actions, and neither a protocol name n
 
 The shipped UI accepts text. It sends authored trip context and current shared records to the configured service only after a traveler submits a request. Original PDF/image bytes and API credentials are excluded from model context. Image understanding is not shipped: adding it requires a vision-capable model, protected upload handling and a real image test.
 
-Expense amounts use integer cents, known traveler IDs and the ledger's existing base currency (`CNY` until configured). A foreign expense requires the user's actual converted base amount; the assistant cannot invent an exchange rate. Missing or ambiguous facts remain pending. Tool loops are bounded; a model failure before plan completion saves no shared change.
+Expense amounts use integer cents, known traveler IDs and the ledger's existing base currency (`CNY` until configured). A foreign expense requires the user's actual converted base amount; the assistant cannot invent an exchange rate. Missing or ambiguous facts remain pending. Tool loops are bounded, and one request has 55 seconds to finish its plan; a slow service that runs past it returns an error and the traveler can retry. A model failure before plan completion saves no shared change.
 
 ## Verify the chosen environment
 
