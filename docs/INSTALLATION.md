@@ -1,5 +1,7 @@
 # Installation and Fresh-Install Verification
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [中文安装说明](INSTALLATION.zh-CN.md)
 
 The public first-party collection's current stable release is [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9), published at tag `v0.2.9` (immutable [release manifest](evidence/releases/v0.2.9/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md)). It provides **39 admitted first-party Skills** across 7 purpose-based categories. Fresh installs from the released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 407 files, byte-identical), plus a local install for Claude Code and pi in which Claude Code listed all 39 Skills and both Hosts ran `eli5` from the fresh project. Codex runtime was not checked locally. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.

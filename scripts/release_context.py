@@ -6,6 +6,7 @@ Manifest/Receipt content and observed external facts remain authoritative.
 
 from __future__ import annotations
 
+import json
 import re
 import posixpath
 from dataclasses import dataclass, replace
@@ -22,6 +23,8 @@ PUBLIC_RELEASE_DOCS = (
 )
 STAGES = ("prepared", "ci_verified", "tagged", "install_verified", "published", "attested")
 VERSION = r"v\d+\.\d+\.\d+"
+# Frozen release objects up to this version state their facts in prose, not release-state fields.
+LAST_PROSE_RELEASE = (0, 2, 9)
 
 
 @dataclass(frozen=True)
@@ -243,52 +246,109 @@ def infer_document_context(documents: Mapping[str, str]) -> ReleaseContext | Non
     return None
 
 
+STATE_MARKER = re.compile(r"<!--\s*release-state:\s*(\{.*?\})\s*-->")
+VIEWS = {"snapshot": "snapshot", "notes": "notes", "release-body": "notes", "current-notes": "notes",
+         "manifest": "manifest", "current": "current"}
+
+
+def release_state(text: str) -> tuple[dict | None, str | None]:
+    """Read the one `<!-- release-state: {...} -->` field block outside code fences."""
+    found: list[str] = []
+    in_code = False
+    for line in text.splitlines():
+        if line.strip().startswith("```"):
+            in_code = not in_code
+        elif not in_code:
+            found.extend(STATE_MARKER.findall(line))
+    if len(found) != 1:
+        return None, f"expected one release-state field block, found {len(found)}"
+    try:
+        state = json.loads(found[0])
+    except json.JSONDecodeError as error:
+        return None, f"release-state is not valid JSON ({error.msg})"
+    if not isinstance(state, dict):
+        return None, "release-state must be a JSON object"
+    return state, None
+
+
+def structured_state_required(kind: str, context: ReleaseContext) -> bool:
+    """Current pages always carry fields; frozen objects only from the first release written with them."""
+    return kind == "current" or version_key(context.target) > LAST_PROSE_RELEASE
+
+
+def heading_titles(text: str) -> set[str]:
+    return {match.group(1).strip() for _, line in active_lines(text)
+            for match in [re.match(r"^#{1,6}\s+(.*?)\s*#*\s*$", line)] if match}
+
+
+def state_errors(text: str, path: str, kind: str, context: ReleaseContext) -> list[str]:
+    """Check the structured fields that replace the old required wording."""
+    state, problem = release_state(text)
+    if state is None:
+        return [f"[RELEASE_STATE] {path}: {problem}; see release-workflow DOCUMENT-STATE.md"]
+    errors: list[str] = []
+    view = VIEWS[kind]
+    if state.get("view") != view:
+        errors.append(f"[RELEASE_STATE] {path}: view must be {view!r}, found {state.get('view')!r}")
+    if kind == "current":
+        if context.current_stable is None or state.get("stable") != context.current_stable:
+            errors.append(f"[CURRENT_STABLE] {path}: expected confirmed stable {context.current_stable}, "
+                          f"field says {state.get('stable')!r}; source={context.evidence_source}")
+    elif state.get("version") != context.target:
+        code = "MANIFEST_IDENTITY" if kind == "manifest" else "SNAPSHOT_IDENTITY"
+        errors.append(f"[{code}] {path}: expected version {context.target}, field says {state.get('version')!r}")
+    if kind == "manifest":
+        if state.get("written") != "preparation":
+            errors.append(f"[MANIFEST_TIME_CONTEXT] {path}: field written must be 'preparation'")
+        if f"refs/tags/{context.target}" not in text:
+            errors.append(f"[MANIFEST_IDENTITY] {path}: name the expected refs/tags/{context.target} identity")
+    if view == "notes":
+        if not re.search(r"\]\([^)]*RELEASE_MANIFEST(?:\.zh-CN)?\.md[^)]*\)", text):
+            errors.append(f"[SNAPSHOT_EVIDENCE] {path}: link the release Manifest")
+        section = state.get("verification")
+        if not isinstance(section, str) or section not in heading_titles(text):
+            errors.append(f"[RELEASE_VERIFICATION_CONTEXT] {path}: field verification must name an existing heading, "
+                          f"found {section!r}")
+    return errors
+
+
 def validate_document(text: str, path: str, kind: str, context: ReleaseContext) -> list[str]:
-    """Validate one release object; findings name the object and its statement."""
+    """Validate one release object; findings name the object and its statement.
+
+    Required facts come from the release-state fields. Prose is only scanned for
+    statements that would be false at this stage (unobserved success, stale
+    candidate status, a stable claim the fields and receipts do not support).
+    """
     if kind in ("snapshot", "notes", "manifest") and legacy_snapshot(context):
         return []
     errors: list[str] = []
     active = list(active_lines(text))
     frozen = kind in ("snapshot", "notes", "manifest")
-    errors.extend(installation_command_errors(text, path, context, frozen=frozen))
+    structured = structured_state_required(kind, context)
+    if structured:
+        errors.extend(state_errors(text, path, kind, context))
+        state = release_state(text)[0] or {}
+        errors.extend(installation_command_errors(text, path, context, frozen=frozen, state=state))
     for number, line in active:
         for statement in re.split(r"[;；。]|\.\s+(?!\d)", plain(line)):
             if installation_claim(statement) and (frozen or not context.install_verified):
                 errors.append(f"[UNOBSERVED_INSTALLATION] {path}:{number}: released-source installation success requires observed installation facts")
             if publication_claim(statement) and (frozen or not context.published):
                 errors.append(f"[UNOBSERVED_PUBLICATION] {path}:{number}: publication success requires observed publication facts")
-    if kind == "manifest":
-        if not re.search(r"(?:Preparation (?:snapshot|status)|准备(?:时快照|状态|快照))[：:]", plain(text), re.I):
-            errors.append(f"[MANIFEST_TIME_CONTEXT] {path}: label the document as a preparation-time snapshot")
-        identity_lines = [plain(line) for _, line in active
-                          if re.search(r"^#\s|Release(?: Version)?\s*[:|]|发布版本\s*[：:|]", plain(line), re.I)]
-        identities = {version for line in identity_lines for version in re.findall(VERSION, line)}
-        if identities != {context.target} or f"refs/tags/{context.target}" not in text:
-            errors.append(f"[MANIFEST_IDENTITY] {path}: expected {context.target} and its exact refs/tags identity")
     if kind == "current":
-        claims = {version for _, line in active for version in stable_claims(line)}
-        if context.current_stable is None or claims != {context.current_stable}:
-            errors.append(f"[CURRENT_STABLE] {path}: expected confirmed stable {context.current_stable}, found {sorted(claims)}; source={context.evidence_source}")
+        stray = {version for _, line in active for version in stable_claims(line)} - {context.current_stable}
+        if stray:
+            errors.append(f"[CURRENT_STABLE] {path}: prose names {sorted(stray)} as stable; confirmed stable is {context.current_stable}")
         for number, line in active:
             if candidate_statement(line, context):
                 errors.append(f"[CURRENT_CANDIDATE_STATE] {path}:{number}: current publication authority retains candidate status")
     if kind in ("snapshot", "notes", "current-notes", "release-body"):
-        identity_lines = [plain(line) for _, line in active if re.search(r"release snapshot|版本快照", plain(line), re.I)]
-        if kind != "snapshot":
-            identity_lines.extend(plain(line) for _, line in active if re.match(r"^#\s", line))
-        identities = {version for line in identity_lines for version in re.findall(VERSION, line)}
-        if identities != {context.target}:
-            errors.append(f"[SNAPSHOT_IDENTITY] {path}: expected release snapshot {context.target}, found {sorted(identities)}")
-        if not re.search(r"RELEASE_MANIFEST", text) or not re.search(r"(?:receipt|收据).*main|main.*(?:receipt|收据)", text, re.I):
-            errors.append(f"[SNAPSHOT_EVIDENCE] {path}: name the Manifest and the observed-facts receipt on main")
         for number, line in active:
             if kind in ("snapshot", "notes") and stable_claims(line):
                 errors.append(f"[SNAPSHOT_CURRENT_STATE] {path}:{number}: a frozen snapshot cannot assert a current stable release")
             if candidate_statement(line, context):
                 code = "RELEASE_BODY_CANDIDATE_STATE" if kind == "release-body" else "SNAPSHOT_CANDIDATE_STATE"
                 errors.append(f"[{code}] {path}:{number}: candidate status would become stale in the release object")
-        if kind in ("release-body", "current-notes") and not re.search(r"(?:^|\n)(?:#{1,6}\s*|\*\*)?(?:Verification|Release status|验证|发布状态)", text, re.I):
-            errors.append(f"[RELEASE_VERIFICATION_CONTEXT] {path}: retain the verification/status section and its evidence source")
     return errors
 
 
@@ -309,20 +369,17 @@ def installation_claim(statement: str) -> bool:
                 and not re.search(r"not (?:verified|passed)|not installation evidence|不是安装证据|未验证|未通过", statement, re.I))
 
 
-def installation_command_errors(text: str, path: str, context: ReleaseContext, *, frozen: bool) -> list[str]:
-    errors: list[str] = []
-    heading = ""
-    preceding: list[str] = []
+def installation_command_errors(text: str, path: str, context: ReleaseContext, *,
+                                frozen: bool, state: Mapping) -> list[str]:
+    """Target or default install commands stay declared templates until their source is verified."""
+    if not (frozen or not context.install_verified) or state.get("install_commands") == "template":
+        return []
     for number, line in active_lines(text, include_code=True):
-        if re.match(r"^#{1,6}\s", line):
-            heading = line
-            preceding = []
         source = re.search(rf"\bskills\s+add\s+{REPO_PATTERN}(?:#([^\s`]+))?", line)
         if source and (source.group(1) is None or source.group(1) == context.target):
-            if (frozen or not context.install_verified) and not re.search(r"template|模板", heading + "\n" + "\n".join(preceding[-4:]), re.I):
-                errors.append(f"[FUTURE_INSTALL_TEMPLATE] {path}:{number}: mark the target/default installation command as a template until its released source is verified")
-        preceding.append(line)
-    return errors
+            return [f"[FUTURE_INSTALL_TEMPLATE] {path}:{number}: set release-state install_commands to 'template' "
+                    "until the released source is verified"]
+    return []
 
 
 def publication_claim(statement: str) -> bool:

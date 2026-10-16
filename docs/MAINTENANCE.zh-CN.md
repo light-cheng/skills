@@ -1,5 +1,7 @@
 # 第一方维护与文档同步
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [English maintenance contract](MAINTENANCE.md)
 
 本页规定第一方 Skill 的生命周期和使集合可维护、可安装的文档同步要求。不复制 [AGENTS.md](../AGENTS.md) 或架构文档。
