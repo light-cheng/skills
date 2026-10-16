@@ -149,8 +149,6 @@ def valid_publication_time(value) -> bool:
 
 # The LightDevCoder account was renamed to light-cheng. GitHub reports the new owner
 # and redirects the old one, so both release URLs identify this repository.
-# Receipts and public docs still write the LightDevCoder form; confirmed_stable
-# and the receipt URL check accept only that form.
 RELEASE_OWNERS = ("LightDevCoder", "light-cheng")
 
 
@@ -223,8 +221,7 @@ def confirmed_stable(documents: Mapping[str, str]) -> tuple[str | None, str | No
         identity_zh = re.search(r"\|\s*\*\*发布版本\*\*\s*\|\s*`?([^`|\s]+)", other)
         if not identity_en or not identity_zh or identity_en.group(1) != version or identity_zh.group(1) != version:
             continue
-        url = f"https://github.com/LightDevCoder/skills/releases/tag/{version}"
-        if url not in text or url not in other:
+        if not any(url in text for url in release_urls(version)) or not any(url in other for url in release_urls(version)):
             continue
         if not re.search(r"\|\s*\*\*GitHub Release Publication\*\*\s*\|\s*`?(?:PASS|SUCCESS)`?\s*\|", text, re.I):
             continue

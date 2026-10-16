@@ -904,6 +904,23 @@ class ReceiptStrictValidationTests(unittest.TestCase):
         self.assertTrue(res.passed, f"Expected PASS but got {res.status}: {res.message}")
         self.assertEqual(res.status, "PASS")
 
+    def test_receipt_release_url_accepts_the_renamed_owner_only(self) -> None:
+        """The receipt may name the light-cheng release URL; another owner is rejected."""
+        for cmd in (["git", "init"], ["git", "config", "user.name", "Test"], ["git", "config", "user.email", "test@example.com"]):
+            subprocess.run(cmd, cwd=self.tmp_root, capture_output=True, check=True)
+        (self.tmp_root / "test.txt").write_text("ok", encoding="utf-8")
+        subprocess.run(["git", "add", "."], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "commit", "-m", "candidate"], cwd=self.tmp_root, capture_output=True, check=True)
+        subprocess.run(["git", "tag", "-a", "v0.2.4", "-m", "release v0.2.4"], cwd=self.tmp_root, capture_output=True, check=True)
+        tag_ident = resolve_annotated_tag_identity("v0.2.4", cwd=self.tmp_root)
+        for owner, accepted in (("light-cheng", True), ("someone-else", False)):
+            url = f"https://github.com/{owner}/skills/releases/tag/v0.2.4"
+            for name, factory in (("RELEASE_RECEIPT.md", make_valid_receipt_en), ("RELEASE_RECEIPT.zh-CN.md", make_valid_receipt_zh)):
+                text = factory(tag_obj=tag_ident.tag_object_sha, tag_target=tag_ident.peeled_commit_sha, release_url=url)
+                (self.rel_dir / name).write_text(text, encoding="utf-8")
+            res = check_release_receipt_consistency("v0.2.4", release_commit=tag_ident.peeled_commit_sha, repo_root=self.tmp_root)
+            self.assertEqual(res.passed, accepted, f"{owner}: {res.status}: {res.message}")
+
     def test_lightweight_release_tag_rejected(self) -> None:
         """Lightweight release tag (git tag without -a) is rejected as RELEASE_TAG_NOT_ANNOTATED."""
         subprocess.run(["git", "init"], cwd=self.tmp_root, capture_output=True, check=True)

@@ -46,6 +46,7 @@ from release_context import (
     STAGES, ReleaseContext, apply_observations, check_release_documents,
     confirmed_stable, document_links, legacy_snapshot, validate_ci_observation,
     validate_document, validate_observation_kind, validate_publication_observation, version_key,
+    release_urls,
 )
 
 
@@ -946,13 +947,13 @@ def check_release_receipt_consistency(
     # 9. Release URL
     url_m_en = re.search(r"\|\s*\*\*Release URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_en)
     url_m_zh = re.search(r"\|\s*\*\*发布 URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_zh)
-    if not url_m_en or url_m_en.group(1) != expected_url:
+    if not url_m_en or url_m_en.group(1) not in release_urls(tag):
         return VerificationResult(
             passed=False,
             status="RECEIPT_URL_MISMATCH",
             message=f"Release URL in English receipt must be '{expected_url}'.",
         )
-    if not url_m_zh or url_m_zh.group(1) != expected_url:
+    if not url_m_zh or url_m_zh.group(1) not in release_urls(tag):
         return VerificationResult(
             passed=False,
             status="RECEIPT_URL_MISMATCH",
