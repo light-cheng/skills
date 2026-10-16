@@ -47,7 +47,9 @@ through a proposal, however small.
    - Approved → recommend `project-spec` for SPEC changes and
      `project-tickets` for ticket changes, passing the proposal path. Give the
      user the exact call to type for the current Host, for example
-     `/project-spec <proposal-path>` in Claude Code. Both are user-invoked, so
+     `/project-spec <proposal-path>` in Claude Code,
+     `$project-spec <proposal-path>` in Codex or
+     `/skill:project-spec <proposal-path>` in pi. Both are user-invoked, so
      the Host may hide them from you; never tell the user they are not
      installed. When its
      `Charter` line names a Charter item, recommend `project-review`'s Change
