@@ -10,6 +10,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TAG = "v9.8.7"
+# Fixture repository: release scripts must not depend on the collection's real name.
+REPO = "example-owner/skills"
 
 
 def git(root: Path, *args: str) -> str:
@@ -281,7 +283,7 @@ def body_cli(root: Path, body: str, *extra: str) -> subprocess.CompletedProcess[
     input_path.write_text(body, encoding="utf-8")
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/prepare_release_body.py"), "--tag", TAG,
-         "--input", str(input_path), "--output", str(root / "release-body.md"), *extra],
+         "--input", str(input_path), "--output", str(root / "release-body.md"), "--repo", REPO, *extra],
         cwd=root, capture_output=True, text=True, timeout=30,
     )
 
@@ -559,13 +561,13 @@ def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tm
     body_path = tmp_path.parent / f"{tmp_path.name}-body.md"
     body = subprocess.run(
         [sys.executable, str(ROOT / "scripts/prepare_release_body.py"), "--root", str(tmp_path),
-         "--tag", TAG, "--observations", str(observations), "--simulate", "--output", str(body_path)],
+         "--tag", TAG, "--repo", REPO, "--observations", str(observations), "--simulate", "--output", str(body_path)],
         capture_output=True, text=True, timeout=30,
     )
     assert body.returncode == 0 and "SIMULATED" in body.stderr, body.stdout + body.stderr
     data["release"] = {
         "tagName": TAG, "isDraft": False, "isPrerelease": False, "publishedAt": "2026-10-09T00:00:00Z",
-        "url": f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}",
+        "url": f"https://github.com/{REPO}/releases/tag/{TAG}",
         "body": body_path.read_text(encoding="utf-8"),
     }
     observations.write_text(json.dumps(data), encoding="utf-8")
@@ -614,3 +616,30 @@ def test_existing_v027_tag_is_audited_without_rewriting_main_or_tag() -> None:
     assert result.returncode == 0 and "HISTORICAL_SNAPSHOT" in result.stdout, result.stdout + result.stderr
     assert git(ROOT, "rev-parse", "refs/tags/v0.2.7") == before
     assert (ROOT / "README.md").read_bytes() == main_readme_before
+
+
+def test_known_defect_notice_keeps_a_published_body_valid(tmp_path: Path, monkeypatch, capsys) -> None:
+    """BROKEN-RELEASE.md marks a bad release by prefixing its body; the attested gate must still pass."""
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    import verify_release_integrity as verifier
+    make_attested(tmp_path)
+    body = (tmp_path / f"docs/evidence/releases/{TAG}/RELEASE_NOTES.md").read_text(encoding="utf-8")
+    prefix = f"https://github.com/{REPO}/blob/{TAG}/docs/evidence/releases/{TAG}/"
+    body = body.replace("(RELEASE_NOTES.zh-CN.md)", f"({prefix}RELEASE_NOTES.zh-CN.md)")
+    body = body.replace("(RELEASE_MANIFEST.md)", f"({prefix}RELEASE_MANIFEST.md)")
+    body = "> **Known defect:** one script crashes on empty input. Use v9.8.8 instead.\n\n" + body
+    release = {"body": body, "tagName": TAG, "isDraft": False, "isPrerelease": False,
+               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/{REPO}/releases/tag/{TAG}"}
+    seen = []
+    original_run = subprocess.run
+    def run(command, *args, **kwargs):
+        if command[:3] == ["gh", "release", "view"]:
+            seen.append(command)
+            return subprocess.CompletedProcess(command, 0, json.dumps(release), "")
+        return original_run(command, *args, **kwargs)
+    monkeypatch.setattr(verifier.subprocess, "run", run)
+    result = verifier.check_github_release_navigation(TAG, repo=REPO, cwd=tmp_path)
+    assert result.passed, result.message
+    assert seen and seen[0][seen[0].index("--repo") + 1] == REPO
+    wrong_repo = verifier.check_github_release_navigation(TAG, repo="someone-else/skills", cwd=tmp_path)
+    assert not wrong_repo.passed and "PUBLICATION_IDENTITY" in wrong_repo.message

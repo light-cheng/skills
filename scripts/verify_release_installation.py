@@ -11,8 +11,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPOSITORY = "https://github.com/LightDevCoder/skills.git"
-SOURCE = "LightDevCoder/skills"
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from repo_identity import resolve_repository, validate_repository  # noqa: E402
+
 COLLECTION_SIZE = 39  # admitted packages in the release this script verifies
 
 
@@ -97,8 +98,12 @@ def main() -> None:
     parser.add_argument("--tag", required=True)
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--repo", type=validate_repository, default=None,
+                        help="GitHub owner/name to install from (default: GITHUB_REPOSITORY, then gh, then origin).")
     args = parser.parse_args()
     validate_identity(args.tag, args.expected_commit)
+    source = resolve_repository(args.repo)
+    repository = f"https://github.com/{source}.git"
     require_fresh_runner(Path.home())
     args.output.mkdir(parents=True, exist_ok=False)
     commands, observations = [], []
@@ -115,7 +120,7 @@ def main() -> None:
 
     def clone(ref: str, name: str) -> tuple[Path, str, dict]:
         root = args.output / name
-        run(["git", "clone", "--quiet", "--depth", "1", "--branch", ref, REPOSITORY, str(root)])
+        run(["git", "clone", "--quiet", "--depth", "1", "--branch", ref, repository, str(root)])
         return root, run(["git", "rev-parse", "HEAD"], root), source_packages(root)
 
     _, pinned_sha, pinned = clone(args.tag, "pinned-source")
@@ -147,13 +152,13 @@ def main() -> None:
             "case": name, "selected_agents": selected, "destinations": checked,
         })
 
-    fixed_source = f"{SOURCE}#{args.tag}"
+    fixed_source = f"{source}#{args.tag}"
     install("pinned-global-codex", fixed_source, ["--global", "--agent", "codex"], pinned, ["codex"], True)
     install("pinned-whole", fixed_source, ["--agent", "codex", "claude-code", "--skill", "*", "--copy"], pinned, ["codex", "claude-code"])
     for name in ("light-implement", "light-tdd", "light-research"):
         install("single-" + name, fixed_source, ["--agent", "codex", "--skill", name], {name: pinned[name]}, ["codex"])
-    install("default-whole", SOURCE, ["--agent", "codex", "claude-code", "--skill", "*", "--copy"], latest, ["codex", "claude-code"])
-    default_after = run(["git", "ls-remote", REPOSITORY, "refs/heads/main"]).split()[0]
+    install("default-whole", source, ["--agent", "codex", "claude-code", "--skill", "*", "--copy"], latest, ["codex", "claude-code"])
+    default_after = run(["git", "ls-remote", repository, "refs/heads/main"]).split()[0]
     if default_after != default_sha:
         raise ValueError("default branch moved during installation; rerun against stable identities")
     final_cli_files = list((args.output / "npm-cache").glob("_npx/*/node_modules/skills/dist/cli.mjs"))

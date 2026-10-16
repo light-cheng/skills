@@ -25,6 +25,7 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from repo_identity import RELEASE_URL_PATTERN
 from release_context import PUBLIC_RELEASE_DOCS, STAGES, ReleaseContext, check_release_documents, confirmed_stable, infer_document_context
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -168,7 +169,7 @@ def check_release_link_labels(
     """Keep visible release version labels aligned with their GitHub tag links."""
     errors: list[str] = []
     target_files = files if files is not None else get_public_surface_files(repo_root)
-    pattern = re.compile(r"\[(v\d+\.\d+\.\d+)\]\(https://github\.com/LightDevCoder/skills/releases/tag/(v\d+\.\d+\.\d+)\)")
+    pattern = re.compile(r"\[(v\d+\.\d+\.\d+)\]\(" + RELEASE_URL_PATTERN + r"(v\d+\.\d+\.\d+)\)")
     for path in target_files:
         for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             for match in pattern.finditer(line):

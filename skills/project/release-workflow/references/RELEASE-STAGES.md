@@ -1,67 +1,51 @@
 # Release stage procedures
 
-Use only the stages required by the user request. Before any remote mutation,
-confirm the exact target and existing publication authority. Local-only work
-stops before those mutations. Capture facts using [DOCUMENT-STATE.md](DOCUMENT-STATE.md);
-passing a local rehearsal never proves production publication.
+Run only the stages the owner asked for. Before any remote write, confirm the
+exact target and that the owner approved it. Local-only work stops before the
+first push. [DOCUMENT-STATE.md](DOCUMENT-STATE.md) says how to record facts; a
+passing local rehearsal never proves a production release.
 
-## Release Artifact Architecture
+The scripts find the GitHub repository themselves (`--repo owner/name`, then
+`GITHUB_REPOSITORY`, then `gh repo view`, then the `origin` remote). Pass
+`--repo` only to override that. Use `"$REPO"` from this command in the examples:
 
-The release workflow maintains three distinct artifacts across cleanly separated lifecycles:
+```bash
+REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+```
 
-1. **Release Notes (`RELEASE_NOTES.md` / `RELEASE_NOTES.zh-CN.md`):**
-   User-facing summary of new capabilities, architectural changes, breaking
-   changes, and migration guidance. Created during `PREPARED` and frozen inside the tag.
-2. **Release Manifest (`RELEASE_MANIFEST.md` / `RELEASE_MANIFEST.zh-CN.md`):**
-   Immutable pre-publication release snapshot committed directly into the
-   candidate commit and frozen inside the tag. Records version, scope, package
-   count, policy status, expected tag identity (`refs/tags/vX.Y.Z^{commit}`),
-   compatibility baselines, and local verification evidence. Avoids circular
-   commit-hash self-references and does not link relatively to uncreated receipts;
-   notes that post-publication verification is attested on `main` in `RELEASE_RECEIPT.md`.
-3. **Release Receipt (`RELEASE_RECEIPT.md` / `RELEASE_RECEIPT.zh-CN.md`):**
-   Post-publication attestation recording verified facts: tag object SHA, peeled
-   commit SHA, exact GitHub Actions CI run ID and conclusion, pinned and generic
-   fresh install outcomes, GitHub Release URL, and publication timestamp.
-   **Created for the first time on `main` during `ATTESTED`** (directly with
-   `Status: VERIFIED` or documented failure). Receipts never exist inside tag
-   snapshots or candidate preparation commits.
+## The three release documents
 
----
+All three live in `docs/evidence/releases/vX.Y.Z/`, each in English and Chinese.
 
-## Release Lifecycle Stages
+| Document | Written when | Says |
+| --- | --- | --- |
+| `RELEASE_NOTES` | PREPARED, frozen in the tag | What changed, breaking changes, migration. |
+| `RELEASE_MANIFEST` | PREPARED, frozen in the tag | Version, scope, package count, policy status, expected tag `refs/tags/vX.Y.Z^{commit}`, local checks. It does not contain its own commit SHA and does not link to the receipt, which does not exist yet. |
+| `RELEASE_RECEIPT` | ATTESTED, first created on main | Observed facts: tag object and commit, CI run, install results, Release URL and time. Never in the candidate or the tag. |
 
-### 1. Stage PREPARED (Candidate Preparation — Manifest + Notes Only)
+## 1. PREPARED — build the candidate
 
-Prepare the candidate commit carrying code, documentation, and the immutable
-release manifest:
-
-1. Update `CHANGELOG.md` (and `.zh-CN.md`) with target version entries.
-2. Prepare README / CATALOG / INSTALLATION / MAINTENANCE in both languages
-   as target-version snapshots. Keep current-stable facts on main and preparation-
-   time history in the Manifest; see [document state](DOCUMENT-STATE.md).
-3. Create `RELEASE_MANIFEST.md` and `RELEASE_MANIFEST.zh-CN.md` under
-   `docs/evidence/releases/vX.Y.Z/` recording pre-tag facts (version, scope,
-   package count, policy status, tag ref). Manifest must not include relative
-   links to uncreated receipts.
-4. Create candidate `RELEASE_NOTES.md` and `RELEASE_NOTES.zh-CN.md`.
-5. **Do NOT create `RELEASE_RECEIPT*.md`** in `PREPARED`. No candidate receipts
-   may enter candidate commits or tag snapshots.
-6. Finalize artifact paths and links, then follow the
-   [final-artifact checks](CLOSEOUT.md#verify-final-artifacts).
-   Stage the candidate and bind verification to its exact tree:
+1. Add the version to `CHANGELOG.md` and `CHANGELOG.zh-CN.md`.
+2. Update README, CATALOG, INSTALLATION and MAINTENANCE in both languages as
+   snapshots of the target version. Current-stable facts stay on main; history
+   at preparation time goes into the Manifest.
+3. Write the Manifest and the Notes. Do not create a Receipt.
+4. Finish every path and link, then follow the
+   [final-artifact checks](CLOSEOUT.md#verify-final-artifacts). Stage the
+   candidate and bind the checks to its exact tree:
    ```bash
    git add <candidate-files>
    git diff --exit-code
    VERIFIED_TREE="$(git write-tree)"
    git diff --cached --check
    python3 -m pytest -q
-   python3 -m unittest discover -s tests
    python3 -m compileall -q skills tests scripts
    python3 scripts/check_public_docs.py --tag vX.Y.Z --stage prepared
    git diff --check
    ```
-7. Confirm the checked tree is unchanged, then commit:
+   `pytest` also runs the `unittest` test classes; a separate
+   `python3 -m unittest discover` run repeats the same tests.
+5. Confirm the tree did not change, then commit:
    ```bash
    git diff --exit-code
    test "$(git write-tree)" = "$VERIFIED_TREE"
@@ -69,157 +53,168 @@ release manifest:
    CANDIDATE_SHA="$(git rev-parse HEAD)"
    test "$(git rev-parse HEAD^{tree})" = "$VERIFIED_TREE"
    ```
-8. On the clean working tree, validate the `PREPARED` state:
+6. On the clean working tree, check the PREPARED state:
    ```bash
    python3 scripts/verify_release_integrity.py \
      --tag vX.Y.Z \
      --release-commit "$CANDIDATE_SHA" \
      --stage prepared --mode current
    ```
-9. **Transition:** Transition lifecycle state to `PREPARED`.
 
-### 2. Stage CI_VERIFIED (Remote CI Verification on Main)
+## 2. CI_VERIFIED — CI on the exact commit, then main
 
-Ensure the exact candidate commit is verified by remote CI:
+Use the pull-request path. Use the direct push only when main is unprotected
+and the owner chooses it for this release.
 
-1. Push candidate commit to `origin/main`.
-2. Await remote GitHub Actions `collection-quality` execution on the exact candidate commit SHA:
+### Pull-request path (recommended)
+
+1. Base the candidate on the current tip of main, so the PR's test merge has
+   the same tree as the candidate:
    ```bash
-   gh run list --commit "$CANDIDATE_SHA" --workflow collection-quality --json databaseId,headSha,status,conclusion --limit 1
-   gh run watch <run-id> --exit-status
-   gh run view <run-id> --json headSha,status,conclusion
+   git fetch origin main
+   test "$(git rev-parse "$CANDIDATE_SHA^")" = "$(git rev-parse origin/main)"
+   git push origin "$CANDIDATE_SHA:refs/heads/release/vX.Y.Z"
+   gh pr create --repo "$REPO" --base main --head release/vX.Y.Z --title "release: prepare vX.Y.Z" --body-file <notes>
    ```
-3. Require the run's `headSha` to equal `CANDIDATE_SHA`, `status` to be
-   `completed`, and `conclusion` to be `success`. An unavailable query or any
-   other result does not pass; follow [CI completion](CLOSEOUT.md#wait-for-the-exact-commit).
-4. **Transition:** Transition lifecycle state to `CI_VERIFIED`.
+   If main moved, rebase the candidate, repeat the PREPARED checks and use the
+   new `CANDIDATE_SHA`.
+2. Wait for `collection-quality` on the exact candidate commit and require
+   `headSha` = `CANDIDATE_SHA`, `status: completed`, `conclusion: success`:
+   ```bash
+   gh run list --repo "$REPO" --commit "$CANDIDATE_SHA" --workflow collection-quality --json databaseId,headSha,status,conclusion,event --limit 1
+   gh run watch <run-id> --repo "$REPO" --exit-status
+   gh run view <run-id> --repo "$REPO" --json headSha,status,conclusion
+   ```
+3. Merge the PR (merge commit or squash; the owner picks). Record the commit it
+   created on main and prove it carries the candidate tree:
+   ```bash
+   git fetch origin main
+   RELEASE_SHA="$(gh pr view release/vX.Y.Z --repo "$REPO" --json mergeCommit --jq .mergeCommit.oid)"
+   python3 scripts/check_merged_candidate.py --candidate "$CANDIDATE_SHA" --merged "$RELEASE_SHA" --branch origin/main
+   ```
+   `BLOCKED` means main changed between CI and merge. Do not tag. Rebuild the
+   candidate on the new main and start this stage again.
+4. Wait for the push run of `collection-quality` on `RELEASE_SHA` with the same
+   three checks. `RELEASE_SHA` is the commit you tag; from here on pass it as
+   `--release-commit`.
 
-### 3. Stage TAGGED (Remote Tag Protection Gate & Immutable Tag Creation)
+### Direct push (main unprotected, owner's choice)
 
-> Recheck the target-bound publication authority established before the first
-> remote write. Reuse it while repository, version, candidate and actions remain
-> in scope; a materially different target needs its own authorization.
+Push the candidate to main, wait for CI on `CANDIDATE_SHA` as in step 2, and
+set `RELEASE_SHA="$CANDIDATE_SHA"`.
 
-Create the annotated tag pointing to the exact CI-verified commit:
+Either way, a missing, queued, failed or unreadable run does not pass; follow
+[CI completion](CLOSEOUT.md#wait-for-the-exact-commit).
 
-1. Verify remote GitHub tag ruleset protection:
+**Protect main.** Recommend that the owner adds a branch ruleset for main that
+requires a pull request, requires the `collection-quality` check, and blocks
+force pushes and deletion. The owner changes repository settings; you do not.
+
+## 3. TAGGED — protected annotated tag
+
+Recheck the owner's approval for this repository, version and commit. A
+different target needs a new approval.
+
+1. Check that tags are protected on GitHub:
    ```bash
    python3 scripts/check_release_tag_protection.py
    ```
-   Requires: target is `tag`, enforcement is `active`, pattern covers `refs/tags/v*`,
-   both `deletion` and `update` restrictions are present, `bypass_actors` is empty `[]`,
-   and `current_user_can_bypass` is `never`. If missing or inactive, report `BLOCKED` and halt tag publication.
-2. Verify tag creation preconditions (tag preflight):
+   It requires an active `tag` ruleset covering `refs/tags/v*` that restricts
+   `deletion` and `update`, with no bypass actors. Otherwise report `BLOCKED`
+   and stop.
+2. Run the tag preflight. It checks that the commit exists, the working tree
+   is clean, the ruleset passes, and the tag exists neither locally nor on origin:
    ```bash
    python3 scripts/check_release_tag_preflight.py \
      --tag vX.Y.Z \
-     --release-commit "$CANDIDATE_SHA"
+     --release-commit "$RELEASE_SHA"
    ```
-   Requires: candidate commit exists, working tree is clean, remote ruleset PASS,
-   and target tag does not exist locally or on origin.
-3. Create annotated tag pointing to CI-verified candidate commit (tag snapshot contains Manifest + Notes; Receipt does NOT exist):
+3. Create the annotated tag on the release commit. The tag holds the Manifest
+   and Notes, never a Receipt:
    ```bash
-   git tag -a vX.Y.Z -m "vX.Y.Z — <title>"
+   git tag -a vX.Y.Z -m "vX.Y.Z — <title>" "$RELEASE_SHA"
    ```
-4. Validate `TAGGED` state:
+4. Check the local tag:
    ```bash
    python3 scripts/verify_release_integrity.py \
      --tag vX.Y.Z \
-     --release-commit "$CANDIDATE_SHA" \
+     --release-commit "$RELEASE_SHA" \
      --stage tagged --mode current
    ```
-   If `stage=tagged` verification fails, pushing the tag is strictly forbidden.
-   Delete the erroneous unpushed local tag immediately (`git tag -d vX.Y.Z`) and fix the cause.
-5. Push the verified annotated tag to origin:
+   If this fails, do not push the tag. Delete the local tag
+   (`git tag -d vX.Y.Z`) and fix the cause.
+5. Push the tag:
    ```bash
    git push origin vX.Y.Z
    ```
-6. Confirm tag resolution:
+6. Confirm `git cat-file -t refs/tags/vX.Y.Z` prints `tag` (annotated, not a
+   commit), then bind the remote tag to the release commit:
    ```bash
-   git rev-parse refs/tags/vX.Y.Z
-   git rev-parse refs/tags/vX.Y.Z^{commit}
-   git cat-file -t refs/tags/vX.Y.Z
+   python3 scripts/verify_release_integrity.py --tag vX.Y.Z --release-commit "$RELEASE_SHA" --stage tagged --mode current --check-remote
    ```
-   Must confirm object type is `tag` (annotated tag object), not `commit`.
-   Re-run `verify_release_integrity.py --tag vX.Y.Z --release-commit "$CANDIDATE_SHA" --stage tagged --mode current --check-remote` after the push; this must bind the remote annotated tag object and peeled commit to the local candidate.
-7. **Transition:** Transition lifecycle state to `TAGGED`.
 
-### 4. Stage INSTALL_VERIFIED (Fresh Install Verification)
+A pushed tag cannot be moved or deleted. If anything after this point is wrong,
+follow [BROKEN-RELEASE.md](BROKEN-RELEASE.md).
 
-Verify installation against the published tag in disposable directories,
-independent of the source checkout:
+## 4. INSTALL_VERIFIED — fresh installs from the tag
 
-1. **Pinned Whole Collection:**
+The required evidence is the `release-installation` workflow. Run it from main,
+so a verifier fixed on main applies without touching the tag:
+
+```bash
+gh workflow run release-installation.yml --repo "$REPO" --ref main -f tag=vX.Y.Z -f expected_commit="$RELEASE_SHA"
+```
+
+Wait for the run, then download its `release-installation-evidence` artifact.
+Its `result.json` becomes the `installation` observation. The manual command
+matrix and the real-Host smoke in [VERIFICATION.md](VERIFICATION.md) are
+optional extra evidence; neither replaces the workflow result.
+
+## 5. PUBLISHED — GitHub Release
+
+GitHub renders Release bodies with links relative to the repository root, so
+sibling links in the Notes would 404. The body script turns them into full URLs
+on the current repository.
+
+1. Prepare the body in a temporary directory:
    ```bash
-   npx --yes skills add LightDevCoder/skills#vX.Y.Z --yes --copy --agent '*'
-   ```
-2. **Generic Latest Whole Collection:**
-   ```bash
-   npx --yes skills add LightDevCoder/skills --yes --copy --agent '*'
-   ```
-3. Verify installed package count matches the admitted package snapshot and contracts
-   discover cleanly.
-4. Record CLI version, package counts, discovery results, and destination paths.
-5. **Transition:** Transition lifecycle state to `INSTALL_VERIFIED`.
-
-### 5. Stage PUBLISHED (GitHub Release Publication)
-
-Create the formal GitHub Release:
-
-> **Important — Link Context on GitHub Releases:** GitHub Releases renders Markdown
-> with the repository root (`/`) as its base path, not `docs/evidence/releases/vX.Y.Z/`.
-> Sibling relative links in `RELEASE_NOTES.md` (such as links pointing to `RELEASE_NOTES.zh-CN.md`)
-> will 404 if uploaded directly. Always expand them into canonical repository URLs
-> using `scripts/prepare_release_body.py` before publication.
-
-1. Prepare release body expanding sibling relative links to full canonical repository URLs:
-   ```bash
+   BODY="$(mktemp -d)/release-body-vX.Y.Z.md"
    python3 scripts/prepare_release_body.py \
      --tag vX.Y.Z \
-     --output /tmp/release_body_vX.Y.Z.md
+     --output "$BODY"
    ```
-2. Publish release using the prepared release body:
+2. Publish:
    ```bash
-   gh release create vX.Y.Z \
+   gh release create vX.Y.Z --repo "$REPO" \
      --title "vX.Y.Z — <title>" \
-     --notes-file /tmp/release_body_vX.Y.Z.md
+     --notes-file "$BODY"
    ```
-3. Verify release status and public URL, confirming all navigation links resolve cleanly:
-   ```bash
-   gh release view vX.Y.Z
-   ```
-4. **Transition:** Transition lifecycle state to `PUBLISHED`.
+3. Open `gh release view vX.Y.Z --repo "$REPO"` and check that every link works.
 
-### 6. Stage ATTESTED (Post-Release Attestation — Receipt Created on Main)
+## 6. ATTESTED — receipt on main
 
-Record verified publication facts into `RELEASE_RECEIPT.md`:
-
-1. Create `docs/evidence/releases/vX.Y.Z/RELEASE_RECEIPT.md` and `.zh-CN.md` for
-   the first time on `main` (with `Status: VERIFIED` or documented failure), recording:
-   - Tag object SHA and peel target commit SHA
-   - Exact CI run ID and conclusion
-   - Pinned and generic fresh install verification counts
-   - GitHub Release URL and publication timestamp
-   Receipts may link back to `RELEASE_MANIFEST.md` and `RELEASE_NOTES.md`.
-2. Update documentation and catalog to reflect the new stable release.
-3. Finish archive/copy operations and update every affected link before
-   following [final-artifact checks](CLOSEOUT.md#verify-final-artifacts)
-   on the complete staged attestation. Commit that verified tree to `main`:
-   `docs(release): attest vX.Y.Z publication`; record `ATTESTATION_SHA`.
-4. On the clean working tree on `main`, run the full ATTESTED integrity gate:
+1. On main, create `RELEASE_RECEIPT.md` and `RELEASE_RECEIPT.zh-CN.md` with
+   `Status: VERIFIED` or a documented failure. Record the tag object and
+   commit SHAs, the CI run IDs and results, the pinned and latest install
+   results, the Release URL and its publication time. Link back to the Manifest
+   and Notes.
+2. Update the docs and catalog to name the new stable release.
+3. Finish every copy and link, then follow the
+   [final-artifact checks](CLOSEOUT.md#verify-final-artifacts) on the staged
+   attestation. Commit it as `docs(release): attest vX.Y.Z publication` and
+   record `ATTESTATION_SHA`. If main is protected, this commit goes through a
+   pull request like the candidate did.
+4. On the clean tree, run the full gate:
    ```bash
    python3 scripts/verify_release_integrity.py \
      --tag vX.Y.Z \
-     --release-commit <candidate-sha> \
+     --release-commit "$RELEASE_SHA" \
      --stage attested --mode current \
      --check-remote
    ```
-5. Only after `verify_release_integrity.py` passes, push the attestation commit to `origin/main`.
-6. Follow [CI completion](CLOSEOUT.md#wait-for-the-exact-commit) for
-   `ATTESTATION_SHA`. Every subsequent repair repeats the local checks and
-   exact-commit remote CI; retain earlier failures.
-7. **Transition:** Reach `ATTESTED` only after that final commit passes CI.
-   [Closeout reporting](CLOSEOUT.md#report-the-whole-release) names
-   candidate/final commit and run identities, publication facts, and any failed
-   attempts with their repairs; it distinguishes old file badges from current
-   branch status.
+5. Only after it passes, push the attestation commit to `origin/main`.
+6. Wait for CI on `ATTESTATION_SHA` as in
+   [CI completion](CLOSEOUT.md#wait-for-the-exact-commit). Every later repair
+   repeats the local checks and exact-commit CI; keep the earlier failures.
+7. ATTESTED is reached only when that final commit passes CI. Then write the
+   [closeout report](CLOSEOUT.md#report-the-whole-release).

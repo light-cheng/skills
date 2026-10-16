@@ -1,7 +1,7 @@
 interface:
   display_name: "Release Workflow"
-  short_description: "Governance-gated release for the Skills collection"
-  default_prompt: "Use release-workflow to run the governance-gated release workflow for a new Skills collection version, tag, or verified release."
+  short_description: "Release the Skills collection stage by stage, with evidence"
+  default_prompt: "Use release-workflow to prepare, verify and publish a new Skills collection version, or to audit an existing release tag."
 
 policy:
   allow_implicit_invocation: true

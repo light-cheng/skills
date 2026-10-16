@@ -1,62 +1,73 @@
-# Release document state
+# What release documents may say
 
-## One context, three views
+The same version appears in three places. Each may claim only what is true at
+the moment it is frozen or published.
 
-The context is a check input, not another release ledger. Target version and fixed
-revision identify the snapshot; bilingual VERIFIED Receipts identify current
-stable; observation files bind external results to target and candidate.
-
-| View | Meaning | Gate |
+| Place | Describes | Must not say |
 | --- | --- | --- |
-| Candidate/tag snapshot | This version's content and Manifest, with observed facts in the receipt on main | No frozen current-stable/candidate status, no premature success claims |
-| Current main | The latest confirmed stable target and branch/tag install distinction | Target, Receipt and all current fields must agree |
-| GitHub Release body | This release's content, migration and actually observed verification | Correct version/links; no unpublished status or unsupported success claims |
+| Candidate and tag (Notes, Manifest, public pages at that commit) | This version's content | That it is the current stable release, that it is unpublished, or any install or publication success. Those facts are only known later. |
+| Current main | The latest confirmed stable version, and the difference between latest and pinned installs | A stable version that no VERIFIED receipt confirms. |
+| GitHub Release body | This release's content, migration, and verification you actually observed | An unpublished status, a wrong version, broken links, or a success nobody observed. |
 
 Check README, CATALOG, INSTALLATION and MAINTENANCE in both languages, plus both
-Notes/Manifest files. A preparation Manifest explicitly names its time context.
-Historical failures, previous versions and recovery commands keep their meaning;
-never perform an indiscriminate version replacement. Current authority cannot be
-established by merely writing VERIFIED in an unrelated newer receipt.
+languages of the Notes and Manifest. A Manifest states that it was written at
+preparation time. Old failures, earlier versions and recovery commands keep
+their meaning: never search-and-replace version numbers across the docs.
 
-## Common CLI
+Main learns the current stable version only from a release's bilingual receipts
+with `Status: VERIFIED`, a matching version and a passing publication row.
+Writing VERIFIED into some unrelated receipt does not make a version stable.
 
-Run `scripts/verify_release_integrity.py --tag <target> --release-commit <candidate>
---stage <stage> --mode current` for the actual selected phase. Supported stages
-are prepared, ci_verified, tagged, install_verified, published and attested.
-Prepared/tagged checks export the fixed Git tree rather than the working directory.
-Use `scripts/check_public_docs.py --tag <target> --stage prepared` for snapshot
-semantics; its ordinary mode selects the branch view from Manifest/Receipt facts.
-Without `--tag`, the CI/default entry reads the newest preparation Manifest and
-the latest confirmed Receipt. A newer Manifest selects snapshot checks; once its
-Receipt is confirmed, current-main checks apply. Keep prior release records.
+## The checking scripts
 
-For CI/install/publication phases supply `--observations <json>`. The record has
-`kind: observed`, exact `tag` and `candidate`, then actual tool results:
+`scripts/verify_release_integrity.py --tag <version> --release-commit <commit>
+--stage <stage> --mode current` checks one stage: `prepared`, `ci_verified`,
+`tagged`, `install_verified`, `published` or `attested`. For prepared and
+tagged it exports the committed Git tree and checks that, not your working
+directory.
 
-- `ci`: GitHub run databaseId, headSha, status and conclusion;
-- `installation`: the existing released-source verifier result shape, including
-  pinned/default source revisions, source manifests and observed destination
-  manifests; each source/destination path and hash must match;
-- `release`: actual tagName, non-draft/non-prerelease flags, URL, publishedAt and
-  the observed body.
+`scripts/check_public_docs.py --tag <version> --stage prepared` checks the
+snapshot pages. Without `--tag` (as in CI) it picks the view itself: if the
+newest Manifest has no confirmed receipt yet, it checks the snapshot rules;
+once that receipt is confirmed, it checks the current-main rules.
 
-Store the final main run separately and pass `--final-ci <json>` to attested.
-Its headSha must match the current main commit. Do not put that commit/run back
-inside its own Receipt. CI/tag/install/publication checks are separate from
-current main's exact final CI, and the report names both.
+### Observations
 
-Local rehearsals use `kind: test-double` plus `--simulate`; the result says
-SIMULATED_PASS. Missing or mismatched observations never become a production fact.
+From CI_VERIFIED on, pass what you observed with `--observations <json>`. The
+file has `kind: observed`, the exact `tag` and `candidate`, and the real tool
+results:
 
-## Body renderer and historical audits
+- `ci`: the GitHub run's `databaseId`, `headSha`, `status` and `conclusion`;
+- `installation`: the `result.json` from the `release-installation` workflow,
+  with pinned and latest source commits, source manifests and the installed
+  manifests; every path and hash must match;
+- `release`: from `gh release view --json`, the `tagName`, the draft and
+  pre-release flags (both false), `url`, `publishedAt` and the `body`.
 
-`scripts/prepare_release_body.py` validates body identity, statement semantics and
-navigation. It reads the requested source/target, expands sibling and parent
-relative links, pins immutable content links and uses main for post-release
-Receipts. Claims of installation success require bound observations (or a valid
-existing Receipt for publication repair), not merely an install_verified flag.
+The `url` must be a release page of this tag. Pass `--repo owner/name` to also
+require that exact repository; documents written before a rename keep the old
+name and still pass.
 
-Use `--mode historical` only to re-audit an existing tag. It cannot prepare or
-promote a candidate. Already frozen tags through v0.2.7 retain their old prose
-with an explicit historical-snapshot result; new candidates must obey the new
-semantic rules. Never downgrade current main to an older audited tag.
+For ATTESTED, pass the final main CI run separately with `--final-ci <json>`.
+Its `headSha` must be the current main commit. Do not write that commit or run
+into its own receipt.
+
+For a local rehearsal, use `kind: test-double` with `--simulate`. The result is
+`SIMULATED_PASS`. Missing or mismatched observations never count as facts.
+
+## The Release body
+
+`scripts/prepare_release_body.py` reads the Notes from the tag (or `--revision`)
+and checks the version, the statements and the links. It turns relative links
+into full URLs on the current repository, pinned to the tag; receipt links
+point to main because receipts are written after the tag. It allows an
+installation-success claim only with matching observations or an existing
+valid receipt.
+
+## Re-auditing an old tag
+
+Use `--mode historical` only to re-audit an existing tag; it cannot prepare or
+promote a candidate. Tags up to v0.2.7 were frozen before these rules existed;
+they keep their original wording and report a historical-snapshot result. New
+candidates follow the current rules. Never move current main back to an older
+audited tag.
