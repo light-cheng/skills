@@ -6,6 +6,8 @@
 
 ## 未发布
 
+- `release-workflow`：`RELEASE-STAGES.md` 中的推送命令给 SHA 变量加了花括号（`"${CANDIDATE_SHA}:refs/heads/..."`）。在 zsh 中 `"$CANDIDATE_SHA:refs/..."` 会触发 `:r` 修饰符，推送错误的 refspec；这是第一次走 pull request 路径发布（v0.2.9）时发现的。新增测试保证参考文档中没有 `$VAR:` 写法。
+
 ## 0.2.9 — 2026-10-16
 
 - 经 pull request 路径发布：准确候选的 PR CI、合并树检查、合并提交上的 CI、受保护 annotated 标签、实际发布源的新鲜安装，以及 Claude Code 和 pi 上的真实 Host 冒烟；见[发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)。标签指向 PR #8 的合并提交 `ae11283`。

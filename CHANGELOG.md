@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- `release-workflow`: the push commands in `RELEASE-STAGES.md` brace the SHA variable (`"${CANDIDATE_SHA}:refs/heads/..."`). In zsh, `"$CANDIDATE_SHA:refs/..."` applies the `:r` modifier and pushes a wrong refspec; found on the first pull-request-path release (v0.2.9). A test keeps the references free of `$VAR:`.
+
 ## 0.2.9 — 2026-10-16
 
 - Published through the pull-request path with exact-candidate PR CI, a merged-tree check, CI on the merged commit, a protected annotated tag, fresh installs from the released source and real-Host smokes on Claude Code and pi; see the [release receipt](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.md). The tag peels to `ae11283`, the merge commit of PR #8.

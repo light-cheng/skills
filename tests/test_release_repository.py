@@ -206,3 +206,10 @@ def test_installation_verifier_reports_an_unresolvable_repository(monkeypatch, c
         module.main()
     assert exit_info.value.code == 2
     assert "cannot find the GitHub repository" in capsys.readouterr().err
+
+
+def test_documented_commands_brace_variables_before_a_colon():
+    """In zsh, "$SHA:refs/..." applies the :r modifier and pushes a wrong refspec; use ${SHA}."""
+    for path in (ROOT / "skills/project/release-workflow").rglob("*.md"):
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            assert not re.search(r"\$[A-Za-z_][A-Za-z0-9_]*:", line), f"{path.name}:{number}: {line.strip()}"

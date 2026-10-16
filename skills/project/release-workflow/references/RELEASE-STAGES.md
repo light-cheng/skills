@@ -76,7 +76,7 @@ and the owner chooses it for this release.
    ```bash
    git fetch origin main
    git merge-base --is-ancestor origin/main "$CANDIDATE_SHA"
-   git push origin "$CANDIDATE_SHA:refs/heads/release/vX.Y.Z"
+   git push origin "${CANDIDATE_SHA}:refs/heads/release/vX.Y.Z"
    PR_URL="$(gh pr create --repo "$REPO" --base main --head release/vX.Y.Z --title "release: prepare vX.Y.Z" --body-file <notes>)"
    ```
    If main moved, merge or rebase main into the candidate branch, repeat the
@@ -225,7 +225,7 @@ on the current repository.
    blocks: merge main in, rerun the final checks and open the PR again.
    ```bash
    git merge-base --is-ancestor origin/main "$ATTESTATION_SHA"
-   git push origin "$ATTESTATION_SHA:refs/heads/attest/vX.Y.Z"
+   git push origin "${ATTESTATION_SHA}:refs/heads/attest/vX.Y.Z"
    ATTEST_PR_URL="$(gh pr create --repo "$REPO" --base main --head attest/vX.Y.Z --title "docs(release): attest vX.Y.Z publication" --body "Receipt for vX.Y.Z.")"
    # after CI on ATTESTATION_SHA passes and the owner merges:
    git fetch origin main
