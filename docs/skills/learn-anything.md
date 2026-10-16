@@ -21,8 +21,10 @@ evidence must produce a learning summary or `BLOCKED`, not invented fields.
 
 This is `user-invoked only`:
 
+Type each Skill name with your Host's prefix, for example `/learn-anything` in Claude Code or `$learn-anything` in Codex.
+
 ```text
-$learn-anything
+learn-anything
 ```
 
 The input is the source material, provenance, exact commands/paths/errors, and

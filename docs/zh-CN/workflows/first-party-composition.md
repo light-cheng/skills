@@ -12,7 +12,7 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 用户目标和当前 artifacts
           |
           v
-    $ask-light
+    ask-light
           |
           v
 检查项目阶段 → 一个建议 + 理由
@@ -30,20 +30,20 @@ Agent 已有 goal、artifacts、blockers、project type、task kind、availabili
 
 可能的下一步包括：
 
-- `$project-init`：项目需要经确认的初始化；
-- `$project-clarify`：已有项目还有未定的决定；
-- `$clarify`：一个模糊的想法需要轻量梳理，不涉及项目；
-- `$decision-map`：工作量大、方向不清、要跨多个会话；
-- `$light-research`：需要一个外部事实；
-- `$light-prototype`：设计问题需要一次性的试验；
-- `$project-spec` / `$project-tickets`：下一个产物是 SPEC 或工单图；
-- `$light-implement`：有一张没被阻塞的工单可以开工；
-- `$light-diagnosing-bugs`：有东西坏了、报错、失败或变慢；
-- `$project-review` 或 `$review-loop`：目标和验收来源已经冻结；
-- `$learn-anything`：资料里可能有可复用的方法；
-- `$recap`：用户明确想要一句话的会话摘要；
-- `$manuscript-ops`：文稿的范围、状态、格式或审阅关口需要按领域路由；或
-- `$release-workflow`：项目已通过验收，准备发布。
+- `project-init`：项目需要经确认的初始化；
+- `project-clarify`：已有项目还有未定的决定；
+- `clarify`：一个模糊的想法需要轻量梳理，不涉及项目；
+- `decision-map`：工作量大、方向不清、要跨多个会话；
+- `light-research`：需要一个外部事实；
+- `light-prototype`：设计问题需要一次性的试验；
+- `project-spec` / `project-tickets`：下一个产物是 SPEC 或工单图；
+- `light-implement`：有一张没被阻塞的工单可以开工；
+- `light-diagnosing-bugs`：有东西坏了、报错、失败或变慢；
+- `project-review` 或 `review-loop`：目标和验收来源已经冻结；
+- `learn-anything`：资料里可能有可复用的方法；
+- `recap`：用户明确想要一句话的会话摘要；
+- `manuscript-ops`：文稿的范围、状态、格式或审阅关口需要按领域路由；或
+- `release-workflow`：项目已通过验收，准备发布。
 
 `ask-light` 在用户批准前停止且不执行、安装、delegate、创建 workflow state 或静默串联 user-invoked Skill；用户以 `yes`/`可以`/`go ahead` 批准后，对 model-invoked 被接受 Skill 可在 host 支持时开始；对 user-invoked 被接受 Skill，在有验证过的 host 证据时可直接进入，否则渲染精确调用并请用户启动。选中 Skill 保留自己的契约与证据边界。
 

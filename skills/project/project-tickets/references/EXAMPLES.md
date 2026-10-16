@@ -11,14 +11,14 @@ from the issue body.
 
 > **Ticket 01 — Project-spec entry and contract**
 > Blocked by: None — can start immediately
-> What it delivers: a concise user-invoked `$project-spec` entry that turns
+> What it delivers: a concise user-invoked `project-spec` entry that turns
 > `project-clarify`/`decision-map` outputs into a bounded SPEC at
 > `.scratch/<feature>/spec.md`, returns to `project-clarify` when blocked,
 > and exposes a verifiable handoff.
 >
 > **Ticket 02 — Project-tickets entry and publishing**
 > Blocked by: 01 — Project-spec entry and contract
-> What it delivers: a concise user-invoked `$project-tickets` entry that
+> What it delivers: a concise user-invoked `project-tickets` entry that
 > slices a verified SPEC into numbered tracer-bullet tickets under
 > `.scratch/<feature>/issues/` with `Blocked by`/`Status` edges compatible
 > with Wayfinding ops.
@@ -32,7 +32,7 @@ User approves granularity and edges. Publish in dependency order under
 ```markdown
 # 01 — Project-spec entry and contract
 
-**What to build:** A `$project-spec` Skill that synthesizes the
+**What to build:** A `project-spec` Skill that synthesizes the
 project-clarify handoff or decision-map answers into a formal SPEC at
 .scratch/<feature>/spec.md without reopening an interview, with a blocking
 return to project-clarify when a user decision remains.
@@ -49,7 +49,7 @@ return to project-clarify when a user decision remains.
 
 # 02 — Project-tickets entry and publishing
 
-**What to build:** A `$project-tickets` Skill that slices the verified SPEC
+**What to build:** A `project-tickets` Skill that slices the verified SPEC
 into one-file-per-ticket issues at .scratch/<feature>/issues/NN-<slug>.md,
 with a dependency quiz and a Wayfinding-compatible frontier.
 
@@ -141,7 +141,7 @@ map, or to the SPEC evidence section otherwise. Frontier now advances to `02`.
 
 ## Example 5 — Rejected input: no SPEC
 
-User: `$project-tickets turn the brainstorming chat into tickets`
+User: `project-tickets turn the brainstorming chat into tickets`
 
 No `.scratch/<feature>/spec.md` exists and the conversation carries no bounded
 SPEC sections.
@@ -151,7 +151,7 @@ Behaviour: report the handoff gap:
 ```text
 No verifiable SPEC found at .scratch/<feature>/spec.md — cannot slice
 without the Problem Statement / Solution / User Stories / Implementation
-Decisions shape from project-spec. Recommended: $project-spec first.
+Decisions shape from project-spec. Recommended: project-spec first.
 ```
 
 Stop without publishing. Producing tickets speculatively would reintroduce the

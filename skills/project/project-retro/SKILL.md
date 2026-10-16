@@ -5,7 +5,9 @@ description: >
   execution friction to its root causes, verify which issues are already
   permanently guarded, and surface durable improvements to workflow,
   navigation, automated checks, steering, information access, test
-  architecture, and tool economy.
+  architecture, and tool economy. Use after a project-review verdict, a
+  release, or a long or friction-heavy session, or when the user asks for a
+  retrospective.
 ---
 
 # Project Retro
@@ -24,8 +26,8 @@ environment, workflow, and guardrails.
 - **Friction-heavy session:** When an agent encounters repeated rework,
   reviewer-caught mechanical defects, unverified assumptions, unfindable
   contracts, expensive tool churn, or cross-repo friction.
-- **User-invoked:** On direct human request (`project-retro`, `retrospective`,
-  `$project-retro`).
+- **User-invoked:** On direct human request (`project-retro` or
+  `retrospective`).
 
 ## Agent self-evaluation trigger (Workflow final step)
 

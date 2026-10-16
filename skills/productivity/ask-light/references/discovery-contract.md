@@ -44,8 +44,8 @@ and conversation context. No regex decides whether project evidence
 participates in routing: the packet is the same for Chinese, English, and
 Japanese requests.
 
-Modes: `$ask-light next` (next-step advisor), `$ask-light workflow` (workflow
-recipes), `$ask-light <category>` (collection navigation).
+Modes: `ask-light next` (next-step advisor), `ask-light workflow` (workflow
+recipes), `ask-light <category>` (collection navigation).
 
 ### Ticket frontier
 
@@ -373,7 +373,7 @@ constraints bind current-workflow reasoning only).
 ## Implement and agent-config relationship
 
 - `light-implement` = bounded executor; `agent-config` = optional execution-planning enhancement.
-- When the current project has a ready implementation item, `$ask-light next` routes to `light-implement` (even for complex tasks; `light-implement` decides whether to offer `agent-config`, and the user decides whether to accept).
+- When the current project has a ready implementation item, `ask-light next` routes to `light-implement` (even for complex tasks; `light-implement` decides whether to offer `agent-config`, and the user decides whether to accept).
 - Route directly to `agent-config` only when execution configuration or setup intent itself is the user's explicit goal:
   - setup intent: `agent-config setup`, "配置当前 Harness 模型", "配置模型档位", "重新配置 Agent Config";
   - execution queries: "这个任务用哪个模型", "这些工单怎么分 Agent", "这个 Harness 怎么跑这批 tickets", "哪个模型执行/给多少 effort", "execution topology / model tier routing".

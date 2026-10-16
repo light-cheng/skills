@@ -1,6 +1,6 @@
 # Modes and approval transition
 
-## Workflow mode (`$ask-light workflow`)
+## Workflow mode (`ask-light workflow`)
 
 Model-led: inspect the current context, read the helper's recipe catalog
 (`--mode workflow` publishes every canonical recipe with step availability,
@@ -11,7 +11,7 @@ explain the relevant remaining flow from there. A project with an accepted
 SPEC must not be shown the full chain from `project-init`; show the remaining
 flow from the current state and preserve each Skill's stopping boundary.
 
-## Navigation mode (`$ask-light <category>`)
+## Navigation mode (`ask-light <category>`)
 
 Collection browsing, family listings, and exact named comparisons (for
 example `clarify vs project-clarify`) may resolve deterministically from the

@@ -14,8 +14,10 @@ conversation history. The output is capped at 400 characters.
 
 Select it explicitly:
 
+Type each Skill name with your Host's prefix, for example `/recap` in Claude Code or `$recap` in Codex.
+
 ```text
-$recap
+recap
 ```
 
 The package frontmatter and host metadata keep this entry user-invoked.

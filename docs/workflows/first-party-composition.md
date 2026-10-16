@@ -12,7 +12,7 @@ An Agent task has a goal, artifacts, blockers, project type, task kind, availabi
 user goal and current artifacts
               |
               v
-        $ask-light
+        ask-light
               |
               v
 inspect project stage → one recommendation + reasoning
@@ -30,20 +30,20 @@ validate + honor invocation policy
 
 Possible next choices include:
 
-- `$project-init` when the project needs confirmed initialization;
-- `$project-clarify` when an existing project has unresolved decisions;
-- `$clarify` when a vague idea needs lightweight triage without a project;
-- `$decision-map` when the effort is large, foggy, and multi-session;
-- `$light-research` when an external fact is needed;
-- `$light-prototype` when a design question needs a throwaway probe;
-- `$project-spec` / `$project-tickets` when a SPEC or ticket graph is the next artifact;
-- `$light-implement` when one unblocked ticket is ready;
-- `$light-diagnosing-bugs` when something is broken/throwing/failing/slow;
-- `$project-review` or `$review-loop` when the target and acceptance source are already frozen;
-- `$learn-anything` when source material may contain a reusable method;
-- `$recap` when the user explicitly wants a one-line session summary;
-- `$manuscript-ops` when manuscript scope, state, formats, or review gates need domain routing; or
-- `$release-workflow` when the project passed acceptance and is ready to publish.
+- `project-init` when the project needs confirmed initialization;
+- `project-clarify` when an existing project has unresolved decisions;
+- `clarify` when a vague idea needs lightweight triage without a project;
+- `decision-map` when the effort is large, foggy, and multi-session;
+- `light-research` when an external fact is needed;
+- `light-prototype` when a design question needs a throwaway probe;
+- `project-spec` / `project-tickets` when a SPEC or ticket graph is the next artifact;
+- `light-implement` when one unblocked ticket is ready;
+- `light-diagnosing-bugs` when something is broken/throwing/failing/slow;
+- `project-review` or `review-loop` when the target and acceptance source are already frozen;
+- `learn-anything` when source material may contain a reusable method;
+- `recap` when the user explicitly wants a one-line session summary;
+- `manuscript-ops` when manuscript scope, state, formats, or review gates need domain routing; or
+- `release-workflow` when the project passed acceptance and is ready to publish.
 
 `ask-light` stops after its recommendation **until the user approves**. It does
 not execute, install, delegate, create workflow state, or silently chain

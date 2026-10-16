@@ -81,4 +81,4 @@ See [docs/MAINTENANCE.md](../MAINTENANCE.md) and [docs/REVIEW_POLICY.md](../REVI
 
 ## 7. Standalone session recap
 
-`recap` is a one-step, user-invoked stopping boundary. The user explicitly selects `$recap`; it consumes only current session context, emits exactly one line, invokes nothing else, and stops. It does not create a handoff, compact history, continue execution, or issue a review verdict.
+`recap` is a one-step, user-invoked stopping boundary. The user explicitly selects `recap`; it consumes only current session context, emits exactly one line, invokes nothing else, and stops. It does not create a handoff, compact history, continue execution, or issue a review verdict.

@@ -6,6 +6,8 @@
 
 ## 未发布
 
+- Skill 调用写法（与 Host 无关）：`SKILL.md`、references 和 description 中的技能名去掉 Codex 的 `$` 前缀（例如写 `project-tickets`，不写 `$project-tickets`）。在 Claude Code 上，Agent 会把 `$project-tickets` 原样给用户，而这种写法在那里无效；现在由 Agent 按当前 Host 的写法给出调用方式。`manuscript-ops` 的交接示例从只写 Codex 写法改为按当前 Host 渲染的逻辑调用；Codex 自己的 `agents/openai.yaml` 提示保留 `$`，哈希冻结的 `recap` 不变。README、CATALOG、快速开始、包指南和工作流文档（中英）改写为不带前缀的技能名，并加一行说明 Claude Code（`/name`）与 Codex（`$name`）的写法。钉住 `$` 措辞的测试去掉了这部分断言。
+- `project-retro`：description 末尾加一句 "Use after …" 触发句（project-review 给出结论后、发布后、长时间或摩擦多的会话后，或用户要求时）；已记入其 ATTRIBUTION。
 - `release-workflow`（行为变化）：发布文档检查改为读取 `<!-- release-state: {...} -->` 字段块（view、version 或 stable、发布说明的验证标题、发布清单的 `written: preparation`、可选的 `install_commands: template`），不再要求“Release snapshot”“Preparation snapshot”、写明收据在 main 的句子或带“template”的标题等固定措辞，正文可以自由书写。检查仍会在正文中找出未观察到的安装或发布成功、会过时的候选状态，以及没有依据的稳定版本说法。当前 main 的公开页面带 `"view": "current"`；v0.2.9 及之前的发布说明、发布清单和标签保留原有写法。字段列表见 `references/DOCUMENT-STATE.md`。
 - `release-workflow`：RELEASE-STAGES 写明如何把最终 main 的 CI 运行记录为 `--final-ci` 所需的观察文件（需要 `kind: observed`），以及在工作树中 `git switch main` 失败时怎么做；两者都是 v0.2.9 发布时发现的。
 - `release-workflow`：`RELEASE-STAGES.md` 中的推送命令给 SHA 变量加了花括号（`"${CANDIDATE_SHA}:refs/heads/..."`）。在 zsh 中 `"$CANDIDATE_SHA:refs/..."` 会触发 `:r` 修饰符，推送错误的 refspec；这是第一次走 pull request 路径发布（v0.2.9）时发现的。新增测试保证参考文档中没有 `$VAR:` 写法。

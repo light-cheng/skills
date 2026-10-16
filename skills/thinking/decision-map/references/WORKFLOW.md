@@ -10,7 +10,7 @@
    than diving deep on one thread. Surface open decisions and the first steps
    takeable now. **If no fog surfaces** — the way is already clear and small
    enough for one session — do not create a map; ask how the user wants to
-   proceed (likely `$project-clarify` or direct `project-spec`).
+   proceed (likely `project-clarify` or direct `project-spec`).
 
 3. **Create the map** (`.scratch/<effort>/map.md`) with `Destination` and
    `Notes` filled in, `Decisions so far` empty, and the dim future sketched
@@ -69,7 +69,7 @@ The map is complete when:
 At that point the way is clear. The map's `Decisions so far` plus ticket
 `## Answer` records are the material for `project-spec` to build a formal SPEC.
 
-Recommend explicit `$project-spec` and stop. Do not auto-chain. `project-spec`
+Recommend explicit `project-spec` and stop. Do not auto-chain. `project-spec`
 should not re-run a full clarification interview; if it does uncover a truly
-blocking user decision, it returns to `$project-clarify` or this map.
+blocking user decision, it returns to `project-clarify` or this map.
 

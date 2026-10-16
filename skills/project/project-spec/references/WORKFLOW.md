@@ -5,7 +5,7 @@ holds the full step description.
 
 ## Entry condition
 
-- User explicitly invokes `$project-spec`.
+- User explicitly invokes `project-spec`.
 - At least one of these exists:
   - a `project-clarify` handoff (the `Project clarification handoff` record),
   - a `decision-map` map (`.scratch/<effort>/map.md`) with its `Decisions so
@@ -17,10 +17,10 @@ holds the full step description.
 - Given a slug and no handoff in the conversation, look for
   `.scratch/<feature>/clarify-handoff.md`. Use it when it holds a `Project
   clarification handoff`. A file holding only a `clarify` synthesis is not a
-  handoff: recommend `$project-clarify` and stop.
+  handoff: recommend `project-clarify` and stop.
 
 Do not start from a general vague prompt and do not auto-chain from a prior
-clarification stage — wait for the explicit `$project-spec` token.
+clarification stage — wait for the explicit `project-spec` token.
 
 ## Steps
 
@@ -82,7 +82,7 @@ Before writing, test whether a truly blocking, user-owned decision remains:
 - If such a decision exists: do **not** write the SPEC. Return to
   `project-clarify` (or to the map when the effort is still foggy) with the
   exact blocker, its dependencies, and a context pointer. Recommend explicit
-  `$project-clarify` or `$decision-map` and stop.
+  `project-clarify` or `decision-map` and stop.
 - If only fact gaps remain that do not force speculation, note them in the
   SPEC's `Further Notes` / `Out of Scope` and proceed.
 

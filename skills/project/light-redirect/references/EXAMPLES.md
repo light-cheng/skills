@@ -44,7 +44,7 @@ before 08:00, previous evening (recommended) or previous morning?" The user
 says "yes, previous evening". It records the choice in the proposal, sets
 `**Status:** approved`, adds
 `- 2026-10-10 approved — "yes, previous evening"`, and recommends
-`$project-spec` and then `$project-tickets` with the proposal path.
+`project-spec` and then `project-tickets` with the proposal path.
 
 ## Local fix: not a redirect
 

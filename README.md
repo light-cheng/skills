@@ -119,13 +119,15 @@ See [Installation](docs/INSTALLATION.md) for advanced options (explicit agent ta
 
 ## Quick Start
 
+Type each Skill name with your Host's prefix, for example `/ask-light next` in Claude Code or `$ask-light next` in Codex.
+
 ```text
-$ask-light next        # Suggest the next appropriate Skill from current context
-$project-init          # Bootstrap project workspace and task tracker settings
-$clarify               # Clarify requirements through targeted questions
-$project-clarify       # Clarify project decisions using repository context
-$light-implement       # Execute a ready ticket with verification
-$project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
+ask-light next        # Suggest the next appropriate Skill from current context
+project-init          # Bootstrap project workspace and task tracker settings
+clarify               # Clarify requirements through targeted questions
+project-clarify       # Clarify project decisions using repository context
+light-implement       # Execute a ready ticket with verification
+project-review        # Run final acceptance checks: PASS / FAIL / BLOCKED
 ```
 
 ## Main Workflow
@@ -164,7 +166,7 @@ clarify                                  # Standalone brainstorming and clarific
 light-implement                          # Implement a well-defined ticket directly
 light-diagnosing-bugs → light-implement  # Diagnose an issue, then apply the fix
 release-workflow                         # Publish an approved release
-$ask-light                               # Route unclear tasks to the right Skill
+ask-light                                # Route unclear tasks to the right Skill
 ```
 
 See [docs/workflows/](docs/workflows) for full workflow guides.
@@ -172,8 +174,8 @@ See [docs/workflows/](docs/workflows) for full workflow guides.
 ## Finding the Right Skill
 
 ```text
-$ask-light next
-$ask-light workflow
+ask-light next
+ask-light workflow
 ```
 
 `ask-light` is the Light workflow advisor, navigator, and router. It inspects project and workflow evidence, reasons about the best next Skill, explains why, and waits for approval before a validated host-aware transition (model-invoked targets may begin where supported; user-invoked targets fall back to rendering the exact invocation when direct Host transition is unavailable).

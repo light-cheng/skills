@@ -55,7 +55,7 @@ and rules: [host-evidence-schema.md](references/host-evidence-schema.md#script-e
 ## Handoff
 - Return `AgentConfigResult` to the caller; `handoff` names a recommendation, not permission to start another Skill.
 - An already active `light-implement` caller may resume its authorized bounded item when `readiness === "READY"`.
-- For standalone invocation, recommend explicit `$light-implement` when ready or `$project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
+- For standalone invocation, recommend explicit `light-implement` when ready or `project-tickets` when tickets are needed, then stop. Starting either user-invoked stage requires explicit user approval for that exact target and verified host transition support; otherwise show its exact invocation.
 - Code review converges via `review-loop`; final acceptance belongs to `project-review`.
 
 ## Optional capabilities

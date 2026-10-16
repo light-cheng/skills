@@ -14,13 +14,15 @@
 
 它是 `user-invoked only`，必须由用户选择：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/project-init`，在 Codex 中输入 `$project-init`。
+
 ```text
-$project-init
+project-init
 ```
 
 ## 前置条件、输入和输出
 
-默认目标是当前目录。写入前读取根部指令、README、manifest、项目文档和当前状态。输入包括项目类型、目标、输出、协作、约束、相关 Skills、issue tracker、domain context locator、review profile/acceptance strategy、working area，以及由当前 host 证据确认的 instruction filename。现有 tracker adapter 只支持 `.scratch/<effort>/issues`；其他 locator 需要新增 adapter。两个 preset 都合理时，先比较影响、给出推荐并让用户选择。深度 discovery 属于 `$clarify`/`$project-clarify`/`$decision-map`。
+默认目标是当前目录。写入前读取根部指令、README、manifest、项目文档和当前状态。输入包括项目类型、目标、输出、协作、约束、相关 Skills、issue tracker、domain context locator、review profile/acceptance strategy、working area，以及由当前 host 证据确认的 instruction filename。现有 tracker adapter 只支持 `.scratch/<effort>/issues`；其他 locator 需要新增 adapter。两个 preset 都合理时，先比较影响、给出推荐并让用户选择。深度 discovery 属于 `clarify`/`project-clarify`/`decision-map`。
 
 输出包含一个 instruction pointer、`docs/agents/light-project.md`、`docs/agents/issue-tracker.md`，以及精确的 created/updated/preserved 报告；不创建 triage labels、tickets、implementation plan、final-review record 或竞争性的 specification。
 

@@ -40,12 +40,12 @@ through a proposal, however small.
    approvals, edits, silence and "just edit it" are covered in
    [handling the answer](references/PROPOSAL.md#handling-the-answer).
 6. **Hand off** and stop:
-   - Approved → recommend `$project-spec` for SPEC changes and
-     `$project-tickets` for ticket changes, passing the proposal path. When its
+   - Approved → recommend `project-spec` for SPEC changes and
+     `project-tickets` for ticket changes, passing the proposal path. When its
      `Charter` line names a Charter item, recommend `project-review`'s Change
      Proposal first and cite the recorded approval as its decision evidence.
    - An open decision needs more than a short answer (research or a longer
-     interview) → recommend `$project-clarify` and leave the proposal
+     interview) → recommend `project-clarify` and leave the proposal
      `proposed`.
    - Rejected → return to the caller with the reason.
 

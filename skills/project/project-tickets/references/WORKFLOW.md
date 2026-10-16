@@ -6,7 +6,7 @@ execution order with Light's local markdown tracker.
 
 ## Entry condition
 
-- User explicitly invokes `$project-tickets`.
+- User explicitly invokes `project-tickets`.
 - A formal SPEC exists, normally at `.scratch/<feature>/spec.md` from
   `project-spec`. The user may pass a different spec path as the invoke
   argument.

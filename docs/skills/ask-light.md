@@ -26,10 +26,12 @@ Code validates that choice.
 
 This is `user-invoked only`. The primary commands are:
 
+Type each Skill name with your Host's prefix, for example `/ask-light next` in Claude Code or `$ask-light next` in Codex.
+
 ```text
-$ask-light next
-$ask-light workflow
-$ask-light <category>
+ask-light next
+ask-light workflow
+ask-light <category>
 ```
 
 `next` returns one evidence-based recommendation and at most one materially

@@ -2,7 +2,7 @@
 
 ## Example 1 — Charted map (new effort)
 
-User: `$decision-map We're going to rebuild the skills repo with a new
+User: `decision-map We're going to rebuild the skills repo with a new
 workflow architecture.`
 
 **Destination** (settled via quick `socratic`):
@@ -48,7 +48,7 @@ Frontier is then `01`, `02`, `04` (unblocked, unclaimed).
 
 ## Example 2 — Resolve one ticket and graduate fog
 
-Session: `$decision-map .scratch/skills-refactor` (no ticket arg — takes frontier)
+Session: `decision-map .scratch/skills-refactor` (no ticket arg — takes frontier)
 
 1. Claims `01-domain-boundary.md` (`Status: claimed`).
 2. Runs `socratic` to settle domain terminology; records:
@@ -100,5 +100,5 @@ After several sessions, all tickets resolved and fog empty:
 - Custom GPU scheduler — see above
 ```
 
-Recommend: `Next: $project-spec using the map's Decisions so far and ticket
+Recommend: `Next: project-spec using the map's Decisions so far and ticket
 answers; no new clarification needed.` Stop.

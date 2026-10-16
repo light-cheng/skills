@@ -6,7 +6,7 @@ Fowler baseline the Standards axis carries underneath repo standards.
 
 ## Entry condition
 
-- User explicitly invokes `$light-code-review` with a fixed point (commit SHA,
+- User explicitly invokes `light-code-review` with a fixed point (commit SHA,
   branch name, tag, `main`, `HEAD~N`), or `review-loop` / `project-review`
   (software Profile via `project-review`) invokes this Skill with a frozen
   fixed point and approved Spec. Do not guess a fixed point from recent

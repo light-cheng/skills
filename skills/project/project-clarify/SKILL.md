@@ -1,17 +1,17 @@
 ---
 name: project-clarify
-description: Clarify a real project's unresolved decisions from inspected project facts and return a bounded handoff artifact. Use only when the user explicitly invokes $project-clarify after readiness or when a project needs formal clarification; it does not create a SPEC, tickets, or automatically start another user-invoked stage.
+description: Clarify a real project's unresolved decisions from inspected project facts and return a bounded handoff artifact. Use only when the user explicitly invokes project-clarify after readiness or when a project needs formal clarification; it does not create a SPEC, tickets, or automatically start another user-invoked stage.
 disable-model-invocation: true
 ---
 
 # Project Clarify
 
 `project-clarify` is an explicit, user-invoked project stage. One
-`$project-clarify` request starts a **continuous clarification session**:
+`project-clarify` request starts a **continuous clarification session**:
 after each frontier round the user replies normally, the next frontier is
 recomputed and presented again, and only shared-understanding confirmation (or
 an explicit exit/switch) produces the bounded handoff for `project-spec`.
-The user does not need to type `$project-clarify` again between rounds.
+The user does not need to type `project-clarify` again between rounds.
 
 ## Required order
 
@@ -37,7 +37,7 @@ The user does not need to type `$project-clarify` again between rounds.
    every ordinary user reply, use `socratic` again to recompute the frontier
    and present the next round. When no meaningful frontier remains, confirm
    shared understanding; after confirmation return the handoff and stop. Do
-   not require a repeated `$project-clarify` invocation for normal replies.
+   not require a repeated `project-clarify` invocation for normal replies.
 
 ## Handoff shape
 
@@ -66,7 +66,7 @@ project-clarify → socratic
 ```
 
 If the effort is large, multi-session, or has many dependent decisions,
-recommend `$decision-map` and stop. The full contract is in
+recommend `decision-map` and stop. The full contract is in
 [project-clarification-contract.md](references/project-clarification-contract.md);
 workflow and examples are in [WORKFLOW.md](references/WORKFLOW.md) and
 [EXAMPLES.md](references/EXAMPLES.md).

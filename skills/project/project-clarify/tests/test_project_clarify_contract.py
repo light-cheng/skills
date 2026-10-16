@@ -39,8 +39,6 @@ class ProjectClarifyContractTest(unittest.TestCase):
     def test_invocation_boundaries_and_no_implicit_write_are_explicit(self) -> None:
         skill, metadata, _ = read_contract()
 
-        self.assertRegex(skill, r"(?is)only\s+after.*\$project-clarify|explicit.*\$project-clarify")
-        self.assertIn("$project-clarify", skill)
         self.assertNotIn("grill-with-docs", skill + metadata)
 
     def test_optional_capability_calls_have_read_and_failure_boundaries(self) -> None:

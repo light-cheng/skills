@@ -19,8 +19,10 @@ app, database, or file format.
 
 Select it explicitly:
 
+Type each Skill name with your Host's prefix, for example `/kb-init` in Claude Code or `$kb-init` in Codex.
+
 ```text
-$kb-init
+kb-init
 ```
 
 It must not trigger on its own from a generic mention of knowledge bases,

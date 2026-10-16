@@ -2,7 +2,7 @@
 
 ## Example 1 — Bounded solo code ticket: direct execution with `light-tdd` and `light-code-review`
 
-**Input:** `$light-implement .scratch/auth/spec.md` slice plus
+**Input:** `light-implement .scratch/auth/spec.md` slice plus
 `.scratch/auth/issues/02-session-middleware.md` (`Blocked by: 01`, now
 `resolved`).
 
@@ -50,7 +50,7 @@
 
 ## Example 2 — Complex multi-unit task with routing offer: user accepts
 
-**Input:** `$light-implement .scratch/storage/issues/05-multi-backend.md` (touches
+**Input:** `light-implement .scratch/storage/issues/05-multi-backend.md` (touches
 driver layer, memory backend, file backend, and test harness across 6 files).
 
 **Run:**
@@ -69,7 +69,7 @@ driver layer, memory backend, file backend, and test harness across 6 files).
 
 ## Example 3 — Complex task with routing offer: user declines
 
-**Input:** `$light-implement .scratch/storage/issues/05-multi-backend.md`.
+**Input:** `light-implement .scratch/storage/issues/05-multi-backend.md`.
 
 **Run:**
 
@@ -81,7 +81,7 @@ driver layer, memory backend, file backend, and test harness across 6 files).
 
 ## Example 4 — Explicit user intent: pre-authorized routing
 
-**Input:** `$light-implement .scratch/sync/issues/03-engine.md using agent-config`.
+**Input:** `light-implement .scratch/sync/issues/03-engine.md using agent-config`.
 
 **Run:**
 
@@ -91,7 +91,7 @@ driver layer, memory backend, file backend, and test harness across 6 files).
 
 ## Example 5 — Explicit user intent: disabled routing
 
-**Input:** `$light-implement .scratch/sync/issues/03-engine.md just implement directly`.
+**Input:** `light-implement .scratch/sync/issues/03-engine.md just implement directly`.
 
 **Run:**
 
@@ -101,7 +101,7 @@ driver layer, memory backend, file backend, and test harness across 6 files).
 
 ## Example 6 — Host lacking model selector: graceful continuation
 
-**Input:** `$light-implement .scratch/payments/issues/01-stripe-webhook.md`.
+**Input:** `light-implement .scratch/payments/issues/01-stripe-webhook.md`.
 
 **Run:**
 
@@ -112,7 +112,7 @@ driver layer, memory backend, file backend, and test harness across 6 files).
 
 ## Example 7 — Document ticket: Skill + template without code
 
-**Input:** `$light-implement .scratch/kb-init/issues/01-package-skeleton.md`
+**Input:** `light-implement .scratch/kb-init/issues/01-package-skeleton.md`
 (`What to build: scaffold SKILL.md and supporting references from the
 proposal template`).
 
@@ -133,7 +133,7 @@ proposal template`).
 
 ## Example 8 — Configuration slice (non-code) with schema validation
 
-**Input:** `$light-implement .scratch/infra/issues/04-ci-workflow.md` with a
+**Input:** `light-implement .scratch/infra/issues/04-ci-workflow.md` with a
 `CI YAML` acceptance list.
 
 1. Inspect the existing workflow and schema; record the evidence gap if the
@@ -146,7 +146,7 @@ proposal template`).
 
 ## Example 9 — Research artifact slice
 
-**Input:** `$light-implement .scratch/payments/issues/03-psp-research.md` (`What to
+**Input:** `light-implement .scratch/payments/issues/03-psp-research.md` (`What to
 build: high-trust PSP comparison captured as Markdown` with a finding schema).
 
 1. The ticket explicitly asks for a research artifact. Call `light-research`
@@ -163,8 +163,8 @@ build: high-trust PSP comparison captured as Markdown` with a finding schema).
 ticket or Spec slice.
 
 **Outcome:** `light-implement` does not invent scope. It reports the handoff gap
-(`missing bounded Spec or ticket — route via $project-clarify or
-$project-spec first`) and stops. Typechoice or review is not attempted.
+(`missing bounded Spec or ticket — route via project-clarify or
+project-spec first`) and stops. Typechoice or review is not attempted.
 
 
 

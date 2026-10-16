@@ -29,7 +29,6 @@ class DecisionMapContractTest(unittest.TestCase):
         self.assertRegex(skill, r"(?m)^name: decision-map$")
         self.assertRegex(skill, r"(?m)^disable-model-invocation: true$")
         self.assertRegex(metadata, r"(?m)^\s*allow_implicit_invocation: false$")
-        self.assertIn("$decision-map", skill)
         self.assertRegex(skill, r"(?is)large.*multi-session|multi-session.*large")
         self.assertIn(".scratch/<effort>/map.md", skill)
 

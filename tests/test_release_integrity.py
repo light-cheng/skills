@@ -1702,6 +1702,7 @@ class GitObjectBoundArtifactTests(unittest.TestCase):
                 "--release-commit", candidate_a,
                 "--stage", "attested",
                 "--root", str(self.tmp_root),
+                "--repo", FIXTURE_REPO,
             ],
             capture_output=True,
             text=True,

@@ -21,7 +21,7 @@ This document explains the **Clarification & Research** composition: entry, hand
 ```
 
 - [`socratic`](../../skills/thinking/socratic/SKILL.md) — core engine: dynamic, decision-owned questioning; no fixed questionnaire; distinguishes facts vs user decisions. Not a project workflow by itself. Other Skills *call* it; they do not reimplement it.
-- [`clarify`](../../skills/thinking/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. One `$clarify` starts a continuous session; normal replies advance `socratic`. Turns stay conversational, include a recommendation when useful, and end only after shared-understanding confirmation, exit, or a workflow switch. No SPEC, no auto-chain.
+- [`clarify`](../../skills/thinking/clarify/SKILL.md) — **user-invoked standalone entry** for vague ideas/brainstorms with no project context. One `clarify` starts a continuous session; normal replies advance `socratic`. Turns stay conversational, include a recommendation when useful, and end only after shared-understanding confirmation, exit, or a workflow switch. No SPEC, no auto-chain.
 
 ## Project-aware clarification
 

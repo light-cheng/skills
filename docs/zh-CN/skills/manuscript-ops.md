@@ -18,9 +18,11 @@
 
 它是 model-invoked 能力；宿主支持时也可明确选择：
 
+按所用 Host 的写法输入技能名，例如在 Claude Code 中输入 `/manuscript-ops`，在 Codex 中输入 `$manuscript-ops`。
+
 ```text
-$manuscript-ops
-$manuscript-ops resume
+manuscript-ops
+manuscript-ops resume
 ```
 
 ## 输入和检查
