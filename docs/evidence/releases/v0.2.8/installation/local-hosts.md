@@ -1,12 +1,12 @@
 # Local fresh installs and Host discovery
 
-Date: 2026-10-16. Machine: the maintainer's macOS computer. Skills CLI `1.7.2`. Each install ran in a new, empty Git project under `<tmp>`; no project contained the repository checkout.
+Date: 2026-10-16. Machine: the maintainer's macOS computer. Skills CLI `1.7.2`. Each install ran in a new, empty Git project under `<tmp>`; no project contained the repository checkout. The source is the repository's new name `light-cheng/skills`; `skills-lock.json` records it. The same matrix was first run from the old name `LightDevCoder/skills` (which GitHub redirects) with identical results.
 
 | Case | Command | Result |
 | --- | --- | --- |
-| Pinned whole | `npx --yes skills add LightDevCoder/skills#v0.2.8 --skill '*' --agent claude-code pi --copy --yes` | exit 0; `.claude/skills` and `.agents/skills` each hold 39 packages and 406 files, every file byte-identical to `refs/tags/v0.2.8` |
-| Default whole | `npx --yes skills add LightDevCoder/skills --skill '*' --agent claude-code pi --copy --yes` | exit 0; both destinations 39 packages / 406 files, byte-identical to `origin/main` (`c522857`) |
-| Renamed single | `npx --yes skills add LightDevCoder/skills#v0.2.8 --skill light-merge-conflicts --agent claude-code pi --copy --yes` | exit 0; exactly one package (3 files) in each destination, byte-identical to the tag |
+| Pinned whole | `npx --yes skills add light-cheng/skills#v0.2.8 --skill '*' --agent claude-code pi --copy --yes` | exit 0; `.claude/skills` and `.agents/skills` each hold 39 packages and 406 files, every file byte-identical to `refs/tags/v0.2.8` |
+| Default whole | `npx --yes skills add light-cheng/skills --skill '*' --agent claude-code pi --copy --yes` | exit 0; both destinations 39 packages / 406 files, byte-identical to `origin/main` (`c522857`) |
+| Renamed single | `npx --yes skills add light-cheng/skills#v0.2.8 --skill light-merge-conflicts --agent claude-code pi --copy --yes` | exit 0; exactly one package (3 files) in each destination, byte-identical to the tag |
 | CLI listing | `npx --yes skills list` in the pinned project | 39 project Skills listed |
 | Repeat install | the pinned command again | exit 0; reports `overwrites: Claude Code, Pi`, a no-op overwrite; bytes unchanged |
 
