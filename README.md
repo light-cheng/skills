@@ -94,10 +94,10 @@ npx skills add light-cheng/skills --agent claude-code
 
 ### Companion MCP runtime
 
-The `agent-config` Skill uses an optional companion MCP server for host inspection and profile persistence, maintained in [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config):
+The `agent-config` Skill uses an optional companion MCP server for host inspection and profile persistence, maintained in [light-cheng/agent-config](https://github.com/light-cheng/agent-config):
 
 ```bash
-git clone https://github.com/LightDevCoder/agent-config.git
+git clone https://github.com/light-cheng/agent-config.git
 cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
@@ -191,7 +191,7 @@ See [CATALOG.md](CATALOG.md) for full descriptions, invocation modes, and packag
 | First-party | Collection owner authored | Maintained in `skills/<category>/<name>/`. |
 | Approved Port (Matt Pocock) | Upstream behavior preserved with `ATTRIBUTION.md` | Self-contained in `skills/<category>/<name>/` without upstream runtime dependencies. |
 | Third-party unmodified | External upstream | Recommended for direct installation; not duplicated here. |
-| Modified third-party | Managed in private `LightDevCoder/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
+| Modified third-party | Managed in private `light-cheng/skills-3rdParty` | Retains full patches, licenses, and sync locks. |
 | Retired standalone | Consolidated into collection | Documented with migration history in release records. |
 
 Approved Matt Ports (12 packages): `light-research`, `light-prototype`, `light-tdd`, `light-handoff`, `light-diagnosing-bugs`, `light-wizard`, `light-teach`, `light-wait-what`, `light-to-questionnaire`, `light-writing-for-agents`, `light-merge-conflicts`, `project-retro`. Each package contains `ATTRIBUTION.md` and runs without external runtime dependencies.

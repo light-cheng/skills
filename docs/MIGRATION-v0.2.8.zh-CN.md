@@ -26,7 +26,7 @@ SPEC 现在在标题下用一行 `Approval:` 记录批准，`project-tickets` �
 
 ## 升级之前
 
-记下目标 Host 和它的 Skill 根目录。动已安装的 `resolving-merge-conflicts` 之前，先确认它的来源：打开它的 `SKILL.md` 和 `ATTRIBUTION.md`，或查看符号链接指向。Light 的副本会写明 `light-cheng/skills` 或旧名 `LightDevCoder/skills`，Matt 的原版不会。其他来源的包保持不动。
+记下目标 Host 和它的 Skill 根目录。动已安装的 `resolving-merge-conflicts` 之前，先确认它的来源：打开它的 `SKILL.md` 和 `ATTRIBUTION.md`，或查看符号链接指向。Light 的副本会写明 `light-cheng/skills` 或旧名 `light-cheng/skills`，Matt 的原版不会。其他来源的包保持不动。
 
 在项目提示、`AGENTS.md`、可用性声明、脚本、自动化任务和安装器的 `--skill` 参数里，查找指向 Light 包的 `resolving-merge-conflicts`。
 

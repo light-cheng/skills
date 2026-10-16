@@ -11,13 +11,13 @@
 下列命令安装公开发布的 Skill 集合。示例输出仍然只展示选择边界；安装不会授权自动串联。
 
 ```bash
-npx skills add LightDevCoder/skills
+npx skills add light-cheng/skills
 ```
 
 刷新 Agent host，并在脱离 source checkout 的情况下确认 discovery。只安装一个包时，例如：
 
 ```bash
-npx skills add LightDevCoder/skills --skill ask-light
+npx skills add light-cheng/skills --skill ask-light
 ```
 
 ## 2. 查看示例

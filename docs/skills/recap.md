@@ -32,7 +32,7 @@ Fresh-copy and independent review evidence is recorded in the
 The manual-only `recap` form is part of the v0.2.0 stable release line. The
 current `main` branch contains unreleased collection updates while the stable
 release snapshot remains `v0.2.0`. Install the stable release form with
-`npx skills add LightDevCoder/skills#v0.2.0 --skill recap`,
+`npx skills add light-cheng/skills#v0.2.0 --skill recap`,
 refresh, and confirm discovery without the source checkout under
 [the installation policy](../INSTALLATION.md).
 

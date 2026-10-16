@@ -39,7 +39,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator covering primary coding-agent harnesses [10 native adapters + 1 generic fallback]).
-- **Evidence:** [references/host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/engineering/agent-config/references/plan-schema.md), [task-assessment.md](skills/engineering/agent-config/references/task-assessment.md), [profile-schema.md](skills/engineering/agent-config/references/profile-schema.md), [companion-contract.md](skills/engineering/agent-config/references/companion-contract.md), [harness-support.md](skills/engineering/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md); companion runtime maintained at [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config).
+- **Evidence:** [references/host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/engineering/agent-config/references/plan-schema.md), [task-assessment.md](skills/engineering/agent-config/references/task-assessment.md), [profile-schema.md](skills/engineering/agent-config/references/profile-schema.md), [companion-contract.md](skills/engineering/agent-config/references/companion-contract.md), [harness-support.md](skills/engineering/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md); companion runtime maintained at [light-cheng/agent-config](https://github.com/light-cheng/agent-config).
 - **Installation path:** `<skills-root>/agent-config/`.
 
 ### ask-light
@@ -288,7 +288,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** Project has passed `project-review` and is ready to publish.
 - **Invocation:** Model-invoked (or manual entry where supported).
 - **Package:** [skills/project/release-workflow/](skills/project/release-workflow)
-- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from `LightDevCoder/release-workflow`).
+- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from the retired `LightDevCoder/release-workflow` repository).
 - **Evidence:** [SKILL.md](skills/project/release-workflow/SKILL.md) · [Closeout guard acceptance](docs/evidence/2026-10-07-release-closeout/acceptance.md) · [Repair batch acceptance](docs/evidence/2026-10-07-release-batch/acceptance.md).
 - **Installation path:** `<skills-root>/release-workflow/`.
 

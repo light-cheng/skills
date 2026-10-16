@@ -14,6 +14,11 @@ TAG = "v9.8.7"
 REPO = "example-owner/skills"
 
 
+@pytest.fixture(autouse=True)
+def _fixture_repository(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
+
+
 def git(root: Path, *args: str) -> str:
     proc = subprocess.run(["git", *args], cwd=root, text=True, capture_output=True, check=True)
     return proc.stdout.strip()
@@ -72,7 +77,7 @@ def commit(root: Path, message: str = "release: fixture preparation") -> str:
 
 def integrity(root: Path, stage: str = "prepared", *extra: str, repo: str | None = REPO,
               env: dict | None = None) -> subprocess.CompletedProcess[str]:
-    repo_args = ["--repo", repo] if repo and "--observations" in extra else []
+    repo_args = ["--repo", repo] if repo and ("--observations" in extra or stage == "attested") else []
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/verify_release_integrity.py"),
          "--root", str(root), "--tag", TAG, "--stage", stage, *extra, *repo_args],
@@ -113,7 +118,8 @@ def make_attested(root: Path) -> tuple[str, str]:
     tag_object = git(root, "rev-parse", f"refs/tags/{TAG}")
     for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
         write(root, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
-              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate))
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate,
+                      release_url=f"https://github.com/{REPO}/releases/tag/{TAG}"))
     for path in ("README.md", "README.zh-CN.md", "CATALOG.md", "CATALOG.zh-CN.md", "docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", "docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md"):
         doc = root / path
         doc.write_text(doc.read_text(encoding="utf-8") + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
@@ -693,3 +699,22 @@ def test_live_publication_accepts_only_the_resolved_repository(url: str, accepte
     record = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
               "publishedAt": "2026-10-16T07:22:12Z", "url": url}
     assert (validate_publication_observation(record, TAG, "fixture", "light-cheng/skills") == []) is accepted
+
+
+def test_current_attested_receipt_must_name_the_resolved_repository(tmp_path: Path) -> None:
+    """Without --repo or --check-remote, a current attested run resolves the repo; an old-owner receipt fails."""
+    import os
+    from test_release_integrity import make_valid_receipt_en, make_valid_receipt_zh
+    candidate, _ = make_attested(tmp_path)
+    tag_object = git(tmp_path, "rev-parse", f"refs/tags/{TAG}")
+    old = f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}"
+    for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
+        write(tmp_path, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, release_url=old))
+    commit(tmp_path, "receipt names the pre-rename owner")
+    env = {**os.environ, "GITHUB_REPOSITORY": REPO}
+    current = integrity(tmp_path, "attested", "--release-commit", candidate, repo=None, env=env)
+    assert current.returncode == 1 and "RECEIPT_URL_MISMATCH" in current.stdout, current.stdout + current.stderr
+    assert f"GitHub Repo:    {REPO}" in current.stdout
+    history = integrity(tmp_path, "attested", "--release-commit", candidate, "--mode", "historical", repo=None, env=env)
+    assert "RECEIPT_URL_MISMATCH" not in history.stdout, history.stdout

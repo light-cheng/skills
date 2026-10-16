@@ -39,7 +39,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [10 种原生适配器 + 1 种通用回退]）。
-- **证据：** [host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/engineering/agent-config/references/plan-schema.md)、[task-assessment.md](skills/engineering/agent-config/references/task-assessment.md)、[profile-schema.md](skills/engineering/agent-config/references/profile-schema.md)、[companion-contract.md](skills/engineering/agent-config/references/companion-contract.md)、[harness-support.md](skills/engineering/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。
+- **证据：** [host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/engineering/agent-config/references/plan-schema.md)、[task-assessment.md](skills/engineering/agent-config/references/task-assessment.md)、[profile-schema.md](skills/engineering/agent-config/references/profile-schema.md)、[companion-contract.md](skills/engineering/agent-config/references/companion-contract.md)、[harness-support.md](skills/engineering/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [light-cheng/agent-config](https://github.com/light-cheng/agent-config)。
 - **安装路径：** `<skills-root>/agent-config/`。
 
 ### ask-light
@@ -288,7 +288,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 项目已通过 `project-review` 验收，准备执行版本发布、Tag 创建与收据证明时。
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/release-workflow/](skills/project/release-workflow)
-- **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自 `LightDevCoder/release-workflow`）。
+- **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自已退役的 `LightDevCoder/release-workflow` 仓库）。
 - **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md) · [发布收尾门禁验收](docs/evidence/2026-10-07-release-closeout/acceptance.md) · [完整修复批次验收](docs/evidence/2026-10-07-release-batch/acceptance.md)。
 - **安装路径：** `<skills-root>/release-workflow/`。
 

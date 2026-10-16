@@ -94,10 +94,10 @@ npx skills add light-cheng/skills --agent claude-code
 
 ### Companion MCP 运行时
 
-`agent-config` Skill 使用可选的 Companion MCP 服务进行宿主探测与 Profile 持久化，该运行时维护于独立仓库 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)：
+`agent-config` Skill 使用可选的 Companion MCP 服务进行宿主探测与 Profile 持久化，该运行时维护于独立仓库 [light-cheng/agent-config](https://github.com/light-cheng/agent-config)：
 
 ```bash
-git clone https://github.com/LightDevCoder/agent-config.git
+git clone https://github.com/light-cheng/agent-config.git
 cd agent-config && npm ci && npm run build && npm install -g .
 agent-config setup --check
 ```
@@ -191,7 +191,7 @@ $ask-light workflow
 | 第一方原生 | 集合所有者原创 | 维护于 `skills/<category>/<name>/`。 |
 | 经批准 Port（Matt Pocock） | 保留上游行为并附 `ATTRIBUTION.md` | 自包含于 `skills/<category>/<name>/`，无外部运行时依赖。 |
 | 第三方未修改 | 外部原作者维护 | 建议直接从上游安装，本仓库不冗余存放。 |
-| 第三方定制修改 | 私有仓库 `LightDevCoder/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
+| 第三方定制修改 | 私有仓库 `light-cheng/skills-3rdParty` 托管 | 记录完整补丁、许可证与同步状态。 |
 | 历史独立迁移 | 整合并入主集合 | 在发布记录中记载迁移历史与退役状态。 |
 
 经批准的 Matt Port（共 12 个）：`light-research`、`light-prototype`、`light-tdd`、`light-handoff`、`light-diagnosing-bugs`、`light-wizard`、`light-teach`、`light-wait-what`、`light-to-questionnaire`、`light-writing-for-agents`、`light-merge-conflicts`、`project-retro`。各包均含 `ATTRIBUTION.md`，无需在运行时安装上游包。

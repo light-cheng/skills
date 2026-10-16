@@ -56,7 +56,7 @@ jobs:
           git init /tmp/agent-config-companion
           (
             cd /tmp/agent-config-companion
-            git remote add origin https://github.com/LightDevCoder/agent-config.git
+            git remote add origin https://github.com/light-cheng/agent-config.git
             git fetch --depth 1 origin "$PIN"
             git checkout --detach "$PIN"
             current_head=$(git rev-parse HEAD)

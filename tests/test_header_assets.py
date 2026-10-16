@@ -48,7 +48,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             "SVG dimensions/viewBox are not 1600x480.",
         )
         c.check(
-            "LightDevCoder" in svg and "/skills" in svg and "Personal Skills Collection" in svg,
+            "light-cheng" in svg and "/skills" in svg and "Personal Skills Collection" in svg,
             "SVG does not contain the requested wordmark and slogan.",
         )
         c.check('fill="#72a0a3"' in svg and "translate(6 8)" in svg, "SVG does not contain the flat under-layer typography.")

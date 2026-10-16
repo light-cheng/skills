@@ -6,7 +6,7 @@ User: `$decision-map We're going to rebuild the skills repo with a new
 workflow architecture.`
 
 **Destination** (settled via quick `socratic`):
-> A refactor plan and initial slices that leave `LightDevCoder/skills` as a
+> A refactor plan and initial slices that leave `light-cheng/skills` as a
 > composable workflow system with inspectable clarification → planning →
 > execution → review stages.
 
@@ -15,7 +15,7 @@ workflow architecture.`
 ```markdown
 ## Destination
 
-A refactor plan and initial slices that leave LightDevCoder/skills composable
+A refactor plan and initial slices that leave light-cheng/skills composable
 and traceable through clarification, planning, execution, and review.
 
 ## Notes

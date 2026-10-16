@@ -1198,8 +1198,8 @@ def main() -> int:
     print(f"Repository:     {repo_root}")
     print("--------------------------------")
 
-    # Live publication facts are compared with the resolved repository, never any owner.
-    if args.observations or (args.check_remote and stage == "attested"):
+    # Live publication facts and current receipts name the resolved repository, never any owner.
+    if args.observations or (stage == "attested" and (args.check_remote or args.mode == "current")):
         try:
             args.repo = resolve_repository(args.repo, repo_root)
         except ValueError as error:

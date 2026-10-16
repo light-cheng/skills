@@ -61,7 +61,7 @@ discovery, specification, implementation, or final review.
 
 ## Installation and discovery check
 
-Install with `npx skills add LightDevCoder/skills --skill project-init`,
+Install with `npx skills add light-cheng/skills --skill project-init`,
 refresh the host, and confirm the package is discovered without the source
 checkout. Run the contract and behavior tests in
 [skills/project/project-init/tests/](../../skills/project/project-init/tests) and record any

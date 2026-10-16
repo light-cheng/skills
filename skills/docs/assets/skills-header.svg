@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="480" viewBox="0 0 1600 480" role="img" aria-labelledby="title desc">
-  <title id="title">LightDevCoder/skills</title>
+  <title id="title">light-cheng/skills</title>
   <desc id="desc">A restrained technical header showing independent agent skills connecting into a reusable collection.</desc>
   <defs>
     <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
@@ -37,10 +37,10 @@
 
   <g font-family="'Anthropic Serif', Georgia, 'Times New Roman', serif" fill="#17242b">
     <g transform="translate(6 8)" fill="#72a0a3" fill-opacity=".82">
-      <text x="74" y="145" font-size="72" font-weight="600" letter-spacing="-2.4">LightDevCoder</text>
+      <text x="74" y="145" font-size="72" font-weight="600" letter-spacing="-2.4">light-cheng</text>
       <text x="74" y="236" font-size="96" font-weight="600" letter-spacing="-3.2">/skills</text>
     </g>
-    <text x="74" y="145" font-size="72" font-weight="600" letter-spacing="-2.4">LightDevCoder</text>
+    <text x="74" y="145" font-size="72" font-weight="600" letter-spacing="-2.4">light-cheng</text>
     <text x="74" y="236" font-size="96" font-weight="600" letter-spacing="-3.2">/skills</text>
     <text x="78" y="304" font-size="20" font-weight="400" letter-spacing=".1">Personal Skills Collection — Drive your creativity</text>
   </g>

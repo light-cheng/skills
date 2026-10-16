@@ -2,6 +2,8 @@
 
 [简体中文](MIGRATION-v0.2.7.zh-CN.md) · [Release notes](evidence/releases/v0.2.7/RELEASE_NOTES.md)
 
+The GitHub account `LightDevCoder` was renamed to `light-cheng` in October 2026. Commands on this guide use the new name; the repository, tags and content are the same, and old `LightDevCoder/skills` commands still redirect. Prefer the new name: a redirect stops working if someone else registers the old account.
+
 **Status:** v0.2.7 is published. Independent candidate acceptance, exactcandidateCI, protectedtag and actual published-source installs passed. See the [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md). v0.2.6 retains the old names; prior blocked attempts remain historical.
 
 Twelve Light packages gain `light-` names. The other 24 names, seven categories, 36-package total, responsibilities, and invocation permissions remain unchanged. There are no installable aliases or wrappers for old names. `ask-light` and `light-travelpage` keep their names. Installed paths become `<skills-root>/<new-name>/`; source paths remain `skills/<category>/<new-name>/`.
@@ -36,12 +38,12 @@ Inventory old names in project prompts, `AGENTS.md`, availability declarations, 
 5. Inspect the Host selector or discovery listing. Record all 36 Light package identities when installing the whole collection, the 12 new labels (`Light · …`), their resolved paths/source, and the selected invocation. `ask-light` must recommend `light-implement` for a ready ticket and resolve software review through `light-code-review`; a missing Light dependency must remain unavailable rather than resolve to an old same-name capability.
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.7
-npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
-npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
+npx skills add light-cheng/skills#v0.2.7
+npx skills add light-cheng/skills#v0.2.7 --skill light-implement
+npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 ```
 
-An unqualified `npx skills add LightDevCoder/skills` follows actual default branch `main`; it does not automatically follow the latest stable tag. Candidate names are unavailable from v0.2.6. A static file scan verifies structure; it does not establish Host invocation behavior. Discovery and explicit source selection do not lock all model-invoked calls to one workflow.
+An unqualified `npx skills add light-cheng/skills` follows actual default branch `main`; it does not automatically follow the latest stable tag. Candidate names are unavailable from v0.2.6. A static file scan verifies structure; it does not establish Host invocation behavior. Discovery and explicit source selection do not lock all model-invoked calls to one workflow.
 
 ## Recovery
 

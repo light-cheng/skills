@@ -7,9 +7,18 @@ import subprocess
 import sys
 import tempfile
 import unittest
+
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Fixture receipts name this repository; the CLI resolves it from GITHUB_REPOSITORY, as in CI.
+FIXTURE_REPO = "fixture-owner/skills"
+
+
+@pytest.fixture(autouse=True)
+def _fixture_repository(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPOSITORY", FIXTURE_REPO)
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from check_release_tag_preflight import (
@@ -657,7 +666,7 @@ def make_valid_receipt_en(
     release_url: str | None = None,
     timestamp: str = "2026-09-21T00:00:00Z",
 ) -> str:
-    url = release_url or f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
+    url = release_url or f"https://github.com/{FIXTURE_REPO}/releases/tag/{tag}"
     return f"""# LightDevCoder/skills {tag} Release Receipt
 
 [中文收据](RELEASE_RECEIPT.zh-CN.md)
@@ -702,7 +711,7 @@ def make_valid_receipt_zh(
     release_url: str | None = None,
     timestamp: str = "2026-09-21T00:00:00Z",
 ) -> str:
-    url = release_url or f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
+    url = release_url or f"https://github.com/{FIXTURE_REPO}/releases/tag/{tag}"
     return f"""# LightDevCoder/skills {tag} 发布收据
 
 [English Version](RELEASE_RECEIPT.md)
@@ -2705,7 +2714,7 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             pub_evidence = {
                 "published_tag": "v9.9.9",
                 "publication_status": "PASS",
-                "release_url": "https://github.com/LightDevCoder/skills/releases/tag/v9.9.9",
+                "release_url": f"https://github.com/{FIXTURE_REPO}/releases/tag/v9.9.9",
                 "timestamp": "2026-09-21T00:00:00Z",
             }
             self.assertEqual(pub_evidence["publication_status"], "PASS")

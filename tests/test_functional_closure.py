@@ -34,11 +34,14 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
 
     def test_frozen_hashes_allow_only_recorded_name_token_amendments(self) -> None:
         baseline = ROOT / ".scratch/light-skills-lean-refactor/frozen-baseline.sha256"
-        amendments = json.loads((ROOT / "docs/evidence/namespace-v0.2.6/frozen-name-amendments.json").read_text())
+        amendments = {}
+        for record in ("namespace-v0.2.6", "namespace-v0.2.9"):
+            amendments.update(json.loads((ROOT / f"docs/evidence/{record}/frozen-name-amendments.json").read_text()))
         self.assertEqual(set(amendments), {
             "skills/kb-init/SKILL.md",
             "skills/kb-init/references/base-discovery.md",
             "skills/kb-init/references/research-contract.md",
+            "skills/kanban-worker/references/api.md",
         })
         for line in baseline.read_text(encoding="utf-8").splitlines():
             match = re.match(r"^\s*([0-9a-f]{64})\s+(.+)$", line)
@@ -53,7 +56,9 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
                 record = amendments[relative]
                 self.assertEqual(record["baseline_sha256"], expected, relative)
                 self.assertEqual(actual, record["candidate_sha256"], relative)
-                restored = relocated_path(ROOT, relative).read_bytes().replace(b"`light-research`", b"`research`")
+                restored = relocated_path(ROOT, relative).read_bytes()
+                for new_token, old_token in record.get("restore", [["`light-research`", "`research`"]]):
+                    restored = restored.replace(new_token.encode(), old_token.encode())
                 self.assertEqual(hashlib.sha256(restored).hexdigest(), expected, relative)
             else:
                 self.assertEqual(actual, expected, relative)

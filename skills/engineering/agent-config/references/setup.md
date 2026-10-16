@@ -136,7 +136,7 @@ Normal MCP usage available (inspect_host, get_profile, save_profile, preview_con
 
 ### Companion packaging and CLI discovery
 
-- **Source & packaging:** The companion MCP runtime is maintained in the dedicated repository `LightDevCoder/agent-config` (Node.js/TypeScript). Install globally via `npm install -g LightDevCoder/agent-config` or build from source via git clone `LightDevCoder/agent-config` and `npm ci && npm run build && npm install -g .`.
+- **Source & packaging:** The companion MCP runtime is maintained in the dedicated repository `light-cheng/agent-config` (Node.js/TypeScript). Install globally via `npm install -g light-cheng/agent-config` or build from source via git clone `light-cheng/agent-config` and `npm ci && npm run build && npm install -g .`.
 - **Binary & PATH:** The binary entry point `agent-config` (`dist/server/index.js`) is installed globally, making `agent-config` available in `$PATH`.
 - **CLI Subcommand:** Running `agent-config setup` runs the setup CLI runner. Running `agent-config` or `agent-config serve` starts the MCP stdio server.
 - **CLI Commands:**

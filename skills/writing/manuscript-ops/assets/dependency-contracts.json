@@ -16,7 +16,7 @@
           "Call `socratic`"
         ]
       },
-      "repository": "LightDevCoder/skills"
+      "repository": "light-cheng/skills"
     },
     {
       "name": "socratic",
@@ -34,7 +34,7 @@
           "factRoutes"
         ]
       },
-      "repository": "LightDevCoder/skills"
+      "repository": "light-cheng/skills"
     },
     {
       "name": "decision-map",
@@ -51,7 +51,7 @@
           "## Child ticket file"
         ]
       },
-      "repository": "LightDevCoder/skills"
+      "repository": "light-cheng/skills"
     },
     {
       "name": "light-prototype",
@@ -64,7 +64,7 @@
         "LOGIC.md"
       ],
       "interface_tokens": {},
-      "repository": "LightDevCoder/skills"
+      "repository": "light-cheng/skills"
     },
     {
       "name": "project-review",
@@ -82,7 +82,7 @@
           "manuscript"
         ]
       },
-      "repository": "LightDevCoder/skills"
+      "repository": "light-cheng/skills"
     }
   ],
   "host_invocation": {
