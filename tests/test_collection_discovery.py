@@ -114,18 +114,18 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             len(png_bytes) > 100 and png_bytes[0] == 137 and png_bytes[1] == 80 and png_bytes[2] == 78 and png_bytes[3] == 71,
             "Header PNG does not have a valid PNG signature.",
         )
-    c.check("npx skills add LightDevCoder/skills" in installation, "Installation guide is missing the generic whole-repository latest install command.")
-    c.check("npx skills add LightDevCoder/skills --skill project-review" in installation, "Installation guide is missing the generic per-Skill latest install command.")
+    c.check("npx skills add light-cheng/skills" in installation, "Installation guide is missing the generic whole-repository latest install command.")
+    c.check("npx skills add light-cheng/skills --skill project-review" in installation, "Installation guide is missing the generic per-Skill latest install command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.2", installation)), "Installation guide is missing the historical pinned v0.1.2 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.3", installation)), "Installation guide is missing the historical pinned v0.1.3 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.4", installation)), "Installation guide is missing the historical pinned v0.1.4 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.5", installation)), "Installation guide is missing the pinned v0.1.5 release command.")
     c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.1\.6", installation)), "Installation guide is missing the pinned v0.1.6 release command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.0", installation)), "Installation guide is missing the pinned v0.2.0 release command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.1", installation)), "Installation guide is missing the pinned v0.2.1 release command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.2", installation)), "Installation guide is missing the pinned v0.2.2 release command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.3", installation)), "Installation guide is missing the pinned v0.2.3 release command.")
-    c.check(bool(re.search(r"npx skills add LightDevCoder/skills#v0\.2\.4", installation)), "Installation guide is missing the pinned v0.2.4 release command.")
+    c.check(bool(re.search(r"npx skills add light-cheng/skills#v0\.2\.0", installation)), "Installation guide is missing the pinned v0.2.0 release command.")
+    c.check(bool(re.search(r"npx skills add light-cheng/skills#v0\.2\.1", installation)), "Installation guide is missing the pinned v0.2.1 release command.")
+    c.check(bool(re.search(r"npx skills add light-cheng/skills#v0\.2\.2", installation)), "Installation guide is missing the pinned v0.2.2 release command.")
+    c.check(bool(re.search(r"npx skills add light-cheng/skills#v0\.2\.3", installation)), "Installation guide is missing the pinned v0.2.3 release command.")
+    c.check(bool(re.search(r"npx skills add light-cheng/skills#v0\.2\.4", installation)), "Installation guide is missing the pinned v0.2.4 release command.")
     c.check(bool(re.search(r"#ref|fragment|default revision", installation)), "Installation guide must explain revision semantics rather than overclaim shorthand immutability.")
     c.check("commands target the immutable v0.1.0 release" not in installation, "Installation guide must not claim the old shorthand is permanently immutable.")
     c.check(not re.search(r"not a verified command|<owner>/<repository>", installation), "Installation guide still contains unresolved pre-release command wording.")
@@ -139,8 +139,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check(stable is not None, "Catalog must name a stable or previous release, or its local verified release baseline.")
     if stable:
         version = stable.group(1)
-        c.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README must link to the catalog's stable release.")
-        c.check(f"npx skills add LightDevCoder/skills#{version}" in installation, "Installation guide must document the stable pinned release.")
+        c.check(any(f"https://github.com/{owner}/skills/releases/tag/{version}" in readme for owner in ("LightDevCoder", "light-cheng")), "README must link to the catalog's stable release.")
+        c.check(any(f"npx skills add {owner}/skills#{version}" in installation for owner in ("LightDevCoder", "light-cheng")), "Installation guide must document the stable pinned release.")
         c.check((root / f"docs/evidence/releases/{version}/RELEASE_RECEIPT.md").is_file(), "Stable release must have a post-publication receipt.")
     c.check("33" in catalog and "admitted" in catalog, "Catalog must present the 36-package collection (historical 33 at the original v0.2.0 publication).")
     c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
@@ -384,7 +384,7 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             for marker in markers:
                 c.check(marker in en_text and marker in zh_text, f"{name} {revision} release evidence is missing the synchronized semantic marker: {marker}")
 
-    c.check("LightDevCoder/skills" in readme, "README must mention repository identity.")
+    c.check("light-cheng/skills" in readme, "README must mention repository identity.")
 
     workflow_text = read(root, "skills/productivity/ask-light/SKILL.md") + read(root, "skills/productivity/ask-light/references/discovery-contract.md")
     workflow_script = read(root, "skills/productivity/ask-light/scripts/ask_light.py")

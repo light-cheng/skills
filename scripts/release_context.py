@@ -325,7 +325,7 @@ def installation_command_errors(text: str, path: str, context: ReleaseContext, *
         if re.match(r"^#{1,6}\s", line):
             heading = line
             preceding = []
-        source = re.search(r"\bskills\s+add\s+LightDevCoder/skills(?:#([^\s`]+))?", line)
+        source = re.search(r"\bskills\s+add\s+(?:LightDevCoder|light-cheng)/skills(?:#([^\s`]+))?", line)
         if source and (source.group(1) is None or source.group(1) == context.target):
             if (frozen or not context.install_verified) and not re.search(r"template|模板", heading + "\n" + "\n".join(preceding[-4:]), re.I):
                 errors.append(f"[FUTURE_INSTALL_TEMPLATE] {path}:{number}: mark the target/default installation command as a template until its released source is verified")

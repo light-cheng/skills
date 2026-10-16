@@ -20,7 +20,7 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本是 [v0.2.8](https://github.com/LightDevCoder/skills/releases/tag/v0.2.8)（39 个包，新增 `light-decide`、`light-redirect`、`light-html-plan`）。其[发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围，[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)记录实际观察到的发布与安装事实。
+准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本是 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（39 个包，新增 `light-decide`、`light-redirect`、`light-html-plan`）。其[发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围，[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)记录实际观察到的发布与安装事实。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 

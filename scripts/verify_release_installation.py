@@ -11,8 +11,9 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPOSITORY = "https://github.com/LightDevCoder/skills.git"
-SOURCE = "LightDevCoder/skills"
+# Formerly LightDevCoder/skills; GitHub redirects the old name.
+REPOSITORY = "https://github.com/light-cheng/skills.git"
+SOURCE = "light-cheng/skills"
 COLLECTION_SIZE = 39  # admitted packages in the release this script verifies
 
 

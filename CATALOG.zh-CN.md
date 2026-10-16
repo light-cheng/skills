@@ -17,7 +17,7 @@
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 39 个已准入第一方 Skill |
 | 当前状态 | 39 个包；v0.2.8 是当前稳定版本 |
-| 稳定版本 | [v0.2.8](https://github.com/LightDevCoder/skills/releases/tag/v0.2.8)（39 个包；新增 light-decide、light-redirect、light-html-plan；上一稳定版 v0.2.7 为 36 个包） |
+| 稳定版本 | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（39 个包；新增 light-decide、light-redirect、light-html-plan；上一稳定版 v0.2.7 为 36 个包） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
 | 证据 | [v0.2.8 发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md) · [v0.2.8 发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md) · 上一版本：[v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
