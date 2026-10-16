@@ -6,6 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- `release-workflow` (behaviour change): the release document checks read a `<!-- release-state: {...} -->` field block (view, version or stable, Notes verification heading, Manifest `written: preparation`, optional `install_commands: template`) instead of fixed phrases such as "Release snapshot", "Preparation snapshot", a receipt-on-main sentence or a "template" heading, so the visible text can be worded freely. The checks still flag unobserved install or publication success, stale candidate status and unsupported stable claims in the text. Current main's public pages carry `"view": "current"`; Notes, Manifests and tags up to v0.2.9 keep their prose. Fields are listed in `references/DOCUMENT-STATE.md`.
 - `release-workflow`: RELEASE-STAGES shows how to record the final main CI run for `--final-ci` (it needs `kind: observed`) and what to do when `git switch main` fails in a worktree; both found during the v0.2.9 release.
 - `release-workflow`: the push commands in `RELEASE-STAGES.md` brace the SHA variable (`"${CANDIDATE_SHA}:refs/heads/..."`). In zsh, `"$CANDIDATE_SHA:refs/..."` applies the `:r` modifier and pushes a wrong refspec; found on the first pull-request-path release (v0.2.9). A test keeps the references free of `$VAR:`.
 

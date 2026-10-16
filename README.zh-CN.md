@@ -4,6 +4,8 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 `light-cheng/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
 > **发布：** [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) 是全部 39 个第一方 Skill 的当前稳定版本。它在 GitHub 账号改名后把所有现行链接和安装命令改为 `light-cheng/skills`，并改进了 `release-workflow`。不可变的[发布清单](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)记录范围与验证。见 [v0.2.9 发布说明](docs/evidence/releases/v0.2.9/RELEASE_NOTES.zh-CN.md)和 [v0.2.9 迁移说明](docs/MIGRATION-v0.2.9.zh-CN.md)。

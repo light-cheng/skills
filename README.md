@@ -4,6 +4,8 @@
 
 # Light Skills — Composable Agent Workflows
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 `light-cheng/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
 > **Release:** [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) is the current stable release of all 39 first-party Skills. It moves every live link and install command to `light-cheng/skills` after the GitHub account rename and improves `release-workflow`. Its immutable [release manifest](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.md) record the scope and verification. See the [v0.2.9 release notes](docs/evidence/releases/v0.2.9/RELEASE_NOTES.md) and [v0.2.9 migration guide](docs/MIGRATION-v0.2.9.md).

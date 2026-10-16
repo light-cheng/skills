@@ -1,5 +1,7 @@
 # 安装与 Fresh-Install 验证
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [English installation guide](INSTALLATION.md)
 
 公开第一方集合的当前稳定版本是 [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)，对应 tag `v0.2.9`（不可变的[发布清单](evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)）。共 **39 个已准入第一方 Skill**，按 7 个用途分类。实际发布源的新鲜安装已通过：托管 Linux 用户上的 Codex、Claude Code 项目锁定版与默认分支全量安装、原生 Codex 全局范围和代表性单包（39 个包、407 个文件，逐字节一致），以及本机为 Claude Code 和 pi 做的安装：Claude Code 列出全部 39 个 Skill，两个 Host 都从新项目运行了 `eli5`。本机没有检查 Codex 运行。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
