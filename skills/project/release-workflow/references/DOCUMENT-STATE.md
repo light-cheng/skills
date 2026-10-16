@@ -44,9 +44,9 @@ results:
 - `release`: from `gh release view --json`, the `tagName`, the draft and
   pre-release flags (both false), `url`, `publishedAt` and the `body`.
 
-The `url` must be a release page of this tag. Pass `--repo owner/name` to also
-require that exact repository; documents written before a rename keep the old
-name and still pass.
+The `url` must be this tag's release page on the current repository (found as in
+[RELEASE-STAGES.md](RELEASE-STAGES.md); `--repo owner/name` overrides it). Receipts
+and other documents written before a rename keep the old name and still pass.
 
 For ATTESTED, pass the final main CI run separately with `--final-ci <json>`.
 Its `headSha` must be the current main commit. Do not write that commit or run

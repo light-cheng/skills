@@ -70,11 +70,13 @@ def commit(root: Path, message: str = "release: fixture preparation") -> str:
     return git(root, "rev-parse", "HEAD")
 
 
-def integrity(root: Path, stage: str = "prepared", *extra: str) -> subprocess.CompletedProcess[str]:
+def integrity(root: Path, stage: str = "prepared", *extra: str, repo: str | None = REPO,
+              env: dict | None = None) -> subprocess.CompletedProcess[str]:
+    repo_args = ["--repo", repo] if repo and "--observations" in extra else []
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/verify_release_integrity.py"),
-         "--root", str(root), "--tag", TAG, "--stage", stage, *extra],
-        cwd=root, capture_output=True, text=True, timeout=30,
+         "--root", str(root), "--tag", TAG, "--stage", stage, *extra, *repo_args],
+        cwd=root, capture_output=True, text=True, timeout=30, env=env,
     )
 
 
@@ -506,7 +508,7 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     import verify_release_integrity as verifier
     make_attested(tmp_path)
     body = (tmp_path / f"docs/evidence/releases/{TAG}/RELEASE_NOTES.md").read_text(encoding="utf-8")
-    prefix = f"https://github.com/LightDevCoder/skills/blob/{TAG}/docs/evidence/releases/{TAG}/"
+    prefix = f"https://github.com/{REPO}/blob/{TAG}/docs/evidence/releases/{TAG}/"
     body = body.replace("(RELEASE_NOTES.zh-CN.md)", f"({prefix}RELEASE_NOTES.zh-CN.md)")
     body = body.replace("(RELEASE_MANIFEST.md)", f"({prefix}RELEASE_MANIFEST.md)")
     if fault == "wrong-title":
@@ -514,9 +516,9 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     elif fault == "unpublished":
         body += "\nRelease status: not yet published.\n"
     elif fault == "wrong-link":
-        body += f"\n[v9.8.6](https://github.com/LightDevCoder/skills/releases/tag/{TAG})\n"
+        body += f"\n[v9.8.6](https://github.com/{REPO}/releases/tag/{TAG})\n"
     release = {"body": body, "tagName": TAG, "isDraft": fault == "draft", "isPrerelease": False,
-               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}"}
+               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/{REPO}/releases/tag/{TAG}"}
     original_run = subprocess.run
     def run(command, *args, **kwargs):
         if command[:3] == ["gh", "release", "view"]:
@@ -529,7 +531,7 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
         return original_tag_check(*args, **kwargs)
     monkeypatch.setattr(verifier, "check_tag_immutability", check_tag)
     monkeypatch.setattr(sys, "argv", ["verify_release_integrity.py", "--root", str(tmp_path),
-                                     "--tag", TAG, "--stage", "attested", "--check-remote"])
+                                     "--tag", TAG, "--stage", "attested", "--check-remote", "--repo", REPO])
     assert verifier.main() == 1
     output = capsys.readouterr().out
     assert "GitHub Release" in output
@@ -643,3 +645,34 @@ def test_known_defect_notice_keeps_a_published_body_valid(tmp_path: Path, monkey
     assert seen and seen[0][seen[0].index("--repo") + 1] == REPO
     wrong_repo = verifier.check_github_release_navigation(TAG, repo="someone-else/skills", cwd=tmp_path)
     assert not wrong_repo.passed and "PUBLICATION_IDENTITY" in wrong_repo.message
+
+
+def test_publication_observation_is_pinned_to_the_resolved_repository(tmp_path: Path) -> None:
+    """Without --repo the gate resolves the repository (here GITHUB_REPOSITORY) and rejects another owner's release."""
+    import os
+    make_candidate(tmp_path)
+    candidate = commit(tmp_path)
+    git(tmp_path, "tag", "-a", TAG, "-m", "Fixture annotated tag")
+    observations = observation_file(tmp_path, candidate)
+    data = json.loads(observations.read_text(encoding="utf-8"))
+    data["installation"] = installation_observation(candidate)
+    data["release"] = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
+                       "publishedAt": "2026-10-09T00:00:00Z",
+                       "url": f"https://github.com/someone-else/skills/releases/tag/{TAG}", "body": "x"}
+    observations.write_text(json.dumps(data), encoding="utf-8")
+    env = {**os.environ, "GITHUB_REPOSITORY": REPO}
+    result = integrity(tmp_path, "published", "--observations", str(observations), "--simulate", repo=None, env=env)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"GitHub Repo:    {REPO}" in result.stdout
+    assert "PUBLICATION_IDENTITY" in result.stdout + result.stderr
+
+
+def test_publication_gate_fails_when_no_repository_can_be_found(tmp_path: Path) -> None:
+    import os
+    make_candidate(tmp_path)
+    candidate = commit(tmp_path)
+    observations = observation_file(tmp_path, candidate)
+    env = {k: v for k, v in os.environ.items() if k != "GITHUB_REPOSITORY"}
+    env["PATH"] = str(tmp_path / "no-gh") + os.pathsep + "/usr/bin:/bin"  # no gh; the fixture has no origin
+    result = integrity(tmp_path, "ci_verified", "--observations", str(observations), "--simulate", repo=None, env=env)
+    assert result.returncode == 1 and "REPOSITORY_UNRESOLVED" in result.stdout, result.stdout + result.stderr

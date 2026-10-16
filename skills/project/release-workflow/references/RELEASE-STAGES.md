@@ -6,8 +6,10 @@ first push. [DOCUMENT-STATE.md](DOCUMENT-STATE.md) says how to record facts; a
 passing local rehearsal never proves a production release.
 
 The scripts find the GitHub repository themselves (`--repo owner/name`, then
-`GITHUB_REPOSITORY`, then `gh repo view`, then the `origin` remote). Pass
-`--repo` only to override that. Use `"$REPO"` from this command in the examples:
+`GITHUB_REPOSITORY`, then `gh repo view`, then the `origin` remote). Checks of
+the published Release compare against that repository and fail when none is
+found. In a fork with an `upstream` remote, `gh` may pick upstream: pass
+`--repo` there. Use `"$REPO"` from this command in the examples:
 
 ```bash
 REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"

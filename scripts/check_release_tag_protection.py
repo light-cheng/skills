@@ -271,13 +271,13 @@ def main() -> int:
     args = parser.parse_args()
     if not args.fixture:
         try:
-            args.repo = resolve_repository(args.repo)
+            args.repo = resolve_repository(args.repo, Path(__file__).resolve().parent.parent)
         except ValueError as error:
             print(f"RESULT: BLOCKED — {error}")
             return 1
 
     print(f"=== Remote Tag Protection Guard ===")
-    print(f"Target Repository: {args.repo}")
+    print(f"Target Repository: {args.repo or 'fixture'}")
     print(f"Required Pattern:  {args.pattern}")
     print("------------------------------------")
 

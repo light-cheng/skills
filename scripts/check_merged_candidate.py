@@ -20,7 +20,10 @@ from pathlib import Path
 
 
 def git(root: Path, *args: str) -> tuple[int, str]:
-    proc = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True)
+    try:
+        proc = subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.TimeoutExpired) as error:
+        return 1, str(error)
     return proc.returncode, proc.stdout.strip()
 
 

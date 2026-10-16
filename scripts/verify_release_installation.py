@@ -102,7 +102,10 @@ def main() -> None:
                         help="GitHub owner/name to install from (default: GITHUB_REPOSITORY, then gh, then origin).")
     args = parser.parse_args()
     validate_identity(args.tag, args.expected_commit)
-    source = resolve_repository(args.repo)
+    try:
+        source = resolve_repository(args.repo, Path(__file__).resolve().parent.parent)
+    except ValueError as error:
+        parser.error(str(error))
     repository = f"https://github.com/{source}.git"
     require_fresh_runner(Path.home())
     args.output.mkdir(parents=True, exist_ok=False)

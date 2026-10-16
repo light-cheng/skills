@@ -49,7 +49,11 @@ def parse_remote_url(url: str) -> str:
 
 def remote_repository(cwd: Path, *, runner: Runner | None = None) -> str | None:
     """Return ``owner/name`` from the origin remote, or None when it is not GitHub."""
-    proc = (runner or subprocess.run)(["git", "remote", "get-url", "origin"], cwd=cwd, capture_output=True, text=True)
+    try:
+        proc = (runner or subprocess.run)(["git", "remote", "get-url", "origin"], cwd=cwd,
+                                          capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
     if proc.returncode != 0:
         return None
     try:
@@ -99,5 +103,7 @@ def is_release_url(url: object, tag: str, repo: str | None = None) -> bool:
     if not isinstance(url, str):
         return False
     if repo:
-        return url == release_url(repo, tag)
+        # GitHub owner and repository names are case-insensitive; the tag is not.
+        prefix, expected = url.rsplit("/", 1)[0], release_url(repo, tag).rsplit("/", 1)[0]
+        return url.endswith(f"/releases/tag/{tag}") and prefix.casefold() == expected.casefold()
     return bool(re.fullmatch(RELEASE_URL_PATTERN + re.escape(tag), url))

@@ -47,7 +47,7 @@ from release_context import (
     confirmed_stable, document_links, legacy_snapshot, validate_ci_observation,
     validate_document, validate_observation_kind, validate_publication_observation, version_key,
 )
-from repo_identity import RELEASE_URL_PATTERN, is_release_url, validate_repository
+from repo_identity import RELEASE_URL_PATTERN, is_release_url, resolve_repository, validate_repository
 
 
 class VerificationResult(NamedTuple):
@@ -1192,6 +1192,16 @@ def main() -> int:
     print(f"Stage:          {stage}")
     print(f"Repository:     {repo_root}")
     print("--------------------------------")
+
+    # Live publication facts are compared with the resolved repository, never any owner.
+    if args.observations or (args.check_remote and stage == "attested"):
+        try:
+            args.repo = resolve_repository(args.repo, repo_root)
+        except ValueError as error:
+            print(f"[REPOSITORY_UNRESOLVED] {error}")
+            print("RESULT: FAIL — Release integrity violation detected.")
+            return 1
+        print(f"GitHub Repo:    {args.repo}")
 
     all_passed = True
     try:

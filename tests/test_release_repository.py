@@ -177,3 +177,32 @@ def test_cli_reports_blocked_and_exit_code(repo: Path):
                            "--candidate", candidate, "--merged", "main", "--branch", "main", "--root", str(repo)],
                           capture_output=True, text=True)
     assert proc.returncode == 1 and "RESULT: BLOCKED" in proc.stdout
+
+
+def test_known_repository_matches_without_case_but_tag_exactly():
+    url = "https://github.com/Light-Cheng/Skills/releases/tag/v1.2.3"
+    assert repo_identity.is_release_url(url, "v1.2.3", "light-cheng/skills")
+    assert not repo_identity.is_release_url(url.replace("v1.2.3", "V1.2.3"), "v1.2.3", "light-cheng/skills")
+
+
+def test_missing_git_counts_as_no_remote():
+    def runner(argv, **kwargs):
+        raise FileNotFoundError(argv[0])
+
+    assert repo_identity.remote_repository(Path("."), runner=runner) is None
+    with pytest.raises(ValueError):
+        repo_identity.resolve_repository(None, Path("."), env={}, runner=runner)
+
+
+def test_installation_verifier_reports_an_unresolvable_repository(monkeypatch, capsys):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("release_installation_cli", ROOT / "scripts/verify_release_installation.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "resolve_repository", lambda *a, **k: (_ for _ in ()).throw(ValueError("cannot find the GitHub repository")))
+    monkeypatch.setattr(sys, "argv", ["verify_release_installation.py", "--tag", "v1.2.3",
+                                      "--expected-commit", "a" * 40, "--output", "unused"])
+    with pytest.raises(SystemExit) as exit_info:
+        module.main()
+    assert exit_info.value.code == 2
+    assert "cannot find the GitHub repository" in capsys.readouterr().err

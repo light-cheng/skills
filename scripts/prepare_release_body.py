@@ -114,7 +114,14 @@ def main() -> int:
             print(f"ERROR: Notes missing from fixed source {revision}:{relative_input}; use --revision for a prepared tree.", file=sys.stderr)
             return 1
     candidate = resolve_commit_sha(args.release_commit or revision, cwd=root)
-    context = ReleaseContext(args.tag, args.stage, revision=revision)
+    repo = None
+    if not args.validate_only:
+        try:
+            repo = resolve_repository(args.repo, root)
+        except ValueError as error:
+            print(f"ERROR: {error}", file=sys.stderr)
+            return 1
+    context = ReleaseContext(args.tag, args.stage, revision=revision, repository=repo)
     if args.observations:
         try:
             observations = json.loads(args.observations.read_text(encoding="utf-8"))
@@ -152,11 +159,6 @@ def main() -> int:
         print("Validation PASSED: All links are safe.")
         return 0
 
-    try:
-        repo = resolve_repository(args.repo, root)
-    except ValueError as error:
-        print(f"ERROR: {error}", file=sys.stderr)
-        return 1
     transformed = transform_release_notes_for_web(
         text=content,
         tag=args.tag,
