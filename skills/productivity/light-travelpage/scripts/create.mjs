@@ -7,10 +7,10 @@ let destination, provider = "off";
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--ai" && i + 1 < args.length) provider = args[++i];
   else if (!args[i].startsWith("--") && !destination) destination = args[i];
-  else throw new Error("Usage: node create.mjs <new-project-directory> [--ai off|openai]");
+  else throw new Error("Usage: node create.mjs <new-project-directory> [--ai off|on]");
 }
 if (!destination)
-  throw new Error("Usage: node create.mjs <new-project-directory> [--ai off|openai]");
+  throw new Error("Usage: node create.mjs <new-project-directory> [--ai off|on]");
 const ai = normalizeAiConfig({ provider });
 const target = path.resolve(destination);
 if (fs.existsSync(target))
@@ -32,5 +32,5 @@ fs.cpSync(template, target, {
 });
 fs.writeFileSync(path.join(target, "ai-config.json"), JSON.stringify(ai, null, 2) + "\n");
 console.log(
-  `Created ${target} with AI ${ai.provider}. Fill trip-data.json, npm ci, then npm run build. Cloudflare setup is described in references/deployment.md.${ai.provider === "openai" ? " Configure server OPENAI_BASE_URL, OPENAI_API_KEY and OPENAI_MODEL using references/ai-integration.md; no upstream was contacted." : ""}`,
+  `Created ${target} with AI ${ai.provider}. Fill trip-data.json, npm ci, then npm run build. Cloudflare setup is described in references/deployment.md.${ai.provider === "on" ? " Configure the AI service with scripts/ai-setup.mjs (references/ai-integration.md); no upstream was contacted." : ""}`,
 );

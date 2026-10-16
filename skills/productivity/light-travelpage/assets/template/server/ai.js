@@ -2,7 +2,7 @@ import { normalizeAiConfig } from "../ai-config.js";
 import { digest, sameOrigin, sessionValid } from "./auth.js";
 import { handleTrip } from "./sync.js";
 import { createAiTools } from "./ai-tools.js";
-import { createOpenAiClient } from "./openai-client.js";
+import { createAiClient, serverAiSettings } from "./ai-client.js";
 
 const reply = (data, status = 200) => Response.json(data, { status, headers: { "cache-control": "no-store" } });
 const idValid = (value) => typeof value === "string" && /^[A-Za-z0-9_-]{1,100}$/.test(value);
@@ -20,9 +20,9 @@ async function assets(env, request, file) {
   return response.json();
 }
 async function planRequest(env, data, snapshot, body) {
-  if (!env.OPENAI_BASE_URL || !env.OPENAI_MODEL) throw new Error("Missing AI configuration");
-  const client = createOpenAiClient({ baseUrl: env.OPENAI_BASE_URL,
-    apiKey: env.OPENAI_API_KEY || "", apiStyle: env.OPENAI_API_STYLE || "chat-completions" });
+  const settings = serverAiSettings(env);
+  if (!settings.baseUrl || !settings.model) throw new Error("Missing AI configuration");
+  const client = createAiClient(settings);
   const toolkit = createAiTools(data, snapshot);
   const initial = await toolkit.execute("get_trip_context", {});
   const messages = [{ role: "system", content: system },
@@ -30,7 +30,7 @@ async function planRequest(env, data, snapshot, body) {
   const signal = AbortSignal.timeout(55000);
   let calls = 0;
   for (let round = 0; round < 6; round++) {
-    const message = await client.complete({ model: env.OPENAI_MODEL, messages, tools: toolkit.tools, signal });
+    const message = await client.complete({ model: settings.model, messages, tools: toolkit.tools, signal });
     const toolCalls = message.tool_calls || [];
     if (!Array.isArray(toolCalls) || toolCalls.length > 8) throw new Error("Invalid tool calls");
     if (!toolCalls.length) return toolkit.plan(typeof message.content === "string" ? message.content.slice(0, 8000) : "本次请求已处理。");

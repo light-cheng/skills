@@ -7,7 +7,8 @@ import { Window } from "happy-dom";
 import { authenticate, digest } from "../server/auth.js";
 import { handleTrip } from "../server/sync.js";
 import { onRequest as handleAi } from "../functions/api/ai/[[tripId]].js";
-import { createOpenAiClient } from "../server/openai-client.js";
+import { createAiClient } from "../server/ai-client.js";
+import { normalizeAiConfig } from "../ai-config.js";
 
 const origin = "https://example.test";
 const data = () => ({ metadata: { tripId: "fixture" }, trip: { status: "draft" }, days: [], places: [],
@@ -28,10 +29,14 @@ function database() {
     catch (error) { sqlite.exec("ROLLBACK"); throw error; }
   } };
 }
-async function setup(t, provider = "openai", style = "chat-completions") {
+// Older pages configure OPENAI_* and provider "openai"; they keep working (legacy = true).
+async function setup(t, provider = "on", format = "openai-chat", legacy = false) {
+  const server = legacy
+    ? { OPENAI_BASE_URL: "https://upstream.example/v1", OPENAI_API_KEY: "synthetic-server-key", OPENAI_MODEL: "mock-tool-model",
+        OPENAI_API_STYLE: { "openai-chat": "chat-completions", "openai-responses": "responses" }[format] }
+    : { AI_BASE_URL: "https://upstream.example/v1", AI_API_KEY: "synthetic-server-key", AI_MODEL: "mock-tool-model", AI_API_FORMAT: format };
   const env = { TRIP_ID: "fixture", ACCESS_CODE_HASH: await digest("synthetic-code"), SESSION_SECRET: "synthetic-session-".repeat(3),
-    DB: database(), OPENAI_BASE_URL: "https://upstream.example/v1", OPENAI_API_KEY: "synthetic-server-key",
-    OPENAI_MODEL: "mock-tool-model", OPENAI_API_STYLE: style,
+    DB: database(), ...server,
     ASSETS: { fetch: async (url) => Response.json(new URL(url).pathname === "/ai-config.json" ? { provider } : data()) } };
   t.after(() => env.DB?.close());
   const login = await authenticate({ env, request: new Request(`${origin}/auth/login`, {
@@ -91,7 +96,7 @@ test("authenticated Chat tool mutation persists through shared API; stale and du
   assert.equal((await handleAi(s.context(requestBody("ai-turn", "different contents")))).status, 409); assert.equal(calls, 2);
 });
 test("Responses conversion preserves function output and encrypted continuation while keeping both out of UI", async (t) => {
-  const s = await setup(t, "openai", "responses"); let calls = 0;
+  const s = await setup(t, "openai", "openai-responses", true); let calls = 0;
   mockUpstream(t, async (url, options) => {
     assert.equal(url, "https://upstream.example/v1/responses"); const body = JSON.parse(options.body);
     assert.equal(body.store, false); assert.deepEqual(body.include, ["reasoning.encrypted_content"]);
@@ -147,13 +152,15 @@ test("upstream failure before plan completion writes nothing and never exposes i
   assert.equal((await (await s.shared()).json()).revision, 0);
 });
 test("transport rejects credential URLs and does not follow redirects", async () => {
-  for (const baseUrl of ["https://key@example.test/v1", "https://example.test/v1?key=x", "https://example.test/v1/responses"])
-    assert.throws(() => createOpenAiClient({ baseUrl }));
-  const client = createOpenAiClient({ baseUrl: "https://example.test", fetchImpl: async (url, options) => {
+  for (const baseUrl of ["https://key@example.test/v1", "https://example.test/v1?key=x", "https://example.test/v1/responses",
+    "https://example.test/v1/messages", "https://example.test/v1/chat/completions"])
+    assert.throws(() => createAiClient({ baseUrl }));
+  assert.throws(() => createAiClient({ baseUrl: "https://example.test/v1", apiFormat: "gemini" }));
+  const client = createAiClient({ baseUrl: "https://example.test", fetchImpl: async (url, options) => {
     assert.equal(url, "https://example.test/v1/chat/completions"); assert.equal(options.redirect, "manual"); return chat();
   } });
   assert.equal((await client.complete({ model: "test", messages: [] })).role, "assistant");
-  const redirect = createOpenAiClient({ baseUrl: "https://example.test/v1", fetchImpl: async (_url, options) => {
+  const redirect = createAiClient({ baseUrl: "https://example.test/v1", fetchImpl: async (_url, options) => {
     assert.equal(options.redirect, "manual"); return new Response(null, { status: 302, headers: { location: "https://foreign.example" } });
   } });
   await assert.rejects(redirect.complete({ model: "test", messages: [] }), /HTTP 302/);
@@ -174,6 +181,102 @@ test("a shared edit during model processing rejects the AI plan without overwrit
   const body = requestBody("racing-ai"); assert.equal((await handleAi(s.context(body))).status, 409);
   const state = await (await s.shared()).json(); assert.equal(state.todos.length, 1); assert.equal(state.todos[0].id, "manual");
   assert.equal((await handleAi(s.context(body))).status, 409); assert.equal(calls, 2);
+});
+
+const anthropic = (content, stop = "end_turn") => Response.json({ id: "msg", type: "message", role: "assistant",
+  content, stop_reason: stop, model: "mock-tool-model" });
+test("Anthropic Messages: tool_use and tool_result round trip saves one task", async (t) => {
+  const s = await setup(t, "on", "anthropic-messages"); let calls = 0;
+  mockUpstream(t, async (url, options) => {
+    assert.equal(url, "https://upstream.example/v1/messages"); assert.equal(options.redirect, "manual");
+    assert.equal(options.headers["x-api-key"], "synthetic-server-key"); assert.equal(options.headers["anthropic-version"], "2023-06-01");
+    assert.equal(Object.hasOwn(options.headers, "Authorization"), false);
+    const body = JSON.parse(options.body); assert.equal(body.model, "mock-tool-model");
+    assert.equal(typeof body.system, "string"); assert.ok(body.system.includes("travel group"));
+    assert.ok(body.messages.every((m) => m.role !== "system"));
+    assert.ok(body.tools.some((tool) => tool.name === "create_task" && tool.input_schema?.type === "object"));
+    if (++calls === 1) return anthropic([{ type: "text", text: "Adding it." },
+      { type: "tool_use", id: "toolu_1", name: "create_task", input: { text: "带雨衣" } }], "tool_use");
+    const [assistant, result] = body.messages.slice(-2);
+    assert.equal(assistant.role, "assistant");
+    assert.deepEqual(assistant.content.map((block) => block.type), ["text", "tool_use"]);
+    assert.equal(result.role, "user"); assert.equal(result.content[0].type, "tool_result");
+    assert.equal(result.content[0].tool_use_id, "toolu_1"); assert.equal(JSON.parse(result.content[0].content).status, "prepared");
+    return anthropic([{ type: "text", text: "已准备添加雨衣任务。" }]);
+  });
+  const response = await handleAi(s.context(requestBody("anthropic-turn"))); assert.equal(response.status, 200);
+  const result = await response.json(); assert.equal(result.status, "saved"); assert.equal(result.snapshot.todos[0].text, "带雨衣");
+  assert.equal(JSON.stringify(result).includes("toolu_1"), false); assert.equal(calls, 2);
+});
+test("Anthropic Messages: several tool calls answer in one user turn", async (t) => {
+  const s = await setup(t, "on", "anthropic-messages"); let calls = 0;
+  mockUpstream(t, async (_url, options) => {
+    const body = JSON.parse(options.body);
+    if (++calls === 1) return anthropic([{ type: "tool_use", id: "a", name: "add_traveler", input: { name: "Alice" } },
+      { type: "tool_use", id: "b", name: "add_traveler", input: { name: "Bob" } }], "tool_use");
+    const last = body.messages.at(-1); assert.equal(last.role, "user");
+    assert.deepEqual(last.content.map((block) => block.tool_use_id), ["a", "b"]);
+    assert.equal(body.messages.filter((m) => m.role === "user").length, 2);
+    return anthropic([{ type: "text", text: "Added." }]);
+  });
+  const result = await (await handleAi(s.context(requestBody("two-travelers", "添加 Alice 和 Bob")))).json();
+  assert.equal(result.snapshot.travelers.length, 2);
+});
+test("Anthropic Messages: a reply cut at max_tokens saves nothing", async (t) => {
+  // Without the guard the cut tool call would run and the next (complete) reply would save it.
+  const s = await setup(t, "on", "anthropic-messages"); let calls = 0;
+  mockUpstream(t, async () => ++calls === 1
+    ? anthropic([{ type: "tool_use", id: "x", name: "create_task", input: { text: "half" } }], "max_tokens")
+    : anthropic([{ type: "text", text: "Done." }]));
+  assert.equal((await handleAi(s.context(requestBody("cut-turn")))).status, 503);
+  assert.equal(calls, 1); assert.equal((await (await s.shared()).json()).revision, 0);
+});
+test("Anthropic Messages: thinking blocks are replayed verbatim; odd tool input stays safe", async (t) => {
+  const s = await setup(t, "on", "anthropic-messages"); let calls = 0;
+  const thinking = { type: "thinking", thinking: "plan", signature: "synthetic-signature" };
+  mockUpstream(t, async (_url, options) => {
+    const body = JSON.parse(options.body);
+    if (++calls === 1) return anthropic([thinking, { type: "tool_use", id: "g", name: "get_trip_context" }], "tool_use");
+    assert.deepEqual(body.messages.at(-2).content[0], thinking);
+    assert.deepEqual(body.messages.at(-2).content[1], { type: "tool_use", id: "g", name: "get_trip_context" });
+    return anthropic([{ type: "text", text: "Read." }]);
+  });
+  const result = await (await handleAi(s.context(requestBody("thinking")))).json();
+  assert.equal(result.status, "read_only"); assert.equal(JSON.stringify(result).includes("synthetic-signature"), false);
+});
+test("new AI_* settings win over legacy OPENAI_* ones", async (t) => {
+  const s = await setup(t, "on", "openai-chat");
+  Object.assign(s.env, { OPENAI_BASE_URL: "https://legacy.example/v1", OPENAI_MODEL: "legacy-model", OPENAI_API_STYLE: "responses" });
+  mockUpstream(t, async (url, options) => {
+    assert.equal(url, "https://upstream.example/v1/chat/completions"); assert.equal(JSON.parse(options.body).model, "mock-tool-model");
+    return chat([], "OK");
+  });
+  assert.equal((await handleAi(s.context(requestBody("precedence")))).status, 200);
+});
+test("settings never mix the AI_* and OPENAI_* sets", async (t) => {
+  // An old endpoint with a new key or format, or a new endpoint with an old model, must not be assembled.
+  const s = await setup(t, "on", "openai-chat", true); let seen;
+  Object.assign(s.env, { AI_API_KEY: "new-key-should-stay-unused", AI_API_FORMAT: "anthropic-messages" });
+  mockUpstream(t, async (url, options) => { seen = { url, auth: options.headers.Authorization, model: JSON.parse(options.body).model }; return chat([], "OK"); });
+  assert.equal((await handleAi(s.context(requestBody("mixed-old")))).status, 200);
+  assert.deepEqual(seen, { url: "https://upstream.example/v1/chat/completions", auth: "Bearer synthetic-server-key", model: "mock-tool-model" });
+  const n = await setup(t, "on", "openai-chat"); delete n.env.AI_MODEL; n.env.OPENAI_MODEL = "old-model";
+  let upstream = 0; mockUpstream(t, async () => { upstream++; return chat(); });
+  assert.equal((await handleAi(n.context(requestBody("mixed-new")))).status, 503);
+  assert.equal(upstream, 0);
+});
+test("travelers cannot pick a model, format or endpoint", async (t) => {
+  const s = await setup(t); let upstream = 0; mockUpstream(t, async () => { upstream++; return chat(); });
+  for (const extra of [{ model: "other" }, { apiFormat: "anthropic-messages" }, { baseUrl: "https://evil.example" }])
+    assert.equal((await handleAi(s.context({ ...requestBody("pick"), ...extra }))).status, 400);
+  assert.equal(upstream, 0);
+});
+test("public switch is on or off; the old openai value reads as on", () => {
+  assert.deepEqual(normalizeAiConfig({ provider: "openai" }), { provider: "on" });
+  assert.deepEqual(normalizeAiConfig({ provider: "on" }), { provider: "on" });
+  assert.deepEqual(normalizeAiConfig(), { provider: "off" });
+  for (const raw of [{ provider: "anthropic" }, { provider: "on", model: "x" }, [], null])
+    assert.throws(() => normalizeAiConfig(raw));
 });
 
 function controller(options) {

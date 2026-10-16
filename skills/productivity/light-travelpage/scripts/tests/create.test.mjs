@@ -19,16 +19,17 @@ function trip(project) {
 test("generator defaults off; enabled build adds a usable protected AI entry and retains all original modules", () => {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), "travel-ai-generator-"));
   try {
-    for (const mode of ["off", "openai"]) {
-      const project = path.join(temporary, mode), args = [create, project, ...(mode === "openai" ? ["--ai", mode] : [])];
+    // "openai" is the older spelling of "on" and must still generate an enabled page.
+    for (const [mode, provider] of [["off", "off"], ["on", "on"], ["openai", "on"]]) {
+      const project = path.join(temporary, mode), args = [create, project, ...(mode === "off" ? [] : ["--ai", mode])];
       const generated = run(args); assert.equal(generated.status, 0, generated.stderr);
-      assert.equal(JSON.parse(fs.readFileSync(path.join(project, "ai-config.json"))).provider, mode);
+      assert.equal(JSON.parse(fs.readFileSync(path.join(project, "ai-config.json"))).provider, provider);
       trip(project);
       fs.writeFileSync(path.join(project, ".dev.vars"), "OPENAI_API_KEY=synthetic-private-key");
       const built = run(["scripts/build.mjs"], project); assert.equal(built.status, 0, built.stderr);
       const html = fs.readFileSync(path.join(project, "dist/index.html"), "utf8");
-      assert.equal(html.includes('id="ai-open"'), mode === "openai");
-      assert.equal(fs.existsSync(path.join(project, "dist/ai-ui.js")), mode === "openai");
+      assert.equal(html.includes('id="ai-open"'), provider === "on");
+      assert.equal(fs.existsSync(path.join(project, "dist/ai-ui.js")), provider === "on");
       for (const id of ["flights", "stays", "route", "itinerary", "prep", "materials", "ledger-view", "ticket-dialog"])
         assert.ok(html.includes(`id="${id}"`), `preserve ${id}`);
       assert.ok(fs.existsSync(path.join(project, "functions/api/ai/[[tripId]].js")));

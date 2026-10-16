@@ -44,7 +44,7 @@ const files = [
   "LICENSE",
   "trip-data.json",
 ];
-if (ai.provider === "openai") files.push("ai-ui.js", "ai.css");
+if (ai.provider === "on") files.push("ai-ui.js", "ai.css");
 for (const file of files) {
   const src = path.join(root, file);
   if (fs.lstatSync(src).isSymbolicLink())
@@ -52,7 +52,7 @@ for (const file of files) {
   fs.copyFileSync(src, path.join(stage, file));
 }
 fs.writeFileSync(path.join(stage, "ai-config.json"), JSON.stringify(ai) + "\n");
-if (ai.provider === "openai") {
+if (ai.provider === "on") {
   const html = fs.readFileSync(path.join(stage, "index.html"), "utf8")
     .replace("<!-- optional-ai:head -->", '<link rel="stylesheet" href="ai.css"><script src="ai-ui.js" defer></script>')
     .replace("<!-- optional-ai:body -->", fs.readFileSync(assetPath(root, "assets/ai-panel.html"), "utf8"));

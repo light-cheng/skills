@@ -57,7 +57,14 @@ EDGES = (
     ("ask-light", "light-decide", "calls-optional"),
     ("agent-config", "light-decide", "calls-optional"),
     ("manuscript-ops", "light-decide", "calls-optional"),
+    ("light-travelpage", "light-travelpage-gw", "calls-optional"),
 )
+
+# Optional targets that live outside this repository. The caller must link the
+# repository and keep working without the package.
+EXTERNAL_OPTIONAL = {
+    "light-travelpage-gw": "https://github.com/LightDevCoder/light-travelpage-gw",
+}
 
 
 def package_text(name: str) -> str:
@@ -82,7 +89,10 @@ class CompositionGraphTests(unittest.TestCase):
     def test_every_edge_targets_a_real_package_named_by_its_source(self) -> None:
         for source, target, _ in EDGES:
             with self.subTest(edge=f"{source}->{target}"):
-                package_dir(ROOT, target)  # raises if the target package is missing
+                if target in EXTERNAL_OPTIONAL:
+                    self.assertIn(EXTERNAL_OPTIONAL[target], package_text(source), f"{source} must link {target}'s repository")
+                else:
+                    package_dir(ROOT, target)  # raises if the target package is missing
                 self.assertRegex(
                     package_text(source),
                     rf"(?<![\w-]){re.escape(target)}(?![\w-])",
@@ -91,7 +101,7 @@ class CompositionGraphTests(unittest.TestCase):
 
     def test_a_skill_only_calls_model_invoked_capabilities(self) -> None:
         for source, target, relation in EDGES:
-            if relation.startswith("calls"):
+            if relation.startswith("calls") and target not in EXTERNAL_OPTIONAL:
                 with self.subTest(edge=f"{source}->{target}"):
                     self.assertTrue(
                         is_model_invoked(target),
@@ -118,6 +128,13 @@ class CompositionGraphTests(unittest.TestCase):
         # ask-light and agent-config each ship the light-decide script path; the copies must not drift.
         copies = [package_dir(ROOT, name) / "scripts" / "decision_source.py" for name in ("ask-light", "agent-config")]
         self.assertEqual(copies[0].read_bytes(), copies[1].read_bytes())
+
+    def test_only_optional_edges_may_leave_the_repository(self) -> None:
+        for source, target, relation in EDGES:
+            if target in EXTERNAL_OPTIONAL:
+                with self.subTest(edge=f"{source}->{target}"):
+                    self.assertEqual(relation, "calls-optional")
+                    self.assertFalse(list((ROOT / "skills").glob(f"*/{target}/SKILL.md")), f"{target} is now in this repository")
 
     def test_invocation_check_rejects_a_user_invoked_target(self) -> None:
         # Negative control: the check above must be able to fail.
