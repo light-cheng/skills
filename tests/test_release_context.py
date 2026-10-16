@@ -9,6 +9,7 @@ import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 TAG = "v9.8.7"
 # Fixture repository: release scripts must not depend on the collection's real name.
 REPO = "example-owner/skills"
@@ -718,3 +719,4 @@ def test_current_attested_receipt_must_name_the_resolved_repository(tmp_path: Pa
     assert f"GitHub Repo:    {REPO}" in current.stdout
     history = integrity(tmp_path, "attested", "--release-commit", candidate, "--mode", "historical", repo=None, env=env)
     assert "RECEIPT_URL_MISMATCH" not in history.stdout, history.stdout
+    assert "[PASS] Receipt Consistency" in history.stdout, history.stdout

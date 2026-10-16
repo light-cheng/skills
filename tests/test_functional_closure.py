@@ -34,9 +34,13 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
 
     def test_frozen_hashes_allow_only_recorded_name_token_amendments(self) -> None:
         baseline = ROOT / ".scratch/light-skills-lean-refactor/frozen-baseline.sha256"
+        # The only name-token edits ever approved for frozen files; the JSON records may not add others.
+        allowed_tokens = {"`light-research`": "`research`", "light-cheng/light-kanban": "LightDevCoder/light-kanban"}
         amendments = {}
         for record in ("namespace-v0.2.6", "namespace-v0.2.9"):
-            amendments.update(json.loads((ROOT / f"docs/evidence/{record}/frozen-name-amendments.json").read_text()))
+            entries = json.loads((ROOT / f"docs/evidence/{record}/frozen-name-amendments.json").read_text())
+            self.assertFalse(set(entries) & set(amendments), f"{record} amends a path another record already amends")
+            amendments.update(entries)
         self.assertEqual(set(amendments), {
             "skills/kb-init/SKILL.md",
             "skills/kb-init/references/base-discovery.md",
@@ -58,6 +62,7 @@ class FunctionalClosureBoundaryTest(unittest.TestCase):
                 self.assertEqual(actual, record["candidate_sha256"], relative)
                 restored = relocated_path(ROOT, relative).read_bytes()
                 for new_token, old_token in record.get("restore", [["`light-research`", "`research`"]]):
+                    self.assertEqual(allowed_tokens.get(new_token), old_token, f"{relative}: unapproved restore pair")
                     restored = restored.replace(new_token.encode(), old_token.encode())
                 self.assertEqual(hashlib.sha256(restored).hexdigest(), expected, relative)
             else:
