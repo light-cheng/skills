@@ -1,6 +1,6 @@
 # 第一方 Skill 目录
 
-<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+<!-- release-state: {"view": "snapshot", "version": "v0.2.10"} -->
 
 [English catalog](CATALOG.md)
 
@@ -8,7 +8,7 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-本目录列出 v0.2.9 已发布的名称，共 39 个包；v0.2.9 不改任何包名。
+v0.2.10 版本快照：本目录列出 39 个包；v0.2.10 不改任何包名。
 
 v0.2.8 曾把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`（[v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)）。
 
@@ -20,13 +20,11 @@ v0.2.8 曾把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`（[v
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 39 个已准入第一方 Skill |
-| 当前状态 | 39 个包；v0.2.9 是当前稳定版本 |
-| 稳定版本 | [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)（39 个包；仓库链接改为 light-cheng；release-workflow 改进；上一稳定版 v0.2.8） |
+| 版本快照 | v0.2.10（39 个包；与 Host 无关的技能调用写法；阶段 7 演练发现的项目流程修复） |
+| 上一版本 | [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)（39 个包） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.9 发布清单](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md) · [v0.2.9 发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md) · 上一版本：[v0.2.8 发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md) |
-
-`v0.2.9` 的发布与新鲜安装已验证；包数量为 39。
+| 证据 | [v0.2.10 发布清单](docs/evidence/releases/v0.2.10/RELEASE_MANIFEST.zh-CN.md)；实际观察到的发布和安装事实写入 `main` 上的 v0.2.10 发布收据 · 上一版本：[v0.2.9 发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md) |
 
 v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 

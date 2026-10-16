@@ -6,6 +6,9 @@
 
 ## 未发布
 
+## 0.2.10 — 2026-10-17
+
+- v0.2.10 发布准备：README、CATALOG、INSTALLATION、MAINTENANCE（中英）改为 v0.2.10 版本快照，安装命令标为模板；在 `docs/evidence/releases/v0.2.10/` 新增发布说明与发布清单。
 - 阶段 7 演练修复（mdlinks 样例，Claude Code 与 pi）：`review-loop` 只有写明审查者、已跑轮数和每轮报告的位置，才交出干净结果；`light-implement` 的报告新增 `Reviewer:` 与 `Evidence:` 两行，没有审查报告时写 `not run`，不能写 `converged`（pi 上曾在没跑审查者的情况下宣称收敛）。`light-implement` 在工单已是 `claimed`、或 `Blocked by` 中有未 `resolved` 的工单时报告 `BLOCKED`，与 WORKFLOW 原有规定一致。`light-redirect` 在整个 SPEC 和所有未完成工单中查找会与变更矛盾的段落；批准后按当前 Host 给出 `project-spec`/`project-tickets` 的确切调用写法，不再说它们"没安装"；写完提案和记录答复后刷新 `plan.html`。`clarify` 与 `project-clarify` 不把用户没选的默认项写进已决定列表。`project-retro` 说某事"在别处待决"时要引用记录它的文件，否则标为未记录。`light-html-plan` 每次刷新都做视觉检查，做不了就写明。
 - Skill 调用写法（与 Host 无关）：`SKILL.md`、references 和 description 中的技能名去掉 Codex 的 `$` 前缀（例如写 `project-tickets`，不写 `$project-tickets`）。在 Claude Code 上，Agent 会把 `$project-tickets` 原样给用户，而这种写法在那里无效；现在由 Agent 按当前 Host 的写法给出调用方式。`manuscript-ops` 的交接示例从只写 Codex 写法改为按当前 Host 渲染的逻辑调用；Codex 自己的 `agents/openai.yaml` 提示保留 `$`，哈希冻结的 `recap` 不变。README、CATALOG、快速开始、包指南和工作流文档（中英）改写为不带前缀的技能名，并加一行说明 Claude Code（`/name`）与 Codex（`$name`）的写法。钉住 `$` 措辞的测试去掉了这部分断言。
 - `project-retro`：description 末尾加一句 "Use after …" 触发句（project-review 给出结论后、发布后、长时间或摩擦多的会话后，或用户要求时）；已记入其 ATTRIBUTION。

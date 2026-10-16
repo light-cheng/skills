@@ -1,6 +1,6 @@
 # 第一方维护与文档同步
 
-<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+<!-- release-state: {"view": "snapshot", "version": "v0.2.10"} -->
 
 [English maintenance contract](MAINTENANCE.md)
 
@@ -22,7 +22,7 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本是 [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)（39 个包；仓库链接改为 `light-cheng`）。其[发布清单](evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围，[发布收据](evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)记录实际观察到的发布与安装事实。
+准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。本页是 v0.2.10 的版本快照（39 个包）。[v0.2.10 发布清单](evidence/releases/v0.2.10/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围；实际观察到的发布与安装事实写入 `main` 上的 v0.2.10 发布收据。上一版本是 [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)（[发布收据](evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)）。
 
 上一版本是 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)）。
 
