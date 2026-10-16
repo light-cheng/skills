@@ -6,7 +6,9 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-以下目录显示已发布v0.2.7名称：36个包，12项迁移、24个保留。见[完整迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
+版本快照 v0.2.8：本目录列出 39 个包。v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`（[v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)）。
+
+此前 12 个 `light-` 改名见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
 ## 集合状态
 
@@ -14,13 +16,11 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 39 个已准入第一方 Skill |
-| 当前状态 | 39个包；v0.2.7（36个包）为当前稳定版本；light-decide、light-redirect、light-html-plan 随下一个版本发布 |
-| 稳定版本 | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)（36个包；上一稳定版为v0.2.6） |
+| 版本快照 | v0.2.8（39 个包；新增 light-decide、light-redirect、light-html-plan） |
+| 上一版本 | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)（36 个包） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.7 发布清单](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md) · [v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
-
-`v0.2.7` 的公开发布与全新安装已对其 36 个包验证。
+| 证据 | [v0.2.8 发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)；实际观察到的发布与安装事实记入 `main` 上的 v0.2.8 发布收据 · 上一版本：[v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
 
 v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 
@@ -396,7 +396,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 其他 Skill 遇到答案集合固定的判断时。不用于用户的决定、批准、验收结论或权限。
 - **调用方式：** model-invoked。
 - **包位置：** [skills/thinking/light-decide/](skills/thinking/light-decide)
-- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
+- **状态：** 第一方已准入；v0.2.8 新增。
 - **证据：** [准入记录](docs/evidence/admissions/light-decide/README.zh-CN.md)、[references/selection.md](skills/thinking/light-decide/references/selection.md)、[references/formats.md](skills/thinking/light-decide/references/formats.md)。
 - **安装路径：** `<skills-root>/light-decide/`。
 
@@ -406,7 +406,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 实施中发现需求缺失或有误、验收因方向问题未通过、用户批准后改了主意，或工单之间、工单与 SPEC 互相矛盾时。
 - **调用方式：** model-invoked。
 - **包位置：** [skills/project/light-redirect/](skills/project/light-redirect)
-- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布。
+- **状态：** 第一方已准入；v0.2.8 新增。
 - **证据：** [准入记录](docs/evidence/admissions/light-redirect/README.zh-CN.md)、[references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md)、[references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md)。
 - **安装路径：** `<skills-root>/light-redirect/`。
 
@@ -416,7 +416,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 用户要看计划的网页，或 `.scratch/<feature>/plan.html` 已存在且某个阶段完成、工作卡住或拿到验收结果时。
 - **调用方式：** model-invoked。
 - **包位置：** [skills/project/light-html-plan/](skills/project/light-html-plan)
-- **状态：** 第一方已准入（v0.2.7 之后）；随下一个版本发布；自带视觉系统（`assets/`）。
+- **状态：** 第一方已准入；v0.2.8 新增；自带视觉系统（`assets/`）。
 - **证据：** [准入记录](docs/evidence/admissions/light-html-plan/README.zh-CN.md)、[references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md)、[references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md)、[ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md)。
 - **安装路径：** `<skills-root>/light-html-plan/`。
 
@@ -428,6 +428,6 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 | 已批准的 Port（Matt） | 本仓库，附 `ATTRIBUTION.md` | 列在上面；自足，运行时不依赖 Matt。 |
 | 直接使用上游 | 原上游仓库 | 作为依赖提及；不原样复制到这里。 |
 | 修改过的第三方 | `skills-3rdParty` | fork 准入后列在那个私有仓库的来源目录里。 |
-| 已弃用或归档 | 已发布的迁移记录 | 列出替代项和迁移说明。 |
+| 已弃用或归档 | 历次版本的迁移记录 | 列出替代项和迁移说明。 |
 
 同步规则见[维护](docs/MAINTENANCE.zh-CN.md)，所有权门槛见[准入](docs/SKILL_ADMISSION.zh-CN.md)。

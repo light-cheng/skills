@@ -114,8 +114,8 @@ class CollectionContractTests(unittest.TestCase):
         self.check("npx skills add LightDevCoder/skills#v0.2.4" in installation, "installation pinned v0.2.4 install")
         self.check("default revision" in installation and "#ref" in installation, "installation revision semantics")
         self.check("LightDevCoder/skills" in readme, "homepage about copy")
-        stable = re.search(r"\| (?:Stable release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
-        self.check(stable is not None, "catalog names a stable release or its local verified release baseline")
+        stable = re.search(r"\| (?:Stable release|Previous release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
+        self.check(stable is not None, "catalog names a stable or previous release, or its local verified release baseline")
         if stable:
             version = stable.group(1)
             self.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README links to catalog's stable release")

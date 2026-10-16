@@ -2,13 +2,13 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7), published at tag `v0.2.7` (immutable [release manifest](evidence/releases/v0.2.7/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md)). It provides **36 admitted first-party Skills** across 7 purpose-based categories. The default branch adds three Skills admitted after v0.2.7 (`light-decide`, `light-redirect`, `light-html-plan`); their installation is not verified yet. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+Release snapshot v0.2.8: this guide covers v0.2.8, with **39 admitted first-party Skills** across 7 purpose-based categories. The [v0.2.8 release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records its preparation-time scope and local evidence; observed installation and publication facts go into the release receipt on `main`. Until that receipt exists, the v0.2.8 and default-branch commands below are templates. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add LightDevCoder/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
-v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the release snapshot; Skills CLI 1.7.0 discovered all 36 Skills.
+v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the tagged tree; Skills CLI 1.7.0 discovered all 36 Skills.
 
-## v0.2.7 name migration
+## Previous release: v0.2.7 name migration
 
 v0.2.7 is published and actual-source fresh installations passed. The fixed tag selects36 admitted packages with the new names. Pinned/default Codex and Claude Code project installs, native Codex global scope and three representative renamed singles are verified. An unqualified command follows actual main and does not automatically select a stable tag.
 
@@ -28,7 +28,7 @@ Current `main` uses `skills/<category>/<name>/`. Host installations remain `<ski
 
 ## Recommended installation
 
-### Interactive installation (recommended)
+### Interactive installation (recommended; command template)
 
 Run the interactive installer and choose the Skills and target Agent hosts you want:
 
@@ -36,7 +36,7 @@ Run the interactive installer and choose the Skills and target Agent hosts you w
 npx skills add LightDevCoder/skills
 ```
 
-### Install a single Skill
+### Install a single Skill (command template)
 
 To install a specific Skill without selecting from the entire collection:
 
@@ -49,11 +49,13 @@ npx skills add LightDevCoder/skills --skill light-travelpage
 npx skills add LightDevCoder/skills --skill project-retro
 ```
 
-### Pinned release installation
+### Pinned release installation (command template for v0.2.8)
 
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.8 -y
+npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement -y
 npx skills add LightDevCoder/skills#v0.2.7 -y
 npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement -y
 ```
@@ -73,7 +75,7 @@ npx skills add LightDevCoder/skills#v0.2.0
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```
 
-### Explicit Agent target
+### Explicit Agent target (command template)
 
 If you know the specific Agent host you want to target, pass `--agent <agent>`:
 
@@ -83,18 +85,18 @@ npx skills add LightDevCoder/skills --agent claude-code
 
 > **Note on Agent targeting:** Specify only the Agent hosts you actually use. Do not pass `--agent '*'` unless you explicitly intend to populate skill directories for every supported Agent host on your machine.
 
-### Installation options and flags
+### Installation options and flags (command template)
 
 - **Scope:** The CLI prompts for installation scope (Project-local vs. Global/user-level) by default. Use `-g` or `--global` to install globally to user home directories.
 - **Copy mode (`--copy`):** By default, Skills CLI uses symlinks from a canonical location to avoid duplicating files across multiple agent folders. Use `--copy` only when your host environment does not support symlinks or when you require fully independent copies per agent directory. Note that forcing copy mode duplicates skill files into each target agent's directory.
 - **Non-interactive / CI (`--yes` / `-y`):** Skips interactive confirmation prompts. When used without `--skill` or `--agent`, `--yes` installs all skills to detected agents. In CI or automated environments, combine `--yes` with explicit `--skill` and `--agent` flags (e.g. `npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --agent claude-code --yes`).
 
-## Revision semantics
+## Revision semantics (command templates)
 
 The official Skills CLI accepts a `#ref` fragment in a GitHub source. The fragment is passed as the Git revision; a source without a fragment uses the repository's default revision. The parser and clone behavior are documented in the [official Skills CLI source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) and [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts).
 
 - **Default branch `main` (`latest`):** An unqualified repository source (`npx skills add LightDevCoder/skills` or `npx skills add LightDevCoder/skills --skill agent-config`) tracks the current default branch `main`. This installs the latest admitted collection work, including the updated `agent-config` Skill.
-- **Stable release snapshot (`#v0.2.0`):** Pinned source commands (`npx skills add LightDevCoder/skills#v0.2.0`) select the published `v0.2.0` release tag. This tag remains a fixed, reproducible historical snapshot and is not silently updated to track `main`.
+- **Pinned tag (`#v0.2.0`):** Pinned source commands (`npx skills add LightDevCoder/skills#v0.2.0`) select the published `v0.2.0` release tag. This tag remains a fixed, reproducible historical snapshot and is not silently updated to track `main`.
 
 ## Historical release verification records
 
@@ -215,7 +217,7 @@ These categories do not imply that every Agent host supports every location. The
 
 ## Manual fallback
 
-When the installer is unavailable or unsupported, check out the target tag after it is published and copy the complete package into the host-recognized root:
+When the installer is unavailable or unsupported, check out the target tag once it exists on the remote and copy the complete package into the host-recognized root:
 
 ```bash
 source_root="<current-release-checkout>"

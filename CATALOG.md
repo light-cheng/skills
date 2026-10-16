@@ -6,7 +6,9 @@ This catalog is synchronized from the 39 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory shows the published v0.2.7 names: 36 packages, 12 renamed and 24 retained. See the [complete migration guide](docs/MIGRATION-v0.2.7.md).
+Release snapshot v0.2.8: the inventory lists 39 packages. v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
+
+The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
 ## Collection status
 
@@ -14,13 +16,11 @@ The inventory shows the published v0.2.7 names: 36 packages, 12 renamed and 24 r
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 39 admitted first-party Skills |
-| Current state | 39 packages; v0.2.7 (36 packages) is the current stable release; light-decide, light-redirect and light-html-plan ship in the next release |
-| Stable release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages; previous stable was v0.2.6) |
+| Release snapshot | v0.2.8 (39 packages; adds light-decide, light-redirect and light-html-plan) |
+| Previous release | [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7) (36 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.7 release manifest](docs/evidence/releases/v0.2.7/RELEASE_MANIFEST.md) · [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
-
-`v0.2.7` publication and fresh installation are verified for its 36 packages.
+| Evidence | [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md); observed publication and installation facts go into the v0.2.8 release receipt on `main` · previous: [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 
@@ -396,7 +396,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** Another Skill reaches a judgment with a fixed set of legal answers. Never for user decisions, approvals, verdicts or permissions.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/thinking/light-decide/](skills/thinking/light-decide)
-- **Status:** Admitted first-party after v0.2.7; ships in the next release.
+- **Status:** Admitted first-party; new in v0.2.8.
 - **Evidence:** [admission record](docs/evidence/admissions/light-decide/README.md), [references/selection.md](skills/thinking/light-decide/references/selection.md), [references/formats.md](skills/thinking/light-decide/references/formats.md).
 - **Installation path:** `<skills-root>/light-decide/`.
 
@@ -406,7 +406,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** Work finds a requirement missing or wrong, a review fails on direction, the user changes their mind after approval, or tickets contradict each other or the SPEC.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/project/light-redirect/](skills/project/light-redirect)
-- **Status:** Admitted first-party after v0.2.7; ships in the next release.
+- **Status:** Admitted first-party; new in v0.2.8.
 - **Evidence:** [admission record](docs/evidence/admissions/light-redirect/README.md), [references/PROPOSAL.md](skills/project/light-redirect/references/PROPOSAL.md), [references/EXAMPLES.md](skills/project/light-redirect/references/EXAMPLES.md).
 - **Installation path:** `<skills-root>/light-redirect/`.
 
@@ -416,7 +416,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** The user asks for an HTML view of a plan, or `.scratch/<feature>/plan.html` exists and a stage finished, work stopped, or an acceptance result arrived.
 - **Invocation:** Model-invoked.
 - **Package:** [skills/project/light-html-plan/](skills/project/light-html-plan)
-- **Status:** Admitted first-party after v0.2.7; ships in the next release; built-in visual system (`assets/`).
+- **Status:** Admitted first-party; new in v0.2.8; built-in visual system (`assets/`).
 - **Evidence:** [admission record](docs/evidence/admissions/light-html-plan/README.md), [references/source-protocol.md](skills/project/light-html-plan/references/source-protocol.md), [references/design-and-verification.md](skills/project/light-html-plan/references/design-and-verification.md), [ATTRIBUTION.md](skills/project/light-html-plan/ATTRIBUTION.md).
 - **Installation path:** `<skills-root>/light-html-plan/`.
 

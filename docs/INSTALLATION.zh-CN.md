@@ -2,13 +2,13 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合当前稳定版本是 [v0.2.7](https://github.com/LightDevCoder/skills/releases/tag/v0.2.7)，发布于 `v0.2.7` tag（不可变的[发布清单](evidence/releases/v0.2.7/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)）。它提供 **36 个已准入的第一方 Skill**，涵盖七大按职责划分的分类目录。默认分支另有三个 v0.2.7 之后准入的 Skill（`light-decide`、`light-redirect`、`light-html-plan`），其安装尚未验证。`skills/<category>/<name>/` 内的包契约仍是行为权威；本页规定安装方法与验证记录。
+版本快照 v0.2.8：本指南说明 v0.2.8，共 **39 个已准入第一方 Skill**，按 7 个用途分类。[v0.2.8 发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围和本地证据；实际观察到的安装与发布事实记入 `main` 上的发布收据。在该收据存在之前，下面的 v0.2.8 与默认分支命令都是模板。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
 
-标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择已发布的 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
+标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add LightDevCoder/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择指定 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
 v0.2.6 为 `light-travelpage` 增加手册 UI 和默认关闭的 AI 选择。[发布说明](evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录变化，[发布收据](evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录两个隔离目录中的标签/最新主干全新安装：均为 36 个包、385 个包内文件，逐字节一致；Skills CLI 1.7.0 实际发现全部 36 个 Skill。
 
-## v0.2.7 名称迁移
+## 上一版本（历史）：v0.2.7 名称迁移
 
 v0.2.7已公开，实际发布源新鲜安装已通过。固定标签包含使用新名称的36个已准入包。固定版/默认分支Codex、Claude Code项目安装、原生Codex全局范围及三个代表性新名称单包均已验证。不带版本的命令跟随实际main，不会自动选择稳定标签。
 
@@ -22,13 +22,13 @@ npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
 
 ## 分类源码与安装目录
 
-当前 `main` 使用 `skills/<category>/<name>/`。宿主安装目录仍是 `<skills-root>/<name>/`，不要把分类目录整体当成一个 Skill。`--skill <name>` 的选择方式不变。已发布的 v0.2.1 及更早 tag 保留原平铺结构；使用这些 tag 手动复制时，将 `source_package` 设为 `skills/$skill_name`。
+当前 `main` 使用 `skills/<category>/<name>/`。宿主安装目录仍是 `<skills-root>/<name>/`，不要把分类目录整体当成一个 Skill。`--skill <name>` 的选择方式不变。v0.2.1 及更早的 tag 保留原平铺结构；使用这些 tag 手动复制时，将 `source_package` 设为 `skills/$skill_name`。
 
 [分类导航](../skills/README.zh-CN.md) · [逐项迁移表](CATEGORY_MIGRATION.zh-CN.md)。
 
 ## 推荐安装方式
 
-### 交互式安装（推荐）
+### 交互式安装（推荐；命令模板）
 
 运行交互式安装命令，按需挑选所需的 Skill 及目标 Agent：
 
@@ -36,7 +36,7 @@ npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
 npx skills add LightDevCoder/skills
 ```
 
-### 安装单个 Skill
+### 安装单个 Skill（命令模板）
 
 若只需安装指定 Skill，无需在全量集合中选择：
 
@@ -49,11 +49,13 @@ npx skills add LightDevCoder/skills --skill light-travelpage
 npx skills add LightDevCoder/skills --skill project-retro
 ```
 
-### 指定稳定版本安装（Pinned Release）
+### 指定版本安装（Pinned Release；v0.2.8 命令模板）
 
-通过指定发布的 Release Tag 进行确定性安装（推荐用于可复现环境）：
+使用指定的 Release Tag 进行确定性安装（推荐用于可复现环境）：
 
 ```bash
+npx skills add LightDevCoder/skills#v0.2.8 -y
+npx skills add LightDevCoder/skills#v0.2.8 --skill light-implement -y
 npx skills add LightDevCoder/skills#v0.2.7 -y
 npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement -y
 ```
@@ -73,7 +75,7 @@ npx skills add LightDevCoder/skills#v0.2.0
 npx skills add LightDevCoder/skills#v0.2.0 --skill project-review
 ```
 
-### 直接指定目标 Agent
+### 直接指定目标 Agent（命令模板）
 
 若已明确所需配置的 Agent，可传入 `--agent <agent>` 参数：
 
@@ -83,18 +85,18 @@ npx skills add LightDevCoder/skills --agent claude-code
 
 > **关于 Agent 目标的说明：** 请仅指定实际使用的 Agent。除非你确实希望为本机上所有受支持的 Agent 目录均写入 Skill，否则请勿传入 `--agent '*'`。
 
-### 安装选项与参数说明
+### 安装选项与参数说明（命令模板）
 
 - **安装范围（Scope）：** 默认情况下，Skills CLI 会交互提示选择项目级（Project-local）或全局/用户级（Global/user-level）安装。使用 `-g` 或 `--global` 可直接安装至用户主目录。
 - **复制模式（`--copy`）：** 默认情况下，Skills CLI 会通过规范位置建立符号链接（Symlink），避免在多个 Agent 目录间重复复制文件。仅在宿主环境不支持符号链接或确实需要为每个 Agent 维护独立副本时使用 `--copy`。注意：强制复制模式会将 Skill 文件完整写入每个目标 Agent 目录。
 - **非交互/自动化（`--yes` / `-y`）：** 跳过交互式确认提示。在未指定 `--skill` 或 `--agent` 时，`--yes` 会将所有 Skill 安装至检测到的 Agent。在 CI 或自动化脚本中，请将 `--yes` 与明确的 `--skill` 和 `--agent` 配合使用（例如 `npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --agent claude-code --yes`）。
 
-## Revision 语义
+## Revision 语义（命令模板）
 
 官方 Skills CLI 支持 GitHub source 的 `#ref` fragment，并将其作为 Git revision；没有 fragment 的仓库简写使用仓库默认 revision。可查看 [官方 source parser](https://raw.githubusercontent.com/vercel-labs/skills/main/src/source-parser.ts) 和 [Git helper](https://raw.githubusercontent.com/vercel-labs/skills/main/src/git.ts)。
 
 - **默认分支 `main`（`latest`）：** 不带 fragment 的仓库来源（`npx skills add LightDevCoder/skills` 或 `npx skills add LightDevCoder/skills --skill agent-config`）跟随仓库默认分支 `main`，安装最新的已准入特性，包括更新后的 `agent-config` Skill。
-- **稳定版本快照（`#v0.2.0`）：** 显式指定 tag 的命令（`npx skills add LightDevCoder/skills#v0.2.0`）锁定已发布的 `v0.2.0` 稳定标签。该 tag 保持为不可变、可复现的历史快照，绝不会被静默更新为当前 `main` 内容。
+- **固定标签（`#v0.2.0`）：** 显式指定 tag 的命令（`npx skills add LightDevCoder/skills#v0.2.0`）锁定 `v0.2.0` 标签。该 tag 保持为不可变、可复现的历史快照，绝不会被静默更新为当前 `main` 内容。
 
 ## 历史 Release 验证记录
 
@@ -215,7 +217,7 @@ npx skills add LightDevCoder/skills --skill review-loop
 
 ## 手动 fallback
 
-installer 不可用时，在 target tag 发布后 checkout，并将完整包复制到 host 认可的 root：
+installer 不可用时，在 target tag 出现在远端后 checkout，并将完整包复制到 host 认可的 root：
 
 ```bash
 source_root="<current-release-checkout>"
@@ -253,4 +255,4 @@ Light 的 Port 和它的上游 Skill 只装一个，不要同时装。七个 Por
 
 ## 安装说明中的版本身份
 
-版本快照说明包内容，当前 main 收据记录实际安装与发布事实。不带版本的来源跟随默认分支，固定标签对应不可变树。[发布文档检查](../skills/project/release-workflow/references/DOCUMENT-STATE.md)核对双语入口及实际来源、目标清单。本地复制或模拟安装不表示实际发布源验证通过。
+版本快照说明包内容，当前 main 收据记录实际安装与发布事实。不带版本的来源跟随默认分支，固定标签对应不可变树。[发布文档检查](../skills/project/release-workflow/references/DOCUMENT-STATE.md)核对双语入口及实际来源、目标清单。本地复制或模拟安装不是安装证据。

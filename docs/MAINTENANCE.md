@@ -20,11 +20,11 @@ Keep each fact in one authoritative location and link elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Current stable release is `v0.2.7` (36 packages; previous stable was `v0.2.6`). `light-decide`, `light-redirect` and `light-html-plan` were admitted after it and ship in the next release.
+The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Release snapshot v0.2.8: this page describes v0.2.8 (39 packages, adding `light-decide`, `light-redirect` and `light-html-plan`). Its [release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records the preparation-time scope; observed publication and installation facts go into the release receipt on `main`.
 
 History markers: `v0.1.1` (five), `v0.1.2` (seven), `v0.1.3` toolchain migration, `v0.1.4` (`kanban-worker` as `light-kanban-worker`), `v0.1.5` scheduling + identity hardening, `v0.1.6` (`kb-init`). Structural/discovery checks live in [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) and [tests/test_composition.py](../tests/test_composition.py); they are structural evidence, not fresh-install proof.
 
-Published v0.2.7 changes 12 names as recorded in the [migration guide](MIGRATION-v0.2.7.md) and [release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md). Evidence for the earlier v0.2.6 attempt remains historical.
+v0.2.8 renames one package ([v0.2.8 migration guide](MIGRATION-v0.2.8.md)). The earlier v0.2.7 changes to 12 names are in the [v0.2.7 migration guide](MIGRATION-v0.2.7.md) and the previous [v0.2.7 release receipt](evidence/releases/v0.2.7/RELEASE_RECEIPT.md); evidence for the v0.2.6 attempt remains historical.
 
 ## Change workflow
 

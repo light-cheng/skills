@@ -20,11 +20,11 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本为 `v0.2.7`（36 个包；上一稳定版为 `v0.2.6`）。`light-decide`、`light-redirect`、`light-html-plan` 在其后准入，随下一个版本发布。
+准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。版本快照 v0.2.8：本页说明 v0.2.8（39 个包，新增 `light-decide`、`light-redirect`、`light-html-plan`）。其[发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围；实际观察到的发布与安装事实记入 `main` 上的发布收据。
 
 历史：`v0.1.1` 五个、`v0.1.2` 七个、`v0.1.3` 工具链迁移、`v0.1.4`（`light-kanban-worker`）、`v0.1.5` 调度与身份加固、`v0.1.6`（`kb-init`）。结构发现检查在 [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) 与 [tests/test_composition.py](../tests/test_composition.py)，仅为结构证据，不是 fresh-install 证明。
 
-已发布的 v0.2.7 按[迁移说明](MIGRATION-v0.2.7.zh-CN.md)调整 12 个名称；验证见[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)。先前 v0.2.6 尝试的证据保留为历史。
+v0.2.8 改名一个包（[v0.2.8 迁移说明](MIGRATION-v0.2.8.zh-CN.md)）。此前 v0.2.7 调整 12 个名称，见 [v0.2.7 迁移说明](MIGRATION-v0.2.7.zh-CN.md)和上一版本的 [v0.2.7 发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)；v0.2.6 尝试的证据保留为历史。
 
 ## 变更流程
 
@@ -53,7 +53,7 @@
 
 目录条目须写明作用、when to use（适用时）、调用方式、包路径、状态、安装范围与证据。以包 metadata 为准，不另建静态路由表。
 
-发布示例必须指向真实已发布来源并与当前目录一致。针对 fresh 环境验证全仓与单包安装，保留精确命令、已发布 revision、host 与离线 discovery 结果；未验证前保持模板标记。
+发布示例必须指向真实发布过的来源并与当前目录一致。针对 fresh 环境验证全仓与单包安装，保留精确命令、发布的 revision、host 与离线 discovery 结果；未验证前保持模板标记。
 
 ## 上游归属与兼容性
 
@@ -69,7 +69,7 @@
 
 弃用需显式标记目录与安装指引、写明替代或声明无替代、在发布支持期内保留迁移信息并记入 changelog。
 
-候选发布验证失败时停止 promotion，按适用 review 流程修复；不重写已发布历史或删除证据。稳定发布仅需已准入包、同步文档、已验证安装命令、必需 review 证据与真实版本/tag。
+候选发布验证失败时停止 promotion，按适用 review 流程修复；不重写发布过的历史或删除证据。稳定发布仅需已准入包、同步文档、经验证的安装命令、必需 review 证据与真实版本/tag。
 
 ## Closeout 记录
 

@@ -134,8 +134,9 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
         all(token in installation for token in ("source_root", "skill_name", "destination_root")),
         "Manual fallback must use valid shell variables.",
     )
-    stable = re.search(r"\| (?:Stable release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
-    c.check(stable is not None, "Catalog must name a stable release or its local verified release baseline.")
+    # A release snapshot names the previous release instead of a current stable one.
+    stable = re.search(r"\| (?:Stable release|Previous release|Local verified release baseline) \| \[(v\d+\.\d+\.\d+)\]", catalog)
+    c.check(stable is not None, "Catalog must name a stable or previous release, or its local verified release baseline.")
     if stable:
         version = stable.group(1)
         c.check(f"https://github.com/LightDevCoder/skills/releases/tag/{version}" in readme, "README must link to the catalog's stable release.")
@@ -145,7 +146,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     c.check("v0.2.1" in catalog, "Catalog must mention v0.2.1.")
     c.check("v0.2.2" in catalog, "Catalog must mention v0.2.2.")
     c.check("v0.2.3" in catalog, "Catalog must mention v0.2.3.")
-    c.check("36" in readme, "README must mention 36 Skills.")
+    count = str(len(list((root / "skills").glob("*/*/SKILL.md"))))
+    c.check(count in readme, f"README must mention the {count} Skills.")
     c.check(bool(re.search(r"ask-light", readme, re.IGNORECASE)), "README must mention ask-light entry.")
     c.check(bool(re.search(r"project-init.*project-clarify.*project-spec.*project-tickets.*implement.*project-review.*release-workflow", readme, re.DOTALL | re.IGNORECASE)), "README must present the main workflow project-init → project-clarify → project-spec → project-tickets → implement → project-review → release-workflow.")
 
@@ -303,8 +305,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
             c.check(en.split("/")[-1] in zh_text, f"{zh} does not link its English counterpart.")
 
     parity_matrix = [
-        ("README.md", "README.zh-CN.md", ["ask-light", "36", "skills/"]),
-        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", "36", "skills/"]),
+        ("README.md", "README.zh-CN.md", ["ask-light", count, "skills/"]),
+        ("CATALOG.md", "CATALOG.zh-CN.md", ["review-loop", count, "skills/"]),
         ("CHANGELOG.md", "CHANGELOG.zh-CN.md", ["34", "ATTRIBUTION", "review-loop"]),
         ("docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", ["npx skills add", "fresh-install", "SKILL.md"]),
         ("docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md", ["ATTRIBUTION", "review-loop", "Port"]),
