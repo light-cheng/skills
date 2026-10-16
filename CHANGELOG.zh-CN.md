@@ -6,6 +6,11 @@
 
 ## 未发布
 
+- `release-workflow`：`RELEASE-STAGES.md` 中的推送命令给 SHA 变量加了花括号（`"${CANDIDATE_SHA}:refs/heads/..."`）。在 zsh 中 `"$CANDIDATE_SHA:refs/..."` 会触发 `:r` 修饰符，推送错误的 refspec；这是第一次走 pull request 路径发布（v0.2.9）时发现的。新增测试保证参考文档中没有 `$VAR:` 写法。
+
+## 0.2.9 — 2026-10-16
+
+- 经 pull request 路径发布：准确候选的 PR CI、合并树检查、合并提交上的 CI、受保护 annotated 标签、实际发布源的新鲜安装，以及 Claude Code 和 pi 上的真实 Host 冒烟；见[发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)。标签指向 PR #8 的合并提交 `ae11283`。
 - v0.2.9 发布准备：README、CATALOG、INSTALLATION、MAINTENANCE（中英）改为 v0.2.9 版本快照；在 `docs/evidence/releases/v0.2.9/` 新增发布说明与发布清单，并新增 [v0.2.9 迁移说明](docs/MIGRATION-v0.2.9.zh-CN.md)。
 - **所有者名称（需迁移）：** GitHub 账号 `LightDevCoder` 已改名为 `light-cheng`。现行链接和安装命令改为 `light-cheng`：README、快速开始、INSTALLATION 与 MIGRATION-v0.2.6/7/8（各加一行改名说明）、包与工作流指南、`agent-config` 参考文档、`ask-light` 集合映射、`light-travelpage`、`decision-map` 示例、`manuscript-ops` 依赖契约、CI 中克隆 `agent-config` 的地址和页眉 SVG。`kanban-worker/references/api.md` 记录一次只改名称的冻结修订（`docs/evidence/namespace-v0.2.9/`）。`agent-config` 的 schema 快照从 `light-cheng/agent-config` 的 `08e2122` 重新复制（light-cheng/agent-config#2）。历史证据、`.scratch` 归档、已发布版本的变更记录和 `project-review` 的迁移历史保留旧名称；CATALOG 写明来源是已退役的 `LightDevCoder/release-workflow` 仓库。
 - `release-workflow`（行为变化）：新增 `scripts/repo_identity.py`；发布脚本从 `--repo`、`GITHUB_REPOSITORY`、`gh repo view` 或 `origin` 取得仓库，不再写死所有者。实时检查（已发布的 Release、observations）和当前模式的收据只接受解析出的仓库，旧所有者不再通过；历史审计仍能读取改名前的收据。这取代了 v0.2.8 同时接受两个所有者的临时修复。新增 `scripts/check_merged_candidate.py`，检查合并后的 pull request 是否把经 CI 验证的候选树放到了 `main`。各阶段新增 pull request 路径和保护 `main` 的建议；从 `main` 触发 `release-installation` 工作流作为必需的安装证据；新增可选的真实 Host 冒烟（`claude -p` 发现加一次 `eli5` 调用）；Release 正文写到临时目录；只运行一次 `pytest`，不再同时跑 `unittest`；去掉对 `trash` 的依赖。新增 `references/BROKEN-RELEASE.md`：标记坏版本、发布下一个补丁版本、记入收据。`SKILL.md` 和参考文档改写为直白文字。

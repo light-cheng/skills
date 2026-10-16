@@ -12,7 +12,7 @@
 
 ## 安装
 
-在收据确认实际发布源之前，以下为模板：
+实际 v0.2.9 发布源的新鲜安装已通过。锁定标签可复现安装：
 
 ```bash
 npx skills add light-cheng/skills#v0.2.9
@@ -21,4 +21,4 @@ npx skills add light-cheng/skills#v0.2.9 --skill release-workflow
 
 ## 验证
 
-准备时的本地证据列在[发布清单](RELEASE_MANIFEST.zh-CN.md)中。发布后 main 上的收据记录 CI、受保护标签、全新安装和公开发布。完整[变更记录](https://github.com/light-cheng/skills/blob/main/CHANGELOG.zh-CN.md)列出全部变更。
+准备时的本地证据列在[发布清单](RELEASE_MANIFEST.zh-CN.md)中。准确候选的 pull request CI、合并提交上的 CI、合并树检查和受保护的 annotated 标签均已验证。在全新的托管 Linux 用户上，Codex 与 Claude Code 项目的锁定版和默认分支全量安装、原生 Codex 全局范围和三个单包都与源码逐字节一致（39 个包、407 个文件）。在本机，Claude Code 从全新安装中列出全部 39 个 Skill，Claude Code 与 pi 都从中运行了 `eli5`。维护者机器上没有安装 Codex。详情见发布后 main 上的收据。完整[变更记录](https://github.com/light-cheng/skills/blob/main/CHANGELOG.zh-CN.md)列出全部变更。

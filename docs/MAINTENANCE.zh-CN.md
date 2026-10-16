@@ -20,7 +20,7 @@
 
 ## 当前同步基线
 
-准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。版本快照 v0.2.9：本页说明 v0.2.9（39 个包；仓库链接改为 `light-cheng`）。其[发布清单](evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围；实际观察到的发布与安装事实记入 `main` 上的发布收据。
+准入集合包含 `skills/` 下 **39 个第一方 Skill**（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）。当前稳定版本是 [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)（39 个包；仓库链接改为 `light-cheng`）。其[发布清单](evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围，[发布收据](evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)记录实际观察到的发布与安装事实。
 
 上一版本是 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)）。
 
