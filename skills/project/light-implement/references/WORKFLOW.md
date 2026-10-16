@@ -234,13 +234,17 @@ alone.
 - Verification:
   - `<exact command or observation>` → <observed result>
 - Review: review-loop <rounds run>/<limit>, <converged | limit reached | not run: reason>
+  - Reviewer: <reviewer Skill name, or none>
+  - Evidence: <where each round's reviewer report is: file path, subagent or session id, or the quoted report>
 - Remaining findings:
   - <F-###> · <severity> · <location> · <problem> · <reason>
 - Limitations: <unavailable dependencies, environments, untestable paths, or none>
 - Plan gap: <none, or one sentence on what in the approved SPEC, ticket or acceptance items no longer holds>
 ```
 
-Write `none` for an empty list; leave no field out. `Plan gap:` names a
+Write `none` for an empty list; leave no field out. `converged` needs at
+least one reviewer report under `Evidence:`. Without one, write `not run` and
+the reason, for example `not run: this Host could not start a reviewer`. `Plan gap:` names a
 problem with the plan itself (a missing or wrong requirement, tickets that
 contradict each other or the SPEC), not with the work; the run stops
 `BLOCKED` with it, leaves the plan as approved, and hands it to `light-redirect`

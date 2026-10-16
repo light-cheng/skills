@@ -15,5 +15,6 @@ This package is a Light first-party port and adaptation of an upstream Skill.
   6. Workflow-aware retrospective evolution: Extended Matt's environment improvement focus (navigation, automated checks, coding standards, steering, tool economy, information access) into a workflow-aware retrospective engine incorporating current-state deduplication against repository HEAD, tri-state finding classification (CLOSED / PARTIAL / OPEN), permanent guardrail extraction, test architecture & cross-repo isolation, and release mechanics.
   7. Workflow states: the retrospective ends in `AWAITING_SELECTION` and moves a recommendation to `APPROVED_ACTION` only after an explicit human selection.
   8. Trigger sentence: the description ends with a "Use after …" sentence (project-review verdict, release, long or friction-heavy session, or a user request) so Hosts can match the model-invoked trigger.
+  9. Pending claims: a finding that says its decision is pending elsewhere cites the file that records it, or stays `[OPEN]` as unrecorded (found in the stage 7 rehearsal).
 
 Verification: `SKILL.md` frontmatter `name: project-retro` matches, `agents/openai.yaml` is valid with `allow_implicit_invocation: true`, MIT attribution is preserved, and no external runtime coupling remains.

@@ -58,7 +58,8 @@ diagrams, strips, tables or charts; prose says what each exhibit proves.
 5. Read the whole rendered page, including closed sections. Fix wording in the
    text, not in CSS. Reconcile it with the commitment map. Check 1440px and
    390px widths, light and dark themes, overflow, and that the file makes no
-   external requests.
+   external requests. Do this on every refresh too. When you cannot open a
+   browser, return `Visual check: not run` and the reason.
 
 ## Return and stop
 

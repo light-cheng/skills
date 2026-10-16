@@ -39,7 +39,10 @@ review as complete.
 
 ## Handoff and stop
 
-- Clean: hand off `Findings: []`.
+- Clean: hand off `Findings: []` with the reviewer's name, the rounds run and
+  where each round's report is (a file path, a subagent or session id, or the
+  quoted report). No reviewer report means no clean result: hand off
+  `not run` and the reason.
 - Limited or blocked: hand off outstanding findings and the next smallest
   action.
 - Caller needing final acceptance: recommend `project-review`, which composes

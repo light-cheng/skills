@@ -32,7 +32,11 @@ through a proposal, however small.
    [the proposal format](references/PROPOSAL.md). Done when the proposal names
    every affected SPEC section, ticket action, Charter item and resolved ticket
    that needs acceptance again, every decision the user still has to make, and
-   what stays unchanged.
+   what stays unchanged. To find them, search the whole SPEC and every open
+   ticket for each term, user story and behavior the change touches, not only
+   the passage the trigger names. List every passage that would contradict the
+   plan once the change is applied, for example a Solution paragraph or a
+   ticket's "What to build" that still describes the old behavior.
 4. **Point** to it from `.scratch/<feature>/map.md` when that file exists
    ([map pointer](references/PROPOSAL.md#map-pointer)).
 5. **Ask** the user to approve or reject it, in plain words, together with any
@@ -41,7 +45,11 @@ through a proposal, however small.
    [handling the answer](references/PROPOSAL.md#handling-the-answer).
 6. **Hand off** and stop:
    - Approved → recommend `project-spec` for SPEC changes and
-     `project-tickets` for ticket changes, passing the proposal path. When its
+     `project-tickets` for ticket changes, passing the proposal path. Give the
+     user the exact call to type for the current Host, for example
+     `/project-spec <proposal-path>` in Claude Code. Both are user-invoked, so
+     the Host may hide them from you; never tell the user they are not
+     installed. When its
      `Charter` line names a Charter item, recommend `project-review`'s Change
      Proposal first and cite the recorded approval as its decision evidence.
    - An open decision needs more than a short answer (research or a longer
@@ -60,6 +68,9 @@ See [examples](references/EXAMPLES.md) for a direction change and a local fix.
 - **Direction or local fix is unclear** → call `light-decide` with question id
   `light-redirect/is-direction-change` (yes or no). Unavailable → judge it
   yourself.
+- **`.scratch/<feature>/plan.html` exists** → after you write the proposal and
+  after you record the user's answer, call `light-html-plan` to refresh it.
+  Missing page or capability → skip.
 
 ## Contract with callers
 
