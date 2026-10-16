@@ -76,7 +76,7 @@ and the owner chooses it for this release.
    git fetch origin main
    test "$(git rev-parse "$CANDIDATE_SHA^")" = "$(git rev-parse origin/main)"
    git push origin "$CANDIDATE_SHA:refs/heads/release/vX.Y.Z"
-   gh pr create --repo "$REPO" --base main --head release/vX.Y.Z --title "release: prepare vX.Y.Z" --body-file <notes>
+   PR_URL="$(gh pr create --repo "$REPO" --base main --head release/vX.Y.Z --title "release: prepare vX.Y.Z" --body-file <notes>)"
    ```
    If main moved, rebase the candidate, repeat the PREPARED checks and use the
    new `CANDIDATE_SHA`.
@@ -91,14 +91,19 @@ and the owner chooses it for this release.
    created on main and prove it carries the candidate tree:
    ```bash
    git fetch origin main
-   RELEASE_SHA="$(gh pr view release/vX.Y.Z --repo "$REPO" --json mergeCommit --jq .mergeCommit.oid)"
+   RELEASE_SHA="$(gh pr view "$PR_URL" --json mergeCommit --jq .mergeCommit.oid)"
    python3 scripts/check_merged_candidate.py --candidate "$CANDIDATE_SHA" --merged "$RELEASE_SHA" --branch origin/main
    ```
    `BLOCKED` means main changed between CI and merge. Do not tag. Rebuild the
    candidate on the new main and start this stage again.
 4. Wait for the push run of `collection-quality` on `RELEASE_SHA` with the same
    three checks. `RELEASE_SHA` is the commit you tag; from here on pass it as
-   `--release-commit`.
+   `--release-commit`, and use it as `candidate` and `ci.headSha` in the
+   observations file. Move the checkout to it:
+   ```bash
+   git switch main && git merge --ff-only origin/main
+   test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+   ```
 
 ### Direct push (main unprotected, owner's choice)
 
@@ -204,8 +209,7 @@ on the current repository.
 3. Finish every copy and link, then follow the
    [final-artifact checks](CLOSEOUT.md#verify-final-artifacts) on the staged
    attestation. Commit it as `docs(release): attest vX.Y.Z publication` and
-   record `ATTESTATION_SHA`. If main is protected, this commit goes through a
-   pull request like the candidate did.
+   record `ATTESTATION_SHA`.
 4. On the clean tree, run the full gate:
    ```bash
    python3 scripts/verify_release_integrity.py \
@@ -214,9 +218,22 @@ on the current repository.
      --stage attested --mode current \
      --check-remote
    ```
-5. Only after it passes, push the attestation commit to `origin/main`.
-6. Wait for CI on `ATTESTATION_SHA` as in
-   [CI completion](CLOSEOUT.md#wait-for-the-exact-commit). Every later repair
-   repeats the local checks and exact-commit CI; keep the earlier failures.
-7. ATTESTED is reached only when that final commit passes CI. Then write the
+5. Only after it passes, push the attestation commit to `origin/main`. If main
+   requires pull requests, open a PR instead, wait for CI on `ATTESTATION_SHA`,
+   merge, and prove the merge kept the tree:
+   ```bash
+   git push origin "$ATTESTATION_SHA:refs/heads/attest/vX.Y.Z"
+   ATTEST_PR_URL="$(gh pr create --repo "$REPO" --base main --head attest/vX.Y.Z --title "docs(release): attest vX.Y.Z publication" --body "Receipt for vX.Y.Z.")"
+   # after CI on ATTESTATION_SHA passes and the owner merges:
+   git fetch origin main
+   FINAL_SHA="$(gh pr view "$ATTEST_PR_URL" --json mergeCommit --jq .mergeCommit.oid)"
+   python3 scripts/check_merged_candidate.py --candidate "$ATTESTATION_SHA" --merged "$FINAL_SHA" --branch origin/main
+   git switch main && git merge --ff-only origin/main
+   ```
+   On the direct push, `FINAL_SHA="$ATTESTATION_SHA"`.
+6. Wait for CI on `FINAL_SHA` as in
+   [CI completion](CLOSEOUT.md#wait-for-the-exact-commit), then rerun step 4
+   with `--final-ci <that run's JSON>` while `HEAD` is `FINAL_SHA`. Every later
+   repair repeats the local checks and exact-commit CI; keep the earlier failures.
+7. ATTESTED is reached only when `FINAL_SHA` passes CI. Then write the
    [closeout report](CLOSEOUT.md#report-the-whole-release).

@@ -58,7 +58,9 @@ because any explanation request triggers it and it needs no tools.
 Claude Code example (install with `--agent claude-code` or `--agent '*'`):
 
 ```bash
+FRESH_DIR="<the pinned whole-collection directory from the matrix>"
 cd "$FRESH_DIR"
+test -d .claude/skills   # stop here if the install did not create it
 claude -p "List the Skills you can use in this project. Then explain what a git tag is, like I'm five." \
   --output-format stream-json --verbose > host-smoke.jsonl
 # Discovery: every installed package is in the session's Skill list. Prints nothing on success.
@@ -68,7 +70,7 @@ ls .claude/skills | sort | comm -23 - host-skills.txt
 jq -r 'select(.type=="assistant") | .message.content[] | select(.type=="tool_use" and .name=="Skill") | .input.skill' host-smoke.jsonl
 ```
 
-Pass when the first check prints nothing and the second prints `eli5`. (Checked
+Pass when `test -d` succeeds, the first check prints nothing and the second prints `eli5`. (Checked
 on 2026-10-16 with Claude Code 2.1.296 against `#v0.2.7`: all 36 packages were
 listed and `eli5` was called.) For pi or another Host, first check its own help
 for a one-shot (print) mode and how it reports Skill use; do not guess flags.

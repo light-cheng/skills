@@ -45,7 +45,8 @@ commit count low.
    git diff --cached --check
    python3 -m pytest -q
    python3 -m compileall -q skills tests scripts
-   python3 scripts/check_public_docs.py --tag vX.Y.Z --stage prepared
+   python3 scripts/check_public_docs.py --tag vX.Y.Z --stage prepared   # at PREPARED
+   python3 scripts/check_public_docs.py                                  # at ATTESTED, as CI runs it
    VERIFY_DIR="$(mktemp -d)"
    mkdir "$VERIFY_DIR/exported"
    git archive --output="$VERIFY_DIR/tree.tar" "$VERIFIED_TREE"
@@ -54,7 +55,8 @@ commit count low.
    rm -rf -- "$VERIFY_DIR"
    ```
 
-   Record the tree ID and the result before you remove the export. The
+   Run the `check_public_docs.py` line for your stage only. Record the tree ID
+   and the result before you remove the export. The
    discovery test resolves every Markdown link, receipts included, against the
    committed files. Both the export and the test must pass.
 4. Before committing, require no unstaged changes and the same `git write-tree`

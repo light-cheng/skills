@@ -34,8 +34,9 @@ once that receipt is confirmed, it checks the current-main rules.
 ### Observations
 
 From CI_VERIFIED on, pass what you observed with `--observations <json>`. The
-file has `kind: observed`, the exact `tag` and `candidate`, and the real tool
-results:
+file has `kind: observed`, the exact `tag`, `candidate` set to the commit you
+pass as `--release-commit` (from TAGGED on, `RELEASE_SHA`, the commit the tag
+points at), and the real tool results:
 
 - `ci`: the GitHub run's `databaseId`, `headSha`, `status` and `conclusion`;
 - `installation`: the `result.json` from the `release-installation` workflow,

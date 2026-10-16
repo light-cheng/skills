@@ -24,12 +24,14 @@ that changes the published facts its receipt recorded.
    REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
    NOTES="$(mktemp -d)/release-body-vX.Y.Z.md"
    gh release view vX.Y.Z --repo "$REPO" --json body --jq .body > "$NOTES.old"
-   { printf '> **Known defect:** <one sentence>. Use vX.Y.Z+1 instead.\n\n'; cat "$NOTES.old"; } > "$NOTES"
+   { printf '> **Known defect:** <one sentence>. A fixed release is coming; see INSTALLATION.\n\n'; cat "$NOTES.old"; } > "$NOTES"
    gh release edit vX.Y.Z --repo "$REPO" --notes-file "$NOTES"
    ```
 2. In INSTALLATION (both languages), put the same warning next to the pinned
    `#vX.Y.Z` command. Remove the warning only if the defect turns out not to
    exist.
+3. After vX.Y.Z+1 is published, edit the notice the same way to say
+   "Use vX.Y.Z+1 instead". Do not name a version before it exists.
 
 ## 3. Publish the fix as a new patch version
 
@@ -38,9 +40,11 @@ workflow for `vX.Y.Z+1`, from PREPARED to ATTESTED. Its Notes name the defect,
 the affected version and the migration (usually: reinstall with the new tag).
 `gh release create` marks the higher version as Latest.
 
-If the fix is not ready soon and the defect is serious, tell the owner. They
-decide whether to point README and INSTALLATION back to the previous good
-release in the meantime.
+Until the fix ships, the notice and the INSTALLATION warning are the interim
+measure. Do not point README or INSTALLATION back to an older release: the
+checks take the current stable version from the newest VERIFIED receipt, and
+the broken release's receipt stays VERIFIED. If the defect is serious and the
+fix is far off, tell the owner; changing that rule is a separate change.
 
 ## 4. Record it in the receipts
 

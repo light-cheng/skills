@@ -538,7 +538,8 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     assert "RELEASE_BODY_INCONSISTENT" in output or "PUBLICATION_IDENTITY" in output
 
 
-def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tmp_path: Path) -> None:
+def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     from release_context import PUBLIC_RELEASE_DOCS
     from test_release_integrity import make_valid_receipt_en, make_valid_receipt_zh
     make_candidate(tmp_path)
