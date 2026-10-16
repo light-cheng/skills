@@ -6,6 +6,7 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- `release-workflow`: RELEASE-STAGES shows how to record the final main CI run for `--final-ci` (it needs `kind: observed`) and what to do when `git switch main` fails in a worktree; both found during the v0.2.9 release.
 - `release-workflow`: the push commands in `RELEASE-STAGES.md` brace the SHA variable (`"${CANDIDATE_SHA}:refs/heads/..."`). In zsh, `"$CANDIDATE_SHA:refs/..."` applies the `:r` modifier and pushes a wrong refspec; found on the first pull-request-path release (v0.2.9). A test keeps the references free of `$VAR:`.
 
 ## 0.2.9 — 2026-10-16

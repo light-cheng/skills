@@ -105,6 +105,8 @@ and the owner chooses it for this release.
    git switch main && git merge --ff-only origin/main
    test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
    ```
+   In a worktree, `git switch main` fails while main is checked out elsewhere;
+   use `git switch --detach "$RELEASE_SHA"` there.
 
 ### Direct push (main unprotected, owner's choice)
 
@@ -235,8 +237,14 @@ on the current repository.
    ```
    On the direct push, `FINAL_SHA="$ATTESTATION_SHA"`.
 6. Wait for CI on `FINAL_SHA` as in
-   [CI completion](CLOSEOUT.md#wait-for-the-exact-commit), then rerun step 4
-   with `--final-ci <that run's JSON>` while `HEAD` is `FINAL_SHA`. Every later
-   repair repeats the local checks and exact-commit CI; keep the earlier failures.
+   [CI completion](CLOSEOUT.md#wait-for-the-exact-commit). Record that run as
+   an observation and rerun step 4 with it while `HEAD` is `FINAL_SHA`:
+   ```bash
+   gh run view <run-id> --repo "$REPO" --json databaseId,headSha,status,conclusion \
+     --jq '. + {kind: "observed"}' > "$(mktemp -d)/final-ci.json"
+   ```
+   Pass that file as `--final-ci`; without `kind` the gate reports
+   `OBSERVATION_KIND`. Every later repair repeats the local checks and
+   exact-commit CI; keep the earlier failures.
 7. ATTESTED is reached only when `FINAL_SHA` passes CI. Then write the
    [closeout report](CLOSEOUT.md#report-the-whole-release).
