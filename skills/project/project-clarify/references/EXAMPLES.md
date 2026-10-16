@@ -4,7 +4,7 @@
 
 **Target root** has `README.md#Purpose`, `AGENTS.md`, `docs/adr/0001-storage.md`.
 
-User: `$project-clarify We want to add offline sync to the notes app.`
+User: `project-clarify We want to add offline sync to the notes app.`
 
 **Inspection** (before asking):
 - `README.md#Purpose` — "local-first notes, no cloud"

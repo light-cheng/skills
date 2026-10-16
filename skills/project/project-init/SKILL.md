@@ -1,13 +1,13 @@
 ---
 name: project-init
-description: Bootstrap the stable Light project and tracker contracts consumed by downstream Project Skills, preserving manual content and supporting safe reruns. Use only when a user explicitly invokes $project-init for a new or incompletely initialized repository.
+description: Bootstrap the stable Light project and tracker contracts consumed by downstream Project Skills, preserving manual content and supporting safe reruns. Use only when a user explicitly invokes project-init for a new or incompletely initialized repository.
 disable-model-invocation: true
 ---
 
 # Project Init
 
 `project-init` is the one-time Light project bootstrap. Run it only after an
-explicit `$project-init` request. It creates the stable repository contract
+explicit `project-init` request. It creates the stable repository contract
 that later Project Skills consume; it does not clarify requirements, create
 tickets, or run later workflow stages.
 

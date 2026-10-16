@@ -2,7 +2,7 @@
 
 ## Example 1 — Vague idea → frontier round
 
-**User**: `$clarify I want a tool that helps me learn Japanese`
+**User**: `clarify I want a tool that helps me learn Japanese`
 
 Ask `socratic`:
 - Current understanding: goal is a Japanese learning tool, no constraints.
@@ -36,7 +36,7 @@ are both accepted.
 
 ## Example 2 — Fact gap is not a user question
 
-**User**: `$clarify Should we use the DeepL API or Google Translate? I don't
+**User**: `clarify Should we use the DeepL API or Google Translate? I don't
 know their pricing.`
 
 - This contains a fact (pricing) that `light-research` can answer, not a pure user
@@ -54,8 +54,8 @@ It does not invent pricing or convert the fact into "Which do you prefer?"
 
 After two turns, frontier is empty except for a blocked dependency.
 `clarify` does not create a formal SPEC. It reports the gap and recommends:
-"If pricing is needed, run `$light-research`; if this becomes a project, run
-`$project-clarify`" and stops.
+"If pricing is needed, run `light-research`; if this becomes a project, run
+`project-clarify`" and stops.
 
 ## Example 4 — Shared-understanding confirmation
 
@@ -67,11 +67,11 @@ After the user settles the final decisions:
 > clarification is complete.
 
 "Yes" completes the session. A correction updates the decision state and asks
-the next useful round without another `$clarify` invocation.
+the next useful round without another `clarify` invocation.
 
 ## Existing investigation authorization
 
-The user starts `$clarify` and explicitly asks for a read-only check of official
+The user starts `clarify` and explicitly asks for a read-only check of official
 API pricing before discussing the choice. Reuse that scoped authorization for
 the fact check; do not ask again whether to investigate. Honor the selected
 capability's actual invocation policy and the wrapper's no-project-write

@@ -41,13 +41,13 @@ is the one the run actually wrote. The SPEC contains:
 
 **Handoff**
 
-Recommend `$project-tickets .scratch/planning-demo/spec.md` and stop. The
+Recommend `project-tickets .scratch/planning-demo/spec.md` and stop. The
 SPEC file at that path is the verifiable token; no automatic ticket creation
 is performed.
 
 ## Example 2 — Returning to project-clarify when blocked
 
-User: `$project-spec add offline sync to the notes app`
+User: `project-spec add offline sync to the notes app`
 
 **Gathered material**
 
@@ -71,7 +71,7 @@ Blocking decision: D1 sync topology (CRDT vs last-write-wins) — user-owned;
 blocks Implementation Decisions and the seam choice.
 Context: Project clarification handoff §Open decisions and dependencies;
         notes app offline-sync thread.
-Recommended next explicit invocation: $project-clarify
+Recommended next explicit invocation: project-clarify
 ```
 
 Stop after the return. The SPEC is not published and `project-tickets` is

@@ -1,13 +1,13 @@
 ---
 name: decision-map
-description: Plan a large, multi-session, decision-heavy effort as a persistent decision map of tickets. Use only when the user explicitly invokes $decision-map; it maintains .scratch/<effort>/map.md and child decision tickets until fog clears, then hands off to project-spec.
+description: Plan a large, multi-session, decision-heavy effort as a persistent decision map of tickets. Use only when the user explicitly invokes decision-map; it maintains .scratch/<effort>/map.md and child decision tickets until fog clears, then hands off to project-spec.
 disable-model-invocation: true
 ---
 
 # Decision Map
 
 `decision-map` is an explicit, user-invoked planning stage for foggy, large,
-or multi-session work. Run it only after an explicit `$decision-map` request.
+or multi-session work. Run it only after an explicit `decision-map` request.
 It charts a persistent decision map on the local markdown tracker and resolves
 it one ticket per session.
 
@@ -52,7 +52,7 @@ session resolves at most one non-research ticket.
 ## Handoff
 
 When open tickets are zero, fog is empty, and remaining scope is in
-`Out of scope`, recommend explicit `$project-spec` and stop.
+`Out of scope`, recommend explicit `project-spec` and stop.
 
 ```text
 decision-map → project-spec

@@ -5,12 +5,12 @@ full step description.
 
 ## Entry condition
 
-- User explicitly invokes `$clarify` with an idea, requirement, brainstorm
+- User explicitly invokes `clarify` with an idea, requirement, brainstorm
   topic, plan, or vague request.
 - No project context is required. The thread is standalone.
 
 Do not start `clarify` from a general vague prompt — wait for the explicit
-`$clarify` token.
+`clarify` token.
 
 ## Steps
 
@@ -57,11 +57,11 @@ question per round.
 ## Handoff options
 
 - If the clarified thread now has enough context to become a project stage,
-  recommend `$project-clarify` and stop. When that stage may run in another
+  recommend `project-clarify` and stop. When that stage may run in another
   session, offer to save the confirmed synthesis at
   `.scratch/<feature>/clarify-handoff.md`; write only after the user confirms.
   `project-clarify` reads it as prior material.
 - If the user wants a questionnaire for another person, recommend
-  `$light-to-questionnaire` and stop.
+  `light-to-questionnaire` and stop.
 - Otherwise the user replies normally until the synthesis is confirmed or the
   frontier is blocked.

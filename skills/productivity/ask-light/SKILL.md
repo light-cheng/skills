@@ -1,6 +1,6 @@
 ---
 name: ask-light
-description: Act as the Light workflow advisor, navigator, and router. Understand what the user is trying to do, inspect the actual project/host evidence and Skill catalog, reason about the best next Light Skill, explain why, wait for user approval, then honor the accepted Skill's invocation policy with host-aware transition. Also answer collection-navigation and standalone routing requests. Use only when the user explicitly invokes $ask-light; never execute before consent.
+description: Act as the Light workflow advisor, navigator, and router. Understand what the user is trying to do, inspect the actual project/host evidence and Skill catalog, reason about the best next Light Skill, explain why, wait for user approval, then honor the accepted Skill's invocation policy with host-aware transition. Also answer collection-navigation and standalone routing requests. Use only when the user explicitly invokes ask-light; never execute before consent.
 disable-model-invocation: true
 ---
 
@@ -53,9 +53,9 @@ only. Full evidence, validation and approval protocol:
 
 ## Modes
 
-- `$ask-light next` — one next-Skill recommendation with workflow reasoning.
-- `$ask-light workflow` — one bounded workflow recipe anchored at current state.
-- `$ask-light <category>` — browse the collection (e.g. `project Skills`, `review Skills`, `learning Skills`) and explain roles and neighbors.
+- `ask-light next` — one next-Skill recommendation with workflow reasoning.
+- `ask-light workflow` — one bounded workflow recipe anchored at current state.
+- `ask-light <category>` — browse the collection (e.g. `project Skills`, `review Skills`, `learning Skills`) and explain roles and neighbors.
 - Plain standalone requests (`Explain this like I'm five`, `Investigate this bug`) route without deep project inspection.
 
 ## Result contract

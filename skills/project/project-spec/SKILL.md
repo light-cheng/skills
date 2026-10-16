@@ -1,13 +1,13 @@
 ---
 name: project-spec
-description: Turn already-clarified outputs from project-clarify or decision-map into a formal project SPEC without reopening an interview. Use only when the user explicitly invokes $project-spec; it returns to project-clarify when a blocking user decision remains and hands off to project-tickets when ready.
+description: Turn already-clarified outputs from project-clarify or decision-map into a formal project SPEC without reopening an interview. Use only when the user explicitly invokes project-spec; it returns to project-clarify when a blocking user decision remains and hands off to project-tickets when ready.
 disable-model-invocation: true
 ---
 
 # Project Spec
 
 `project-spec` is an explicit, user-invoked planning stage. Run it only after
-an explicit `$project-spec` request. It turns already-clarified material into
+an explicit `project-spec` request. It turns already-clarified material into
 one formal SPEC that `project-tickets` can slice.
 
 ## Core behavior
@@ -24,7 +24,7 @@ one formal SPEC that `project-tickets` can slice.
    [OUTPUT-FORMAT.md](references/OUTPUT-FORMAT.md), to
    `.scratch/<feature>/spec.md`. Ask the user to approve it and record who,
    when and their words in the SPEC's `Approval:` line.
-4. **Stop and recommend** explicit `$project-tickets`.
+4. **Stop and recommend** explicit `project-tickets`.
 
 **Applying a change proposal.** When the user passes an `approved` proposal
 from `.scratch/<feature>/changes/`, apply exactly its `SPEC:` line to the

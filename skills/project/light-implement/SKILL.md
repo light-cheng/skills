@@ -7,7 +7,7 @@ disable-model-invocation: true
 # Implement
 
 `light-implement` is a user-invoked bounded executor. Run it only after an explicit
-`$light-implement` request. It turns one ready work item into a verified artifact and
+`light-implement` request. It turns one ready work item into a verified artifact and
 hands it to review.
 
 ## Core loop
@@ -29,7 +29,7 @@ hands it to review.
    routing, or for bounded solo work, proceed directly without blocking.
    When `agent-config` returns, follow its `readiness` as described in
    [WORKFLOW.md §3E](references/WORKFLOW.md#e-agentconfigresult-consumption-rules).
-   `NEED_PROJECT_TICKETS` always halts: recommend `$project-tickets` and stop.
+   `NEED_PROJECT_TICKETS` always halts: recommend `project-tickets` and stop.
 4. **Execute the bounded slice, then verify.** Use `light-tdd` for code when
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).

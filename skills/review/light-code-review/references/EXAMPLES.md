@@ -2,7 +2,7 @@
 
 ## Example — Aggregate report shape
 
-Direct invocation: `$light-code-review main`
+Direct invocation: `light-code-review main`
 
 > Fixed point `main` resolves at `a1b2c3`. `git diff main...HEAD` is non-empty
 > (3 files, 120 added / 8 removed). `git log main..HEAD --oneline` lists

@@ -97,6 +97,6 @@ workflow switch. The handoff is returned at that completion boundary.
 ## Upgrade to decision-map
 
 If the task is large, multi-session, or has many dependent decisions with fog
-beyond the current frontier, recommend `$decision-map` rather than trying to
+beyond the current frontier, recommend `decision-map` rather than trying to
 resolve all decisions in one `project-clarify` turn.
 

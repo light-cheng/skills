@@ -6,6 +6,8 @@
 
 ## 未发布
 
+- Skill 调用写法（与 Host 无关）：`SKILL.md`、references 和 description 中的技能名去掉 Codex 的 `$` 前缀（例如写 `project-tickets`，不写 `$project-tickets`）。在 Claude Code 上，Agent 会把 `$project-tickets` 原样给用户，而这种写法在那里无效；现在由 Agent 按当前 Host 的写法给出调用方式。`manuscript-ops` 中标明 Codex 的示例、Codex 的 `agents/openai.yaml` 提示保留 `$`，哈希冻结的 `recap` 不变。两个钉住 `$` 措辞的测试去掉了这部分断言。
+- `project-retro`：description 末尾加一句 "Use after …" 触发句（project-review 给出结论后、发布后、长时间或摩擦多的会话后，或用户要求时）；已记入其 ATTRIBUTION。
 - `release-workflow`：RELEASE-STAGES 写明如何把最终 main 的 CI 运行记录为 `--final-ci` 所需的观察文件（需要 `kind: observed`），以及在工作树中 `git switch main` 失败时怎么做；两者都是 v0.2.9 发布时发现的。
 - `release-workflow`：`RELEASE-STAGES.md` 中的推送命令给 SHA 变量加了花括号（`"${CANDIDATE_SHA}:refs/heads/..."`）。在 zsh 中 `"$CANDIDATE_SHA:refs/..."` 会触发 `:r` 修饰符，推送错误的 refspec；这是第一次走 pull request 路径发布（v0.2.9）时发现的。新增测试保证参考文档中没有 `$VAR:` 写法。
 

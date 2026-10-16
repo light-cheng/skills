@@ -1,14 +1,14 @@
 ---
 name: clarify
-description: Run a lightweight standalone clarification session for an ambiguous idea, requirement, plan, or process. Use only when the user explicitly invokes $clarify to start; normal replies then continue until shared understanding is confirmed, without generating a formal specification or auto-chaining another workflow.
+description: Run a lightweight standalone clarification session for an ambiguous idea, requirement, plan, or process. Use only when the user explicitly invokes clarify to start; normal replies then continue until shared understanding is confirmed, without generating a formal specification or auto-chaining another workflow.
 disable-model-invocation: true
 ---
 
 # Clarify
 
 `clarify` is a lightweight, user-invoked clarification entry. An explicit
-`$clarify` starts one session in the current thread. While that session is
-active, ordinary user replies continue it; another `$clarify` token is not
+`clarify` starts one session in the current thread. While that session is
+active, ordinary user replies continue it; another `clarify` token is not
 required. The session ends after confirmed shared understanding, an explicit
 exit, or a switch to another workflow.
 

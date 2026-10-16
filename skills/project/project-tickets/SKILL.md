@@ -1,13 +1,13 @@
 ---
 name: project-tickets
-description: Turn a formal SPEC into tracer-bullet vertical slices with blocking edges, then publish them as single-file-per-ticket issues on the local markdown tracker. Use only when the user explicitly invokes $project-tickets; it verifies the SPEC handoff, drafts a quiz-able breakdown, and hands execution to the frontier via light-implement.
+description: Turn a formal SPEC into tracer-bullet vertical slices with blocking edges, then publish them as single-file-per-ticket issues on the local markdown tracker. Use only when the user explicitly invokes project-tickets; it verifies the SPEC handoff, drafts a quiz-able breakdown, and hands execution to the frontier via light-implement.
 disable-model-invocation: true
 ---
 
 # Project Tickets
 
 `project-tickets` is an explicit, user-invoked planning stage. Run it only
-after an explicit `$project-tickets` request. It turns a verified SPEC into
+after an explicit `project-tickets` request. It turns a verified SPEC into
 numbered, one-file-per-ticket issues on the local markdown tracker.
 
 Resolve the tracker and working area from `docs/agents/light-project.md` and
@@ -40,7 +40,7 @@ change it does not list, goes back to the user unchanged.
 
 ## Handoff
 
-After publishing, describe the frontier and recommend explicit `$light-implement`
+After publishing, describe the frontier and recommend explicit `light-implement`
 on the chosen ticket, then stop.
 
 ## Optional capabilities

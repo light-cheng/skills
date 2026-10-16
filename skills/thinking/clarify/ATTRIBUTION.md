@@ -16,7 +16,7 @@ wrapper around the upstream grilling Skill and was not copied into this package.
 
 `clarify` is an owner-authored, explicit-only standalone entry with a distinct
 Light contract. It invokes the locally defined model engine `socratic` only
-after an explicit `$clarify` request, returns an inspectable
+after an explicit `clarify` request, returns an inspectable
 current/resolved/unresolved state, separates fact gaps from user decisions,
 and stops. It explicitly avoids automatic user-invoked chaining, fact-work
 execution, project mutation, and formal SPEC generation. It contains no

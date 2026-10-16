@@ -5,7 +5,7 @@ this file holds the full step description.
 
 ## Entry condition
 
-- User explicitly invokes `$light-implement` with a bounded work item: a path to
+- User explicitly invokes `light-implement` with a bounded work item: a path to
   `.scratch/<feature>/issues/NN-<slug>.md`, a path to
   `.scratch/<feature>/spec.md` (or a narrow section of it), or a small
   explicit conversation slice.
@@ -34,7 +34,7 @@ Each file carries near the top:
 
 and a body starting `**What to build:**` with acceptance criteria.
 
-When `$light-implement` is passed a ticket path:
+When `light-implement` is passed a ticket path:
 
 1. Read the file body and its header lines. Record the title, `Blocked by` set,
    `Status`, and parent Spec pointer (the ticket body normally cites the Spec
@@ -146,7 +146,7 @@ When `agent-config` is invoked, `light-implement` inspects the canonical `AgentC
 
 - **`readiness === "READY"`**: Consume `execution_config` (model, resolved reasoning effort, worker context, review context) and proceed to execute the bounded slice.
 - **`readiness === "NEED_INPUT"`**: Profile is missing or setup is required (`setup_state.profile === "missing"`). If section D's fallback conditions are met, continue the item directly; do not wait for the user to decline setup. Otherwise report the needed setup and obtain its explicit authorization before starting it. A declined setup does not override a required route or task constraint.
-- **`readiness === "NEED_PROJECT_TICKETS"`**: Task is classified as decomposed without formal tickets (`handoff: "project-tickets"`). Halt implementation immediately, recommend explicit `$project-tickets`, and stop. Never batch-execute un-ticketed tasks inside a single light-implement run.
+- **`readiness === "NEED_PROJECT_TICKETS"`**: Task is classified as decomposed without formal tickets (`handoff: "project-tickets"`). Halt implementation immediately, recommend explicit `project-tickets`, and stop. Never batch-execute un-ticketed tasks inside a single light-implement run.
 - **`readiness === "BLOCKED"` or `"UNSUPPORTED"`**: Stop the rejected configuration and inspect the diagnostic. Continue directly only when section D's fallback conditions are evidenced. Otherwise halt implementation and report the diagnostic to the caller; a missing or ambiguous diagnostic is not permission to fall back.
 
 ### 4. Execute the bounded slice
@@ -255,7 +255,7 @@ same fields to the caller in the handoff.
 
 ## Boundaries
 
-- One item per run. A new ticket needs a fresh `$light-implement` invocation in a
+- One item per run. A new ticket needs a fresh `light-implement` invocation in a
   fresh context. Do not merge sibling tickets to "save a round trip".
 - Inspect only what the item names; do not run a whole-repo redesign inside an
   item.
@@ -272,12 +272,12 @@ same fields to the caller in the handoff.
   report, and return this item's status, evidence, and outstanding findings to
   the caller. The caller owns
   any remaining authorized work; this handoff does not complete the larger
-  request. A new ticket still requires a fresh `$light-implement` invocation in a
+  request. A new ticket still requires a fresh `light-implement` invocation in a
   fresh context, and review limits and approval gates still apply.
 - On a `BLOCKED` gap (missing Spec/ticket/authority/Spec-fidelity decision),
   report the gap with the smallest unblock and stop without branching into
   clarification or reticketing.
 - If a focused question is needed for a human decision, recommend
-  `$ask-light` or `$clarify` and stop; the recommendation is not an automatic
+  `ask-light` or `clarify` and stop; the recommendation is not an automatic
   invocation.
 

@@ -24,7 +24,7 @@ this file summarizes the execution order and references the examples.
 - optionally `light-research` / `light-prototype` per `socratic`'s Unknown routing
 - optionally recommend `light-to-questionnaire` when another person holds the
   blocking information
-- large effort may upgrade to `$decision-map`
+- large effort may upgrade to `decision-map`
 
 See [project-clarification-contract.md](project-clarification-contract.md) for
 the ledger shape and [EXAMPLES.md](EXAMPLES.md) for handoff examples that
