@@ -1,5 +1,7 @@
 # First-Party Skill Catalog
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [中文目录](CATALOG.zh-CN.md)
 
 This catalog is synchronized from the 39 admitted package directories under `skills/`. It is an inventory — not a static workflow router and not a record of what is installed on a particular Agent host. The package's `SKILL.md` remains the behavior authority.

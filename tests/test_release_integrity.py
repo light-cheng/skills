@@ -55,9 +55,9 @@ def write_public_release_fixture(root: Path, tag: str = "v9.9.9", *, attested: b
         destination = root / path
         destination.parent.mkdir(parents=True, exist_ok=True)
         prefix = "evidence/releases" if path.startswith("docs/") else "docs/evidence/releases"
-        text = (f"# Skills\n\n**Release snapshot:** `{tag}`\n\n"
-                f"[Release Manifest]({prefix}/{tag}/RELEASE_MANIFEST.md) records preparation facts.\n"
-                "Observed installation and publication facts are in the receipt on main.\n")
+        fields = {"view": "current", "stable": tag} if attested else {"view": "snapshot", "version": tag}
+        text = (f"# Skills\n\n<!-- release-state: {json.dumps(fields)} -->\n\n"
+                f"[Release Manifest]({prefix}/{tag}/RELEASE_MANIFEST.md)\n")
         if attested:
             text += f"\nCurrent stable release: `{tag}`.\n"
         if path.startswith("CATALOG"):
@@ -81,13 +81,15 @@ def write_public_release_fixture(root: Path, tag: str = "v9.9.9", *, attested: b
     release_dir = root / "docs/evidence/releases" / tag
     for suffix in ("", ".zh-CN"):
         manifest = release_dir / f"RELEASE_MANIFEST{suffix}.md"
-        if manifest.is_file() and "Preparation snapshot" not in manifest.read_text(encoding="utf-8"):
-            manifest.write_text(manifest.read_text(encoding="utf-8") + "\n**Preparation snapshot:** PREPARED; external gates were pending at preparation.\n", encoding="utf-8")
+        if manifest.is_file() and "release-state:" not in manifest.read_text(encoding="utf-8"):
+            fields = {"view": "manifest", "version": tag, "written": "preparation"}
+            manifest.write_text(manifest.read_text(encoding="utf-8") + f"\n<!-- release-state: {json.dumps(fields)} -->\n", encoding="utf-8")
         other = ".zh-CN" if not suffix else ""
         (release_dir / f"RELEASE_NOTES{suffix}.md").write_text(
-            f"# {tag} — Fixture release\n\n**Release snapshot:** `{tag}`\n\n"
+            f"# {tag} — Fixture release\n\n"
+            f"<!-- release-state: {json.dumps({'view': 'notes', 'version': tag, 'verification': 'Verification'})} -->\n\n"
             f"[Other language](RELEASE_NOTES{other}.md) · [Release Manifest](RELEASE_MANIFEST.md)\n"
-            "Verification: preparation facts are in the Manifest; observed facts are in the receipt on main.\n",
+            "\n## Verification\n\nPreparation facts are in the Manifest.\n",
             encoding="utf-8",
         )
 

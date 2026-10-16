@@ -14,6 +14,32 @@ languages of the Notes and Manifest. A Manifest states that it was written at
 preparation time. Old failures, earlier versions and recovery commands keep
 their meaning: never search-and-replace version numbers across the docs.
 
+## Release-state fields
+
+Each of these documents carries one field block, an HTML comment that readers
+do not see. The checks read the facts from it, so you can word the visible text
+freely in either language:
+
+| Document | Field block |
+| --- | --- |
+| Public page in the candidate and tag | `<!-- release-state: {"view": "snapshot", "version": "vX.Y.Z"} -->` |
+| Public page on main after ATTESTED | `<!-- release-state: {"view": "current", "stable": "vX.Y.Z"} -->` |
+| Notes (and so the Release body) | `<!-- release-state: {"view": "notes", "version": "vX.Y.Z", "verification": "<heading>"} -->` |
+| Manifest | `<!-- release-state: {"view": "manifest", "version": "vX.Y.Z", "written": "preparation"} -->` |
+
+- `verification` names a heading in the same Notes file; that section says
+  where the verification facts are.
+- The Notes link the Manifest, and the Manifest names `refs/tags/vX.Y.Z`.
+- A page that shows a target-version or unpinned `skills add` command before
+  the released source is verified adds `"install_commands": "template"`.
+- Put the block outside code fences, once per file.
+
+The checks still read the visible text for statements that would be false at
+that stage: an install or publication success nobody observed, a "not yet
+published" status that goes stale, or a stable version the fields and receipts
+do not support. Notes, Manifests and tags up to v0.2.9 were written before the
+fields and are checked by those statement rules only.
+
 Main learns the current stable version only from a release's bilingual receipts
 with `Status: VERIFIED`, a matching version and a passing publication row.
 Writing VERIFIED into some unrelated receipt does not make a version stable.
@@ -59,7 +85,7 @@ For a local rehearsal, use `kind: test-double` with `--simulate`. The result is
 ## The Release body
 
 `scripts/prepare_release_body.py` reads the Notes from the tag (or `--revision`)
-and checks the version, the statements and the links. It turns relative links
+and checks the fields, the statements and the links. It turns relative links
 into full URLs on the current repository, pinned to the tag; receipt links
 point to main because receipts are written after the tag. It allows an
 installation-success claim only with matching observations or an existing

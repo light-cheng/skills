@@ -29,9 +29,12 @@ All three live in `docs/evidence/releases/vX.Y.Z/`, each in English and Chinese.
 
 1. Add the version to `CHANGELOG.md` and `CHANGELOG.zh-CN.md`.
 2. Update README, CATALOG, INSTALLATION and MAINTENANCE in both languages as
-   snapshots of the target version. Current-stable facts stay on main; history
-   at preparation time goes into the Manifest.
-3. Write the Manifest and the Notes. Do not create a Receipt.
+   snapshots of the target version, and set each page's field block to
+   `"view": "snapshot"` ([fields](DOCUMENT-STATE.md#release-state-fields)).
+   Current-stable facts stay on main; history at preparation time goes into
+   the Manifest.
+3. Write the Manifest and the Notes, each with its field block. Do not create
+   a Receipt.
 4. Finish every path and link, then follow the
    [final-artifact checks](CLOSEOUT.md#verify-final-artifacts). Stage the
    candidate and bind the checks to its exact tree:
@@ -208,7 +211,8 @@ on the current repository.
    commit SHAs, the CI run IDs and results, the pinned and latest install
    results, the Release URL and its publication time. Link back to the Manifest
    and Notes.
-2. Update the docs and catalog to name the new stable release.
+2. Update the docs and catalog to name the new stable release, and set each
+   public page's field block to `{"view": "current", "stable": "vX.Y.Z"}`.
 3. Finish every copy and link, then follow the
    [final-artifact checks](CLOSEOUT.md#verify-final-artifacts) on the staged
    attestation. Commit it as `docs(release): attest vX.Y.Z publication` and

@@ -1,5 +1,7 @@
 # First-Party Maintenance and Documentation Synchronization
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [中文维护说明](MAINTENANCE.zh-CN.md)
 
 This document governs the lifecycle of admitted first-party Skills and the documentation that makes them maintainable and installable. It does not duplicate the ownership contract ([AGENTS.md](../AGENTS.md)) or the architecture.

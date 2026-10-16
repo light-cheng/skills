@@ -1,5 +1,7 @@
 # 第一方 Skill 目录
 
+<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+
 [English catalog](CATALOG.md)
 
 本目录从 `skills/` 下 39 个已准入包同步生成，是可读 inventory，不是静态 workflow router，也不代表某个 Agent host 当前已安装哪些 Skill。包的 `SKILL.md` 仍是行为权威。

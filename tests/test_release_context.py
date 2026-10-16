@@ -31,6 +31,10 @@ def write(root: Path, path: str, text: str) -> None:
     target.write_text(text, encoding="utf-8")
 
 
+def state(**fields) -> str:
+    return f"<!-- release-state: {json.dumps(fields)} -->"
+
+
 def make_candidate(root: Path, tag: str = TAG) -> None:
     git(root, "init", "--initial-branch=main")
     git(root, "config", "user.name", "Release fixture")
@@ -41,11 +45,11 @@ def make_candidate(root: Path, tag: str = TAG) -> None:
     evidence = f"docs/evidence/releases/{tag}"
     for path in ("README.md", "README.zh-CN.md", "CATALOG.md", "CATALOG.zh-CN.md", "docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", "docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md"):
         prefix = "evidence/releases" if path.startswith("docs/") else "docs/evidence/releases"
+        # Free wording: the gate reads the release-state fields, not fixed phrases.
         content = (
-            f"# Skills\n\n**Release snapshot:** `{tag}`\n\n"
-            "This tree contains one Skill. It describes its own release content.\n"
-            f"[Release Manifest]({prefix}/{tag}/RELEASE_MANIFEST.md) records preparation facts.\n"
-            "Observed publication and installation facts belong in the receipt on main.\n"
+            f"# Skills\n\n{state(view='snapshot', version=tag)}\n\n"
+            "This tree contains one Skill.\n"
+            f"[Release Manifest]({prefix}/{tag}/RELEASE_MANIFEST.md)\n"
         )
         if path.startswith("CATALOG"):
             if "zh-CN" in path:
@@ -56,17 +60,17 @@ def make_candidate(root: Path, tag: str = TAG) -> None:
     for suffix in ("", ".zh-CN"):
         other = ".zh-CN" if not suffix else ""
         write(root, f"{evidence}/RELEASE_MANIFEST{suffix}.md", (
-            f"# Release Manifest {tag}\n\n**Preparation snapshot:** PREPARED.\n"
-            f"Release: `{tag}`\nRelease identity: `refs/tags/{tag}^{{commit}}`\n"
+            f"# Release Manifest {tag}\n\n{state(view='manifest', version=tag, written='preparation')}\n\n"
+            f"Release identity: `refs/tags/{tag}^{{commit}}`\n"
             "Previous stable at preparation: v9.8.6; installation and publication pending at preparation.\n"
             "Collection package count: 1 admitted packages\nPolicy status: `PROVISIONAL`\n"
             f"[Other language](RELEASE_MANIFEST{other}.md)\n"
         ))
         write(root, f"{evidence}/RELEASE_NOTES{suffix}.md", (
-            f"# {tag} — Fixture Skill\n\n**Release snapshot:** `{tag}`\n\n"
+            f"# {tag} — Fixture Skill\n\n{state(view='notes', version=tag, verification='Checks')}\n\n"
             "One fixture Skill and its migration instructions.\n"
             f"[Other language](RELEASE_NOTES{other}.md) · [Release Manifest](RELEASE_MANIFEST.md)\n"
-            "Verification: preparation facts are in the Manifest; observed facts are in the receipt on main.\n"
+            "\n## Checks\n\nLocal checks are in the Manifest.\n"
         ))
 
 
@@ -123,7 +127,8 @@ def make_attested(root: Path) -> tuple[str, str]:
                       release_url=f"https://github.com/{REPO}/releases/tag/{TAG}"))
     for path in ("README.md", "README.zh-CN.md", "CATALOG.md", "CATALOG.zh-CN.md", "docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", "docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md"):
         doc = root / path
-        doc.write_text(doc.read_text(encoding="utf-8") + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
+        text = doc.read_text(encoding="utf-8").replace(state(view="snapshot", version=TAG), state(view="current", stable=TAG))
+        doc.write_text(text + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
     return candidate, commit(root, "docs(release): attest fixture")
 
 
@@ -241,7 +246,7 @@ def test_prepared_requires_chinese_installation_authority(tmp_path: Path) -> Non
 def test_manifest_must_name_its_preparation_time_context(tmp_path: Path) -> None:
     make_candidate(tmp_path)
     path = tmp_path / f"docs/evidence/releases/{TAG}/RELEASE_MANIFEST.md"
-    path.write_text(path.read_text(encoding="utf-8").replace("**Preparation snapshot:** PREPARED.\n", ""), encoding="utf-8")
+    path.write_text(path.read_text(encoding="utf-8").replace(", \"written\": \"preparation\"", ""), encoding="utf-8")
     commit(tmp_path)
     result = integrity(tmp_path)
     assert result.returncode == 1, result.stdout + result.stderr
@@ -408,7 +413,8 @@ def test_snapshot_target_install_commands_remain_templates(tmp_path: Path) -> No
     denied = integrity(tmp_path)
     assert denied.returncode == 1, denied.stdout + denied.stderr
     assert "FUTURE_INSTALL_TEMPLATE" in denied.stdout
-    path.write_text(original + "\n## Installation command templates\n" + command, encoding="utf-8")
+    templated = original.replace(state(view="snapshot", version=TAG), state(view="snapshot", version=TAG, install_commands="template"))
+    path.write_text(templated + command, encoding="utf-8")
     commit(tmp_path, "fixture: explicitly scoped future command template")
     allowed = integrity(tmp_path)
     assert allowed.returncode == 0, allowed.stdout + allowed.stderr
@@ -510,7 +516,7 @@ def test_compat_archive_export_rejects_symlink_escape(tmp_path: Path) -> None:
     assert not (tmp_path / "outside.md").exists()
 
 
-@pytest.mark.parametrize("fault", ["wrong-title", "unpublished", "wrong-link", "draft"])
+@pytest.mark.parametrize("fault", ["wrong-version", "unpublished", "wrong-link", "draft"])
 def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkeypatch, capsys, fault: str) -> None:
     import verify_release_integrity as verifier
     make_attested(tmp_path)
@@ -518,8 +524,8 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     prefix = f"https://github.com/{REPO}/blob/{TAG}/docs/evidence/releases/{TAG}/"
     body = body.replace("(RELEASE_NOTES.zh-CN.md)", f"({prefix}RELEASE_NOTES.zh-CN.md)")
     body = body.replace("(RELEASE_MANIFEST.md)", f"({prefix}RELEASE_MANIFEST.md)")
-    if fault == "wrong-title":
-        body = body.replace(TAG, "v9.8.6", 1)
+    if fault == "wrong-version":
+        body = body.replace(f'"version": "{TAG}"', '"version": "v9.8.6"')
     elif fault == "unpublished":
         body += "\nRelease status: not yet published.\n"
     elif fault == "wrong-link":
@@ -590,7 +596,8 @@ def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tm
               "\nEvidence class: local rehearsal; external results are test doubles.\n")
     for path in PUBLIC_RELEASE_DOCS:
         destination = tmp_path / path
-        destination.write_text(destination.read_text(encoding="utf-8") + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
+        text = destination.read_text(encoding="utf-8").replace(state(view="snapshot", version=TAG), state(view="current", stable=TAG))
+        destination.write_text(text + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
     git(tmp_path, "add", ".")
     attestation_tree = git(tmp_path, "write-tree")
     attestation = commit(tmp_path, "docs(release): simulated attestation")
@@ -720,3 +727,52 @@ def test_current_attested_receipt_must_name_the_resolved_repository(tmp_path: Pa
     history = integrity(tmp_path, "attested", "--release-commit", candidate, "--mode", "historical", repo=None, env=env)
     assert "RECEIPT_URL_MISMATCH" not in history.stdout, history.stdout
     assert "[PASS] Receipt Consistency" in history.stdout, history.stdout
+
+
+SNAPSHOT_FIELD = state(view="snapshot", version=TAG)
+
+
+@pytest.mark.parametrize("path, old, new, code", [
+    ("README.md", SNAPSHOT_FIELD, "", "RELEASE_STATE"),
+    ("README.md", SNAPSHOT_FIELD, SNAPSHOT_FIELD + "\n" + SNAPSHOT_FIELD, "RELEASE_STATE"),
+    ("README.md", SNAPSHOT_FIELD, "<!-- release-state: {view: snapshot} -->", "RELEASE_STATE"),
+    ("README.md", SNAPSHOT_FIELD, f"```\n{SNAPSHOT_FIELD}\n```", "RELEASE_STATE"),
+    ("CATALOG.zh-CN.md", SNAPSHOT_FIELD, state(view="snapshot", version="v9.8.6"), "SNAPSHOT_IDENTITY"),
+    ("docs/INSTALLATION.md", SNAPSHOT_FIELD, state(view="current", stable=TAG), "RELEASE_STATE"),
+    (f"docs/evidence/releases/{TAG}/RELEASE_MANIFEST.zh-CN.md", f"refs/tags/{TAG}", "refs/tags/next", "MANIFEST_IDENTITY"),
+    (f"docs/evidence/releases/{TAG}/RELEASE_NOTES.md", "## Checks", "## Other", "RELEASE_VERIFICATION_CONTEXT"),
+    (f"docs/evidence/releases/{TAG}/RELEASE_NOTES.zh-CN.md", "[Release Manifest](RELEASE_MANIFEST.md)", "Manifest", "SNAPSHOT_EVIDENCE"),
+])
+def test_prepared_gate_reads_release_state_fields(tmp_path: Path, path: str, old: str, new: str, code: str) -> None:
+    make_candidate(tmp_path)
+    target = tmp_path / path
+    text = target.read_text(encoding="utf-8")
+    assert old in text
+    target.write_text(text.replace(old, new), encoding="utf-8")
+    commit(tmp_path)
+    result = integrity(tmp_path)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"[{code}] {path}" in result.stdout
+
+
+def test_current_stable_comes_from_the_field_not_a_required_sentence(tmp_path: Path) -> None:
+    candidate, _ = make_attested(tmp_path)
+    readme = tmp_path / "README.md"
+    readme.write_text(readme.read_text(encoding="utf-8").replace(f"\nCurrent stable release: `{TAG}`.\n", "\n"), encoding="utf-8")
+    commit(tmp_path, "fixture: no stable sentence")
+    assert integrity(tmp_path, "attested", "--release-commit", candidate).returncode == 0
+    readme.write_text(readme.read_text(encoding="utf-8").replace(state(view="current", stable=TAG), state(view="current", stable="v9.8.6")), encoding="utf-8")
+    commit(tmp_path, "fixture: stale stable field")
+    result = integrity(tmp_path, "attested", "--release-commit", candidate)
+    assert result.returncode == 1 and "[CURRENT_STABLE] README.md" in result.stdout, result.stdout + result.stderr
+
+
+def test_release_objects_frozen_before_the_fields_keep_their_prose() -> None:
+    from release_context import ReleaseContext, validate_document
+    prose = "# v0.2.9\n\n**Release snapshot:** v0.2.9\n"
+    for version, expected in (("v0.2.9", []), ("v0.3.0", ["RELEASE_STATE"])):
+        context = ReleaseContext(version, "tagged")
+        codes = [error.split("]")[0].lstrip("[") for error in validate_document(prose, "README.md", "snapshot", context)]
+        assert codes == expected
+    current = ReleaseContext("v0.2.9", "attested", current_stable="v0.2.9")
+    assert any("RELEASE_STATE" in error for error in validate_document(prose, "README.md", "current", current))
