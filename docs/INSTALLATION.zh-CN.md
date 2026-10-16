@@ -2,11 +2,15 @@
 
 [English installation guide](INSTALLATION.md)
 
-公开第一方集合的当前稳定版本是 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)，对应 tag `v0.2.8`（不可变的[发布清单](evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)）。共 **39 个已准入第一方 Skill**，按 7 个用途分类。实际发布源的新鲜安装已通过：托管 Linux 用户上的 Codex、Claude Code 项目锁定版与默认分支全量安装、原生 Codex 全局范围和代表性单包（39 个包、406 个文件，逐字节一致），以及本机 Claude Code 和 pi 安装，两个 Host 都能发现。pi 只有在项目受信任后才加载项目 Skill；本机没有检查 Codex 运行。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
+版本快照 v0.2.9：本指南说明 v0.2.9，共 **39 个已准入第一方 Skill**，按 7 个用途分类。[v0.2.9 发布清单](evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围和本地证据；实际观察到的安装与发布事实记入 `main` 上的发布收据。在该收据存在之前，下面的 v0.2.9 与默认分支命令都是模板。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add light-cheng/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择指定 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
 v0.2.6 为 `light-travelpage` 增加手册 UI 和默认关闭的 AI 选择。[发布说明](evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)记录变化，[发布收据](evidence/releases/v0.2.6/RELEASE_RECEIPT.zh-CN.md)记录两个隔离目录中的标签/最新主干全新安装：均为 36 个包、385 个包内文件，逐字节一致；Skills CLI 1.7.0 实际发现全部 36 个 Skill。
+
+## 上一版本（历史）：v0.2.8
+
+上一版本 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（[发布收据](evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)）：实际发布源的新鲜安装已通过：托管 Linux 用户上的 Codex、Claude Code 项目锁定版与默认分支全量安装、原生 Codex 全局范围和代表性单包（39 个包、406 个文件，逐字节一致），以及本机 Claude Code 和 pi 安装，两个 Host 都能发现。pi 只有在项目受信任后才加载项目 Skill；本机没有检查 Codex 运行。
 
 ## 上一版本（历史）：v0.2.7 名称迁移
 
@@ -28,7 +32,7 @@ npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 
 ## 推荐安装方式
 
-### 交互式安装（推荐）
+### 交互式安装（推荐；命令模板）
 
 运行交互式安装命令，按需挑选所需的 Skill 及目标 Agent：
 
@@ -36,7 +40,7 @@ npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 npx skills add light-cheng/skills
 ```
 
-### 安装单个 Skill
+### 安装单个 Skill（命令模板）
 
 若只需安装指定 Skill，无需在全量集合中选择：
 
@@ -49,11 +53,13 @@ npx skills add light-cheng/skills --skill light-travelpage
 npx skills add light-cheng/skills --skill project-retro
 ```
 
-### 指定版本安装（Pinned Release）
+### 指定版本安装（Pinned Release；v0.2.9 命令模板）
 
 使用指定的 Release Tag 进行确定性安装（推荐用于可复现环境）：
 
 ```bash
+npx skills add light-cheng/skills#v0.2.9 -y
+npx skills add light-cheng/skills#v0.2.9 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.8 -y
 npx skills add light-cheng/skills#v0.2.8 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.7 -y
@@ -107,10 +113,10 @@ npx skills add light-cheng/skills --agent claude-code
 v0.2.0 release 命令在全新隔离环境中针对已发布的 v0.2.0 tag 进行了完整验证：
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
 
 详见 [v0.2.0 安装验证](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -120,10 +126,10 @@ npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agen
 上一版本的 v0.1.6 release 命令针对已发布的 v0.1.6 tag 验证，在该 revision 安装九包集合：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
 ```
 
 第一条安装九包集合，其余从同一已验证 revision 选择完整单包。各形式均已针对 fresh destinations 验证，见 [v0.1.6 安装记录](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -132,6 +138,8 @@ npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --ag
 
 ## 改名说明
 
+GitHub 账号 `LightDevCoder` 已于 2026 年 10 月改名为 `light-cheng`。本页命令使用新名称；仓库、tag 和内容都不变，旧的 `LightDevCoder/skills` 命令仍会跳转。请改用新名称：如果有人注册了旧账号，跳转就会失效。
+
 `light-kanban-worker` 在 v0.1.6 中改名为 `kanban-worker`。下面的 v0.1.4 与 v0.1.5 历史记录和命令仍使用旧名 `light-kanban-worker`；当前安装使用 `kanban-worker`。
 
 ## 历史 v0.1.5 验证
@@ -139,9 +147,9 @@ npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --ag
 上一稳定版本是已发布的 v0.1.5 snapshot，commit 为 `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`。它安装八包集合。其已验证的 pinned 形式为：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
 ```
 
 验证见 [v0.1.5 安装记录](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -151,8 +159,8 @@ npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --ag
 上一稳定版本是已发布的 v0.1.4 snapshot，commit 为 `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`。它引入 `light-kanban-worker`，形成八包集合。其 pinned 形式为：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.4 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.4 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
 两种形式均以 CLI `1.5.22` 针对 fresh destinations 验证；见 [v0.1.4 安装记录](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -162,8 +170,8 @@ npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --c
 上一稳定版本是已发布的 v0.1.3 snapshot，commit 为 `f8b573a48f7d53da74cfb8d94eb2ee7ca467d5c4`。它是测试工具链迁移 release，七个包与 v0.1.2 相同，其包级安装由 [v0.1.2 安装验证](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md) 覆盖；其 pinned 形式为：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.3 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.3 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.3 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.3 --skill review-loop --yes --copy --agent '*'
 ```
 
 ## 历史 v0.1.2 验证
@@ -171,8 +179,8 @@ npx skills add LightDevCoder/skills#v0.1.3 --skill review-loop --yes --copy --ag
 上一稳定版本是已发布的 v0.1.2 snapshot，commit 为 `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`。其已验证命令：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.2 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
 ```
 
 两种形式均以 CLI `1.5.22` 针对 fresh destinations 验证；见 [v0.1.2 安装记录](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -182,8 +190,8 @@ npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --ag
 上一稳定版本是已发布的 v0.1.1 snapshot，commit 为 `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`。其已验证命令使用显式 tag 和 codex host 选择：
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+npx skills add light-cheng/skills#v0.1.1 --yes --copy --agent codex
+npx skills add light-cheng/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
 已验证的 CLI version、destination 类别、discovery 和 smoke result 见 [v0.1.1 安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md)。
@@ -193,8 +201,8 @@ npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --ag
 历史稳定版本是已发布的 v0.1.0 snapshot，commit 为 `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`。以下无 fragment 命令作为历史命令保留；其 CLI、host、destination、validator 和证据限制见[历史安装记录](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.zh-CN.md#历史-v010-摘要)：
 
 ```text
-npx skills add LightDevCoder/skills
-npx skills add LightDevCoder/skills --skill review-loop
+npx skills add light-cheng/skills
+npx skills add light-cheng/skills --skill review-loop
 ```
 
 该历史记录是整理摘要，不是当前重跑；原始 receipt 未记录的 boundary/missing-dependency smoke 和重复安装行为会明确标为 `NOT RECORDED`。
@@ -231,7 +239,7 @@ cp -R "$source_root/$source_package" "$destination_root/$skill_name"
 
 ## Direct upstream 与第三方
 
-未修改的 Matt Pocock Skill 保持在 [mattpocock/skills](https://github.com/mattpocock/skills)。修改版只能进入私有 [skills-3rdParty](https://github.com/LightDevCoder/skills-3rdParty)，不属于本公开第一方集合，并有独立的 pinned manifest 和 release evidence。已批准的 Matt PORT（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装上游；Light 主流程不要求 `mattpocock/skills` 或 `sol-advisor`。
+未修改的 Matt Pocock Skill 保持在 [mattpocock/skills](https://github.com/mattpocock/skills)。修改版只能进入私有 [skills-3rdParty](https://github.com/light-cheng/skills-3rdParty)，不属于本公开第一方集合，并有独立的 pinned manifest 和 release evidence。已批准的 Matt PORT（见 [CATALOG.zh-CN.md](../CATALOG.zh-CN.md)）为带 `ATTRIBUTION.md` 的自包含第一方包，运行时不要求安装上游；Light 主流程不要求 `mattpocock/skills` 或 `sol-advisor`。
 
 Light 的 Port 和它的上游 Skill 只装一个，不要同时装。七个 Port 保留了上游的触发说法：`light-diagnosing-bugs`、`light-tdd`、`light-prototype`、`light-research`、`light-wizard`、`light-writing-for-agents` 和 `light-merge-conflicts`。两份都装时，同一个请求会对上两个 Skill，Agent 可能任选其一。这几个包的 description 都写明了对应的上游 Skill。（`light-merge-conflicts` 在 v0.2.8 之前叫 `resolving-merge-conflicts`，与上游同名；见 [v0.2.8 迁移说明](MIGRATION-v0.2.8.zh-CN.md)。）
 

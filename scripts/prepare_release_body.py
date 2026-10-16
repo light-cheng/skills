@@ -20,6 +20,7 @@ from pathlib import Path
 from dataclasses import replace
 from urllib.parse import urlsplit, urlunsplit
 
+from repo_identity import resolve_repository, validate_repository
 from release_context import ReleaseContext, apply_observations, validate_document, document_links
 from verify_release_integrity import git_read_text, resolve_commit_sha, check_release_receipt_consistency, run_git
 
@@ -29,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 def transform_release_notes_for_web(
     text: str,
     tag: str,
-    repo: str = "LightDevCoder/skills",
+    repo: str,
     branch: str = "main",
 ) -> str:
     """Expand sibling relative links to full repository URLs for GitHub Release rendering."""
@@ -82,7 +83,8 @@ def validate_release_body_links(body: str, tag: str) -> tuple[bool, list[str]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Prepare a GitHub Release body from release notes.")
     parser.add_argument("--tag", required=True, help="Release tag (e.g. v0.2.4).")
-    parser.add_argument("--repo", default="LightDevCoder/skills", help="Target GitHub repository (default: LightDevCoder/skills).")
+    parser.add_argument("--repo", type=validate_repository, default=None,
+                        help="GitHub owner/name for links (default: GITHUB_REPOSITORY, then gh, then the origin remote).")
     parser.add_argument("--branch", default=None, help="Ref for immutable artifact links (default: target tag; Receipts always use main).")
     parser.add_argument("--root", type=Path, default=None, help="Repository root (default: current Git checkout).")
     parser.add_argument("--revision", help="Fixed source tree/ref for release Notes (default: refs/tags/<tag>).")
@@ -112,7 +114,14 @@ def main() -> int:
             print(f"ERROR: Notes missing from fixed source {revision}:{relative_input}; use --revision for a prepared tree.", file=sys.stderr)
             return 1
     candidate = resolve_commit_sha(args.release_commit or revision, cwd=root)
-    context = ReleaseContext(args.tag, args.stage, revision=revision)
+    repo = None
+    if not args.validate_only:
+        try:
+            repo = resolve_repository(args.repo, root)
+        except ValueError as error:
+            print(f"ERROR: {error}", file=sys.stderr)
+            return 1
+    context = ReleaseContext(args.tag, args.stage, revision=revision, repository=repo)
     if args.observations:
         try:
             observations = json.loads(args.observations.read_text(encoding="utf-8"))
@@ -153,7 +162,7 @@ def main() -> int:
     transformed = transform_release_notes_for_web(
         text=content,
         tag=args.tag,
-        repo=args.repo,
+        repo=repo,
         branch=args.branch or args.tag,
     )
 

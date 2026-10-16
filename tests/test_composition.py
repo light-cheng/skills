@@ -63,7 +63,7 @@ EDGES = (
 # Optional targets that live outside this repository. The caller must link the
 # repository and keep working without the package.
 EXTERNAL_OPTIONAL = {
-    "light-travelpage-gw": "https://github.com/LightDevCoder/light-travelpage-gw",
+    "light-travelpage-gw": "https://github.com/light-cheng/light-travelpage-gw",
 }
 
 

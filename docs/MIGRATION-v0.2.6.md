@@ -2,6 +2,8 @@
 
 [简体中文](MIGRATION-v0.2.6.zh-CN.md) · [Candidate notes](evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.md)
 
+The GitHub account `LightDevCoder` was renamed to `light-cheng` in October 2026. Commands on this guide use the new name; the repository, tags and content are the same, and old `LightDevCoder/skills` commands still redirect. Prefer the new name: a redirect stops working if someone else registers the old account.
+
 **Status:** The local namespace candidate is unpublished; remote v0.2.6 is occupied by a travel-handbook release. v0.2.5 is this checkout’s verified release baseline, not the latest remote stable release. New-name templates are **BLOCKED; do not execute**. D7 prohibits overwriting the tag or selecting a new version. See the [publication blocker](evidence/namespace-v0.2.6/publication-blocker.md).
 
 Twelve Light packages gain `light-` names. The other 24 names, seven categories, 36-package total, responsibilities, and invocation permissions remain unchanged. There are no installable aliases or wrappers for old names. `ask-light` and `light-travelpage` keep their names. Installed paths become `<skills-root>/<new-name>/`; source paths remain `skills/<category>/<new-name>/`.
@@ -36,12 +38,12 @@ Inventory old names in project prompts, `AGENTS.md`, availability declarations, 
 5. Inspect the Host selector or discovery listing. Record all 36 Light package identities when installing the whole collection, the 12 new labels (`Light · …`), their resolved paths/source, and the selected invocation. `ask-light` must recommend `light-implement` for a ready ticket and resolve software review through `light-code-review`; a missing Light dependency must remain unavailable rather than resolve to an old same-name capability.
 
 ```bash
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --skill light-implement
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --global --agent codex
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6 --skill light-implement
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6 --global --agent codex
 ```
 
-An unqualified `npx skills add LightDevCoder/skills` follows actual default branch `main`; it does not automatically follow the latest stable tag. Candidate names are unavailable from v0.2.5. A static file scan verifies structure; it does not establish Host invocation behavior. Discovery and explicit source selection do not lock all model-invoked calls to one workflow.
+An unqualified `npx skills add light-cheng/skills` follows actual default branch `main`; it does not automatically follow the latest stable tag. Candidate names are unavailable from v0.2.5. A static file scan verifies structure; it does not establish Host invocation behavior. Discovery and explicit source selection do not lock all model-invoked calls to one workflow.
 
 ## Recovery
 

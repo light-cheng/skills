@@ -137,8 +137,8 @@ requirement) carries its own `project-review` `PASS`; see the
 Install the package from the current release with:
 
 ```bash
-npx skills add LightDevCoder/skills --skill kanban-worker
-npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker
+npx skills add light-cheng/skills --skill kanban-worker
+npx skills add light-cheng/skills#v0.1.6 --skill kanban-worker
 ```
 
 The pinned `#v0.1.5` command installed the package under its old name

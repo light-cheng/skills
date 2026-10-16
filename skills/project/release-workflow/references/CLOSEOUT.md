@@ -1,113 +1,120 @@
-# Final artifacts and CI closeout
+# Final checks, CI and the closing report
 
-Use before pushing a candidate, a post-publication attestation or any repair
-commit, and before reporting the release complete. Local checks, published
-tag identity and the final main CI are separate evidence.
+Use this before you push a candidate, an attestation or any repair, and before
+you call a release complete. Local checks, the published tag and the final CI
+on main are three separate pieces of evidence.
 
-## Assemble one repair batch
+## Make one repair per stage
 
-Within one lifecycle stage, gather the whole coherent repair before committing:
-implementation, generated artifacts, both languages, dependent links, status
-and acceptance evidence. Review and repair locally using an immutable staged
-tree/export or a snapshot digest; a review identity does not require an
-intermediate public commit. Default to one final commit and one push for that
-batch, after final-artifact checks pass. Keep intermediate observations in the
+Inside one stage, collect the whole repair before you commit: code, generated
+files, both languages, links, status and evidence. Review it against the staged
+tree; you do not need a public commit to review. Default to one commit and one
+push per stage, after the final checks pass. Keep intermediate notes in your
 local task record.
 
-If agent-owned unpublished checkpoint commits already exist, consolidate them
-only within the user's authorized scope, preserving the reviewed package
-bytes and rechecking the final tree. Never rewrite published history, tags,
-user commits or other work to meet a commit-count target. If ownership or
-rewrite authority is unclear, keep the commits and disclose the reason.
+The candidate and the receipt are always separate commits, because the receipt
+records a publication that happens in between. Do not squash a whole release
+into one commit or write future facts early.
 
-PREPARED candidate and post-publication ATTESTED receipt are separate batches:
-publication must precede the receipt, so do not force an entire release into
-one commit or prefill future facts. A genuine failure discovered after a push
-requires a new coherent repair and CI; preserve and explain it. Do not delay
-necessary repair or hide failure just to claim one commit.
+If you made unpublished checkpoint commits yourself, you may combine them within
+the owner's approved scope, keeping the reviewed package bytes and rechecking the
+final tree. Never rewrite published history, tags, the owner's commits or
+anyone else's work. If you are unsure who owns a commit, keep it and say why.
+
+A failure found after a push needs a new repair commit and new CI. Keep the
+failed commit and run, and explain them. Do not delay a needed fix to keep the
+commit count low.
 
 ## Verify final artifacts
 
-1. Finish generated files, copies, renames and raw-log archives. Update every
-   link to the path that will actually be committed, including both receipt
-   languages. Keep raw bytes intact; an archive may preserve logs whose
-   terminal whitespace cannot pass repository checks.
-2. Inspect all current release authorities: README, catalog, installation,
-   maintenance and migration guidance. PREPARED checks target-version snapshots;
-   ATTESTED checks the confirmed current stable version. Statements must agree
-   with the selected phase. Preserve historical snapshots and claims.
-3. Stage the intended files and check `git diff --exit-code` so tests inspect
-   the same tracked content as the index. Record
-   `VERIFIED_TREE="$(git write-tree)"`, then run `git diff --cached --check`,
-   full collection tests, compilation and public-doc checks from PREPARED.
-   Also export the recorded tree to a fresh directory and run the existing
-   collection-discovery checker there. Working-directory files can include
-   untracked or ignored targets that will be absent from the commit:
+1. Finish generated files, copies, renames and log archives first. Point every
+   link at the path that will be committed, in both receipt languages. Keep raw
+   logs byte-for-byte; an archive may hold logs with trailing whitespace that
+   repository checks would reject.
+2. Read the current release pages: README, catalog, installation, maintenance
+   and migration. At PREPARED they describe the target version; at ATTESTED
+   they name the confirmed stable version. Leave historical snapshots as they
+   are.
+3. Stage the files and bind the checks to that exact tree. Working-directory
+   files can include untracked or ignored files the commit will not have, so
+   also export the tree and run the discovery test on the export:
 
    ```bash
+   git diff --exit-code
+   VERIFIED_TREE="$(git write-tree)"
+   git diff --cached --check
+   python3 -m pytest -q
+   python3 -m compileall -q skills tests scripts
+   python3 scripts/check_public_docs.py --tag vX.Y.Z --stage prepared   # at PREPARED
+   python3 scripts/check_public_docs.py                                  # at ATTESTED, as CI runs it
    VERIFY_DIR="$(mktemp -d)"
    mkdir "$VERIFY_DIR/exported"
    git archive --output="$VERIFY_DIR/tree.tar" "$VERIFIED_TREE"
    tar -xf "$VERIFY_DIR/tree.tar" -C "$VERIFY_DIR/exported"
    (cd "$VERIFY_DIR/exported" && python3 -m pytest -q tests/test_collection_discovery.py)
+   rm -rf -- "$VERIFY_DIR"
    ```
 
-   Retain the result/tree identity, then clean the disposable snapshot with
-   `trash`. This checker resolves final Markdown links, including receipts,
-   against committed files. The tree export and checker must both succeed;
-   a clean integrity result or a workspace-only test does not replace them.
-4. Before committing, require no unstaged tracked changes and the same
-   `git write-tree` value. After committing, require
-   `git rev-parse HEAD^{tree}` to match `VERIFIED_TREE`. Later edits or path
-   changes invalidate the affected checks: stage the final state and repeat
-   verification before pushing. A hook changing the committed tree also
-   requires verification of that new tree.
+   Run the `check_public_docs.py` line for your stage only. Record the tree ID
+   and the result before you remove the export. The
+   discovery test resolves every Markdown link, receipts included, against the
+   committed files. Both the export and the test must pass.
+4. Before committing, require no unstaged changes and the same `git write-tree`
+   value. After committing, require `git rev-parse HEAD^{tree}` to equal
+   `VERIFIED_TREE`. Any later edit, or a hook that changes the commit, means
+   you check the new tree again before you push.
 
-A passing run before an archive or link edit is not evidence for the files
-pushed afterward. Stop before the push when any required check fails; perform
-the smallest authorized repair and recheck. Keep test logs and staged-tree
-identity in the local task record.
+A run that passed before an archive or link edit is not evidence for what you
+push afterwards. If a required check fails, stop before the push, make the
+smallest approved repair and check again.
 
 ## Wait for the exact commit
 
-After each push, record its full SHA and locate its required
-`collection-quality` run, not merely the newest green run on the repository:
+After each push, record the full SHA and find the `collection-quality` run for
+that commit — not the newest green run on the repository:
 
 ```bash
-gh run list --commit <pushed-sha> --workflow collection-quality --json databaseId,headSha,status,conclusion --limit 1
-gh run watch <run-id> --exit-status
-gh run view <run-id> --json headSha,status,conclusion
+REPO="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+gh run list --repo "$REPO" --commit <pushed-sha> --workflow collection-quality --json databaseId,headSha,status,conclusion --limit 1
+gh run watch <run-id> --repo "$REPO" --exit-status
+gh run view <run-id> --repo "$REPO" --json headSha,status,conclusion
 ```
 
-Require matching `headSha`, `status: completed` and `conclusion: success`.
-Queued, running, failed, cancelled, missing or unreadable results do not
-complete the stage. Retry a transient read failure without inventing a CI
-result. If CI fails, inspect its actual log, preserve the failed commit/run,
-repair within the existing authorization, and repeat final-artifact checks
-and CI on the new commit. Do not mark the old run successful or let an earlier
-candidate success stand in for final attestation success.
+Require the matching `headSha`, `status: completed` and `conclusion: success`.
+Queued, running, failed, cancelled, missing or unreadable runs do not pass. If
+reading fails, retry; never invent a result. If CI fails, read its log, keep the
+failed commit and run, repair within the approval, and repeat the final checks
+and CI on the new commit. An earlier candidate success never stands in for the
+final attestation run.
 
-The receipt records already observed publication facts. Store the final
-attestation SHA/run externally in the local closeout record and final report;
-adding a receipt's own commit SHA/run to itself creates another commit that
-needs its own checks. If publication already occurred but attestation is not
-verified, report that precise partial state and keep working within scope.
+The receipt records publication facts you already observed. Keep the final
+attestation SHA and run in your local record and final report, not in the
+receipt: writing them into the receipt creates a new commit that needs its own CI.
+If publication happened but attestation is not verified yet, report exactly
+that and keep working within scope.
 
 ## Report the whole release
 
-Report the version/tag and immutable candidate, actual installation/publication
-results, and final main commit with its successful CI link. If an attempt
-failed, also give its commit/run, cause, repair and the replacement success.
-The user should learn about a failure and its resolution from the task, not
-only from a GitHub email. Preserve the failed history and notification settings.
+Report:
 
-A GitHub file page can show the checks for that file's last modifying commit.
-Compare that SHA with the current branch and its CI before calling it a current
-failure. An old red badge may remain when a later repair touched another file;
-explain the two identities. Do not rerun unchanged bad content, rewrite a tag,
-skip checks or make a cosmetic commit to manufacture a green badge.
+- the version and tag;
+- the candidate commit and the release commit it was tagged on (the same commit
+  on the direct-push path), with their CI runs;
+- the install and publication results, including any Host smoke;
+- the final main commit and its successful CI run;
+- every failed attempt: its commit or run, the cause, the repair and the run
+  that replaced it.
 
-Completion requires correct finalized links and current stable docs, all local
-checks, exact candidate CI, immutable remote tag, fresh actual-source installs,
-public release/navigation, and exact final attestation CI. A successful push or
-a published Release alone is not completion.
+The owner should learn about a failure and its fix from your report, not from a
+GitHub email.
+
+A GitHub file page shows the checks of the last commit that changed that file.
+Before calling a red badge a current failure, compare that commit with the
+current branch and its CI; explain both if they differ. Do not rerun unchanged
+bad content, rewrite a tag, skip checks or make a cosmetic commit to turn a
+badge green.
+
+The release is complete only with correct links and current docs, all local
+checks, exact-commit CI for the candidate, a protected remote tag, fresh
+installs from the released source, a public Release with working links, and
+exact-commit CI for the final attestation.

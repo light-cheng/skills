@@ -6,7 +6,9 @@ This catalog is synchronized from the 39 admitted package directories under `ski
 
 [Browse by category](skills/README.md) · [Path migration](docs/CATEGORY_MIGRATION.md)
 
-The inventory shows the published v0.2.8 names: 39 packages. v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
+Release snapshot v0.2.9: the inventory lists 39 packages; v0.2.9 changes no package names.
+
+v0.2.8 renamed `resolving-merge-conflicts` to `light-merge-conflicts` ([v0.2.8 migration guide](docs/MIGRATION-v0.2.8.md)).
 
 The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
@@ -16,13 +18,11 @@ The twelve earlier `light-` renames are in the [v0.2.7 migration guide](docs/MIG
 | --- | --- |
 | Collection | Light Skills — Composable Agent Workflows |
 | Package count | 39 admitted first-party Skills |
-| Current state | 39 packages; v0.2.8 is the current stable release |
-| Stable release | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) (39 packages; adds light-decide, light-redirect and light-html-plan; previous stable was v0.2.7 with 36) |
+| Release snapshot | v0.2.9 (39 packages; repository links move to light-cheng; release-workflow improvements) |
+| Previous release | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) (39 packages) |
 | Installation authority | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Discovery check | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| Evidence | [v0.2.8 release manifest](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.md) · [v0.2.8 release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) · previous: [v0.2.7 release receipt](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.md) |
-
-`v0.2.8` publication and fresh installation are verified; package count is 39.
+| Evidence | [v0.2.9 release manifest](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.md); observed publication and installation facts go into the v0.2.9 release receipt on `main` · previous: [v0.2.8 release receipt](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.md) |
 
 v0.2.6 optimizes `light-travelpage`; [English notes](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md) and the independent [中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md) describe the handbook and optional AI changes.
 
@@ -39,7 +39,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **Invocation:** Model-invoked.
 - **Package:** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **Status:** Admitted first-party; REFACTOR (Sol Advisor design reference, profile-driven cross-harness execution configurator covering primary coding-agent harnesses [10 native adapters + 1 generic fallback]).
-- **Evidence:** [references/host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/engineering/agent-config/references/plan-schema.md), [task-assessment.md](skills/engineering/agent-config/references/task-assessment.md), [profile-schema.md](skills/engineering/agent-config/references/profile-schema.md), [companion-contract.md](skills/engineering/agent-config/references/companion-contract.md), [harness-support.md](skills/engineering/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md); companion runtime maintained at [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config).
+- **Evidence:** [references/host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md), [plan-schema.md](skills/engineering/agent-config/references/plan-schema.md), [task-assessment.md](skills/engineering/agent-config/references/task-assessment.md), [profile-schema.md](skills/engineering/agent-config/references/profile-schema.md), [companion-contract.md](skills/engineering/agent-config/references/companion-contract.md), [harness-support.md](skills/engineering/agent-config/references/harness-support.md), [provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md); companion runtime maintained at [light-cheng/agent-config](https://github.com/light-cheng/agent-config).
 - **Installation path:** `<skills-root>/agent-config/`.
 
 ### ask-light
@@ -288,7 +288,7 @@ No package in this table is an unmodified upstream copy. Approved Matt PORTs car
 - **When to use:** Project has passed `project-review` and is ready to publish.
 - **Invocation:** Model-invoked (or manual entry where supported).
 - **Package:** [skills/project/release-workflow/](skills/project/release-workflow)
-- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from `LightDevCoder/release-workflow`).
+- **Status:** Admitted first-party; MIGRATE — NO REWRITE (from the retired `LightDevCoder/release-workflow` repository).
 - **Evidence:** [SKILL.md](skills/project/release-workflow/SKILL.md) · [Closeout guard acceptance](docs/evidence/2026-10-07-release-closeout/acceptance.md) · [Repair batch acceptance](docs/evidence/2026-10-07-release-batch/acceptance.md).
 - **Installation path:** `<skills-root>/release-workflow/`.
 

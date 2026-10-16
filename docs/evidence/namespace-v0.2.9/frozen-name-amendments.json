@@ -1,0 +1,13 @@
+{
+  "skills/kanban-worker/references/api.md": {
+    "baseline_sha256": "0a154f1c3650679d4f420a3257ebc63bd7d83b1be7c6e3b62cf6aa70f31da486",
+    "candidate_sha256": "a1f0594af0288d5454e7019cc8bfc26057895388d29cd407385e6c8fb4761846",
+    "restore": [
+      [
+        "light-cheng/light-kanban",
+        "LightDevCoder/light-kanban"
+      ]
+    ],
+    "change": "Only the GitHub owner of the light-kanban link changes (account renamed LightDevCoder → light-cheng); approved by the owner on 2026-10-16 (v0.2.9 plan, decision 2)."
+  }
+}

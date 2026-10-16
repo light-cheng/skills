@@ -56,7 +56,7 @@ invokes another user-invoked Skill.
 
 ## Installation and discovery check
 
-Install with `npx skills add LightDevCoder/skills --skill learn-anything`,
+Install with `npx skills add light-cheng/skills --skill learn-anything`,
 refresh the host, and confirm `SKILL.md`, `agents/openai.yaml`, and the `hooks/`
 resources are discovered without the source checkout. The explicit metadata
 policy must read `allow_implicit_invocation: false`.

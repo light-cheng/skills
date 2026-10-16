@@ -46,8 +46,8 @@ from release_context import (
     STAGES, ReleaseContext, apply_observations, check_release_documents,
     confirmed_stable, document_links, legacy_snapshot, validate_ci_observation,
     validate_document, validate_observation_kind, validate_publication_observation, version_key,
-    release_urls,
 )
+from repo_identity import RELEASE_URL_PATTERN, is_release_url, resolve_repository, validate_repository
 
 
 class VerificationResult(NamedTuple):
@@ -317,11 +317,14 @@ def check_release_manifest_consistency(
 
 def check_github_release_navigation(
     tag: str,
-    repo: str = "LightDevCoder/skills",
+    repo: str | None = None,
     cwd: Path = REPO_ROOT,
     context: ReleaseContext | None = None,
 ) -> VerificationResult:
-    """Check observed publication identity, body meaning and full navigation URLs."""
+    """Check observed publication identity, body meaning and full navigation URLs.
+
+    Without ``repo``, gh resolves the repository from the checkout's remote.
+    """
     version_match = re.match(r"v?(\d+)\.(\d+)\.(\d+)", tag)
     if version_match:
         major, minor, patch = map(int, version_match.groups())
@@ -333,7 +336,8 @@ def check_github_release_navigation(
             )
 
     proc = subprocess.run(
-        ["gh", "release", "view", tag, "--repo", repo, "--json", "body,tagName,isDraft,isPrerelease,publishedAt,url"],
+        ["gh", "release", "view", tag, *(["--repo", repo] if repo else []),
+         "--json", "body,tagName,isDraft,isPrerelease,publishedAt,url"],
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -379,7 +383,7 @@ def check_github_release_navigation(
         )
 
     source = f"GitHub Release {tag}"
-    errors = validate_publication_observation(data, tag, source)
+    errors = validate_publication_observation(data, tag, source, repo)
     body_context = replace(context or ReleaseContext(tag, "attested"), published=not errors, evidence_source=source)
     errors.extend(validate_document(body, source, "release-body", body_context))
     errors.extend(document_links(body, source, body_context, set()))
@@ -651,8 +655,13 @@ def check_release_receipt_consistency(
     release_revision: str | None = None,
     revision: str | None = None,
     repo_root: Path = REPO_ROOT,
+    repo: str | None = None,
 ) -> VerificationResult:
-    """Verify mechanical consistency of release receipt and evidence files."""
+    """Verify mechanical consistency of release receipt and evidence files.
+
+    With ``repo``, the receipt's Release URL must be on that repository; without it
+    (historical audits), any GitHub owner/name is accepted.
+    """
     # Backwards compatibility: if receipt_revision is None and revision is provided
     if receipt_revision is None and revision is not None:
         receipt_revision = revision
@@ -805,8 +814,7 @@ def check_release_receipt_consistency(
             )
 
     # 4. Check release URL format if present
-    expected_url = f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
-    url_match = re.search(r"https://github\.com/LightDevCoder/skills/releases/tag/([^\s\)\`\|]+)", text_en)
+    url_match = re.search(RELEASE_URL_PATTERN + r"([^\s\)\`\|]+)", text_en)
     if url_match:
         url_tag = url_match.group(1)
         if url_tag != tag:
@@ -947,17 +955,19 @@ def check_release_receipt_consistency(
     # 9. Release URL
     url_m_en = re.search(r"\|\s*\*\*Release URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_en)
     url_m_zh = re.search(r"\|\s*\*\*发布 URL\*\*\s*\|\s*(https://github\.com/[^\s\`\|\)]+)", text_zh)
-    if not url_m_en or url_m_en.group(1) not in release_urls(tag):
+    # Historical receipts keep the repository name that was current at publication.
+    expected_url = f"https://github.com/{repo or '<owner>/<name>'}/releases/tag/{tag}"
+    if not url_m_en or not is_release_url(url_m_en.group(1), tag, repo):
         return VerificationResult(
             passed=False,
             status="RECEIPT_URL_MISMATCH",
             message=f"Release URL in English receipt must be '{expected_url}'.",
         )
-    if not url_m_zh or url_m_zh.group(1) not in release_urls(tag):
+    if not url_m_zh or url_m_zh.group(1) != url_m_en.group(1):
         return VerificationResult(
             passed=False,
             status="RECEIPT_URL_MISMATCH",
-            message=f"Release URL in Chinese receipt must be '{expected_url}'.",
+            message=f"Release URL in Chinese receipt must equal the English one ('{url_m_en.group(1)}').",
         )
 
     # 10. Publication Timestamp
@@ -1123,6 +1133,8 @@ def main() -> int:
     parser.add_argument("--allow-dirty", action="store_true", help="Allow uncommitted tracked changes.")
     parser.add_argument("--observations", type=Path, help="Recorded CI/install/publication JSON observations.")
     parser.add_argument("--simulate", action="store_true", help="Accept explicitly marked test-double observations; never reports production PASS.")
+    parser.add_argument("--repo", type=validate_repository, default=None,
+                        help="GitHub owner/name for remote checks (default: resolved by gh from the checkout).")
     parser.add_argument("--final-ci", type=Path, help="Recorded CI for final main HEAD after pushing; kept outside the Receipt to avoid self-reference.")
 
     args = parser.parse_args()
@@ -1186,9 +1198,20 @@ def main() -> int:
     print(f"Repository:     {repo_root}")
     print("--------------------------------")
 
+    # Live publication facts and current receipts name the resolved repository, never any owner.
+    if args.observations or (stage == "attested" and (args.check_remote or args.mode == "current")):
+        try:
+            args.repo = resolve_repository(args.repo, repo_root)
+        except ValueError as error:
+            print(f"[REPOSITORY_UNRESOLVED] {error}")
+            print("RESULT: FAIL — Release integrity violation detected.")
+            return 1
+        print(f"GitHub Repo:    {args.repo}")
+
     all_passed = True
     try:
-        context = ReleaseContext(tag, "prepared" if stage == "candidate" else stage, candidate_sha, args.mode)
+        context = ReleaseContext(tag, "prepared" if stage == "candidate" else stage, candidate_sha, args.mode,
+                                 repository=args.repo)
     except ValueError as error:
         # Keep tag-object diagnostics at the boundary before release-document syntax.
         if candidate_sha and stage in ("tagged", "install_verified", "published", "attested"):
@@ -1357,6 +1380,7 @@ def main() -> int:
             receipt_revision=head_sha,
             release_revision=rel_rev,
             repo_root=repo_root,
+            repo=args.repo if args.mode == "current" else None,
         )
         print(f"[{res_receipt.status}] Receipt Consistency: {res_receipt.message}")
         if not res_receipt.passed:
@@ -1364,7 +1388,7 @@ def main() -> int:
 
         if args.check_remote:
             res_rel_body = check_github_release_navigation(
-                tag, repo="LightDevCoder/skills", cwd=repo_root,
+                tag, repo=args.repo, cwd=repo_root,
                 context=replace(context, install_verified=res_receipt.passed),
             )
             print(f"[{res_rel_body.status}] GitHub Release Body: {res_rel_body.message}")

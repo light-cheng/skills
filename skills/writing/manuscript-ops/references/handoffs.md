@@ -128,11 +128,11 @@ $manuscript-ops resume from <exact-project-root>/.project-review/state.md
 
 Install and refresh the agent between layers when necessary:
 
-1. Required first-party discovery closure from `LightDevCoder/skills`:
+1. Required first-party discovery closure from `light-cheng/skills`:
    `clarify` (the user entry), its underlying `socratic` capability, and
    `decision-map`.
 2. Optional Decision-map branches, before they are selected: `light-prototype`.
-3. Independent acceptance from `LightDevCoder/skills`: `project-review`.
+3. Independent acceptance from `light-cheng/skills`: `project-review`.
 4. `manuscript-ops`.
 
 Never install dependencies automatically during manuscript execution.
@@ -140,7 +140,7 @@ Never install dependencies automatically during manuscript execution.
 ### Generic installer
 
 ```text
-npx skills@latest add LightDevCoder/skills
+npx skills@latest add light-cheng/skills
 ```
 
 Select the exact closure above. Use the installer's global flag only when the
@@ -160,7 +160,7 @@ Resolve the default Codex home when `CODEX_HOME` is unset:
 $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME '.codex' }
 $installer = Join-Path $codexHome 'skills\.system\skill-installer\scripts\install-skill-from-github.py'
 python $installer `
-  --repo LightDevCoder/skills `
+  --repo light-cheng/skills `
   --ref <published-tag-or-commit> `
   --path skills/thinking/clarify skills/thinking/socratic skills/thinking/decision-map skills/review/project-review
 ```
@@ -170,7 +170,7 @@ requires it. Start a fresh Codex session after installation.
 
 ### Manual portable installation
 
-Clone `LightDevCoder/skills` at the selected published tag or commit. Copy every
+Clone `light-cheng/skills` at the selected published tag or commit. Copy every
 selected `skills/<category>/<name>` folder so it ends at
 `.agents/skills/<name>/SKILL.md`. For
 example:

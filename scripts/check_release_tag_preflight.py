@@ -28,6 +28,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from check_release_tag_protection import fetch_remote_rulesets, verify_ruleset_payload
+from repo_identity import resolve_repository, validate_repository
 
 
 class PreflightResult(NamedTuple):
@@ -197,7 +198,7 @@ def check_working_tree(repo_root: Path = REPO_ROOT, tag: str | None = None) -> t
 def run_tag_preflight(
     tag: str,
     release_commit: str,
-    repo: str = "LightDevCoder/skills",
+    repo: str | None = None,
     pattern: str = "refs/tags/v*",
     fixture: str | None = None,
     check_remote_tag: bool = True,
@@ -246,6 +247,7 @@ def run_tag_preflight(
             )
     else:
         try:
+            repo = resolve_repository(repo, repo_root)
             remote_rulesets = fetch_remote_rulesets(repo)
             ruleset_res = verify_ruleset_payload(remote_rulesets, target_pattern=pattern)
         except Exception as e:
@@ -304,7 +306,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Preflight check before release tag creation.")
     parser.add_argument("--tag", required=True, help="Release tag to create (e.g. v0.2.4).")
     parser.add_argument("--release-commit", required=True, help="Candidate commit SHA.")
-    parser.add_argument("--repo", default="LightDevCoder/skills", help="Target GitHub repository.")
+    parser.add_argument("--repo", type=validate_repository, default=None,
+                        help="GitHub owner/name (default: GITHUB_REPOSITORY, then gh, then the origin remote).")
     parser.add_argument("--pattern", default="refs/tags/v*", help="Target tag pattern.")
     parser.add_argument("--fixture", help="Path to ruleset JSON fixture for offline/hermetic testing.")
     parser.add_argument("--skip-remote", action="store_true", help="Skip remote tag existence check (default: remote check enabled).")

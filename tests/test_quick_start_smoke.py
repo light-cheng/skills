@@ -21,8 +21,8 @@ def run_checks(root: Path = ROOT) -> tuple[int, list[str]]:
     zh = (root / "examples/quick-start/README.zh-CN.md").read_text(encoding="utf-8", errors="replace")
 
     c.check(
-        "npx skills add LightDevCoder/skills" in en
-        and "npx skills add LightDevCoder/skills --skill ask-light" in en
+        "npx skills add light-cheng/skills" in en
+        and "npx skills add light-cheng/skills --skill ask-light" in en
         and "$ask-light next" in en
         and "$project-init" in en
         and "$project-review" in en,

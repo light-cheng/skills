@@ -13,6 +13,8 @@ from datetime import datetime
 from typing import Mapping
 from urllib.parse import unquote, urlparse
 
+from repo_identity import REPO_PATTERN, RELEASE_URL_PATTERN, is_release_url
+
 PUBLIC_RELEASE_DOCS = (
     "README.md", "README.zh-CN.md", "CATALOG.md", "CATALOG.zh-CN.md",
     "docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md",
@@ -33,6 +35,7 @@ class ReleaseContext:
     install_verified: bool = False
     published: bool = False
     simulated: bool = False
+    repository: str | None = None  # owner/name when known; None accepts any GitHub repository
 
     def __post_init__(self) -> None:
         if not re.fullmatch(VERSION, self.target):
@@ -70,7 +73,7 @@ def apply_observations(context: ReleaseContext, data: Mapping, candidate: str,
         install_verified = not install_errors
     published = False
     if context.stage in ("published", "attested") or "release" in data:
-        publication_errors = validate_publication_observation(data.get("release"), context.target, source)
+        publication_errors = validate_publication_observation(data.get("release"), context.target, source, context.repository)
         errors.extend(publication_errors)
         published = not publication_errors
         if published:
@@ -147,21 +150,12 @@ def valid_publication_time(value) -> bool:
         return False
 
 
-# The LightDevCoder account was renamed to light-cheng. GitHub reports the new owner
-# and redirects the old one, so both release URLs identify this repository.
-RELEASE_OWNERS = ("LightDevCoder", "light-cheng")
-
-
-def release_urls(tag: str) -> set[str]:
-    return {f"https://github.com/{owner}/skills/releases/tag/{tag}" for owner in RELEASE_OWNERS}
-
-
-def validate_publication_observation(record, tag: str, source: str) -> list[str]:
+def validate_publication_observation(record, tag: str, source: str, repo: str | None = None) -> list[str]:
     if not isinstance(record, dict):
         return [f"[PUBLICATION_UNOBSERVED] {source}: include the observed GitHub Release result"]
     if (record.get("tagName") != tag or record.get("isDraft") is not False
             or record.get("isPrerelease") is not False or not valid_publication_time(record.get("publishedAt"))
-            or record.get("url") not in release_urls(tag)):
+            or not is_release_url(record.get("url"), tag, repo)):
         return [f"[PUBLICATION_IDENTITY] {source}: require the matching non-draft stable release URL and observed publication time"]
     return []
 
@@ -221,7 +215,8 @@ def confirmed_stable(documents: Mapping[str, str]) -> tuple[str | None, str | No
         identity_zh = re.search(r"\|\s*\*\*发布版本\*\*\s*\|\s*`?([^`|\s]+)", other)
         if not identity_en or not identity_zh or identity_en.group(1) != version or identity_zh.group(1) != version:
             continue
-        if not any(url in text for url in release_urls(version)) or not any(url in other for url in release_urls(version)):
+        url = re.compile(RELEASE_URL_PATTERN + re.escape(version) + r"(?![\w.-])")
+        if not url.search(text) or not url.search(other):
             continue
         if not re.search(r"\|\s*\*\*GitHub Release Publication\*\*\s*\|\s*`?(?:PASS|SUCCESS)`?\s*\|", text, re.I):
             continue
@@ -322,7 +317,7 @@ def installation_command_errors(text: str, path: str, context: ReleaseContext, *
         if re.match(r"^#{1,6}\s", line):
             heading = line
             preceding = []
-        source = re.search(r"\bskills\s+add\s+(?:LightDevCoder|light-cheng)/skills(?:#([^\s`]+))?", line)
+        source = re.search(rf"\bskills\s+add\s+{REPO_PATTERN}(?:#([^\s`]+))?", line)
         if source and (source.group(1) is None or source.group(1) == context.target):
             if (frozen or not context.install_verified) and not re.search(r"template|模板", heading + "\n" + "\n".join(preceding[-4:]), re.I):
                 errors.append(f"[FUTURE_INSTALL_TEMPLATE] {path}:{number}: mark the target/default installation command as a template until its released source is verified")

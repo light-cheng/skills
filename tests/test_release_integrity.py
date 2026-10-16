@@ -7,9 +7,18 @@ import subprocess
 import sys
 import tempfile
 import unittest
+
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Fixture receipts name this repository; the CLI resolves it from GITHUB_REPOSITORY, as in CI.
+FIXTURE_REPO = "fixture-owner/skills"
+
+
+@pytest.fixture(autouse=True)
+def _fixture_repository(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPOSITORY", FIXTURE_REPO)
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from check_release_tag_preflight import (
@@ -657,7 +666,7 @@ def make_valid_receipt_en(
     release_url: str | None = None,
     timestamp: str = "2026-09-21T00:00:00Z",
 ) -> str:
-    url = release_url or f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
+    url = release_url or f"https://github.com/{FIXTURE_REPO}/releases/tag/{tag}"
     return f"""# LightDevCoder/skills {tag} Release Receipt
 
 [中文收据](RELEASE_RECEIPT.zh-CN.md)
@@ -702,7 +711,7 @@ def make_valid_receipt_zh(
     release_url: str | None = None,
     timestamp: str = "2026-09-21T00:00:00Z",
 ) -> str:
-    url = release_url or f"https://github.com/LightDevCoder/skills/releases/tag/{tag}"
+    url = release_url or f"https://github.com/{FIXTURE_REPO}/releases/tag/{tag}"
     return f"""# LightDevCoder/skills {tag} 发布收据
 
 [English Version](RELEASE_RECEIPT.md)
@@ -905,7 +914,7 @@ class ReceiptStrictValidationTests(unittest.TestCase):
         self.assertEqual(res.status, "PASS")
 
     def test_receipt_release_url_accepts_the_renamed_owner_only(self) -> None:
-        """The receipt may name the light-cheng release URL; another owner is rejected."""
+        """A current receipt names the resolved repository; a historical audit keeps the old name."""
         for cmd in (["git", "init"], ["git", "config", "user.name", "Test"], ["git", "config", "user.email", "test@example.com"]):
             subprocess.run(cmd, cwd=self.tmp_root, capture_output=True, check=True)
         (self.tmp_root / "test.txt").write_text("ok", encoding="utf-8")
@@ -913,13 +922,15 @@ class ReceiptStrictValidationTests(unittest.TestCase):
         subprocess.run(["git", "commit", "-m", "candidate"], cwd=self.tmp_root, capture_output=True, check=True)
         subprocess.run(["git", "tag", "-a", "v0.2.4", "-m", "release v0.2.4"], cwd=self.tmp_root, capture_output=True, check=True)
         tag_ident = resolve_annotated_tag_identity("v0.2.4", cwd=self.tmp_root)
-        for owner, accepted in (("light-cheng", True), ("someone-else", False)):
+        for owner, repo, accepted in (("light-cheng", "light-cheng/skills", True), ("someone-else", "light-cheng/skills", False),
+                                      ("LightDevCoder", "light-cheng/skills", False), ("LightDevCoder", None, True)):
             url = f"https://github.com/{owner}/skills/releases/tag/v0.2.4"
             for name, factory in (("RELEASE_RECEIPT.md", make_valid_receipt_en), ("RELEASE_RECEIPT.zh-CN.md", make_valid_receipt_zh)):
                 text = factory(tag_obj=tag_ident.tag_object_sha, tag_target=tag_ident.peeled_commit_sha, release_url=url)
                 (self.rel_dir / name).write_text(text, encoding="utf-8")
-            res = check_release_receipt_consistency("v0.2.4", release_commit=tag_ident.peeled_commit_sha, repo_root=self.tmp_root)
-            self.assertEqual(res.passed, accepted, f"{owner}: {res.status}: {res.message}")
+            res = check_release_receipt_consistency("v0.2.4", release_commit=tag_ident.peeled_commit_sha,
+                                                    repo_root=self.tmp_root, repo=repo)
+            self.assertEqual(res.passed, accepted, f"{owner}/{repo}: {res.status}: {res.message}")
 
     def test_lightweight_release_tag_rejected(self) -> None:
         """Lightweight release tag (git tag without -a) is rejected as RELEASE_TAG_NOT_ANNOTATED."""
@@ -2703,7 +2714,7 @@ class ReleaseLifecycleHermeticE2ETests(unittest.TestCase):
             pub_evidence = {
                 "published_tag": "v9.9.9",
                 "publication_status": "PASS",
-                "release_url": "https://github.com/LightDevCoder/skills/releases/tag/v9.9.9",
+                "release_url": f"https://github.com/{FIXTURE_REPO}/releases/tag/v9.9.9",
                 "timestamp": "2026-09-21T00:00:00Z",
             }
             self.assertEqual(pub_evidence["publication_status"], "PASS")

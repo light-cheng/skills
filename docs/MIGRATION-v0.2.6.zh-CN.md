@@ -2,6 +2,8 @@
 
 [English](MIGRATION-v0.2.6.md) · [候选发布说明](evidence/namespace-v0.2.6/release-draft/RELEASE_NOTES.zh-CN.md)
 
+GitHub 账号 `LightDevCoder` 已于 2026 年 10 月改名为 `light-cheng`。本说明命令使用新名称；仓库、tag 和内容都不变，旧的 `LightDevCoder/skills` 命令仍会跳转。请改用新名称：如果有人注册了旧账号，跳转就会失效。
+
 **状态：** 本地名称迁移候选尚未发布；远端 v0.2.6 已被旅行手册发布占用。v0.2.5 是本 checkout 的已验证发布基线，并非最新远端稳定版。新名称模板为 **BLOCKED，不可执行**；D7 禁止覆盖标签或自行改号。见[发布阻断记录](evidence/namespace-v0.2.6/publication-blocker.md)。
 
 12 个 Light 包增加 `light-` 前缀。其他 24 个名称、七个分类、36 个包总数、职责和调用权限保持不变。旧名不提供可安装 alias 或 wrapper。`ask-light` 与 `light-travelpage` 保留名称。安装路径变为 `<skills-root>/<新名>/`；源码路径仍为 `skills/<category>/<新名>/`。
@@ -36,12 +38,12 @@
 5. 检查 Host 选择器或发现列表。安装全集时记录全部 36 个 Light 包身份、12 个新界面标签（`Light · …`）、实际路径、来源和选中的调用。ready-ticket 场景应推荐 `light-implement`，软件审阅应解析到 `light-code-review`。Light 依赖缺失时应报告不可用，不应改用旧同名能力。
 
 ```bash
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --skill light-implement
-# BLOCKED — do not execute: npx skills add LightDevCoder/skills#v0.2.6 --global --agent codex
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6 --skill light-implement
+# BLOCKED — do not execute: npx skills add light-cheng/skills#v0.2.6 --global --agent codex
 ```
 
-不带版本的 `npx skills add LightDevCoder/skills` 跟随实际默认分支 `main`，不会自动跟随最新稳定标签。v0.2.5 不包含候选新名称。静态文件扫描只能证明结构，不能证明 Host 实际调用。能力发现与显式选择来源不会锁定所有 model-invoked 调用。
+不带版本的 `npx skills add light-cheng/skills` 跟随实际默认分支 `main`，不会自动跟随最新稳定标签。v0.2.5 不包含候选新名称。静态文件扫描只能证明结构，不能证明 Host 实际调用。能力发现与显式选择来源不会锁定所有 model-invoked 调用。
 
 ## 恢复
 

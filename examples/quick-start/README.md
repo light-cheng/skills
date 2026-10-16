@@ -12,14 +12,14 @@ The commands below install the published collection. The output remains a
 recommendation boundary; installation does not authorize automatic chaining.
 
 ```bash
-npx skills add LightDevCoder/skills
+npx skills add light-cheng/skills
 ```
 
 Refresh the Agent host and confirm discovery without this source checkout.
 For a single package, use for example:
 
 ```bash
-npx skills add LightDevCoder/skills --skill ask-light
+npx skills add light-cheng/skills --skill ask-light
 ```
 
 ## 2. Inspect the example

@@ -9,7 +9,15 @@ import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 TAG = "v9.8.7"
+# Fixture repository: release scripts must not depend on the collection's real name.
+REPO = "example-owner/skills"
+
+
+@pytest.fixture(autouse=True)
+def _fixture_repository(monkeypatch):
+    monkeypatch.setenv("GITHUB_REPOSITORY", REPO)
 
 
 def git(root: Path, *args: str) -> str:
@@ -68,11 +76,13 @@ def commit(root: Path, message: str = "release: fixture preparation") -> str:
     return git(root, "rev-parse", "HEAD")
 
 
-def integrity(root: Path, stage: str = "prepared", *extra: str) -> subprocess.CompletedProcess[str]:
+def integrity(root: Path, stage: str = "prepared", *extra: str, repo: str | None = REPO,
+              env: dict | None = None) -> subprocess.CompletedProcess[str]:
+    repo_args = ["--repo", repo] if repo and ("--observations" in extra or stage == "attested") else []
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/verify_release_integrity.py"),
-         "--root", str(root), "--tag", TAG, "--stage", stage, *extra],
-        cwd=root, capture_output=True, text=True, timeout=30,
+         "--root", str(root), "--tag", TAG, "--stage", stage, *extra, *repo_args],
+        cwd=root, capture_output=True, text=True, timeout=30, env=env,
     )
 
 
@@ -109,7 +119,8 @@ def make_attested(root: Path) -> tuple[str, str]:
     tag_object = git(root, "rev-parse", f"refs/tags/{TAG}")
     for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
         write(root, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
-              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate))
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate,
+                      release_url=f"https://github.com/{REPO}/releases/tag/{TAG}"))
     for path in ("README.md", "README.zh-CN.md", "CATALOG.md", "CATALOG.zh-CN.md", "docs/INSTALLATION.md", "docs/INSTALLATION.zh-CN.md", "docs/MAINTENANCE.md", "docs/MAINTENANCE.zh-CN.md"):
         doc = root / path
         doc.write_text(doc.read_text(encoding="utf-8") + f"\nCurrent stable release: `{TAG}`.\n", encoding="utf-8")
@@ -281,7 +292,7 @@ def body_cli(root: Path, body: str, *extra: str) -> subprocess.CompletedProcess[
     input_path.write_text(body, encoding="utf-8")
     return subprocess.run(
         [sys.executable, str(ROOT / "scripts/prepare_release_body.py"), "--tag", TAG,
-         "--input", str(input_path), "--output", str(root / "release-body.md"), *extra],
+         "--input", str(input_path), "--output", str(root / "release-body.md"), "--repo", REPO, *extra],
         cwd=root, capture_output=True, text=True, timeout=30,
     )
 
@@ -504,7 +515,7 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     import verify_release_integrity as verifier
     make_attested(tmp_path)
     body = (tmp_path / f"docs/evidence/releases/{TAG}/RELEASE_NOTES.md").read_text(encoding="utf-8")
-    prefix = f"https://github.com/LightDevCoder/skills/blob/{TAG}/docs/evidence/releases/{TAG}/"
+    prefix = f"https://github.com/{REPO}/blob/{TAG}/docs/evidence/releases/{TAG}/"
     body = body.replace("(RELEASE_NOTES.zh-CN.md)", f"({prefix}RELEASE_NOTES.zh-CN.md)")
     body = body.replace("(RELEASE_MANIFEST.md)", f"({prefix}RELEASE_MANIFEST.md)")
     if fault == "wrong-title":
@@ -512,9 +523,9 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
     elif fault == "unpublished":
         body += "\nRelease status: not yet published.\n"
     elif fault == "wrong-link":
-        body += f"\n[v9.8.6](https://github.com/LightDevCoder/skills/releases/tag/{TAG})\n"
+        body += f"\n[v9.8.6](https://github.com/{REPO}/releases/tag/{TAG})\n"
     release = {"body": body, "tagName": TAG, "isDraft": fault == "draft", "isPrerelease": False,
-               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}"}
+               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/{REPO}/releases/tag/{TAG}"}
     original_run = subprocess.run
     def run(command, *args, **kwargs):
         if command[:3] == ["gh", "release", "view"]:
@@ -527,14 +538,15 @@ def test_attested_remote_body_uses_the_same_semantic_gate(tmp_path: Path, monkey
         return original_tag_check(*args, **kwargs)
     monkeypatch.setattr(verifier, "check_tag_immutability", check_tag)
     monkeypatch.setattr(sys, "argv", ["verify_release_integrity.py", "--root", str(tmp_path),
-                                     "--tag", TAG, "--stage", "attested", "--check-remote"])
+                                     "--tag", TAG, "--stage", "attested", "--check-remote", "--repo", REPO])
     assert verifier.main() == 1
     output = capsys.readouterr().out
     assert "GitHub Release" in output
     assert "RELEASE_BODY_INCONSISTENT" in output or "PUBLICATION_IDENTITY" in output
 
 
-def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tmp_path: Path) -> None:
+def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
     from release_context import PUBLIC_RELEASE_DOCS
     from test_release_integrity import make_valid_receipt_en, make_valid_receipt_zh
     make_candidate(tmp_path)
@@ -559,13 +571,13 @@ def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tm
     body_path = tmp_path.parent / f"{tmp_path.name}-body.md"
     body = subprocess.run(
         [sys.executable, str(ROOT / "scripts/prepare_release_body.py"), "--root", str(tmp_path),
-         "--tag", TAG, "--observations", str(observations), "--simulate", "--output", str(body_path)],
+         "--tag", TAG, "--repo", REPO, "--observations", str(observations), "--simulate", "--output", str(body_path)],
         capture_output=True, text=True, timeout=30,
     )
     assert body.returncode == 0 and "SIMULATED" in body.stderr, body.stdout + body.stderr
     data["release"] = {
         "tagName": TAG, "isDraft": False, "isPrerelease": False, "publishedAt": "2026-10-09T00:00:00Z",
-        "url": f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}",
+        "url": f"https://github.com/{REPO}/releases/tag/{TAG}",
         "body": body_path.read_text(encoding="utf-8"),
     }
     observations.write_text(json.dumps(data), encoding="utf-8")
@@ -573,7 +585,8 @@ def test_six_stage_rehearsal_uses_two_committed_trees_and_external_test_facts(tm
     assert published.returncode == 0 and "SIMULATED_PASS" in published.stdout, published.stdout + published.stderr
     for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
         write(tmp_path, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
-              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, timestamp=data["release"]["publishedAt"]) +
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, timestamp=data["release"]["publishedAt"],
+                          release_url=f"https://github.com/{REPO}/releases/tag/{TAG}") +
               "\nEvidence class: local rehearsal; external results are test doubles.\n")
     for path in PUBLIC_RELEASE_DOCS:
         destination = tmp_path / path
@@ -616,15 +629,94 @@ def test_existing_v027_tag_is_audited_without_rewriting_main_or_tag() -> None:
     assert (ROOT / "README.md").read_bytes() == main_readme_before
 
 
+def test_known_defect_notice_keeps_a_published_body_valid(tmp_path: Path, monkeypatch, capsys) -> None:
+    """BROKEN-RELEASE.md marks a bad release by prefixing its body; the attested gate must still pass."""
+    monkeypatch.syspath_prepend(str(ROOT / "scripts"))
+    import verify_release_integrity as verifier
+    make_attested(tmp_path)
+    body = (tmp_path / f"docs/evidence/releases/{TAG}/RELEASE_NOTES.md").read_text(encoding="utf-8")
+    prefix = f"https://github.com/{REPO}/blob/{TAG}/docs/evidence/releases/{TAG}/"
+    body = body.replace("(RELEASE_NOTES.zh-CN.md)", f"({prefix}RELEASE_NOTES.zh-CN.md)")
+    body = body.replace("(RELEASE_MANIFEST.md)", f"({prefix}RELEASE_MANIFEST.md)")
+    body = "> **Known defect:** one script crashes on empty input. Use v9.8.8 instead.\n\n" + body
+    release = {"body": body, "tagName": TAG, "isDraft": False, "isPrerelease": False,
+               "publishedAt": "2026-10-09T00:00:00Z", "url": f"https://github.com/{REPO}/releases/tag/{TAG}"}
+    seen = []
+    original_run = subprocess.run
+    def run(command, *args, **kwargs):
+        if command[:3] == ["gh", "release", "view"]:
+            seen.append(command)
+            return subprocess.CompletedProcess(command, 0, json.dumps(release), "")
+        return original_run(command, *args, **kwargs)
+    monkeypatch.setattr(verifier.subprocess, "run", run)
+    result = verifier.check_github_release_navigation(TAG, repo=REPO, cwd=tmp_path)
+    assert result.passed, result.message
+    assert seen and seen[0][seen[0].index("--repo") + 1] == REPO
+    wrong_repo = verifier.check_github_release_navigation(TAG, repo="someone-else/skills", cwd=tmp_path)
+    assert not wrong_repo.passed and "PUBLICATION_IDENTITY" in wrong_repo.message
+
+
+def test_publication_observation_is_pinned_to_the_resolved_repository(tmp_path: Path) -> None:
+    """Without --repo the gate resolves the repository (here GITHUB_REPOSITORY) and rejects another owner's release."""
+    import os
+    make_candidate(tmp_path)
+    candidate = commit(tmp_path)
+    git(tmp_path, "tag", "-a", TAG, "-m", "Fixture annotated tag")
+    observations = observation_file(tmp_path, candidate)
+    data = json.loads(observations.read_text(encoding="utf-8"))
+    data["installation"] = installation_observation(candidate)
+    data["release"] = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
+                       "publishedAt": "2026-10-09T00:00:00Z",
+                       "url": f"https://github.com/someone-else/skills/releases/tag/{TAG}", "body": "x"}
+    observations.write_text(json.dumps(data), encoding="utf-8")
+    env = {**os.environ, "GITHUB_REPOSITORY": REPO}
+    result = integrity(tmp_path, "published", "--observations", str(observations), "--simulate", repo=None, env=env)
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"GitHub Repo:    {REPO}" in result.stdout
+    assert "PUBLICATION_IDENTITY" in result.stdout + result.stderr
+
+
+def test_publication_gate_fails_when_no_repository_can_be_found(tmp_path: Path) -> None:
+    import os
+    make_candidate(tmp_path)
+    candidate = commit(tmp_path)
+    observations = observation_file(tmp_path, candidate)
+    env = {k: v for k, v in os.environ.items() if k != "GITHUB_REPOSITORY"}
+    env["PATH"] = str(tmp_path / "no-gh") + os.pathsep + "/usr/bin:/bin"  # no gh; the fixture has no origin
+    result = integrity(tmp_path, "ci_verified", "--observations", str(observations), "--simulate", repo=None, env=env)
+    assert result.returncode == 1 and "REPOSITORY_UNRESOLVED" in result.stdout, result.stdout + result.stderr
+
+
 @pytest.mark.parametrize("url, accepted", [
-    (f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}", True),
+    (f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}", False),  # old owner: redirects, never live
     (f"https://github.com/light-cheng/skills/releases/tag/{TAG}", True),
+    (f"https://github.com/Light-Cheng/Skills/releases/tag/{TAG}", True),
     (f"https://github.com/someone-else/skills/releases/tag/{TAG}", False),
     (f"https://github.com/light-cheng/other/releases/tag/{TAG}", False),
     ("https://github.com/light-cheng/skills/releases/tag/v9.8.6", False),
 ])
-def test_publication_accepts_the_renamed_owner_and_nothing_else(url: str, accepted: bool) -> None:
+def test_live_publication_accepts_only_the_resolved_repository(url: str, accepted: bool) -> None:
     from release_context import validate_publication_observation
     record = {"tagName": TAG, "isDraft": False, "isPrerelease": False,
               "publishedAt": "2026-10-16T07:22:12Z", "url": url}
-    assert (validate_publication_observation(record, TAG, "fixture") == []) is accepted
+    assert (validate_publication_observation(record, TAG, "fixture", "light-cheng/skills") == []) is accepted
+
+
+def test_current_attested_receipt_must_name_the_resolved_repository(tmp_path: Path) -> None:
+    """Without --repo or --check-remote, a current attested run resolves the repo; an old-owner receipt fails."""
+    import os
+    from test_release_integrity import make_valid_receipt_en, make_valid_receipt_zh
+    candidate, _ = make_attested(tmp_path)
+    tag_object = git(tmp_path, "rev-parse", f"refs/tags/{TAG}")
+    old = f"https://github.com/LightDevCoder/skills/releases/tag/{TAG}"
+    for suffix, factory in (("", make_valid_receipt_en), (".zh-CN", make_valid_receipt_zh)):
+        write(tmp_path, f"docs/evidence/releases/{TAG}/RELEASE_RECEIPT{suffix}.md",
+              factory(tag=TAG, tag_obj=tag_object, tag_target=candidate, release_url=old))
+    commit(tmp_path, "receipt names the pre-rename owner")
+    env = {**os.environ, "GITHUB_REPOSITORY": REPO}
+    current = integrity(tmp_path, "attested", "--release-commit", candidate, repo=None, env=env)
+    assert current.returncode == 1 and "RECEIPT_URL_MISMATCH" in current.stdout, current.stdout + current.stderr
+    assert f"GitHub Repo:    {REPO}" in current.stdout
+    history = integrity(tmp_path, "attested", "--release-commit", candidate, "--mode", "historical", repo=None, env=env)
+    assert "RECEIPT_URL_MISMATCH" not in history.stdout, history.stdout
+    assert "[PASS] Receipt Consistency" in history.stdout, history.stdout

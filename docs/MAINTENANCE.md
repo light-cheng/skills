@@ -20,7 +20,9 @@ Keep each fact in one authoritative location and link elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). The current stable release is [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) (39 packages, adding `light-decide`, `light-redirect` and `light-html-plan`). Its [release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) records the preparation-time scope and its [release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md) the observed publication and installation facts.
+The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). Release snapshot v0.2.9: this page describes v0.2.9 (39 packages; repository links move to `light-cheng`). Its [release manifest](evidence/releases/v0.2.9/RELEASE_MANIFEST.md) records the preparation-time scope; observed publication and installation facts go into the release receipt on `main`.
+
+The previous release is [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) ([release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md)).
 
 History markers: `v0.1.1` (five), `v0.1.2` (seven), `v0.1.3` toolchain migration, `v0.1.4` (`kanban-worker` as `light-kanban-worker`), `v0.1.5` scheduling + identity hardening, `v0.1.6` (`kb-init`). Structural/discovery checks live in [tests/test_collection_discovery.py](../tests/test_collection_discovery.py) and [tests/test_composition.py](../tests/test_composition.py); they are structural evidence, not fresh-install proof.
 

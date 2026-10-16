@@ -38,4 +38,4 @@ Deliver the live link, repository location, implemented sharing scope, concise v
 
 ## Optional capabilities
 
-- **The owner wants AI through a self-hosted or local gateway (a Tunnel or a loopback address)** → call `light-travelpage-gw` ([repository](https://github.com/LightDevCoder/light-travelpage-gw)). Not installed → support only an HTTPS API the deployed page can reach, and say so.
+- **The owner wants AI through a self-hosted or local gateway (a Tunnel or a loopback address)** → call `light-travelpage-gw` ([repository](https://github.com/light-cheng/light-travelpage-gw)). Not installed → support only an HTTPS API the deployed page can reach, and say so.

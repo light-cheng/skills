@@ -25,6 +25,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any, NamedTuple
 
+from repo_identity import resolve_repository, validate_repository
+
 
 class ProtectionCheckResult(NamedTuple):
     passed: bool
@@ -198,7 +200,7 @@ def verify_ruleset_payload(
     )
 
 
-def fetch_remote_rulesets(repo: str = "LightDevCoder/skills") -> list[dict[str, Any]]:
+def fetch_remote_rulesets(repo: str) -> list[dict[str, Any]]:
     """Fetch rulesets using gh CLI or GitHub REST API."""
     # 1. Try gh CLI if available
     gh_path = shutil.which("gh")
@@ -231,7 +233,7 @@ def fetch_remote_rulesets(repo: str = "LightDevCoder/skills") -> list[dict[str, 
     token = os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
     headers = {
         "Accept": "application/vnd.github+json",
-        "User-Agent": "LightDevCoder-ReleaseTagProtectionCheck",
+        "User-Agent": "skills-release-tag-protection-check",
     }
     if token:
         headers["Authorization"] = f"Bearer {token}"
@@ -261,14 +263,21 @@ def fetch_remote_rulesets(repo: str = "LightDevCoder/skills") -> list[dict[str, 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Verify remote GitHub release tag ruleset protection.")
-    parser.add_argument("--repo", default="LightDevCoder/skills", help="Target GitHub repository (default: LightDevCoder/skills).")
+    parser.add_argument("--repo", type=validate_repository, default=None,
+                        help="GitHub owner/name (default: GITHUB_REPOSITORY, then gh, then the origin remote).")
     parser.add_argument("--pattern", default="refs/tags/v*", help="Target tag pattern (default: refs/tags/v*).")
     parser.add_argument("--fixture", help="Path to local ruleset JSON fixture for hermetic testing.")
 
     args = parser.parse_args()
+    if not args.fixture:
+        try:
+            args.repo = resolve_repository(args.repo, Path(__file__).resolve().parent.parent)
+        except ValueError as error:
+            print(f"RESULT: BLOCKED — {error}")
+            return 1
 
     print(f"=== Remote Tag Protection Guard ===")
-    print(f"Target Repository: {args.repo}")
+    print(f"Target Repository: {args.repo or 'fixture'}")
     print(f"Required Pattern:  {args.pattern}")
     print("------------------------------------")
 

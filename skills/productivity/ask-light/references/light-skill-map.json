@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "collection": "LightDevCoder/skills",
+  "collection": "light-cheng/skills",
   "routingAuthority": {
     "semanticRouting": "model-owned",
     "note": "This map describes the collection; it never makes the final semantic routing decision. The model understands the request and evidence, shortlists candidates, reads the relevant SKILL.md contracts, and selects; ask_light.py validates the selection afterwards.",

@@ -6,7 +6,9 @@
 
 [按分类浏览](skills/README.zh-CN.md) · [路径迁移](docs/CATEGORY_MIGRATION.zh-CN.md)
 
-本目录列出 v0.2.8 已发布的名称，共 39 个包。v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`（[v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)）。
+版本快照 v0.2.9：本目录列出 39 个包；v0.2.9 不改任何包名。
+
+v0.2.8 曾把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`（[v0.2.8 迁移说明](docs/MIGRATION-v0.2.8.zh-CN.md)）。
 
 此前 12 个 `light-` 改名见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
@@ -16,13 +18,11 @@
 | --- | --- |
 | 集合 | Light Skills — Composable Agent Workflows |
 | 包数量 | 39 个已准入第一方 Skill |
-| 当前状态 | 39 个包；v0.2.8 是当前稳定版本 |
-| 稳定版本 | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（39 个包；新增 light-decide、light-redirect、light-html-plan；上一稳定版 v0.2.7 为 36 个包） |
+| 版本快照 | v0.2.9（39 个包；仓库链接改为 light-cheng；release-workflow 改进） |
+| 上一版本 | [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)（39 个包） |
 | 安装权威 | [docs/INSTALLATION.zh-CN.md](docs/INSTALLATION.zh-CN.md) |
 | 发现检查 | [tests/test_collection_discovery.py](tests/test_collection_discovery.py) · [tests/test_composition.py](tests/test_composition.py) |
-| 证据 | [v0.2.8 发布清单](docs/evidence/releases/v0.2.8/RELEASE_MANIFEST.zh-CN.md) · [v0.2.8 发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md) · 上一版本：[v0.2.7 发布收据](docs/evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md) |
-
-`v0.2.8` 的发布与新鲜安装已验证；包数量为 39。
+| 证据 | [v0.2.9 发布清单](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)；实际观察到的发布与安装事实记入 `main` 上的 v0.2.9 发布收据 · 上一版本：[v0.2.8 发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md) |
 
 v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.zh-CN.md)与独立[英文说明](docs/evidence/releases/v0.2.6/RELEASE_NOTES.md)记录旅行手册和可选 AI 变化。
 
@@ -39,7 +39,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **调用方式：** Model-invoked。
 - **包位置：** [skills/engineering/agent-config/](skills/engineering/agent-config)
 - **状态：** 第一方已准入；REFACTOR（参照 Sol Advisor 设计理念，Profile 驱动跨 Harness 执行配置器，覆盖主要编码 Agent Harness [10 种原生适配器 + 1 种通用回退]）。
-- **证据：** [host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/engineering/agent-config/references/plan-schema.md)、[task-assessment.md](skills/engineering/agent-config/references/task-assessment.md)、[profile-schema.md](skills/engineering/agent-config/references/profile-schema.md)、[companion-contract.md](skills/engineering/agent-config/references/companion-contract.md)、[harness-support.md](skills/engineering/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [LightDevCoder/agent-config](https://github.com/LightDevCoder/agent-config)。
+- **证据：** [host-evidence-schema.md](skills/engineering/agent-config/references/host-evidence-schema.md)、[plan-schema.md](skills/engineering/agent-config/references/plan-schema.md)、[task-assessment.md](skills/engineering/agent-config/references/task-assessment.md)、[profile-schema.md](skills/engineering/agent-config/references/profile-schema.md)、[companion-contract.md](skills/engineering/agent-config/references/companion-contract.md)、[harness-support.md](skills/engineering/agent-config/references/harness-support.md)、[provider-adapter-contract.md](skills/engineering/agent-config/references/provider-adapter-contract.md)；Companion 运行时维护于 [light-cheng/agent-config](https://github.com/light-cheng/agent-config)。
 - **安装路径：** `<skills-root>/agent-config/`。
 
 ### ask-light
@@ -288,7 +288,7 @@ v0.2.6 优化 `light-travelpage`；[中文发布说明](docs/evidence/releases/v
 - **什么时候用：** 项目已通过 `project-review` 验收，准备执行版本发布、Tag 创建与收据证明时。
 - **调用方式：** Model-invoked；支持手动入口。
 - **包位置：** [skills/project/release-workflow/](skills/project/release-workflow)
-- **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自 `LightDevCoder/release-workflow`）。
+- **状态：** 第一方已准入；MIGRATE — NO REWRITE（来自已退役的 `LightDevCoder/release-workflow` 仓库）。
 - **证据：** [SKILL.md](skills/project/release-workflow/SKILL.md) · [发布收尾门禁验收](docs/evidence/2026-10-07-release-closeout/acceptance.md) · [完整修复批次验收](docs/evidence/2026-10-07-release-batch/acceptance.md)。
 - **安装路径：** `<skills-root>/release-workflow/`。
 

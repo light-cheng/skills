@@ -2,6 +2,8 @@
 
 [English](MIGRATION-v0.2.7.md) · [发布说明](evidence/releases/v0.2.7/RELEASE_NOTES.zh-CN.md)
 
+GitHub 账号 `LightDevCoder` 已于 2026 年 10 月改名为 `light-cheng`。本说明命令使用新名称；仓库、tag 和内容都不变，旧的 `LightDevCoder/skills` 命令仍会跳转。请改用新名称：如果有人注册了旧账号，跳转就会失效。
+
 **状态：** v0.2.7已公开。独立候选验收、准确CI、受保护标签和真实发布源安装通过。见[发布收据](evidence/releases/v0.2.7/RELEASE_RECEIPT.zh-CN.md)。v0.2.6保留旧名，先前阻断记录保持历史原样。
 
 12 个 Light 包增加 `light-` 前缀。其他 24 个名称、七个分类、36 个包总数、职责和调用权限保持不变。旧名不提供可安装 alias 或 wrapper。`ask-light` 与 `light-travelpage` 保留名称。安装路径变为 `<skills-root>/<新名>/`；源码路径仍为 `skills/<category>/<新名>/`。
@@ -36,12 +38,12 @@
 5. 检查 Host 选择器或发现列表。安装全集时记录全部 36 个 Light 包身份、12 个新界面标签（`Light · …`）、实际路径、来源和选中的调用。ready-ticket 场景应推荐 `light-implement`，软件审阅应解析到 `light-code-review`。Light 依赖缺失时应报告不可用，不应改用旧同名能力。
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.7
-npx skills add LightDevCoder/skills#v0.2.7 --skill light-implement
-npx skills add LightDevCoder/skills#v0.2.7 --global --agent codex
+npx skills add light-cheng/skills#v0.2.7
+npx skills add light-cheng/skills#v0.2.7 --skill light-implement
+npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 ```
 
-不带版本的 `npx skills add LightDevCoder/skills` 跟随实际默认分支 `main`，不会自动跟随最新稳定标签。v0.2.6 不包含候选新名称。静态文件扫描只能证明结构，不能证明 Host 实际调用。能力发现与显式选择来源不会锁定所有 model-invoked 调用。
+不带版本的 `npx skills add light-cheng/skills` 跟随实际默认分支 `main`，不会自动跟随最新稳定标签。v0.2.6 不包含候选新名称。静态文件扫描只能证明结构，不能证明 Host 实际调用。能力发现与显式选择来源不会锁定所有 model-invoked 调用。
 
 ## 恢复
 

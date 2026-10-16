@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       expected_commit:
-        description: Full CI-verified candidate commit
+        description: Full release commit the tag points at (RELEASE_SHA)
         required: true
         type: string
 

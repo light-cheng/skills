@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/LightDevCoder/agent-config/main/schemas/host-capabilities.schema.json",
+  "$id": "https://raw.githubusercontent.com/light-cheng/agent-config/main/schemas/host-capabilities.schema.json",
   "title": "HostCapabilities",
   "description": "Canonical schema for host capabilities reported by Host Adapters. Strictly records factual availability and discrete options, forbidding automatic intelligence ranking or routing ranks.",
   "type": "object",

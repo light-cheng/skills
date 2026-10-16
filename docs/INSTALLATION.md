@@ -2,11 +2,15 @@
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8), published at tag `v0.2.8` (immutable [release manifest](evidence/releases/v0.2.8/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md)). It provides **39 admitted first-party Skills** across 7 purpose-based categories. Fresh installs from the released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 406 files, byte-identical), plus local Claude Code and pi installs that both Hosts discovered. pi loads project Skills only after project trust; Codex runtime was not checked locally. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+Release snapshot v0.2.9: this guide covers v0.2.9, with **39 admitted first-party Skills** across 7 purpose-based categories. The [v0.2.9 release manifest](evidence/releases/v0.2.9/RELEASE_MANIFEST.md) records its preparation-time scope and local evidence; observed installation and publication facts go into the release receipt on `main`. Until that receipt exists, the v0.2.9 and default-branch commands below are templates. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add light-cheng/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
 v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the tagged tree; Skills CLI 1.7.0 discovered all 36 Skills.
+
+## Previous release: v0.2.8
+
+Previous release [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) ([release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md)): fresh installs from its released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 406 files, byte-identical), plus local Claude Code and pi installs that both Hosts discovered. pi loads project Skills only after project trust; Codex runtime was not checked locally.
 
 ## Previous release: v0.2.7 name migration
 
@@ -28,7 +32,7 @@ Current `main` uses `skills/<category>/<name>/`. Host installations remain `<ski
 
 ## Recommended installation
 
-### Interactive installation (recommended)
+### Interactive installation (recommended; command template)
 
 Run the interactive installer and choose the Skills and target Agent hosts you want:
 
@@ -36,7 +40,7 @@ Run the interactive installer and choose the Skills and target Agent hosts you w
 npx skills add light-cheng/skills
 ```
 
-### Install a single Skill
+### Install a single Skill (command template)
 
 To install a specific Skill without selecting from the entire collection:
 
@@ -49,11 +53,13 @@ npx skills add light-cheng/skills --skill light-travelpage
 npx skills add light-cheng/skills --skill project-retro
 ```
 
-### Pinned release installation
+### Pinned release installation (command template for v0.2.9)
 
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
+npx skills add light-cheng/skills#v0.2.9 -y
+npx skills add light-cheng/skills#v0.2.9 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.8 -y
 npx skills add light-cheng/skills#v0.2.8 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.7 -y
@@ -107,10 +113,10 @@ Historical release verifications tested full-collection installations in isolate
 The v0.2.0 release commands were verified against the published v0.2.0 tag in fresh isolated environments:
 
 ```bash
-npx skills add LightDevCoder/skills#v0.2.0 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.2.0 --skill implement --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill project-review --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill agent-config --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.2.0 --skill implement --yes --copy --agent '*'
 ```
 
 See the [v0.2.0 installation verification](evidence/releases/v0.2.0/INSTALLATION_VERIFICATION.md).
@@ -120,10 +126,10 @@ See the [v0.2.0 installation verification](evidence/releases/v0.2.0/INSTALLATION
 The previous v0.1.6 release commands were verified against the published v0.1.6 tag and installed the nine-package collection at that revision:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.6 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill kb-init --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.6 --skill review-loop --yes --copy --agent '*'
 ```
 
 The first installs the nine-package collection and the others select one complete package from the same verified revision. The forms are verified against fresh destinations in the [v0.1.6 installation record](evidence/releases/v0.1.6/INSTALLATION_VERIFICATION.md).
@@ -132,6 +138,8 @@ The `latest` form and the `#v0.1.6` form resolve to the same content at release 
 
 ## Rename note
 
+The GitHub account `LightDevCoder` was renamed to `light-cheng` in October 2026. Commands on this page use the new name; the repository, tags and content are the same, and old `LightDevCoder/skills` commands still redirect. Prefer the new name: a redirect stops working if someone else registers the old account.
+
 `light-kanban-worker` was renamed to `kanban-worker` in v0.1.6. Historical v0.1.4 and v0.1.5 records and commands below still use the old `light-kanban-worker` name; current installs use `kanban-worker`.
 
 ## Historical v0.1.5 verification
@@ -139,9 +147,9 @@ The `latest` form and the `#v0.1.6` form resolve to the same content at release 
 The previous stable release was the published v0.1.5 snapshot at commit `a56aa9d98de0b941ee2282144bc7e756ef5e48bd`. It installed the eight-package collection at that revision. Its verified pinned forms were:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.5 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.5 --skill review-loop --yes --copy --agent '*'
 ```
 
 Verified against fresh destinations in the [v0.1.5 installation record](evidence/releases/v0.1.5/INSTALLATION_VERIFICATION.md).
@@ -151,8 +159,8 @@ Verified against fresh destinations in the [v0.1.5 installation record](evidence
 The previous stable release was the published v0.1.4 snapshot at commit `a9cc8aa029c926fc80f6ddc0022793f79dfd85bd`. It introduced `light-kanban-worker` for the eight-package collection. Its pinned form was:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.4 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.4 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.4 --skill light-kanban-worker --yes --copy --agent '*'
 ```
 
 Both forms were verified against fresh destinations with CLI `1.5.22`; see the [v0.1.4 installation record](evidence/releases/v0.1.4/INSTALLATION_VERIFICATION.md).
@@ -162,8 +170,8 @@ Both forms were verified against fresh destinations with CLI `1.5.22`; see the [
 The previous stable release was the published v0.1.3 snapshot at commit `f8b573a48f7d53da74cfb8d94eb2ee7ca467d5c4`. It is a toolchain-migration release with the same seven packages as v0.1.2, so its package-level installs are covered by the [v0.1.2 installation verification](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md); its pinned form was:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.3 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.3 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.3 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.3 --skill review-loop --yes --copy --agent '*'
 ```
 
 ## Historical v0.1.2 verification
@@ -171,8 +179,8 @@ npx skills add LightDevCoder/skills#v0.1.3 --skill review-loop --yes --copy --ag
 The previous stable release was the published v0.1.2 snapshot at commit `8de5ec1a453b0e93f71dcda160e17ea7b42c3997`. Its verified commands were:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.2 --yes --copy --agent '*'
-npx skills add LightDevCoder/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.2 --yes --copy --agent '*'
+npx skills add light-cheng/skills#v0.1.2 --skill review-loop --yes --copy --agent '*'
 ```
 
 Both forms were verified against fresh destinations with CLI `1.5.22`; see the [v0.1.2 installation record](evidence/releases/v0.1.2/INSTALLATION_VERIFICATION.md).
@@ -182,8 +190,8 @@ Both forms were verified against fresh destinations with CLI `1.5.22`; see the [
 The previous stable release was the published v0.1.1 snapshot at commit `c50f1ef403a5f0bfe02e75d1aeff2c237556db63`. Its verified commands used an explicit tag and a codex host selection:
 
 ```text
-npx skills add LightDevCoder/skills#v0.1.1 --yes --copy --agent codex
-npx skills add LightDevCoder/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
+npx skills add light-cheng/skills#v0.1.1 --yes --copy --agent codex
+npx skills add light-cheng/skills#v0.1.1 --skill review-loop --yes --copy --agent codex
 ```
 
 The verified CLI version, destination class, discovery result, and smoke result are recorded in the [v0.1.1 installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md).
@@ -193,8 +201,8 @@ The verified CLI version, destination class, discovery result, and smoke result 
 The historical stable release was the published v0.1.0 snapshot at commit `fb36fc2dad39ee94ad4aa25a5fee3c87c54f05f2`. The following unqualified commands are retained as historical commands from that published release. The summarized CLI, host, destination, validator, and known evidence limits are recorded in the [historical installation record](evidence/releases/v0.1.1/INSTALLATION_VERIFICATION.md#historical-v010-summary):
 
 ```text
-npx skills add LightDevCoder/skills
-npx skills add LightDevCoder/skills --skill review-loop
+npx skills add light-cheng/skills
+npx skills add light-cheng/skills --skill review-loop
 ```
 
 That historical record is a summary, not a current rerun; it explicitly marks boundary/missing-dependency smoke and repeat-install behavior when the original receipt did not record them.
@@ -231,7 +239,7 @@ This is a fallback procedure, not fresh-install proof by itself. The record must
 
 ## Direct upstream and third-party packages
 
-Unmodified Matt Pocock Skills stay on their original upstream path: [mattpocock/skills](https://github.com/mattpocock/skills). Modified third-party variants belong in the private [skills-3rdParty](https://github.com/LightDevCoder/skills-3rdParty) repository; they are not included in this public collection and have their own pinned manifest and release evidence. Approved Matt PORTs listed in [CATALOG.md](../CATALOG.md) are self-contained first-party packages with `ATTRIBUTION.md` — they require no upstream install at runtime, and the Light main workflow does not require `mattpocock/skills` or `sol-advisor`.
+Unmodified Matt Pocock Skills stay on their original upstream path: [mattpocock/skills](https://github.com/mattpocock/skills). Modified third-party variants belong in the private [skills-3rdParty](https://github.com/light-cheng/skills-3rdParty) repository; they are not included in this public collection and have their own pinned manifest and release evidence. Approved Matt PORTs listed in [CATALOG.md](../CATALOG.md) are self-contained first-party packages with `ATTRIBUTION.md` — they require no upstream install at runtime, and the Light main workflow does not require `mattpocock/skills` or `sol-advisor`.
 
 Install either a Light Port or its upstream Skill, not both. Seven Ports keep their upstream trigger wording: `light-diagnosing-bugs`, `light-tdd`, `light-prototype`, `light-research`, `light-wizard`, `light-writing-for-agents` and `light-merge-conflicts`. When both copies are installed, the Agent sees two Skills for the same request and may pick either one. Each of these descriptions names its upstream Skill. (`light-merge-conflicts` was named `resolving-merge-conflicts` before v0.2.8, the same name as its upstream Skill; see [the v0.2.8 migration](MIGRATION-v0.2.8.md).)
 
