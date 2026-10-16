@@ -2,7 +2,7 @@
 
 [简体中文](MIGRATION-v0.2.9.zh-CN.md)
 
-**Status:** release snapshot v0.2.9. Observed publication and installation facts go into the release receipt on `main`.
+**Status:** v0.2.9 is published. Pull-request CI on the exact candidate, the merged-tree check, the protected tag and fresh installs from the released source passed; see the [release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md).
 
 ## The repository owner name changed
 

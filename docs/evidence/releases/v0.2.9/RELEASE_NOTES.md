@@ -12,7 +12,7 @@ This release snapshot v0.2.9 keeps the same 39 Skills. It moves every live link 
 
 ## Installation
 
-Template until the receipt confirms the released source:
+Installation from the actual v0.2.9 source passed in fresh environments. Select the fixed tag for a reproducible install:
 
 ```bash
 npx skills add light-cheng/skills#v0.2.9
@@ -21,4 +21,4 @@ npx skills add light-cheng/skills#v0.2.9 --skill release-workflow
 
 ## Verification
 
-Local evidence at preparation is listed in the [release manifest](RELEASE_MANIFEST.md). The post-release receipt on main records CI, the protected tag, fresh installs and publication. The full [changelog](https://github.com/light-cheng/skills/blob/main/CHANGELOG.md) lists every change.
+Local evidence at preparation is listed in the [release manifest](RELEASE_MANIFEST.md). Pull-request CI on the exact candidate, CI on the merged commit, the merged-tree check and the protected annotated tag are verified. On a fresh hosted Linux user, pinned and default whole installs for Codex and Claude Code projects, native Codex global scope and three single Skills each matched their source bytes (39 packages, 407 files). Locally, Claude Code listed all 39 Skills from a fresh install and both Claude Code and pi ran `eli5` from it. Codex is not installed on the maintainer's machine. The post-release receipt on main has the details. The full [changelog](https://github.com/light-cheng/skills/blob/main/CHANGELOG.md) lists every change.

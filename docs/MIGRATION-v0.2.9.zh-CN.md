@@ -2,7 +2,7 @@
 
 [English](MIGRATION-v0.2.9.md)
 
-**状态：** v0.2.9 版本快照。实际观察到的发布与安装事实记入 `main` 上的发布收据。
+**状态：** v0.2.9 已公开发布。准确候选的 pull request CI、合并树检查、受保护标签和实际发布源的新鲜安装均已通过；见[发布收据](evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)。
 
 ## 仓库所有者名称已更改
 
