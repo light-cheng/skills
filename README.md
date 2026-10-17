@@ -4,11 +4,11 @@
 
 # Light Skills — Composable Agent Workflows
 
-<!-- release-state: {"view": "snapshot", "version": "v0.2.10", "install_commands": "template"} -->
+<!-- release-state: {"view": "current", "stable": "v0.2.10"} -->
 
 `light-cheng/skills` provides 39 first-party Agent Skills designed to work together across project planning, coding, and review, or run individually on demand. Each package lives in `skills/<category>/<name>/` and defines its own behavior in `SKILL.md`.
 
-> **Release snapshot v0.2.10:** this page describes v0.2.10 with 39 Skills. v0.2.10 writes Skill calls so they work on every Host, not only Codex, and fixes the project-flow problems found in a real rehearsal on Claude Code and pi. The [v0.2.10 release manifest](docs/evidence/releases/v0.2.10/RELEASE_MANIFEST.md) records its preparation-time scope and evidence; observed publication and installation facts are recorded in the release receipt on `main`. See the [v0.2.10 release notes](docs/evidence/releases/v0.2.10/RELEASE_NOTES.md).
+> **Release:** [v0.2.10](https://github.com/light-cheng/skills/releases/tag/v0.2.10) is the current stable release of all 39 first-party Skills. It writes Skill calls so they work on every Host, not only Codex, and fixes the project-flow problems found in a real rehearsal on Claude Code and pi. Its immutable [release manifest](docs/evidence/releases/v0.2.10/RELEASE_MANIFEST.md) and post-publication [release receipt](docs/evidence/releases/v0.2.10/RELEASE_RECEIPT.md) record the scope and verification. See the [v0.2.10 release notes](docs/evidence/releases/v0.2.10/RELEASE_NOTES.md).
 
 > **Name migration:** v0.2.8 renames `resolving-merge-conflicts` to `light-merge-conflicts`. In [v0.2.7](https://github.com/light-cheng/skills/releases/tag/v0.2.7), twelve Skills took `light-` names; see the [v0.2.7 migration guide](docs/MIGRATION-v0.2.7.md).
 
@@ -41,7 +41,7 @@ Skills follow the progressive disclosure patterns of Matt Pocock Skills and the 
 
 ## Installation
 
-### Current main / latest (install command template)
+### Current main / latest
 
 Install the latest collection from the default branch `main`:
 
@@ -59,7 +59,9 @@ npx skills add light-cheng/skills --skill light-research
 
 > **Note:** An unqualified repository source (`light-cheng/skills`) follows the default branch `main`, delivering the latest admitted features and integrations.
 
-### Pinned v0.2.10 (install command template)
+### Stable release snapshot (v0.2.10)
+
+To install the reproducible stable release snapshot, pin the `#v0.2.10` tag:
 
 ```bash
 npx skills add light-cheng/skills#v0.2.10
@@ -100,7 +102,7 @@ npx skills add light-cheng/skills#v0.2.0
 
 > **Note:** The `#v0.2.0` tag remains an immutable, reproducible snapshot of the v0.2.0 release line and is not modified by subsequent work on `main`.
 
-### Target a specific Agent directly (command template)
+### Target a specific Agent directly
 
 ```bash
 npx skills add light-cheng/skills --agent claude-code
@@ -225,5 +227,5 @@ Adapted origin (2 packages): `humanizer` is a substantially transformed first-pa
 - [Review Policy](docs/REVIEW_POLICY.md) · [Reviewer Contract](docs/REVIEWER_CONTRACT.md)
 - [Catalog](CATALOG.md) · [Changelog](CHANGELOG.md)
 - [Workflow Guides](docs/workflows)
-- [v0.2.9 Release Receipt](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.md) (previous release)
+- [Release Receipt](docs/evidence/releases/v0.2.10/RELEASE_RECEIPT.md) · [v0.2.9 Release Receipt](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.md) (previous release)
 - [Collection Discovery Tests](tests/test_collection_discovery.py) · [Composition Tests](tests/test_composition.py)

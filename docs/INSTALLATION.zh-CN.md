@@ -1,10 +1,10 @@
 # 安装与 Fresh-Install 验证
 
-<!-- release-state: {"view": "snapshot", "version": "v0.2.10", "install_commands": "template"} -->
+<!-- release-state: {"view": "current", "stable": "v0.2.10"} -->
 
 [English installation guide](INSTALLATION.md)
 
-v0.2.10 版本快照：本指南描述 v0.2.10，共 **39 个已准入第一方 Skill**，按 7 个用途分类。[v0.2.10 发布清单](evidence/releases/v0.2.10/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围与本地证据；实际观察到的安装和发布事实写入 `main` 上的发布收据。在该收据出现之前，下面的 v0.2.10 和默认分支命令都是模板。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
+公开第一方集合的当前稳定版本是 [v0.2.10](https://github.com/light-cheng/skills/releases/tag/v0.2.10)，对应 tag `v0.2.10`（不可变的[发布清单](evidence/releases/v0.2.10/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](evidence/releases/v0.2.10/RELEASE_RECEIPT.zh-CN.md)）。共 **39 个已准入第一方 Skill**，按 7 个用途分类。实际发布源的新鲜安装已在托管 Linux 用户上通过：Codex、Claude Code 项目锁定版与默认分支全量安装、原生 Codex 全局范围和代表性单包（39 个包、407 个文件，逐字节一致）。v0.2.10 没有做本机真实 Host 冒烟。包契约仍在 `skills/<category>/<name>/` 内；本文件是安装权威，不替代各宿主自身的发现规则。
 
 标准安装命令是通用 `latest` 形式：它跟随仓库默认 revision，因此 `npx skills add light-cheng/skills` 是推荐的交互式安装入口，可按需选择 Skill 与目标 Agent。pinned release 命令选择指定 tag，用于可复现安装。历史验证命令（曾用于在隔离环境中跨所有受支持 Agent 测试完整集合）与历史证据一同记录在下方。
 
@@ -38,7 +38,7 @@ npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 
 ## 推荐安装方式
 
-### 交互式安装（推荐；命令模板）
+### 交互式安装（推荐）
 
 运行交互式安装命令，按需挑选所需的 Skill 及目标 Agent：
 
@@ -46,7 +46,7 @@ npx skills add light-cheng/skills#v0.2.7 --global --agent codex
 npx skills add light-cheng/skills
 ```
 
-### 安装单个 Skill（命令模板）
+### 安装单个 Skill
 
 若只需安装指定 Skill，无需在全量集合中选择：
 
@@ -59,7 +59,7 @@ npx skills add light-cheng/skills --skill light-travelpage
 npx skills add light-cheng/skills --skill project-retro
 ```
 
-### 指定版本安装（Pinned Release；v0.2.10 为命令模板）
+### 指定版本安装（Pinned Release）
 
 使用指定的 Release Tag 进行确定性安装（推荐用于可复现环境）：
 

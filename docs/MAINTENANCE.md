@@ -1,6 +1,6 @@
 # First-Party Maintenance and Documentation Synchronization
 
-<!-- release-state: {"view": "snapshot", "version": "v0.2.10"} -->
+<!-- release-state: {"view": "current", "stable": "v0.2.10"} -->
 
 [中文维护说明](MAINTENANCE.zh-CN.md)
 
@@ -22,7 +22,7 @@ Keep each fact in one authoritative location and link elsewhere:
 
 ## Current synchronization baseline
 
-The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). This page is the release snapshot of v0.2.10 (39 packages). The [v0.2.10 release manifest](evidence/releases/v0.2.10/RELEASE_MANIFEST.md) records the preparation-time scope; observed publication and installation facts go into the v0.2.10 release receipt on `main`. The previous release is [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) ([release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md)).
+The admitted collection contains **39 first-party Skills** under `skills/` (see [CATALOG.md](../CATALOG.md)). The current stable release is [v0.2.10](https://github.com/light-cheng/skills/releases/tag/v0.2.10) (39 packages). Its [release manifest](evidence/releases/v0.2.10/RELEASE_MANIFEST.md) records the preparation-time scope and its [release receipt](evidence/releases/v0.2.10/RELEASE_RECEIPT.md) the observed publication and installation facts. The previous release is [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) ([release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md)).
 
 The previous release is [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8) ([release receipt](evidence/releases/v0.2.8/RELEASE_RECEIPT.md)).
 
