@@ -6,6 +6,8 @@ All notable changes are recorded here. A release entry must be tied to an actual
 
 ## Unreleased
 
+- `light-travelpage`: new hand-drawn route map for geographic regions (`map.style: "sketch"`). Places keep their real bearings, crowded areas are magnified together with the coastline, and arrows and step numbers come from each day's schedule, so the map follows itinerary edits. Optional `map.region.landmarks` and `map.modeWords`. The overview, the daily route view and the handbook day maps use it; regions without the setting are unchanged.
+
 ## 0.2.10 — 2026-10-17
 
 - Published through the pull-request path with exact-candidate PR CI, a merged-tree check, CI on the merged commit, a protected annotated tag and fresh installs from the released source; see the [release receipt](docs/evidence/releases/v0.2.10/RELEASE_RECEIPT.md). The tag peels to `adffefc`, the merge commit of PR #13.

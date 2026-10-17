@@ -133,6 +133,7 @@ function routeLayersFor(source) {
 }
 
 function travelOverviewArtwork(days, source = {}, options = {}) {
+  if (source.sketch && typeof sketchMapArtwork === "function") return sketchMapArtwork(days, source, options.day || 0);
   const routeLayers = routeLayersFor(source);
   const allPlaceLayers = placeLayersFor(source);
   const overviewIds = new Set(source.overviewPlaceIds || []);

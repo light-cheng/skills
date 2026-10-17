@@ -2,6 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildSketch, sketchBaseSvg } from "./sketch-layout.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const MANIFEST_PATH = "assets/maps/templates/manifest.json";
@@ -12,6 +13,7 @@ const GOLDEN = Object.freeze({
   maxOverviewPlaces: 10
 });
 const TEMPLATE_MAP_DISCLAIMER = "本图仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。";
+const SKETCH_MAP_DISCLAIMER = "手绘示意图：地点保持真实方位，地点密集的地方局部放大，不代表真实比例。连线只表示行程顺序，不代表实际道路或航线。";
 const GEOGRAPHIC_MAP_DISCLAIMER = "地理轮廓来自配置的边界数据；地点按提供坐标绘制。连线仅表示行程顺序，不代表实际道路或航线。";
 
 function argsFrom(argv) {
@@ -490,9 +492,51 @@ function mapDataForRegion(mapData, region, regionCount) {
   return { ...mapData, region, places, routes, dailyRoutes };
 }
 
-async function buildRegion(mapData, manifest) {
+async function buildSketchRegion(mapData, tripData, geographic) {
+  const canvas = { width: GOLDEN.width, height: GOLDEN.height };
+  const boundary = await readJson(absolute(geographic.outlineFile));
+  const sketch = buildSketch({ tripData, mapData, boundary, canvas });
+  if (sketch.missing.length) console.warn(`Sketch map skips places without coordinates: ${sketch.missing.join(", ")}`);
+  const baseImage = geographic.sketchImage || geographic.baseImage.replace(/\.svg$/, "-sketch.svg");
+  if (!/^assets\/maps\/[a-z0-9-]+\.svg$/.test(baseImage)) throw new Error("Sketch map image must name a local map asset");
+  const ariaLabel = `${mapData.region.label}手绘路线示意图，共${sketch.days.length}天`;
+  await fs.writeFile(absolute(baseImage), sketchBaseSvg(sketch, canvas, ariaLabel));
+  const color = (day) => GOLDEN.routeColors[(day - 1) % GOLDEN.routeColors.length];
+  const nodeById = new Map(sketch.nodes.map((node) => [node.id, node]));
+  const dayPlaces = (day) => [...new Set(day.legs.flatMap((leg) => [leg.from, leg.to]).concat(day.stay || []))].filter((id) => nodeById.has(id));
+  const regionId = String(mapData.region.id || "trip-map").replace(/[^a-z0-9-]/gi, "-").toLowerCase();
+  return {
+    id: regionId,
+    label: mapData.region.label,
+    countryCode: mapData.region.countryCode,
+    scope: "schematic-sketch",
+    mapMode: "schematic-sketch",
+    templateId: null,
+    mapModeReason: "authored-sketch-style",
+    mapModeMetrics: { geoPlaceCount: sketch.nodes.reduce((sum, node) => sum + node.placeIds.length, 0), missingPlaceIds: sketch.missing },
+    days: sketch.days.map((day) => day.day),
+    canvas,
+    projection: { type: "schematic-sketch", frame: { x: 380, y: 40, width: canvas.width - 420, height: canvas.height - 80 } },
+    baseImage,
+    title: mapData.region.title || `${mapData.region.label} · 旅行路线`,
+    ariaLabel,
+    description: "手绘路线示意图；箭头表示方向，圆圈数字表示顺序。",
+    disclaimer: SKETCH_MAP_DISCLAIMER,
+    heading: { text: mapData.region.heading || mapData.region.label, x: 40, y: 100, size: 40 },
+    legend: { x: 42, y: 160, gap: 42 },
+    annotations: [],
+    routes: sketch.days.map((day) => ({ day: day.day, color: color(day.day), placeIds: dayPlaces(day), paths: [], overviewPaths: [] })),
+    places: sketch.nodes.flatMap((node) => node.placeIds.map((id) => ({ id, x: node.x, y: node.y, tx: node.x + 18, ty: node.y - 14, size: 22, anchor: "start", lines: [node.label], color: "#3a2a1a", days: sketch.days.filter((day) => dayPlaces(day).includes(node.id)).map((day) => day.day), node: node.id }))),
+    overviewPlaceIds: sketch.nodes.map((node) => node.id),
+    dailyLayouts: Object.fromEntries(sketch.days.map((day) => [String(day.day), { places: dayPlaces(day), labels: {}, transport: [] }])),
+    sketch: { nodes: sketch.nodes, away: sketch.away, days: sketch.days }
+  };
+}
+
+async function buildRegion(mapData, manifest, tripData) {
   if (!mapData.places.length) return null;
   const geographic = mapData.mapMode === "geographic-outline" ? mapData.region.geographic : null;
+  if (geographic && mapData.style === "sketch") return buildSketchRegion(mapData, tripData, geographic);
   const selection = geographic ? null : templateSelection(mapData, manifest);
   const template = selection?.template;
   let points;
@@ -608,7 +652,7 @@ if (config.modules?.overview === false) {
   const regions = (await Promise.all(definitions.map(async (definition) => {
     const regional = mapDataForRegion(mapData, definition, definitions.length);
     if ((!regional.templateId || regional.templateId === "auto") && previousTemplates.has(definition.id)) regional.templateId = previousTemplates.get(definition.id);
-    return buildRegion(regional, manifest);
+    return buildRegion(regional, manifest, tripData);
   }))).filter(Boolean);
   if (!regions.length) throw new Error("No destination map regions contain usable places");
   for (const region of regions) await fs.access(absolute(region.baseImage));

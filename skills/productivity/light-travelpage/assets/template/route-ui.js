@@ -34,7 +34,8 @@ function scheduleItemsForPin(day, pin) {
   ).filter(Boolean);
 }
 
-function dailyViewportFor(source) {
+function dailyViewportFor(source, layout, dayNumber) {
+  if (source.sketch && typeof sketchViewport === "function") return sketchViewport(source, dayNumber);
   const canvas = source.canvas || { width: 1448, height: 1086 };
   return { x: 0, y: 0, width: canvas.width, height: canvas.height };
 }
@@ -54,6 +55,9 @@ function transportIcon(type) {
 }
 
 function mapArtwork(source, selected, id, viewport) {
+  if (source.sketch && typeof sketchMapArtwork === "function") {
+    return sketchMapArtwork(state.data.days, source, selected?.day || 0).replace(/sketch-/g, `${id}-sketch-`);
+  }
   if (!selected) return travelOverviewArtwork(state.data.days, source);
   const layout = dailyMapLayoutFor(source, selected.day);
   const day = state.data.days.find((item) => item.day === selected.day);
@@ -96,7 +100,7 @@ function travelMapMarkup(source, route) {
   const day = route && state.data.days.find((item) => item.day === route.day);
   const layout = route && dailyMapLayoutFor(source, route.day);
   const canvas = source.canvas || { width: 1448, height: 1086 };
-  const viewport = route ? dailyViewportFor(source, layout) : { x: 0, y: 0, width: canvas.width, height: canvas.height };
+  const viewport = route ? dailyViewportFor(source, layout, route.day) : { x: 0, y: 0, width: canvas.width, height: canvas.height };
   const position = (x, y) => `left:${(x - viewport.x) / viewport.width * 100}%;top:${(y - viewport.y) / viewport.height * 100}%`;
   const placeLayers = placeLayersFor(source);
   const places = route && layout ? layout.places.map((placeId, index) => {
@@ -318,8 +322,9 @@ function handbookMapLayout(day, source, options = {}) {
 }
 
 function handbookDayMapMarkup(day, options = {}) {
-  options = { whole:true, ...options };
   const source = travelMapSourceForDay(state.data.routeMap, day.day);
+  // A hand-drawn map covers the whole trip region, so open each day zoomed to its own places.
+  options = { whole: !source?.sketch, ...options };
   if (!source) return `<p class="detail-note">${escapeHtml(window.TravelI18n?.text("当天路线资料待补") || "当天路线资料待补")}</p>`;
   const tr = value => escapeHtml(window.TravelI18n?.text(value) ?? value);
   const m = handbookMapLayout(day, source, options), { groups, points, radius, unit } = m;
@@ -373,7 +378,7 @@ function setupHandbookMaps() {
     if (root) {
       const target = event.target.closest("[data-handbook-cluster], [data-handbook-place], [data-handbook-reset], [data-handbook-zoom]");
       if (!target) return;
-      const day = Number(root.dataset.mapDay), options = { whole:true, ...handbookMapSelections.get(day) };
+      const day = Number(root.dataset.mapDay), options = { whole: !travelMapSourceForDay(state.data.routeMap, day)?.sketch, ...handbookMapSelections.get(day) };
       if (target.hasAttribute("data-handbook-cluster")) options.focus = target.dataset.handbookCluster.split('|');
       if (target.hasAttribute("data-handbook-place")) { options.selected = target.dataset.handbookPlace; options.focus = [options.selected]; }
       if (target.hasAttribute("data-handbook-reset")) options.focus = [];

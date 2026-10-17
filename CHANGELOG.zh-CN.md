@@ -6,6 +6,8 @@
 
 ## 未发布
 
+- `light-travelpage`：地理地图新增手绘风格（`map.style: "sketch"`）。地点保持真实方位，密集区域连同海岸线局部放大；箭头和步骤序号按每天的 schedule 生成，行程改了地图跟着变。可选 `map.region.landmarks` 和 `map.modeWords`。总览、每天路线和手册当天地图都使用它；未设置的地区保持原样。
+
 ## 0.2.10 — 2026-10-17
 
 - 经 pull request 路径发布：准确候选的 PR CI、合并后树检查、合并提交上的 CI、受保护的 annotated tag 和发布源的新鲜安装均已验证；见[发布收据](docs/evidence/releases/v0.2.10/RELEASE_RECEIPT.zh-CN.md)。标签指向 PR #13 的合并提交 `adffefc`。
