@@ -4,11 +4,11 @@
 
 # Light Skills — 可组合的 Agent 工作流
 
-<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+<!-- release-state: {"view": "snapshot", "version": "v0.2.10", "install_commands": "template"} -->
 
 `light-cheng/skills` 包含 39 个第一方 Agent Skill，既可串联用于软件项目的规划、编码与审查，也可按需单独使用。每个包位于 `skills/<category>/<name>/`，由包内的 `SKILL.md` 统领具体行为。
 
-> **发布：** [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) 是全部 39 个第一方 Skill 的当前稳定版本。它在 GitHub 账号改名后把所有现行链接和安装命令改为 `light-cheng/skills`，并改进了 `release-workflow`。不可变的[发布清单](docs/evidence/releases/v0.2.9/RELEASE_MANIFEST.zh-CN.md)和发布后的[发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)记录范围与验证。见 [v0.2.9 发布说明](docs/evidence/releases/v0.2.9/RELEASE_NOTES.zh-CN.md)和 [v0.2.9 迁移说明](docs/MIGRATION-v0.2.9.zh-CN.md)。
+> **v0.2.10 版本快照：** 本页描述 v0.2.10，共 39 个 Skill。v0.2.10 把技能调用改成在各个 Host 上都能用的写法，不再只适用于 Codex；并修复了在 Claude Code 和 pi 上真实演练时发现的项目流程问题。[v0.2.10 发布清单](docs/evidence/releases/v0.2.10/RELEASE_MANIFEST.zh-CN.md)记录准备时的范围与证据；实际观察到的发布和安装事实记录在 `main` 上的发布收据中。见 [v0.2.10 发布说明](docs/evidence/releases/v0.2.10/RELEASE_NOTES.zh-CN.md)。
 
 > **名称迁移：** v0.2.8 把 `resolving-merge-conflicts` 改名为 `light-merge-conflicts`。[v0.2.7](https://github.com/light-cheng/skills/releases/tag/v0.2.7) 中 12 个 Skill 改用 `light-` 新名称，见 [v0.2.7 迁移说明](docs/MIGRATION-v0.2.7.zh-CN.md)。
 
@@ -41,7 +41,7 @@
 
 ## 安装
 
-### 当前 main / latest
+### 当前 main / latest（安装命令模板）
 
 从默认分支 `main` 安装最新集合：
 
@@ -59,16 +59,21 @@ npx skills add light-cheng/skills --skill light-research
 
 > **说明：** 不带 fragment 的仓库源（`light-cheng/skills`）将跟随默认分支 `main`，获取最新的已准入特性与集成。
 
-### 稳定版本快照（v0.2.9）
+### 锁定 v0.2.10（安装命令模板）
 
-锁定 `#v0.2.9` tag 可复现安装当前稳定版本：
+```bash
+npx skills add light-cheng/skills#v0.2.10
+npx skills add light-cheng/skills#v0.2.10 --skill light-implement
+```
+
+### 历史版本
+
+锁定 `#v0.2.9` tag 可复现安装 [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9)：
 
 ```bash
 npx skills add light-cheng/skills#v0.2.9
 npx skills add light-cheng/skills#v0.2.9 --skill light-implement
 ```
-
-### 历史版本
 
 锁定 `#v0.2.8` tag 可复现安装 [v0.2.8](https://github.com/light-cheng/skills/releases/tag/v0.2.8)：
 
@@ -220,5 +225,5 @@ ask-light workflow
 - [审阅策略](docs/REVIEW_POLICY.zh-CN.md) · [Reviewer 契约](docs/REVIEWER_CONTRACT.zh-CN.md)
 - [目录](CATALOG.zh-CN.md) · [变更记录](CHANGELOG.zh-CN.md)
 - [工作流指南](docs/zh-CN/workflows)
-- [发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md) · [v0.2.8 发布收据](docs/evidence/releases/v0.2.8/RELEASE_RECEIPT.zh-CN.md)（上一版本）
+- [v0.2.9 发布收据](docs/evidence/releases/v0.2.9/RELEASE_RECEIPT.zh-CN.md)（上一版本）
 - [集合发现测试](tests/test_collection_discovery.py) · [组合测试](tests/test_composition.py)

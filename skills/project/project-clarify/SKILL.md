@@ -54,6 +54,10 @@ Project clarification handoff
 - Status: ready-for-next-stage | waiting-for-user | blocked
 ```
 
+`Resolved user decisions` holds only answers the user gave or confirmed. A
+default you would pick goes under `Open decisions and dependencies` as a
+question.
+
 Return the handoff in memory by default. When the next stage may run in
 another session, offer to save it at `.scratch/<feature>/clarify-handoff.md`
 (or a destination the user names). Write only after the user confirms. Then

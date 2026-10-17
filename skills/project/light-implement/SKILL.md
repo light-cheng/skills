@@ -14,7 +14,10 @@ hands it to review.
 
 1. **Pin one work item.** Resolve exactly one ticket, Spec section, or explicit
    conversation slice and record it as the target. For a tracker ticket, set
-   `Status: claimed` before changing any other file.
+   `Status: claimed` before changing any other file. Report `BLOCKED` and stop
+   instead when the ticket is not `ready-for-agent`, is already `claimed`, or
+   lists a `Blocked by` ticket that is not `resolved` (`claimed` is not
+   `resolved`). Do not move on to another ticket.
 2. **Inspect relevant context.** When `docs/agents/light-project.md` exists,
    read its tracker, domain-context, and review-profile fields. Then skim only
    the named glossary, ADRs, and files the item touches; record source locations.
@@ -34,7 +37,9 @@ hands it to review.
    appropriate; produce non-code artifacts per their contract. Verify locally
    (tests, render, schema, or domain check).
 5. **Hand to `review-loop`** with the matching reviewer: `light-code-review` for
-   code, `generic-review` or a domain reviewer for non-code.
+   code, `generic-review` or a domain reviewer for non-code. Keep the reviewer's
+   report for each round. When no reviewer ran, the review is `not run`: never
+   write `Findings: []` or `converged` for it.
 6. **Write the implementation report and stop.** For a tracker ticket, append
    the report under the ticket's `## Comments`: scope, fixed point, verification
    results, the findings `review-loop` left open, and `Plan gap:`

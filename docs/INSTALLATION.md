@@ -1,14 +1,18 @@
 # Installation and Fresh-Install Verification
 
-<!-- release-state: {"view": "current", "stable": "v0.2.9"} -->
+<!-- release-state: {"view": "snapshot", "version": "v0.2.10", "install_commands": "template"} -->
 
 [中文安装说明](INSTALLATION.zh-CN.md)
 
-The public first-party collection's current stable release is [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9), published at tag `v0.2.9` (immutable [release manifest](evidence/releases/v0.2.9/RELEASE_MANIFEST.md) and post-publication [release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md)). It provides **39 admitted first-party Skills** across 7 purpose-based categories. Fresh installs from the released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 407 files, byte-identical), plus a local install for Claude Code and pi in which Claude Code listed all 39 Skills and both Hosts ran `eli5` from the fresh project. Codex runtime was not checked locally. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
+Release snapshot v0.2.10: this guide covers v0.2.10, with **39 admitted first-party Skills** across 7 purpose-based categories. The [v0.2.10 release manifest](evidence/releases/v0.2.10/RELEASE_MANIFEST.md) records its preparation-time scope and local evidence; observed installation and publication facts go into the release receipt on `main`. Until that receipt exists, the v0.2.10 and default-branch commands below are templates. Package contracts remain inside `skills/<category>/<name>/`; this document is the installation authority and does not replace host-specific discovery rules.
 
 The standard install command is the generic `latest` form: it follows the repository's default revision, so `npx skills add light-cheng/skills` is the recommended interactive entry point to select the desired Skills and Agent hosts. Pinned release commands select published tags for reproducible installs. Historical verification commands (which tested full-collection installations across all supported agents) are documented below alongside historical evidence.
 
 v0.2.6 updates `light-travelpage` with a handbook UI and default-off AI choice. Its [release notes](evidence/releases/v0.2.6/RELEASE_NOTES.md) describe the changes. The [release receipt](evidence/releases/v0.2.6/RELEASE_RECEIPT.md) records pinned/latest installations in separate disposable directories: 36 packages and 385 package files in each, byte-identical to the tagged tree; Skills CLI 1.7.0 discovered all 36 Skills.
+
+## Previous release: v0.2.9
+
+Previous release [v0.2.9](https://github.com/light-cheng/skills/releases/tag/v0.2.9) ([release receipt](evidence/releases/v0.2.9/RELEASE_RECEIPT.md)): fresh installs from its released source passed: pinned and default whole collections for Codex and Claude Code projects, native Codex global scope and representative single Skills on a hosted Linux user (39 packages, 407 files, byte-identical), plus a local install for Claude Code and pi in which Claude Code listed all 39 Skills and both Hosts ran `eli5` from the fresh project. Codex runtime was not checked locally.
 
 ## Previous release: v0.2.8
 
@@ -34,7 +38,7 @@ Current `main` uses `skills/<category>/<name>/`. Host installations remain `<ski
 
 ## Recommended installation
 
-### Interactive installation (recommended)
+### Interactive installation (recommended; command template)
 
 Run the interactive installer and choose the Skills and target Agent hosts you want:
 
@@ -42,7 +46,7 @@ Run the interactive installer and choose the Skills and target Agent hosts you w
 npx skills add light-cheng/skills
 ```
 
-### Install a single Skill
+### Install a single Skill (command template)
 
 To install a specific Skill without selecting from the entire collection:
 
@@ -55,11 +59,13 @@ npx skills add light-cheng/skills --skill light-travelpage
 npx skills add light-cheng/skills --skill project-retro
 ```
 
-### Pinned release installation
+### Pinned release installation (command template for v0.2.10)
 
 To install from a specific published release tag (recommended for reproducible setups):
 
 ```bash
+npx skills add light-cheng/skills#v0.2.10 -y
+npx skills add light-cheng/skills#v0.2.10 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.9 -y
 npx skills add light-cheng/skills#v0.2.9 --skill light-implement -y
 npx skills add light-cheng/skills#v0.2.8 -y

@@ -37,7 +37,9 @@ for the fact-work and handoff boundaries.
 
 When no user-owned decision remains and no unresolved dependency blocks the
 result, return a concise shared-understanding synthesis and ask the user to
-confirm it. A correction reopens the session; confirmation completes it. Then
+confirm it. Put in it only what the user chose or confirmed and facts with a
+source. Anything you add yourself, such as a default you would pick, goes
+under a separate "Not yet decided" line as a question, not as a decision. A correction reopens the session; confirmation completes it. Then
 stop cleanly or recommend one separately invoked next Skill. Do not auto-chain.
 
 ## Composition

@@ -83,6 +83,9 @@ warranted using the value-judgment matrix in [heuristics.md](references/heuristi
    - **`[PARTIAL]`:** Immediate symptom repaired, but long-term automated
      guardrail, test coverage, or reference remains missing.
    - **`[OPEN]`:** Systemic gap remains unguarded and can recur.
+   A finding that says the decision is pending elsewhere (a change proposal,
+   ticket or decision record) cites that file. When no file records it, mark
+   it `[OPEN]` and say the decision is not recorded anywhere.
 5. **Separate Immediate Fix from Permanent Improvement:** Distinguish
    `Observed incident` $\to$ `Immediate repair` $\to$ `Permanent guardrail`.
    The retrospective focuses strictly on permanent systemic guardrails.

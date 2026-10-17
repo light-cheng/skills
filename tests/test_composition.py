@@ -49,6 +49,7 @@ EDGES = (
     ("light-implement", "light-decide", "calls-optional"),
     ("light-implement", "light-redirect", "calls-optional"),
     ("light-implement", "light-html-plan", "calls-optional"),
+    ("light-redirect", "light-html-plan", "calls-optional"),
     ("project-review", "light-redirect", "calls-optional"),
     ("project-review", "light-html-plan", "calls-optional"),
     ("project-spec", "light-html-plan", "calls-optional"),
