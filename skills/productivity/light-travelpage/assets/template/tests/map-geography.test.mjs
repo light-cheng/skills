@@ -83,3 +83,17 @@ test('sketch map reads each day from the schedule and starts from the previous n
   assert.deepEqual(sketch.days[1].legs.map((leg) => [leg.from, leg.to, leg.time]), [['station', 'lake', '09:00'], ['lake', 'station', '17:00']]);
   assert.equal(sketch.away[0].id, 'home');
 });
+
+test('sketch map keeps two nearby stays as separate places', async () => {
+  const { buildSketch } = await import('../scripts/sketch-layout.mjs');
+  const place = (id, lat, lng) => ({ id, name: id, countryCode: 'JP', geo: { lat, lng } });
+  const tripData = {
+    places: [place('station', 32.937, 131.080), place('inn_a', 32.9759, 131.0417), place('inn_b', 32.9724, 131.0501), place('onsen', 32.9726, 131.0505)],
+    accommodations: [{ placeId: 'inn_a', checkIn: '2026-11-15', checkOut: '2026-11-16' }, { placeId: 'inn_b', checkIn: '2026-11-16', checkOut: '2026-11-17' }],
+    days: [{ day: 1, date: '2026-11-15', schedule: [{ time: '11:00', type: 'transfer', text: '巴士', placeIds: ['station', 'inn_a'] }, { time: '17:00', type: 'walk', placeId: 'onsen' }] }]
+  };
+  const sketch = buildSketch({ tripData, mapData: { region: { countryCode: 'JP' } }, boundary: null, canvas: { width: 1448, height: 1086 } });
+  const nodeOf = (id) => sketch.nodes.find((node) => node.placeIds.includes(id)).id;
+  assert.notEqual(nodeOf('inn_a'), nodeOf('inn_b'));
+  assert.equal(nodeOf('onsen'), nodeOf('inn_b'));
+});

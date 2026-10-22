@@ -108,15 +108,23 @@ export function buildSketch({ tripData, mapData, boundary, canvas }) {
   const located = [...usage.keys()].map((id) => placeById.get(id)).filter((place) => place && !isAway(place) && geoOf(place));
   const missing = [...usage.keys()].filter((id) => { const place = placeById.get(id); return place && !isAway(place) && !geoOf(place); });
 
-  // Merge places within MERGE_KM into one map node; the most used place names the node.
+  // Merge each place into the nearest node within MERGE_KM; the most used place names the node.
+  // Two different stays never share a node, so each night's bed stays visible.
+  const stayPlaces = new Set((tripData.accommodations || []).map((stay) => stay.placeId).filter(Boolean));
   const nodes = [];
-  for (const place of located) {
+  // Stays seed the nodes first, so a nearby sight joins the stay it is closest to.
+  const seeded = [...located.filter((place) => stayPlaces.has(place.id)), ...located.filter((place) => !stayPlaces.has(place.id))];
+  for (const place of seeded) {
     const geo = geoOf(place);
-    const node = nodes.find((candidate) => candidate.members.some((member) => distanceKm(geoOf(member), geo) <= MERGE_KM));
+    const gap = (candidate) => Math.min(...candidate.members.map((member) => distanceKm(geoOf(member), geo)));
+    const node = nodes
+      .filter((candidate) => gap(candidate) <= MERGE_KM && !(stayPlaces.has(place.id) && candidate.members.some((member) => stayPlaces.has(member.id))))
+      .sort((a, b) => gap(a) - gap(b))[0];
     if (node) node.members.push(place); else nodes.push({ members: [place] });
   }
+  nodes.sort((a, b) => Math.min(...a.members.map((m) => located.indexOf(m))) - Math.min(...b.members.map((m) => located.indexOf(m))));
   nodes.forEach((node) => {
-    node.members.sort((a, b) => (usage.get(b.id) || 0) - (usage.get(a.id) || 0));
+    node.members.sort((a, b) => (usage.get(b.id) || 0) - (usage.get(a.id) || 0) || located.indexOf(a) - located.indexOf(b));
     node.id = node.members[0].id;
     node.geo = geoOf(node.members[0]);
   });
