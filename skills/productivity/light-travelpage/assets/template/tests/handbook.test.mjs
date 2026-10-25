@@ -436,3 +436,17 @@ test("pocket lists every stay by date and shows only each to-do's instruction la
   assert.equal(w.document.querySelectorAll(".pocket-stay.is-tonight").length, 0);
   assert.deepEqual([...w.document.querySelectorAll(".pocket-todo li")].map(e => e.textContent), ["Ask the front desk", "现金"]);
 });
+
+test("during the trip the pocket puts tonight's stay first and marks it", t => {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = '<a id="bookings-navigation-link"></a><aside id="handbook-pocket"></aside><div id="handbook-materials"></div>';
+  const day = offset => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+  w.TRAVEL_PLAN_CONFIG = { modules: { accommodations: true, flights: false, ledger: false, todo: false } };
+  w.TRAVEL_PLAN_DATA = { config: w.TRAVEL_PLAN_CONFIG, metadata: { timeZone: "UTC" }, ticketPlanning: { items: [] },
+    accommodations: [{ id: "before", name: "Before", checkIn: day(-3), checkOut: day(-1) }, { id: "now", name: "Now", checkIn: day(-1), checkOut: day(1) }, { id: "after", name: "After", checkIn: day(1), checkOut: day(3) }] };
+  w.eval(read("handbook.js"));
+  w.dispatchEvent(new w.Event("travel-config:ready"));
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-stay span[data-authored]")].map(e => e.textContent), ["Now", "Before", "After"]);
+  assert.equal(w.document.querySelector(".pocket-stay.is-tonight span[data-authored]").textContent, "Now");
+});

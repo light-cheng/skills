@@ -40,7 +40,7 @@ async function render(t, data, todos = []) {
     : ({ version: 1, revision: 0, todos, tickets: [], bills: [], travelers: [], settings: null }) });
   w.TravelMaps = { button: () => "" };
   w.eval(read("runtime-storage.js"));
-  await w.eval(read("travel-cards.js") + "\n" + read("overview-map.js") + "\n" + read("route-ui.js") + "\n" + read("app.js").replace('document.addEventListener("DOMContentLoaded", init);', "") + "\ninit();");
+  await w.eval(read("travel-cards.js") + "\n" + read("overview-map.js") + "\n" + read("route-ui.js") + "\n" + read("app.js").replace('document.addEventListener("DOMContentLoaded", init);', "") + "\nwindow.__state = state;\ninit();");
   assert.equal(w.document.querySelector("#loading-error").hidden, true, errors.join("\n"));
   return { w, errors };
 }
@@ -121,4 +121,45 @@ test("stay cards list cancellation and navigation points and mark pending stays 
   assert.deepEqual([...inn.querySelectorAll(".stay-points h4")].map(e => e.textContent), ["取消和付款", "位置和入住"]);
   assert.equal(inn.querySelectorAll(".stay-points li").length, 4);
   assert.equal(w.document.querySelector("#stay-later .soft-label").textContent, "待预订");
+});
+
+async function submitTodo(w, adapter, text) {
+  w.__state.runtimeAdapters.todos = adapter;
+  w.LightTravelRefresh = async () => {};
+  const errors = [];
+  w.addEventListener("light:sync-status", event => errors.push(event.detail.message));
+  w.document.querySelector("#todo-input").value = text;
+  w.document.querySelector("#todo-form").dispatchEvent(new w.Event("submit", { cancelable: true }));
+  await new Promise(resolve => setTimeout(resolve, 0));
+  return errors;
+}
+
+test("a to-do cannot be resubmitted while the previous save is pending or busy", async t => {
+  for (const flag of ["pending", "busy"]) {
+    const { w } = await render(t, layeredTrip());
+    const calls = [];
+    const errors = await submitTodo(w, { [flag]: true, applyChange: async (...args) => { calls.push(args); return {}; } }, "Buy stamps");
+    assert.equal(calls.length, 0, flag);
+    assert.equal(w.document.querySelector("#todo-input").value, "Buy stamps", flag);
+    assert.equal(errors.length, 1, flag);
+  }
+});
+
+test("the to-do input clears only after the save is confirmed, including a recovered retry", async t => {
+  const { w } = await render(t, layeredTrip());
+  let saved;
+  await submitTodo(w, { applyChange: async (_c, todo) => { saved = todo; return { todos: [] }; } }, "Not echoed");
+  assert.equal(w.document.querySelector("#todo-input").value, "Not echoed");
+  await submitTodo(w, { applyChange: async (_c, todo) => ({ todos: [todo] }) }, "Echoed");
+  assert.equal(w.document.querySelector("#todo-input").value, "");
+  const queued = { pending: false, applyChange: async (_c, todo) => { saved = todo; queued.pending = true; throw new Error("offline"); } };
+  const errors = await submitTodo(w, queued, "Retry me");
+  assert.deepEqual(errors, ["offline"]);
+  assert.equal(w.document.querySelector("#todo-input").value, "Retry me");
+  w.LightTravelRecoverSavedMutation([{ snapshot: { todos: [saved] } }]);
+  assert.equal(w.document.querySelector("#todo-input").value, "");
+  const failed = { pending: false, applyChange: async () => { throw new Error("rejected"); } };
+  await submitTodo(w, failed, "Keep me");
+  w.LightTravelRecoverSavedMutation([{ snapshot: { todos: [{ id: "other", text: "Keep me" }] } }]);
+  assert.equal(w.document.querySelector("#todo-input").value, "Keep me");
 });
