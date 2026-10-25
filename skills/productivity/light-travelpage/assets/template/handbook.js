@@ -49,7 +49,7 @@
     "已提供原件": "Original provided", "原件待提供": "Original pending", "当前没有附件。": "No attachments yet.",
     "原始车票和确认文件随资料到齐后保存。": "Original tickets and confirmations will appear when supplied.",
     "当天路线": "Daily route", "全旅程地图": "Whole-trip map", "查看行程区域": "Trip area", "放大当天路线": "Zoom daily route", "收起展开地点": "Collapse places", "展开全部地点": "Expand all places", "个地点": "places", "当天地点": "Daily places", "当天路线资料待补": "Daily route details pending", "当天地点坐标待补充。": "Daily place coordinates pending.", "箭头表示游览顺序；带“处”的圆点可一次展开。": "Arrows show visit order. Click a grouped marker once to show every place.", "地图": "Map",
-    "共同费用": "Shared expenses", "条账单": "bills", "位同行人": "travelers", "查看旅行地图": "Open the trip map", "查看自驾资料": "View driving details"
+    "共同费用": "Shared expenses", "条账单": "bills", "位同行人": "travelers", "查看旅行地图": "Open the trip map", "查看自驾资料": "View driving details", "今晚": "Tonight"
   };
   window.TravelI18n?.addTranslations(Object.fromEntries(Object.entries(words).map(([source, en]) => [source, { en }])));
 
@@ -58,19 +58,33 @@
     const root = document.getElementById("handbook-pocket");
     if (!data || !root) return;
     const modules = window.TRAVEL_PLAN_CONFIG?.modules ?? data.config.modules;
-    const stay = modules.accommodations ? data.accommodations?.[0] : null;
+    const stays = modules.accommodations ? [...(data.accommodations ?? [])].sort((a, b) => String(a.checkIn || "9999").localeCompare(String(b.checkIn || "9999"))) : [];
     const snapshot = modules.ledger ? window.TravelLedger?.getSnapshot?.() : null;
     const tickets = data.ticketPlanning?.items ?? [];
     const parts = [];
-    if (stay) {
-      parts.push(`<section class="pocket-section"><small>${esc(tr("住宿安排"))}</small><h3 data-authored>${esc(stay.name || tr("住宿资料待补"))}</h3><p>${esc(stay.checkIn || tr("入住日期待补"))} — ${esc(stay.checkOut || tr("退房日期待补"))}</p><a href="#stay-${esc(stay.id)}">${esc(tr("查看预订资料"))}</a></section>`);
+    if (stays.length) {
+      // During the trip, the stay covering tonight (trip time zone) goes first and is marked; before departure none is.
+      let today = "";
+      try { today = new Intl.DateTimeFormat("en-CA", { timeZone: data.metadata?.timeZone || undefined }).format(new Date()); } catch { today = new Date().toISOString().slice(0, 10); }
+      const tonight = stays.find(stay => stay.checkIn && stay.checkOut && stay.checkIn <= today && today < stay.checkOut);
+      const ordered = tonight ? [tonight, ...stays.filter(stay => stay !== tonight)] : stays;
+      const md = value => value ? `${Number(value.slice(5, 7))}/${Number(value.slice(8, 10))}` : "";
+      const span = stay => {
+        if (!stay.checkIn) return tr("入住日期待补");
+        if (!stay.checkOut) return `${md(stay.checkIn)}–${tr("退房日期待补")}`;
+        return stay.checkIn.slice(0, 7) === stay.checkOut.slice(0, 7) ? `${md(stay.checkIn)}–${Number(stay.checkOut.slice(8, 10))}` : `${md(stay.checkIn)}–${md(stay.checkOut)}`;
+      };
+      const rows = ordered.map(stay => `<li class="pocket-stay${stay === tonight ? " is-tonight" : ""}">${stay === tonight ? `<b>${esc(tr("今晚"))}</b> ` : ""}<a href="#stay-${esc(stay.id)}"><span>${esc(span(stay))}</span> · <span data-authored>${esc(stay.name || tr("住宿资料待补"))}</span></a></li>`).join("");
+      parts.push(`<section class="pocket-section pocket-stays"><small>${esc(tr("住宿安排"))}</small><ul>${rows}</ul></section>`);
     }
     if (modules.ledger) {
       parts.push(`<section class="pocket-section"><small>${esc(tr("共同费用"))}</small><p class="pocket-count">${snapshot?.bills?.length ?? 0} <span>${esc(tr("条账单"))}</span></p><p data-no-translate>${esc((snapshot?.travelers ?? []).map(person => person.name).join(" · "))}</p><a href="#ledger">${esc(tr("打开同行账本"))}</a></section>`);
     }
     if (modules.todo) {
       const todos = runtimeTodos ?? data.preTrip?.packingItems ?? [];
-      parts.push(`<section class="pocket-section"><h3>to-do</h3><ul>${todos.filter(todo => !todo.completed).slice(0,4).map(todo => `<li data-no-translate>${esc(todo.text)}</li>`).join("")}</ul><a href="#prep">${esc(tr("查看全部 to-do"))}</a></section>`);
+      // The pocket only needs a glance: each open to-do's label or first clause, not the full text.
+      const summary = text => { const s = String(text); const label = s.match(/^([^：:，。；]{1,12})[：:]/); return label ? label[1] : s.split(/[。；：:]/)[0]; };
+      parts.push(`<section class="pocket-section pocket-todo"><h3>to-do</h3><ul>${todos.filter(todo => !todo.completed).slice(0,4).map(todo => `<li data-no-translate>${esc(summary(todo.text))}</li>`).join("")}</ul><a href="#prep">${esc(tr("查看全部 to-do"))}</a></section>`);
     }
     if (modules.overview || modules.driving) {
       parts.push(`<section class="pocket-section">${modules.overview ? `<a href="#route">${esc(tr("查看旅行地图"))}</a>` : ""}${modules.driving ? `<br><a href="#drive">${esc(tr("查看自驾资料"))}</a>` : ""}</section>`);

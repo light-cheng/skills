@@ -37,6 +37,7 @@
       try {
         const recovered = await TravelRuntimeStorage.retryAll();
         await window.TravelLedger?.recoverSavedMutation?.(recovered);
+        window.LightTravelRecoverSavedMutation?.(recovered);
         $("sync-retry").hidden = !TravelRuntimeStorage.hasPending();
         const failures = recovered.filter(entry => entry.error);
         if (failures.length) { status(failures.map(entry => entry.error.message).join("；")); return; }

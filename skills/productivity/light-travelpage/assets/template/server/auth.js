@@ -100,7 +100,7 @@ const loginPage = (error = "") =>
   <main aria-labelledby="login-title">
     <header><span class="wordmark" data-no-translate>LIGHT / TRAVELPAGE</span><button type="button" id="language-toggle" data-no-translate>中文 / EN</button></header>
     <h1 id="login-title">旅行手册</h1>
-    <p class="intro">输入访问码，查看行程、预订和同行账本。</p>
+    <p class="intro">输入访问码，查看行程、预订和出发前 to-do。</p>
     <form method="post" action="/auth/login">
       <label for="code">小组访问码</label>
       <input id="code" name="code" type="password" autocomplete="current-password" required maxlength="256">

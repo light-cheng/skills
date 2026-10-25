@@ -40,6 +40,12 @@ function dailyViewportFor(source, layout, dayNumber) {
   return { x: 0, y: 0, width: canvas.width, height: canvas.height };
 }
 
+function geographicFocusViewport(source) {
+  const frame = source?.projection?.frame;
+  if (source?.mapMode !== "geographic-inset" || !frame) return null;
+  return { x: frame.x - 25, y: frame.y - 55, width: frame.width + 70, height: frame.height + 80 };
+}
+
 function transportIcon(type) {
   const icons = {
     drive: '<path d="m5 9 2-5h10l2 5M4 9h16v9H4zM7 18v2m10-2v2M7 12h1m8 0h1"/>',
@@ -115,9 +121,14 @@ function travelMapMarkup(source, route) {
     return `<button class="transport-pin" type="button" style="${position(pin.x, pin.y)}" data-map-region="${escapeHtml(source.id)}" data-transport-day="${day.day}" data-transport-group="${index}" aria-expanded="false" aria-haspopup="dialog" aria-label="查看${escapeHtml(transportNames[item.type] || "交通")}：${escapeHtml(item.text)}">${transportIcon(item.type)}</button>`;
   }).join("") : "";
   const mapNote = source.disclaimer || "本图为模板化行程示意图，仅表达地点的相对方位与路线顺序，不代表真实比例或精确地理边界。如需使用真实国家或城市地图，可在生成后自行调整。";
+  const placeChoices = route && layout ? `<nav class="map-place-list" aria-label="当天地点"><span>当天地点</span>${layout.places.map((placeId) => {
+    const place = canonicalPlaceFor(placeId);
+    return place ? window.TravelMaps.button(place.id, place.nameZh || place.name) : "";
+  }).join("")}</nav>` : "";
   return `<div class="travel-map-block ${route ? "is-daily" : "is-overview"}" data-map-mode="${escapeHtml(source.mapMode || "")}" ${route ? `style="--route-color:${route.color}"` : ""}>
     <div class="travel-map-scroll"><div class="travel-map-canvas" id="${id}">${mapArtwork(source, route, id, viewport)}${places}${transport}</div></div>
     <div class="map-utility"><span>${route ? "点圆点看地图 · 点图标看交通" : escapeHtml(mapNote)}</span><button type="button" data-expand-map="${id}">放大 ↗</button></div>
+    ${placeChoices}
   </div>`;
 }
 
@@ -143,9 +154,11 @@ function renderRoutePanel(regionId, dayNumber = 0) {
   const source = travelMapSource(routeMap, regionId || routeMap?.defaultRegionId || root.dataset.region);
   root.dataset.region = source.id || "";
   mapRoutes = mapRouteDefinitions(source);
-  const route = mapRoutes.find((item) => item.day === dayNumber);
+  // The handbook shows this map as the whole-trip overview only; each day's map lives on the itinerary page.
+  const overviewOnly = document.body.dataset.layout === "handbook";
+  const route = overviewOnly ? null : mapRoutes.find((item) => item.day === dayNumber);
   root.innerHTML = `<div class="route-region-tabs" aria-label="旅行国家">${regions.map((region) => `<button type="button" data-route-region="${escapeHtml(region.id)}" aria-pressed="${region.id === source.id}">${escapeHtml(region.label || region.heading?.text || region.id)}</button>`).join("")}</div>
-  <div class="route-day-tabs" aria-label="${escapeHtml(source.label || "当前国家")}路线日期"><button type="button" data-route-day="0" aria-pressed="${!route}">总览</button>${mapRoutes.map((item) => { const day = state.data.days.find((candidate) => candidate.day === item.day); return day ? `<button type="button" data-route-day="${item.day}" style="--route-color:${item.color}" aria-pressed="${item === route}"><i></i>${escapeHtml(day.date ? day.date.slice(5).replace("-", "/") : `DAY ${day.day}`)}</button>` : ""; }).join("")}</div>${travelMapMarkup(source, route)}`;
+  ${overviewOnly ? "" : `<div class="route-day-tabs" aria-label="${escapeHtml(source.label || "当前国家")}路线日期"><button type="button" data-route-day="0" aria-pressed="${!route}">总览</button>${mapRoutes.map((item) => { const day = state.data.days.find((candidate) => candidate.day === item.day); return day ? `<button type="button" data-route-day="${item.day}" style="--route-color:${item.color}" aria-pressed="${item === route}"><i></i>${escapeHtml(day.date ? day.date.slice(5).replace("-", "/") : `DAY ${day.day}`)}</button>` : ""; }).join("")}</div>`}${travelMapMarkup(source, route)}`;
   if (route) activateDayMaps(root);
 }
 
@@ -196,7 +209,7 @@ function setupRouteExplorer() {
       const day = state.data.days.find((item) => item.day === Number(pin.dataset.transportDay));
       const source = travelMapSource(state.data?.routeMap, pin.dataset.mapRegion);
       const group = dailyMapLayoutFor(source, day.day).transport[Number(pin.dataset.transportGroup)];
-      showPopover(pin, scheduleItemsForPin(day, group).map((item) => `<div class="transport-leg"><strong>${escapeHtml(transportNames[item.type] || "交通")} · ${escapeHtml(item.time)}</strong><p>${escapeHtml(item.text)}</p></div>`).join(""));
+      showPopover(pin, scheduleItemsForPin(day, group).map((item) => `<div class="transport-leg"><strong>${escapeHtml(transportNames[item.type] || "交通")} · ${escapeHtml(item.time)}</strong>${item.detail?.lead ? `<p>${escapeHtml(item.detail.lead)}</p>${(item.detail.sections || []).filter((section) => section?.points?.length).map((section) => `<p class="transport-leg__label">${escapeHtml(section.label || "")}</p><ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul>`).join("")}` : `<p>${escapeHtml(item.text)}</p>`}</div>`).join(""));
       return;
     }
     if (event.target.closest(".route-popover")) return;
@@ -211,10 +224,22 @@ function setupRouteExplorer() {
       for (const oldId of ids) svg.innerHTML = svg.innerHTML.replaceAll(`id="${oldId}"`, `id="${oldId}-zoom"`).replaceAll(`url(#${oldId})`, `url(#${oldId}-zoom)`);
       copy.removeAttribute("id"); copy.classList.toggle("daily-fullscreen", Boolean(source.closest(".is-daily")));
       copy.style.setProperty("--route-color", getComputedStyle(source).getPropertyValue("--route-color"));
+      const region = travelMapSource(state.data?.routeMap, $("#route-explorer").dataset.region);
+      const focus = geographicFocusViewport(region);
+      if (focus) {
+        svg.setAttribute("viewBox", `${focus.x} ${focus.y} ${focus.width} ${focus.height}`);
+        // Crop the same geographic canvas; overlay positions retain their map coordinates.
+        copy.querySelectorAll(".map-place-dot,.transport-pin").forEach((pin) => {
+          const x = parseFloat(pin.style.left) / 100 * region.canvas.width;
+          const y = parseFloat(pin.style.top) / 100 * region.canvas.height;
+          pin.style.left = `${(x - focus.x) / focus.width * 100}%`;
+          pin.style.top = `${(y - focus.y) / focus.height * 100}%`;
+        });
+        copy.style.minWidth = "850px";
+      }
       $("#map-dialog-content").replaceChildren(copy); dialog.showModal();
       const viewport = $("#map-dialog-content");
-      const region = travelMapSource(state.data?.routeMap, $("#route-explorer").dataset.region);
-      viewport.scrollLeft = mapZoomScrollLeft(region, copy.scrollWidth, viewport.clientWidth,
+      viewport.scrollLeft = focus ? Math.max(0, (copy.scrollWidth - viewport.clientWidth) / 2) : mapZoomScrollLeft(region, copy.scrollWidth, viewport.clientWidth,
         Boolean(source.closest('.is-overview[data-map-mode="geographic-inset"]')));
     }
     const link = event.target.closest("[data-open-day]");
@@ -344,6 +369,14 @@ function handbookDayMapMarkup(day, options = {}) {
     const action = multiple ? `data-handbook-cluster="${escapeHtml(g.points.map(p=>p.id).join('|'))}"` : `data-handbook-place="${escapeHtml(g.points[0].id)}"`;
     return `<g class="handbook-map-pin" ${action} role="button" tabindex="0" aria-label="${escapeHtml(label)}${multiple ? ' · '+tr("展开全部地点") : ''}"><circle cx="${g.xy[0]}" cy="${g.xy[1]}" r="${radius}" fill="${selected?'#954434':'#fffdf6'}" stroke="#513f31" stroke-width="${1.2*unit}"/><text x="${g.xy[0]}" y="${g.xy[1]+4.5*unit}" text-anchor="middle" font-size="${(multiple?11:14)*unit}" fill="${selected?'white':'#2b2e27'}">${multiple ? g.points.length+(window.TravelI18n?.language==='en'?'':'处') : g.points[0].number}</text><title>${escapeHtml(g.points.map(p=>p.label).join('、'))}</title></g>`;
   }).join("");
+  // Hand-drawn trips use the same artwork as the route page, zoomed to this day by sketchViewport.
+  if (source.sketch && typeof sketchMapArtwork === "function") {
+    return `<header class="handbook-map-heading"><h3>${tr("当天路线")}</h3><a href="#route">${tr("全旅程地图")} ↗</a></header>
+    <div class="handbook-sketch-map" data-map-mode="${escapeHtml(source.mapMode || "")}">${sketchMapArtwork(state.data.days, source, day.day, { labelScale: 2 }).replace(/sketch-/g, `${id}-sketch-`)}</div>
+    ${source.disclaimer ? `<p class="handbook-map-note" data-authored>${escapeHtml(source.disclaimer)}</p>` : ""}
+    <div class="handbook-map-places" aria-label="${tr("当天地点")}">${points.map(p=>`<div><button type="button" data-handbook-place="${escapeHtml(p.id)}" aria-pressed="${p.id===options.selected}"><span data-authored>${escapeHtml(p.label)}</span></button>${window.TravelMaps.button(p.id,window.TravelI18n?.text("地图") || "地图",p.place)}</div>`).join('')}</div>
+    ${!points.length?`<p class="detail-note">${tr("当天地点坐标待补充。")}</p>`:''}`;
+  }
   const geographic = source.scope === "geographic-outline" || source.mapMode === "geographic-inset";
   const mapNote = source.disclaimer || (geographic
     ? "地理轮廓与行程地点；彩色连线只表示行程顺序。"

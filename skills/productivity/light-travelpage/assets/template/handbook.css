@@ -25,6 +25,8 @@ h1, h2, h3, .day-title, .day-meta, .handbook-dates strong, .flight-stop__code,
 .flight-stop__time, .stay-card dd, .rental-countdown { font-family: var(--handbook-serif); font-weight: 400; }
 a, button, input, select, textarea { outline-offset: 4px; }
 button { cursor: pointer; }
+.flight-booking-note { padding: 10px 12px; border-left: 2px solid var(--lake); background: var(--handbook-soft); font: 12px/1.6 var(--handbook-ui); }
+.flight-booking-note p { margin: 3px 0; }
 .topbar { height: auto; min-height: 52px; padding: 5px max(24px, calc((100vw - 1160px)/2)); background: #e0ddd2; border-color: var(--line); backdrop-filter: none; }
 .wordmark, #language-toggle, .topbar nav a, .travel-navigation summary { font: 13px/1.5 var(--handbook-ui); }
 .travel-navigation-menu { background: var(--surface); border-color: var(--line); border-radius: 3px; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -145,6 +147,22 @@ body[data-active-view="ledger"] .topbar { background: #e0ddd2; }
 .route-section { margin: 0; transform: none; max-width: none; }
 body[data-chapter="itinerary"] .handbook-pages { grid-template-columns: minmax(0,1fr); }
 body[data-chapter="itinerary"] .handbook-pocket { display: none; }
+body[data-chapter="todo"] .pocket-todo { display: none; }
+body[data-layout="handbook"] .todo-item { align-items: start; padding: 14px 0; }
+body[data-layout="handbook"] .todo-item label { align-items: flex-start; min-height: 0; }
+body[data-layout="handbook"] .todo-check { margin-top: 2px; }
+body[data-layout="handbook"] .todo-delete { min-height: 32px; }
+.todo-text { display: grid; gap: 6px; max-width: 38em; line-height: 1.75; }
+.todo-label { font-weight: 600; color: var(--ink); }
+.todo-lead, .todo-detail { display: grid; gap: 6px; }
+.todo-detail { color: var(--muted); font-size: 13px; }
+.todo-line { display: block; }
+.todo-bullets { display: grid; gap: 2px; padding-left: 2px; }
+.todo-bullet { display: block; padding-left: 14px; position: relative; }
+.todo-bullet::before { content: "·"; position: absolute; left: 2px; font-weight: 700; }
+.todo-item.is-complete .todo-detail, .todo-item.is-complete .todo-lead { display: none; }
+.todo-item.is-complete .todo-label { font-weight: 400; color: var(--muted); text-decoration: line-through; }
+.todo-item.is-complete .todo-text:not(:has(.todo-label)) .todo-lead { display: grid; }
 body[data-layout="handbook"] .day-card { scroll-margin-top: 130px; }
 body[data-layout="handbook"] .day-card + .day-card { margin-top: 40px; padding-top: 30px; border-top: 2px solid var(--ink); }
 body[data-layout="handbook"] .day-detail { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,.9fr); gap: 32px; align-items: start; }
@@ -267,3 +285,47 @@ body[data-layout="handbook"] #ai-capabilities { color: var(--muted); }
   .ledger-category-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .stay-card { padding: 18px; }
 }
+.cash-budget { margin-top: 28px; font-family: var(--handbook-ui); font-size: 14px; line-height: 1.6; }
+.cash-budget h3 { margin: 0 0 6px; font-size: 17px; }
+.cash-budget__summary { margin: 0 0 12px; }
+.cash-budget table { width: 100%; border-collapse: collapse; }
+.cash-budget th, .cash-budget td { padding: 7px 6px; border-bottom: 1px solid var(--line, #ddd); text-align: left; vertical-align: top; }
+.cash-budget th { font-weight: 500; color: var(--muted); font-size: 12px; }
+.cash-budget td:nth-child(2) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cash-budget tr.is-cash td:last-child { font-weight: 600; }
+.cash-budget__note { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+.cash-budget th:nth-child(1) { width: 44%; } .cash-budget th:nth-child(2) { width: 22%; }
+.pocket-stays ul { list-style: none; padding: 0; margin: 8px 0 0; }
+.pocket-stays li { padding: 6px 0; border-bottom: 1px dotted var(--line); line-height: 1.5; }
+.pocket-stays li:last-child { border-bottom: 0; }
+.pocket-stays a { display: inline; margin: 0; color: var(--ink); text-decoration: none; }
+.pocket-stays a:hover span[data-authored] { text-decoration: underline; text-underline-offset: 3px; }
+.pocket-stays a > span:first-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+.pocket-stays li.is-tonight b { display: inline-block; padding: 0 6px; margin-right: 4px; border-radius: 3px; color: #fff; background: var(--lake); font-size: 12px; font-weight: 500; }
+/* Structured schedule entries: lead line, then labelled point lists. */
+.schedule-text--detail { display: grid; gap: 10px; }
+.schedule-lead { margin: 0; font-weight: 500; color: var(--ink); }
+.schedule-section { display: grid; gap: 2px; }
+.schedule-section__label { font-family: var(--handbook-ui); font-size: 12px; letter-spacing: .04em; color: var(--lake); }
+.schedule-section ul, .stay-points ul, .ticket-dialog__guidance { margin: 0; padding-left: 1.1em; }
+.schedule-section li { font-size: 14px; line-height: 1.65; color: var(--ink); padding: 1px 0; }
+.schedule-section li::marker, .stay-points li::marker, .ticket-dialog__guidance li::marker { color: var(--muted); }
+.schedule-ticket__guidance { grid-column: 1 / -1; display: grid; gap: 2px; font-family: var(--handbook-ui); font-size: 12px; line-height: 1.5; color: var(--muted); }
+.schedule-ticket__guidance span { display: block; padding-left: 10px; position: relative; }
+.schedule-ticket__guidance span::before { content: "·"; position: absolute; left: 0; font-weight: 700; }
+.ticket-dialog__guidance li { padding: 2px 0; line-height: 1.6; }
+.stay-points { margin-top: 14px; }
+.stay-points h4 { margin: 0 0 4px; font-family: var(--handbook-ui); font-size: 12px; font-weight: 500; letter-spacing: .04em; color: var(--lake); }
+.stay-points li { font-size: 14px; line-height: 1.6; padding: 2px 0; overflow-wrap: anywhere; }
+.transport-leg .transport-leg__label { margin-top: 8px; font-size: 12px; color: var(--lake); }
+.transport-leg ul { margin: 2px 0 0; padding-left: 1.1em; font-size: 13px; line-height: 1.55; }
+.handbook-dates .handbook-weekday { display: block; font-family: var(--handbook-ui); font-size: 11px; line-height: 1.2; color: var(--muted); letter-spacing: .04em; }
+.handbook-dates button[aria-pressed="true"] .handbook-weekday { color: var(--lake); }
+.handbook-sketch-map { border: 1px solid #bdbdaf; background: #f4ecd8; }
+.handbook-sketch-map > svg { display: block; width: 100%; height: auto; }
+/* Show-at-the-desk cards inside to-dos: big, line-for-line local-language text in a light box. */
+.todo-card { grid-column: 1 / -1; display: block; margin: 0 0 4px 32px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 4px; background: #fffaf0; color: var(--ink); font-size: 17px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", var(--handbook-ui), sans-serif; }
+.todo-item.is-complete .todo-card { display: none; }
+.todo-card-text { white-space: pre-line; }
+.todo-card-copy { float: right; margin: 0 0 6px 10px; min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface, #fff); color: var(--lake); font: 500 13px/1 var(--handbook-ui); cursor: pointer; }
+.todo-card-copy:active { background: #f6e7df; }

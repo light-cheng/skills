@@ -63,13 +63,14 @@ function sketchViewport(source, dayNumber) {
   };
 }
 
-function sketchMapArtwork(days, source, dayNumber = 0) {
+// options.labelScale enlarges marks and text for small embeds (the itinerary side map); the route page uses the default.
+function sketchMapArtwork(days, source, dayNumber = 0, options = {}) {
   const sketch = source.sketch;
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&apos;" })[character]);
   const f = (value) => Number(value).toFixed(1);
   const canvas = source.canvas || { width: 1448, height: 1086 };
   const view = sketchViewport(source, dayNumber);
-  const u = view.width / canvas.width;
+  const u = view.width / canvas.width * (Number(options.labelScale) || 1);
   const nodes = new Map(sketch.nodes.map((node) => [node.id, node]));
   const today = dayNumber ? sketch.days.find((day) => day.day === dayNumber) : null;
   const legs = sketchLegs(sketch, dayNumber);

@@ -323,19 +323,21 @@ function realNavigationPage(t, modules) {
   return w;
 }
 
-test("real chapter navigation exposes route and puts only unrepresented destinations in More", t => {
+test("real chapter navigation puts the overview on to-do, materials last, and only unrepresented destinations in More", t => {
   const modules = { itinerary:true, flights:true, accommodations:true, overview:true, ledger:true, todo:true, driving:true };
   const w = realNavigationPage(t, modules);
   const visibleHrefs = selector => [...w.document.querySelectorAll(selector)].filter(e => !e.hidden).map(e => e.getAttribute("href"));
-  assert.deepEqual(visibleHrefs(".handbook-tabs a"), ["#itinerary", "#flights", "#ledger", "#prep", "#route"]);
-  assert.deepEqual(visibleHrefs(".travel-navigation-menu a"), ["#materials", "#drive"]);
+  assert.deepEqual(visibleHrefs(".handbook-tabs a"), ["#itinerary", "#flights", "#prep", "#materials", "#ledger"]);
+  assert.deepEqual([...w.document.querySelectorAll(".handbook-tabs a")].filter(e => !e.hidden).map(e => e.querySelector("span").textContent), ["01", "02", "03", "04", "05"]);
+  assert.deepEqual(visibleHrefs(".travel-navigation-menu a"), ["#drive"]);
   w.document.querySelector("#todo-input").value = "unsaved checklist draft";
-  w.document.querySelector('.handbook-tabs [href="#route"]').click();
+  w.document.querySelector('.handbook-tabs [href="#prep"]').click();
   assert.equal(w.document.querySelector("#route").hidden, false);
+  assert.equal(w.document.querySelector("#prep").hidden, false);
   assert.equal(w.document.querySelector("#itinerary").hidden, true);
-  w.document.querySelector('.travel-navigation-menu [href="#materials"]').click();
+  w.document.querySelector('.handbook-tabs [href="#materials"]').click();
   assert.equal(w.document.querySelector("#materials").hidden, false);
-  assert.equal(w.document.querySelector('.travel-navigation-menu [href="#materials"]').getAttribute("aria-current"), "page");
+  assert.equal(w.document.querySelector('.handbook-tabs [href="#materials"]').getAttribute("aria-current"), "page");
   assert.equal(w.document.querySelector("#todo-input").value, "unsaved checklist draft");
 });
 
@@ -397,12 +399,11 @@ test("validated undated draft initializes itinerary and map and switches its dai
   assert.equal(w.document.querySelector("#loading-error").hidden,true,errors.join("\n"));
   assert.equal(w.document.querySelectorAll(".day-card").length,2);
   assert.equal(w.document.querySelectorAll(".handbook-day-map").length,2);
-  assert.deepEqual([...w.document.querySelectorAll(".route-day-tabs button")].map(e=>e.textContent),["总览","DAY 1","DAY 2"]);
+  // The handbook route map is the whole-trip overview only; days are switched on the itinerary page.
+  assert.equal(w.document.querySelectorAll(".route-day-tabs").length,0);
   w.document.querySelector('[data-handbook-day="2"]').click();
   assert.equal(w.document.querySelector('.day-card[data-day="2"]').hidden,false);
   assert.equal(w.document.querySelector('.day-card[data-day="1"]').hidden,true);
-  w.document.querySelector('[data-route-day="2"]').click();
-  assert.equal(w.document.querySelector('[data-route-day="2"]').getAttribute("aria-pressed"),"true");
-  assert.equal(w.document.querySelectorAll(".map-place-dot").length,2);
+  assert.equal(w.document.querySelectorAll("#route-explorer .map-place-dot").length,0);
   assert.deepEqual(errors,[]);
 });

@@ -1,6 +1,7 @@
 /* In-place display localization. Form values and shared records stay untouched. */
 (() => {
   const messages = {
+  "当天地点": "Places today",
   "查看地图": "View map",
   "入住日期": "Check-in date",
   "退房日期": "Check-out date",
@@ -74,6 +75,13 @@
   "待补充信息": "Missing details",
   "日期待确认": "Date pending",
   "资料待补充": "Details pending",
+  "待预订": "Not booked yet",
+  "项目": "Item",
+  "怎么付": "How to pay",
+  "钱怎么带": "Cash and cards",
+  "不用预约，现场买": "No booking needed; buy on the spot",
+  "请长按选择复制": "Press and hold to copy",
+  "输入访问码，查看行程、预订和出发前 to-do。": "Enter your group code to view the itinerary, bookings and pre-trip to-do.",
   "门票已准备": "Tickets ready",
   "需提前购票": "Advance booking required",
   "出发机场": "Departure airport",
@@ -344,6 +352,7 @@
   "请核对地点后开始导航": "Check the destination before navigating",
   "复制原地址": "Copy original address",
   "已复制": "Copied",
+  "复制": "Copy",
   "复制失败，请选择上方地址手动复制": "Copy failed. Select the address above to copy manually.",
   "无法打开时，请更换地图或复制地址。地图在外部窗口打开。": "If unavailable, choose another map or copy the address. Maps open in a new window.",
   "旅行手册": "Travel handbook",
