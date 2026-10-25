@@ -19,3 +19,9 @@
 | C-005 | round-01 Spec | spec | low | repaired (db0f5d3) | confirmed |
 | C-006 | round-01 Spec | spec | low | closed | rejected |
 | C-007 | round-01 Spec | spec | low | repaired (db0f5d3) | confirmed |
+| E-001 | round-01 Evaluator | evidence | medium | repaired (9037dac) | confirmed |
+| E-002 | round-01 Evaluator | records | low | repaired (9037dac) | confirmed |
+| E-003 | round-01 Evaluator | evidence | low | repaired (9037dac) | confirmed |
+| E-101 | round-02 Evaluator | test quality | low | open, accepted as limit | confirmed |
+| E-102 | round-02 Evaluator | process | low | recorded as limit | confirmed |
+| E-103 | round-02 Evaluator | records | low | repaired (closeout commit) | confirmed |
