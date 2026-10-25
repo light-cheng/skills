@@ -33,6 +33,7 @@ const files = [
   "i18n.js",
   "map-navigation.js",
   "travel-cards.js",
+  "sketch-map.js",
   "overview-map.js",
   "route-ui.js",
   "site-navigation.js",

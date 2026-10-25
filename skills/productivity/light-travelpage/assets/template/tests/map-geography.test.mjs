@@ -22,6 +22,7 @@ test('geographic map builds a sourced outline and keeps coordinates fixed', (t) 
   mkdirSync(path.join(root, 'scripts'), { recursive: true });
   mkdirSync(path.join(root, 'assets/maps/templates'), { recursive: true });
   copyFileSync(new URL('../scripts/build-map.mjs', import.meta.url), path.join(root, 'scripts/build-map.mjs'));
+  copyFileSync(new URL('../scripts/sketch-layout.mjs', import.meta.url), path.join(root, 'scripts/sketch-layout.mjs'));
   writeFileSync(path.join(root, 'package.json'), '{"type":"module"}\n');
   writeFileSync(path.join(root, 'assets/maps/templates/manifest.json'), '{"templates":[],"disclaimer":"fixture"}\n');
   writeFileSync(path.join(root, 'assets/maps/test-coast.geojson'), JSON.stringify({
@@ -63,4 +64,36 @@ test('geographic map builds a sourced outline and keeps coordinates fixed', (t) 
   const negative = build();
   assert.notEqual(negative.status, 0);
   assert.match(negative.stderr, /outside detail bounds/);
+});
+
+test('sketch map reads each day from the schedule and starts from the previous night', async () => {
+  const { buildSketch } = await import('../scripts/sketch-layout.mjs');
+  const place = (id, lat, lng, countryCode = 'JP') => ({ id, name: id, countryCode, geo: { lat, lng } });
+  const tripData = {
+    places: [place('home', 22.3, 113.9, 'HK'), place('airport', 33.58, 130.45), place('station', 33.59, 130.42), place('hotel', 33.5905, 130.4205), place('lake', 33.26, 131.37)],
+    accommodations: [{ placeId: 'hotel', checkIn: '2026-11-12', checkOut: '2026-11-14', status: 'confirmed' }],
+    days: [
+      { day: 1, date: '2026-11-12', schedule: [{ time: '12:00', type: 'flight', text: '飞机', placeIds: ['home', 'airport'] }, { time: '18:00', type: 'transfer', text: '西铁巴士', placeIds: ['airport', 'station'] }] },
+      { day: 2, date: '2026-11-13', schedule: [{ time: '09:00', type: 'transfer', text: '特急' }, { time: '12:00', type: 'walk', placeId: 'lake' }, { time: '17:00', type: 'return', text: '特急回酒店' }] }
+    ]
+  };
+  const sketch = buildSketch({ tripData, mapData: { region: { countryCode: 'JP' }, modeWords: ['西铁巴士'] }, boundary: null, canvas: { width: 1448, height: 1086 } });
+  assert.deepEqual(sketch.nodes.find((node) => node.id === 'station').placeIds.sort(), ['hotel', 'station']);
+  assert.deepEqual(sketch.days[0].legs.map((leg) => [leg.from, leg.to, leg.mode]), [['home', 'airport', '飞机'], ['airport', 'station', '西铁巴士']]);
+  assert.deepEqual(sketch.days[1].legs.map((leg) => [leg.from, leg.to, leg.time]), [['station', 'lake', '09:00'], ['lake', 'station', '17:00']]);
+  assert.equal(sketch.away[0].id, 'home');
+});
+
+test('sketch map keeps two nearby stays as separate places', async () => {
+  const { buildSketch } = await import('../scripts/sketch-layout.mjs');
+  const place = (id, lat, lng) => ({ id, name: id, countryCode: 'JP', geo: { lat, lng } });
+  const tripData = {
+    places: [place('station', 32.937, 131.080), place('inn_a', 32.9759, 131.0417), place('inn_b', 32.9724, 131.0501), place('onsen', 32.9726, 131.0505)],
+    accommodations: [{ placeId: 'inn_a', checkIn: '2026-11-15', checkOut: '2026-11-16' }, { placeId: 'inn_b', checkIn: '2026-11-16', checkOut: '2026-11-17' }],
+    days: [{ day: 1, date: '2026-11-15', schedule: [{ time: '11:00', type: 'transfer', text: '巴士', placeIds: ['station', 'inn_a'] }, { time: '17:00', type: 'walk', placeId: 'onsen' }] }]
+  };
+  const sketch = buildSketch({ tripData, mapData: { region: { countryCode: 'JP' } }, boundary: null, canvas: { width: 1448, height: 1086 } });
+  const nodeOf = (id) => sketch.nodes.find((node) => node.placeIds.includes(id)).id;
+  assert.notEqual(nodeOf('inn_a'), nodeOf('inn_b'));
+  assert.equal(nodeOf('onsen'), nodeOf('inn_b'));
 });

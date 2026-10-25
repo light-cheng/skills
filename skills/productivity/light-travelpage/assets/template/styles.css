@@ -323,7 +323,7 @@ main { overflow: hidden; }
 .schedule-ticket.is-purchased .schedule-ticket__check { border-color: var(--forest); color: white; background: var(--forest); }
 .schedule-ticket.is-purchased .schedule-ticket__status { color: var(--forest); }
 .schedule-ticket.is-purchased .schedule-ticket__content strong { color: #708072; text-decoration: line-through; }
-.schedule-ticket.is-purchased .schedule-ticket__content small { display: none; }
+.schedule-ticket.is-purchased .schedule-ticket__content small, .schedule-ticket.is-purchased .schedule-ticket__guidance { display: none; }
 .schedule-ticket.is-purchased .schedule-ticket__open { color: var(--forest); border-left-color: rgba(81,107,85,.2); }
 
 .ticket-dialog { width: min(100% - 28px,720px); max-height: min(88dvh,820px); padding: 0; border: 1px solid rgba(19,38,47,.12); border-radius: 20px; background: var(--paper); box-shadow: 0 22px 70px rgba(19,38,47,.2); overflow: hidden; }
@@ -396,6 +396,8 @@ main { overflow: hidden; }
 .travel-map-canvas svg {display:block;width:100%;height:auto;}
 .map-utility {display:flex;justify-content:space-between;align-items:center;margin:5px 0 12px;font-size:12px;color:var(--muted);}
 .map-utility button {border:0;background:transparent;font-size:12px;padding:8px;cursor:pointer;}
+.map-place-list {display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 18px;font-size:13px;}
+.map-place-list > span {color:var(--muted);margin-right:4px;}
 .transport-pin {position:absolute;transform:translate(-50%,-50%);font-size:11px;line-height:1.2;border:1px solid var(--route-color);background:white;color:var(--ink);padding:5px 7px;border-radius:20px;cursor:pointer;box-shadow:0 2px 6px #13262f22;white-space:nowrap;}
 .transport-pin::before {content:"";position:absolute;inset:-6px;}
 .transport-pin[aria-expanded="true"] {background:var(--route-color);color:white;}
