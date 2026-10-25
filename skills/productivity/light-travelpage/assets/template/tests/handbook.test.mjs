@@ -323,19 +323,21 @@ function realNavigationPage(t, modules) {
   return w;
 }
 
-test("real chapter navigation exposes route and puts only unrepresented destinations in More", t => {
+test("real chapter navigation puts the overview on to-do, materials last, and only unrepresented destinations in More", t => {
   const modules = { itinerary:true, flights:true, accommodations:true, overview:true, ledger:true, todo:true, driving:true };
   const w = realNavigationPage(t, modules);
   const visibleHrefs = selector => [...w.document.querySelectorAll(selector)].filter(e => !e.hidden).map(e => e.getAttribute("href"));
-  assert.deepEqual(visibleHrefs(".handbook-tabs a"), ["#itinerary", "#flights", "#ledger", "#prep", "#route"]);
-  assert.deepEqual(visibleHrefs(".travel-navigation-menu a"), ["#materials", "#drive"]);
+  assert.deepEqual(visibleHrefs(".handbook-tabs a"), ["#itinerary", "#flights", "#prep", "#materials", "#ledger"]);
+  assert.deepEqual([...w.document.querySelectorAll(".handbook-tabs a")].filter(e => !e.hidden).map(e => e.querySelector("span").textContent), ["01", "02", "03", "04", "05"]);
+  assert.deepEqual(visibleHrefs(".travel-navigation-menu a"), ["#drive"]);
   w.document.querySelector("#todo-input").value = "unsaved checklist draft";
-  w.document.querySelector('.handbook-tabs [href="#route"]').click();
+  w.document.querySelector('.handbook-tabs [href="#prep"]').click();
   assert.equal(w.document.querySelector("#route").hidden, false);
+  assert.equal(w.document.querySelector("#prep").hidden, false);
   assert.equal(w.document.querySelector("#itinerary").hidden, true);
-  w.document.querySelector('.travel-navigation-menu [href="#materials"]').click();
+  w.document.querySelector('.handbook-tabs [href="#materials"]').click();
   assert.equal(w.document.querySelector("#materials").hidden, false);
-  assert.equal(w.document.querySelector('.travel-navigation-menu [href="#materials"]').getAttribute("aria-current"), "page");
+  assert.equal(w.document.querySelector('.handbook-tabs [href="#materials"]').getAttribute("aria-current"), "page");
   assert.equal(w.document.querySelector("#todo-input").value, "unsaved checklist draft");
 });
 
@@ -397,12 +399,54 @@ test("validated undated draft initializes itinerary and map and switches its dai
   assert.equal(w.document.querySelector("#loading-error").hidden,true,errors.join("\n"));
   assert.equal(w.document.querySelectorAll(".day-card").length,2);
   assert.equal(w.document.querySelectorAll(".handbook-day-map").length,2);
-  assert.deepEqual([...w.document.querySelectorAll(".route-day-tabs button")].map(e=>e.textContent),["总览","DAY 1","DAY 2"]);
+  // The handbook route map is the whole-trip overview only; days are switched on the itinerary page.
+  assert.equal(w.document.querySelectorAll(".route-day-tabs").length,0);
   w.document.querySelector('[data-handbook-day="2"]').click();
   assert.equal(w.document.querySelector('.day-card[data-day="2"]').hidden,false);
   assert.equal(w.document.querySelector('.day-card[data-day="1"]').hidden,true);
-  w.document.querySelector('[data-route-day="2"]').click();
-  assert.equal(w.document.querySelector('[data-route-day="2"]').getAttribute("aria-pressed"),"true");
-  assert.equal(w.document.querySelectorAll(".map-place-dot").length,2);
+  assert.equal(w.document.querySelectorAll("#route-explorer .map-place-dot").length,0);
   assert.deepEqual(errors,[]);
+});
+
+test("without to-do the overview map keeps a tab-less chapter that #route opens, and with to-do it is never the fallback", async t => {
+  const noTodo = realNavigationPage(t, { itinerary:true, flights:false, accommodations:false, overview:true, ledger:false, todo:false, driving:false });
+  noTodo.location.hash = "#route";
+  noTodo.dispatchEvent(new noTodo.HashChangeEvent("hashchange"));
+  await new Promise(resolve => noTodo.setTimeout(resolve, 50));
+  assert.equal(noTodo.document.body.dataset.chapter, "overview");
+  assert.equal(noTodo.document.querySelector("#route").hidden, false);
+  assert.equal(noTodo.document.querySelector("#itinerary").hidden, true);
+  const todoOnly = realNavigationPage(t, { itinerary:false, flights:false, accommodations:false, overview:true, ledger:false, todo:true, driving:false });
+  assert.equal(todoOnly.document.body.dataset.chapter, "todo");
+  assert.equal(todoOnly.document.querySelector("#route").hidden, false);
+  assert.equal(todoOnly.document.querySelector("#prep").hidden, false);
+});
+
+test("pocket lists every stay by date and shows only each to-do's instruction label", t => {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = '<a id="bookings-navigation-link"></a><aside id="handbook-pocket"></aside><div id="handbook-materials"></div>';
+  w.TRAVEL_PLAN_CONFIG = { modules: { accommodations: true, flights: false, ledger: false, todo: true } };
+  w.TRAVEL_PLAN_DATA = { config: w.TRAVEL_PLAN_CONFIG, metadata: { timeZone: "UTC" },
+    accommodations: [{ id: "late", name: "Late Inn", checkIn: "2099-02-03", checkOut: "2099-02-05" }, { id: "early", name: "Early Inn", checkIn: "2099-01-01", checkOut: "2099-01-03" }],
+    preTrip: { packingItems: [{ id: "card", text: "Ask the front desk\n\nこんにちは", completed: false }, { id: "cash", text: "现金：先换钱。", completed: false }] }, ticketPlanning: { items: [] } };
+  w.eval(read("handbook.js"));
+  w.dispatchEvent(new w.Event("travel-config:ready"));
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-stay span[data-authored]")].map(e => e.textContent), ["Early Inn", "Late Inn"]);
+  assert.equal(w.document.querySelectorAll(".pocket-stay.is-tonight").length, 0);
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-todo li")].map(e => e.textContent), ["Ask the front desk", "现金"]);
+});
+
+test("during the trip the pocket puts tonight's stay first and marks it", t => {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = '<a id="bookings-navigation-link"></a><aside id="handbook-pocket"></aside><div id="handbook-materials"></div>';
+  const day = offset => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+  w.TRAVEL_PLAN_CONFIG = { modules: { accommodations: true, flights: false, ledger: false, todo: false } };
+  w.TRAVEL_PLAN_DATA = { config: w.TRAVEL_PLAN_CONFIG, metadata: { timeZone: "UTC" }, ticketPlanning: { items: [] },
+    accommodations: [{ id: "before", name: "Before", checkIn: day(-3), checkOut: day(-1) }, { id: "now", name: "Now", checkIn: day(-1), checkOut: day(1) }, { id: "after", name: "After", checkIn: day(1), checkOut: day(3) }] };
+  w.eval(read("handbook.js"));
+  w.dispatchEvent(new w.Event("travel-config:ready"));
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-stay span[data-authored]")].map(e => e.textContent), ["Now", "Before", "After"]);
+  assert.equal(w.document.querySelector(".pocket-stay.is-tonight span[data-authored]").textContent, "Now");
 });

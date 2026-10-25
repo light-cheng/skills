@@ -53,12 +53,22 @@ function applyModuleConfig() {
     bookingsLink.hidden = !(moduleEnabled("flights") || moduleEnabled("accommodations"));
     bookingsLink.href = moduleEnabled("flights") ? "#flights" : "#stays";
   }
+  // When other handbook chapters are shown, materials is their last tab instead of a top-bar entry.
+  const materialsTab = $("#materials-tab");
+  const materialsAsTab = Boolean(materialsTab) && [...document.querySelectorAll(".handbook-tabs a")].some((link) => link !== materialsTab && !link.hidden);
+  if (materialsTab) materialsTab.hidden = !materialsAsTab;
+  document.querySelectorAll('.travel-navigation-menu [data-chapter="materials"]').forEach((link) => { link.hidden = materialsAsTab; });
   const visibleTravelLinks = [...document.querySelectorAll(".travel-navigation-menu a")].filter((link) => !link.hidden);
   const travelNavigation = $("#travel-navigation");
   const materialsLink = $("#materials-navigation-link");
   const materialsOnly = Boolean(materialsLink && visibleTravelLinks.length === 1 && visibleTravelLinks[0].dataset.chapter === "materials");
   if (materialsLink) materialsLink.hidden = !materialsOnly;
   if (travelNavigation) travelNavigation.hidden = visibleTravelLinks.length === 0 || materialsOnly;
+  // Number the visible handbook tabs 01, 02, … so hidden modules leave no gaps.
+  [...document.querySelectorAll(".handbook-tabs a")].filter((link) => !link.hidden).forEach((link, index) => {
+    const number = link.querySelector("span[aria-hidden]");
+    if (number) number.textContent = String(index + 1).padStart(2, "0");
+  });
   document.documentElement.dataset.persistence = state.config.persistence.mode;
 
   const hashModules = {
@@ -134,6 +144,14 @@ function formatCompactDate(dateString) {
   if (!dateString) return "日期待确认";
   const [, month, day] = dateString.split("-");
   return `${Number(month)}月${Number(day)}日`;
+}
+
+// Weekday of a trip calendar date ("2026-11-12" → "周四"); i18n maps it to "Thu" in English.
+const WEEKDAY_LABELS = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+window.TravelI18n?.addTranslations(Object.fromEntries(WEEKDAY_LABELS.map((label, index) => [label, { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][index] }])));
+function weekdayLabel(dateString) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateString || "");
+  return match ? WEEKDAY_LABELS[new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]))).getUTCDay()] : "";
 }
 
 function todayForTrip() {
@@ -299,6 +317,7 @@ function flightCard(journey, index) {
   const last = flights[flights.length - 1];
   const status = journeyStatusAndTarget(flights);
   const countdown = status.complete ? "已完成" : preciseCountdownText(status.target, "即将出发");
+  const bookingGuidance = (journey.ticketIds || []).flatMap(id => state.data.ticketPlanning.items.find(ticket => ticket.id === id)?.guidance || []);
   const stops = [
     { airport: first.departure, departure: first.departure },
     ...flights.map((flight, flightIndex) => ({
@@ -327,6 +346,7 @@ function flightCard(journey, index) {
       </div>
       ${journey.demo ? `<p>演示资料</p>` : ""}${(journey.ticketIds || []).map(id => `<button type="button" data-ticket-open="${escapeHtml(id)}">查看票据</button>`).join("")}
       <div class="flight-card__airlines">${escapeHtml([...new Set(flights.map((flight) => flight.airline.nameZh || flight.airline.name))].join(" · "))}</div>
+      ${bookingGuidance.length ? `<aside class="flight-booking-note">${bookingGuidance.map(note => `<p ${/[\u3400-\u9fff]/.test(note) ? "data-authored" : "data-no-translate"}>${escapeHtml(note)}</p>`).join("")}</aside>` : ""}
       <div class="flight-flow" style="--route-columns: ${stops.map((_, stopIndex) => stopIndex < stops.length - 1 ? "minmax(0,1fr) minmax(34px,.5fr)" : "minmax(0,1fr)").join(" ")}">
         ${routeItems.join("")}
       </div>
@@ -451,6 +471,7 @@ function ticketRequirement(ticket) {
   return ({
     "advance-required": "需提前购票",
     "advance-recommended": "建议预约",
+    "on-site": "不用预约，现场买",
     "needs-confirmation": "购票方式待确认"
   })[ticket.requirement] || "门票信息";
 }
@@ -459,9 +480,19 @@ function ticketTitle(ticket) {
   return ticket.name || ticket.attraction?.nameZh || ticket.attraction?.name || "门票详情";
 }
 
-function ticketGuidance(ticket) {
+// Each guidance line on its own row instead of one "·"-joined string.
+function ticketGuidanceLines(ticket) {
   const guidance = ticket.guidance || ticket.notes || [];
-  return Array.isArray(guidance) ? guidance.join("·") : String(guidance || "");
+  return (Array.isArray(guidance) ? guidance : [guidance]).map((line) => String(line || "").trim()).filter(Boolean);
+}
+
+// Structured schedule entries (item.detail) render as a lead line plus labelled point lists; item.text stays as the source text.
+function scheduleTextMarkup(item) {
+  const detail = item.detail;
+  if (!detail || (!detail.lead && !detail.sections?.length)) return `<div class="schedule-text">${escapeHtml(item.text)}</div>`;
+  const sections = (detail.sections || []).filter((section) => section?.points?.length).map((section) => `
+    <div class="schedule-section">${section.label ? `<span class="schedule-section__label">${escapeHtml(section.label)}</span>` : ""}<ul>${section.points.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}</ul></div>`).join("");
+  return `<div class="schedule-text schedule-text--detail" data-no-translate>${detail.lead ? `<p class="schedule-lead">${escapeHtml(detail.lead)}</p>` : ""}${sections}</div>`;
 }
 
 function ticketDocument(ticket) {
@@ -484,7 +515,7 @@ function inlineTicketMarkup(ticket) {
         <span class="schedule-ticket__content">
           <span class="schedule-ticket__status">${purchased ? "已购票" : escapeHtml(ticketRequirement(ticket))}</span>
           <strong>${escapeHtml(title)}</strong>
-          <small>${escapeHtml(ticketGuidance(ticket))}</small>
+          ${ticketGuidanceLines(ticket).length ? `<span class="schedule-ticket__guidance">${ticketGuidanceLines(ticket).map((line) => `<span>${escapeHtml(line)}</span>`).join("")}</span>` : ""}
         </span>
       </label>
       <button type="button" class="schedule-ticket__open" data-ticket-open="${escapeHtml(ticket.id)}" aria-haspopup="dialog" aria-controls="ticket-dialog">查看</button>
@@ -504,7 +535,7 @@ function dayCard(day) {
       <li class="schedule-item" data-schedule-id="${escapeHtml(item.id || "")}" data-schedule-place="${escapeHtml(item.placeId || item.placeIds?.[0] || "")}">
         <span class="schedule-time">${escapeHtml(item.time)}</span>
         <div class="schedule-content">
-          <div class="schedule-text">${escapeHtml(item.text)}</div>
+          ${scheduleTextMarkup(item)}
           ${scheduleTickets}
           ${item.accommodationId ? `<a href="#stay-${escapeHtml(item.accommodationId)}">查看住宿</a>` : ""}
           ${mapLinks ? `<div class="schedule-map-links">${mapLinks}</div>` : ""}
@@ -515,7 +546,7 @@ function dayCard(day) {
   const notes = [...(day.notes || []), ...(day.sourceDateLabelConflict ? [day.sourceDateLabelConflict] : [])];
   const costs = (day.costReferences || []).map((cost) => `<span class="cost-tag">${escapeHtml(costText(cost))}</span>`).join("");
   const dayTickets = ticketsForDay(day);
-  const pendingTicketCount = dayTickets.filter((ticket) => !isTicketPurchased(ticket)).length;
+  const pendingTicketCount = dayTickets.filter((ticket) => ticket.requirement !== "on-site" && !isTicketPurchased(ticket)).length;
   const ticketSummary = dayTickets.length
     ? `<span class="day-ticket-summary ${pendingTicketCount ? "has-pending" : "is-complete"}">${pendingTicketCount ? `${pendingTicketCount} 项待购票` : "门票已准备"}</span>`
     : "";
@@ -525,7 +556,7 @@ function dayCard(day) {
       <button class="day-toggle" type="button" aria-expanded="${expanded}" aria-controls="day-detail-${day.day}">
         <span>
           ${$("#handbook-dates") ? `<span class="handbook-date-number" aria-hidden="true">${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</span>` : ""}
-          <span class="day-meta">DAY ${String(day.day).padStart(2, "0")} · ${escapeHtml(formatCompactDate(day.date))}${isToday ? " · 今天" : ""}</span>
+          <span class="day-meta">DAY ${String(day.day).padStart(2, "0")} · ${escapeHtml(formatCompactDate(day.date))}${weekdayLabel(day.date) ? ` · <span class="day-weekday">${weekdayLabel(day.date)}</span>` : ""}${isToday ? " · 今天" : ""}</span>
           <span class="day-title">${escapeHtml(day.title)}</span>
           <span class="day-locations">${escapeHtml(day.locations.join(" → "))}</span>
           ${ticketSummary}
@@ -638,7 +669,7 @@ function renderTimeline() {
   $("#timeline").innerHTML = state.data.days.map(dayCard).join("");
   const navigation = $("#handbook-dates");
   if (navigation) {
-    navigation.innerHTML = state.data.days.map(day => `<button type="button" data-handbook-day="${day.day}" aria-pressed="${state.expandedDay === day.day}" aria-controls="day-detail-${day.day}"><strong>${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</strong><span>${escapeHtml(day.date ? formatCompactDate(day.date) : `DAY ${day.day}`)}</span></button>`).join("");
+    navigation.innerHTML = state.data.days.map(day => `<button type="button" data-handbook-day="${day.day}" aria-pressed="${state.expandedDay === day.day}" aria-controls="day-detail-${day.day}"><strong>${escapeHtml(day.date?.slice(-2) || String(day.day).padStart(2,"0"))}</strong><span>${escapeHtml(day.date ? formatCompactDate(day.date) : `DAY ${day.day}`)}</span>${weekdayLabel(day.date) ? `<small class="handbook-weekday">${weekdayLabel(day.date)}</small>` : ""}</button>`).join("");
     navigation.onclick = event => {
       const button = event.target.closest("[data-handbook-day]");
       if (!button) return;
@@ -874,6 +905,52 @@ async function saveSharedChange(collection, value, op = "upsert") {
 
 function saveTodoState() { return Promise.all(state.todos.map((todo) => saveSharedChange("todos", todo))); }
 
+// "Instruction\n\nCard": the part after the first blank line is a show-at-the-desk card, kept line for line.
+function splitTodoCard(text) {
+  const value = String(text), blank = value.indexOf("\n\n");
+  return blank > -1 ? { head: value.slice(0, blank).trim(), card: value.slice(blank + 2).trim() } : { head: value, card: "" };
+}
+
+// Long authored to-dos read better as a bold label, one line per sentence, and bullets for "；" lists.
+function formatTodoText(text) {
+  const { head, card } = splitTodoCard(text);
+  if (card) return `<span class="todo-lead"><span class="todo-line">${escapeHtml(head)}</span></span>`;
+  // Authored line breaks (e.g. numbered fallback steps) are kept: first line leads, each further line stands alone.
+  if (String(text).includes("\n")) {
+    const [first, ...rest] = String(text).split("\n").map((line) => line.trim()).filter(Boolean);
+    const labelled = first.match(/^([^：:，。；]{1,12})[：:]\s*(.+)$/);
+    return `${labelled ? `<strong class="todo-label">${escapeHtml(labelled[1])}</strong>` : ""}<span class="todo-lead"><span class="todo-line">${escapeHtml(labelled ? labelled[2] : first)}</span></span>${rest.length ? `<span class="todo-detail">${rest.map((line) => `<span class="todo-line">${escapeHtml(line)}</span>`).join("")}</span>` : ""}`;
+  }
+  const match = String(text).match(/^([^：:，。；]{1,12})[：:]\s*([\s\S]+)$/);
+  const label = match ? match[1] : "";
+  const body = match ? match[2] : String(text);
+  const sentences = body.split(/(?<=。)/).map((part) => part.trim()).filter(Boolean);
+  const blocks = sentences.map((sentence) => {
+    if ((sentence.match(/；/g) || []).length < 2) return `<span class="todo-line">${escapeHtml(sentence)}</span>`;
+    const colon = sentence.search(/[：:]/);
+    const intro = colon > -1 && colon < sentence.indexOf("；") ? sentence.slice(0, colon + 1) : "";
+    const items = sentence.slice(intro.length).split("；").map((item) => item.trim()).filter(Boolean);
+    return `${intro ? `<span class="todo-line">${escapeHtml(intro)}</span>` : ""}<span class="todo-bullets">${items.map((item) => `<span class="todo-bullet">${escapeHtml(item)}</span>`).join("")}</span>`;
+  });
+  const [first, ...rest] = blocks;
+  return `${label ? `<strong class="todo-label">${escapeHtml(label)}</strong>` : ""}<span class="todo-lead">${first || ""}</span>${rest.length ? `<span class="todo-detail">${rest.join("")}</span>` : ""}`;
+}
+
+// Copy a desk/email card with its line breaks. Clipboard API first; a selected textarea covers older iOS Safari.
+function copyTodoCardText(text) {
+  const fallback = () => {
+    const area = document.createElement("textarea");
+    area.value = text; area.setAttribute("readonly", ""); area.style.position = "fixed"; area.style.opacity = "0"; area.style.fontSize = "16px";
+    document.body.append(area); area.focus(); area.select(); area.setSelectionRange(0, text.length);
+    let copied = false;
+    try { copied = document.execCommand("copy"); } catch { copied = false; }
+    area.remove();
+    return copied ? Promise.resolve() : Promise.reject(new Error("copy failed"));
+  };
+  if (navigator.clipboard?.writeText && window.isSecureContext !== false) return navigator.clipboard.writeText(text).catch(fallback);
+  return fallback();
+}
+
 function renderTodoList() {
   const completed = state.todos.filter((todo) => todo.completed).length;
   $("#todo-progress").textContent = `${completed} / ${state.todos.length}`;
@@ -882,20 +959,62 @@ function renderTodoList() {
       <label>
         <input type="checkbox" ${todo.completed ? "checked" : ""} aria-label="完成：${escapeHtml(todo.text)}">
         <span class="todo-check" aria-hidden="true">✓</span>
-        <span class="todo-text" data-no-translate>${escapeHtml(todo.text)}</span>
+        <span class="todo-text" data-no-translate>${formatTodoText(todo.text)}</span>
       </label>
       <button type="button" class="todo-delete" aria-label="删除：${escapeHtml(todo.text)}">删除</button>
+      ${splitTodoCard(todo.text).card ? `<div class="todo-card"${state.data.metadata?.localLanguage ? ` lang="${escapeHtml(state.data.metadata.localLanguage)}"` : ""} data-no-translate><button type="button" class="todo-card-copy" data-copy-card lang="zh-CN">复制</button><span class="todo-card-text">${escapeHtml(splitTodoCard(todo.text).card)}</span></div>` : ""}
     </div>`).join("") : `<p class="todo-empty">还没有 to-do，添加第一项吧。</p>`;
+}
+
+let submittedTodoDraft = null;
+function finishSavedTodoDraft(snapshot) {
+  if (!submittedTodoDraft || !snapshot?.todos?.some((todo) =>
+    todo.id === submittedTodoDraft.id && todo.text === submittedTodoDraft.text)) return;
+  const input = $("#todo-input");
+  if (input.value === submittedTodoDraft.inputValue) input.value = "";
+  submittedTodoDraft = null;
+}
+window.LightTravelRecoverSavedMutation = function (recovered) {
+  recovered.filter((entry) => !entry.error).forEach((entry) => finishSavedTodoDraft(entry.snapshot));
+};
+
+function renderCashBudget() {
+  const root = $("#cash-budget"), budget = state.data.preTrip?.cashBudget;
+  if (!root) return;
+  root.hidden = !budget?.rows?.length;
+  if (root.hidden) return;
+  root.innerHTML = `
+    <h3 data-no-translate>${escapeHtml(budget.title || "钱怎么带")}</h3>
+    ${budget.summary ? `<p class="cash-budget__summary" data-no-translate>${escapeHtml(budget.summary)}</p>` : ""}
+    <table>
+      <thead><tr><th>项目</th><th>${escapeHtml(budget.currency || "金额")}</th><th>怎么付</th></tr></thead>
+      <tbody>${budget.rows.map((row) => `<tr${row.cash ? ' class="is-cash"' : ""}><td data-no-translate>${escapeHtml(row.item)}</td><td data-no-translate>${escapeHtml(row.amount)}</td><td data-no-translate>${escapeHtml(row.pay)}</td></tr>`).join("")}</tbody>
+    </table>
+    ${(budget.notes || []).map((note) => `<p class="cash-budget__note" data-no-translate>${escapeHtml(note)}</p>`).join("")}`;
 }
 
 function renderTravelPrep() {
   renderTodoList();
+  renderCashBudget();
   $("#todo-form").onsubmit = async (event) => {
     event.preventDefault();
     const input = $("#todo-input"), text = input.value.trim();
     if (!text) return;
+    const adapter = state.runtimeAdapters.todos;
+    if (adapter?.pending || adapter?.busy) {
+      reportSyncError(new Error("请先重试上次保存，不要重复提交。"));
+      return;
+    }
     const todo = {id: `todo-${crypto.randomUUID()}`, text, completed: false};
-    try { await saveSharedChange("todos", todo); input.value = ""; await window.LightTravelRefresh(); } catch (error) { reportSyncError(error); }
+    submittedTodoDraft = {id: todo.id, text, inputValue: input.value};
+    try {
+      const saved = await saveSharedChange("todos", todo);
+      finishSavedTodoDraft(saved);
+      await window.LightTravelRefresh();
+    } catch (error) {
+      if (!adapter?.pending) submittedTodoDraft = null;
+      reportSyncError(error);
+    }
   };
   $("#todo-list").onchange = async (event) => {
     const item = event.target.closest("[data-todo-id]");
@@ -906,6 +1025,16 @@ function renderTravelPrep() {
     catch (error) { reportSyncError(error); renderTodoList(); }
   };
   $("#todo-list").onclick = async (event) => {
+    const copy = event.target.closest("[data-copy-card]");
+    if (copy) {
+      event.preventDefault();
+      const todo = state.todos.find((entry) => entry.id === copy.closest("[data-todo-id]")?.dataset.todoId);
+      const text = splitTodoCard(todo?.text || "").card;
+      if (!text) return;
+      copyTodoCardText(text).then(() => { copy.textContent = "已复制"; }, () => { copy.textContent = "请长按选择复制"; })
+        .finally(() => setTimeout(() => { copy.textContent = "复制"; }, 1600));
+      return;
+    }
     const button = event.target.closest(".todo-delete"); if (!button) return;
     button.disabled = true;
     try { await saveSharedChange("todos", {id: button.closest("[data-todo-id]").dataset.todoId}, "delete"); await window.LightTravelRefresh(); }
@@ -974,7 +1103,7 @@ function openTicketDialog(ticketId, opener) {
   ].filter(Boolean).join("");
   $("#ticket-dialog-body").innerHTML = `
     <p class="ticket-dialog__status">${escapeHtml(isTicketPurchased(ticket) ? "已标记购票" : ticketRequirement(ticket))}</p>
-    ${ticketGuidance(ticket) ? `<p class="ticket-dialog__guidance">${escapeHtml(ticketGuidance(ticket))}</p>` : ""}
+    ${ticketGuidanceLines(ticket).length ? `<ul class="ticket-dialog__guidance">${ticketGuidanceLines(ticket).map((line) => `<li>${escapeHtml(line)}</li>`).join("")}</ul>` : ""}
     ${preview || (!links ? `<p class="ticket-dialog__empty">当前没有可预览的票据文件或官方链接。</p>` : "")}
     ${links ? `<div class="ticket-dialog__links">${links}</div>` : ""}`;
   if (typeof dialog.showModal === "function") dialog.showModal();

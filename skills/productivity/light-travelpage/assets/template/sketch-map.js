@@ -63,13 +63,15 @@ function sketchViewport(source, dayNumber) {
   };
 }
 
-function sketchMapArtwork(days, source, dayNumber = 0) {
+// options.labelScale enlarges marks and text for small embeds (the itinerary side map); the route page uses the default.
+// options.dayTitle: false leaves out the date and title line when the page already shows them beside the map.
+function sketchMapArtwork(days, source, dayNumber = 0, options = {}) {
   const sketch = source.sketch;
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&apos;" })[character]);
   const f = (value) => Number(value).toFixed(1);
   const canvas = source.canvas || { width: 1448, height: 1086 };
   const view = sketchViewport(source, dayNumber);
-  const u = view.width / canvas.width;
+  const u = view.width / canvas.width * (Number(options.labelScale) || 1);
   const nodes = new Map(sketch.nodes.map((node) => [node.id, node]));
   const today = dayNumber ? sketch.days.find((day) => day.day === dayNumber) : null;
   const legs = sketchLegs(sketch, dayNumber);
@@ -88,7 +90,7 @@ function sketchMapArtwork(days, source, dayNumber = 0) {
     obstacles.push({ x: p.x - s, y: p.y - s, w: s * 2, h: s * 2 });
   };
   const chip = (p, text, color, caption, normal) => {
-    marks.push(`<g transform="translate(${f(p.x)} ${f(p.y)}) scale(${u})"><circle r="13" fill="${color}" stroke="${SKETCH_PAPER}" stroke-width="2.5"/><text y="5.2" text-anchor="middle" font-family="${SKETCH_FONT}" font-size="16" font-weight="700" fill="#fff">${esc(text)}</text></g>`);
+    marks.push(`<g transform="translate(${f(p.x)} ${f(p.y)}) scale(${u})"><circle r="13" fill="${esc(color)}" stroke="${SKETCH_PAPER}" stroke-width="2.5"/><text y="5.2" text-anchor="middle" font-family="${SKETCH_FONT}" font-size="16" font-weight="700" fill="#fff">${esc(text)}</text></g>`);
     obstacles.push({ x: p.x - 15 * u, y: p.y - 15 * u, w: 30 * u, h: 30 * u });
     if (!caption) return;
     // Mode and time sit beside the step number, on the outer side of the curve.
@@ -172,9 +174,10 @@ function sketchMapArtwork(days, source, dayNumber = 0) {
   const header = [];
   if (today) {
     const x = view.x + 30 * u, y = view.y + view.height - 30 * u;
-    header.push(`<text x="${f(x)}" y="${f(y - 34 * u)}" font-family="${SKETCH_FONT}" font-size="${36 * u}" font-weight="700" fill="${SKETCH_INK}" stroke="${SKETCH_PAPER}" stroke-width="${6 * u}" paint-order="stroke">${esc((today.date || "").slice(5).replace("-", "/"))}　${esc(today.title)}</text>`);
+    if (options.dayTitle !== false) header.push(`<text x="${f(x)}" y="${f(y - 34 * u)}" font-family="${SKETCH_FONT}" font-size="${36 * u}" font-weight="700" fill="${SKETCH_INK}" stroke="${SKETCH_PAPER}" stroke-width="${6 * u}" paint-order="stroke">${esc((today.date || "").slice(5).replace("-", "/"))}　${esc(today.title)}</text>`);
     header.push(`<text x="${f(x)}" y="${f(y)}" font-family="${SKETCH_FONT}" font-size="${16 * u}" fill="${SKETCH_SUB}" stroke="${SKETCH_PAPER}" stroke-width="${4 * u}" paint-order="stroke">圆圈数字是当天第几步，箭头是方向${today.stay ? `；今晚住 ${esc(nodes.get(today.stay)?.label || "")}${today.stayPending ? "（未订）" : ""}` : ""}</text>`);
-    obstacles.push({ x: view.x, y: view.y + view.height - 100 * u, w: Math.min(view.width, 760 * u), h: 100 * u });
+    const headerHeight = (options.dayTitle === false ? 56 : 100) * u;
+    obstacles.push({ x: view.x, y: view.y + view.height - headerHeight, w: Math.min(view.width, 760 * u), h: headerHeight });
   } else {
     const heading = source.heading || { text: source.label, x: 40, y: 100, size: 40 };
     const legend = source.legend || { x: 42, y: 160, gap: 42 };

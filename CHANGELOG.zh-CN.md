@@ -7,6 +7,7 @@
 ## 未发布
 
 - `light-travelpage`：地理地图新增手绘风格（`map.style: "sketch"`）。地点保持真实方位，密集区域连同海岸线局部放大；箭头和步骤序号按每天的 schedule 生成，行程改了地图跟着变。可选 `map.region.landmarks` 和 `map.modeWords`。总览、每天路线和手册当天地图都使用它；未设置的地区保持原样。
+- `light-travelpage`（行为变化）：手册改为四个章节：行程 · 预订 · to-do · 材料，启用账本时再加账本，编号按实际显示的标签排。单独的路线章节取消：全程总览图放在 to-do 顶部，`#route` 打开它；手绘行程每天的手绘地图放在行程旁。每天标题和日期条显示星期。长文字分层：可选 `schedule[].detail`、票务 `guidance` 逐行显示、住宿 `cancellationPoints`/`navigationPoints`、to-do 粗体标签和要点，空一行后的部分显示为出示卡片并带「复制」按钮（`metadata.localLanguage` 设定卡片语言）。新增可选 `preTrip.cashBudget` 现金表和 `on-site` 票种。口袋卡列出全部住宿，旅途中「今晚」排第一。上次保存还在重试时不能重复提交 to-do。`handbook-design.md` 要求每次改 JS 或 CSS 都同时改 `index.html` 里的 `?v=`。未启用 to-do 时，总览图保留一个没有标签的章节，`#route` 仍能打开。出示卡片的字体随卡片语言变化。来自九州行程。
 
 ## 0.2.10 — 2026-10-17
 
