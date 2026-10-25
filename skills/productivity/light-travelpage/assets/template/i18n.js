@@ -1,7 +1,6 @@
 /* In-place display localization. Form values and shared records stay untouched. */
 (() => {
   const messages = {
-  "当天地点": "Places today",
   "查看地图": "View map",
   "入住日期": "Check-in date",
   "退房日期": "Check-out date",
@@ -76,6 +75,11 @@
   "日期待确认": "Date pending",
   "资料待补充": "Details pending",
   "待预订": "Not booked yet",
+  "取消和付款": "Cancellation and payment",
+  "位置和入住": "Location and check-in",
+  "旅行路线": "Trip route",
+  "圆圈数字是第几天 · 实心点是住宿": "Numbers are trip days · filled dots are stays",
+  "圆圈数字是当天第几步，箭头是方向": "Numbers are today's steps; arrows show direction",
   "项目": "Item",
   "怎么付": "How to pay",
   "钱怎么带": "Cash and cards",

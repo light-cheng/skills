@@ -12,7 +12,7 @@ Chapter layout and typography are defined in [handbook-design.md](handbook-desig
 
 ## Cards
 
-Display complete and pending records distinctly. Source data with no flight segments can use a pending journey; do not invent a countdown. Airport endpoints may reference `placeId`; journeys may reference `ticketIds`. Stays appear between flights and the route and can be linked from schedule items using `accommodationId`. Stay nights are computed from local calendar dates, not elapsed UTC hours. Credentials and booking documents remain inside the authenticated deployment. Chromium and WebKit can block PDF `iframe` content inside a modal, so the builder keeps each source PDF unchanged and generates a same-name PNG of its first page. Both files stay behind the same authentication. `#ticket-dialog` displays the PNG directly, offers zoom, and retains a link to open the original PDF in a new window.
+Display complete and pending records distinctly. Source data with no flight segments can use a pending journey; do not invent a countdown. Airport endpoints may reference `placeId`; journeys may reference `ticketIds`. Stays follow flights in the bookings chapter and can be linked from schedule items using `accommodationId`. Stay nights are computed from local calendar dates, not elapsed UTC hours. Credentials and booking documents remain inside the authenticated deployment. Chromium and WebKit can block PDF `iframe` content inside a modal, so the builder keeps each source PDF unchanged and generates a same-name PNG of its first page. Both files stay behind the same authentication. `#ticket-dialog` displays the PNG directly, offers zoom, and retains a link to open the original PDF in a new window.
 
 ## Regional maps
 

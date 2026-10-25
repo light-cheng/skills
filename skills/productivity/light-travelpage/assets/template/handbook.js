@@ -83,7 +83,7 @@
     if (modules.todo) {
       const todos = runtimeTodos ?? data.preTrip?.packingItems ?? [];
       // The pocket only needs a glance: each open to-do's label or first clause, not the full text.
-      const summary = text => { const s = String(text); const label = s.match(/^([^：:，。；]{1,12})[：:]/); return label ? label[1] : s.split(/[。；：:]/)[0]; };
+      const summary = text => { const s = String(text).split("\n")[0]; const label = s.match(/^([^：:，。；]{1,12})[：:]/); return label ? label[1] : s.split(/[。；：:]/)[0]; };
       parts.push(`<section class="pocket-section pocket-todo"><h3>to-do</h3><ul>${todos.filter(todo => !todo.completed).slice(0,4).map(todo => `<li data-no-translate>${esc(summary(todo.text))}</li>`).join("")}</ul><a href="#prep">${esc(tr("查看全部 to-do"))}</a></section>`);
     }
     if (modules.overview || modules.driving) {

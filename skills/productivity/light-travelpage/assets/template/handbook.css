@@ -324,7 +324,9 @@ body[data-layout="handbook"] #ai-capabilities { color: var(--muted); }
 .handbook-sketch-map { border: 1px solid #bdbdaf; background: #f4ecd8; }
 .handbook-sketch-map > svg { display: block; width: 100%; height: auto; }
 /* Show-at-the-desk cards inside to-dos: big, line-for-line local-language text in a light box. */
-.todo-card { grid-column: 1 / -1; display: block; margin: 0 0 4px 32px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 4px; background: #fffaf0; color: var(--ink); font-size: 17px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", var(--handbook-ui), sans-serif; }
+.todo-card { grid-column: 1 / -1; display: block; margin: 0 0 4px 32px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 4px; background: #fffaf0; color: var(--ink); font-size: 17px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; font-family: var(--handbook-ui), sans-serif; }
+.todo-card:lang(ja) { font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", var(--handbook-ui), sans-serif; }
+.todo-card:lang(ko) { font-family: "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", var(--handbook-ui), sans-serif; }
 .todo-item.is-complete .todo-card { display: none; }
 .todo-card-text { white-space: pre-line; }
 .todo-card-copy { float: right; margin: 0 0 6px 10px; min-height: 32px; padding: 0 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface, #fff); color: var(--lake); font: 500 13px/1 var(--handbook-ui); cursor: pointer; }

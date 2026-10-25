@@ -40,12 +40,6 @@ function dailyViewportFor(source, layout, dayNumber) {
   return { x: 0, y: 0, width: canvas.width, height: canvas.height };
 }
 
-function geographicFocusViewport(source) {
-  const frame = source?.projection?.frame;
-  if (source?.mapMode !== "geographic-inset" || !frame) return null;
-  return { x: frame.x - 25, y: frame.y - 55, width: frame.width + 70, height: frame.height + 80 };
-}
-
 function transportIcon(type) {
   const icons = {
     drive: '<path d="m5 9 2-5h10l2 5M4 9h16v9H4zM7 18v2m10-2v2M7 12h1m8 0h1"/>',
@@ -224,22 +218,10 @@ function setupRouteExplorer() {
       for (const oldId of ids) svg.innerHTML = svg.innerHTML.replaceAll(`id="${oldId}"`, `id="${oldId}-zoom"`).replaceAll(`url(#${oldId})`, `url(#${oldId}-zoom)`);
       copy.removeAttribute("id"); copy.classList.toggle("daily-fullscreen", Boolean(source.closest(".is-daily")));
       copy.style.setProperty("--route-color", getComputedStyle(source).getPropertyValue("--route-color"));
-      const region = travelMapSource(state.data?.routeMap, $("#route-explorer").dataset.region);
-      const focus = geographicFocusViewport(region);
-      if (focus) {
-        svg.setAttribute("viewBox", `${focus.x} ${focus.y} ${focus.width} ${focus.height}`);
-        // Crop the same geographic canvas; overlay positions retain their map coordinates.
-        copy.querySelectorAll(".map-place-dot,.transport-pin").forEach((pin) => {
-          const x = parseFloat(pin.style.left) / 100 * region.canvas.width;
-          const y = parseFloat(pin.style.top) / 100 * region.canvas.height;
-          pin.style.left = `${(x - focus.x) / focus.width * 100}%`;
-          pin.style.top = `${(y - focus.y) / focus.height * 100}%`;
-        });
-        copy.style.minWidth = "850px";
-      }
       $("#map-dialog-content").replaceChildren(copy); dialog.showModal();
       const viewport = $("#map-dialog-content");
-      viewport.scrollLeft = focus ? Math.max(0, (copy.scrollWidth - viewport.clientWidth) / 2) : mapZoomScrollLeft(region, copy.scrollWidth, viewport.clientWidth,
+      const region = travelMapSource(state.data?.routeMap, $("#route-explorer").dataset.region);
+      viewport.scrollLeft = mapZoomScrollLeft(region, copy.scrollWidth, viewport.clientWidth,
         Boolean(source.closest('.is-overview[data-map-mode="geographic-inset"]')));
     }
     const link = event.target.closest("[data-open-day]");
@@ -372,7 +354,7 @@ function handbookDayMapMarkup(day, options = {}) {
   // Hand-drawn trips use the same artwork as the route page, zoomed to this day by sketchViewport.
   if (source.sketch && typeof sketchMapArtwork === "function") {
     return `<header class="handbook-map-heading"><h3>${tr("当天路线")}</h3><a href="#route">${tr("全旅程地图")} ↗</a></header>
-    <div class="handbook-sketch-map" data-map-mode="${escapeHtml(source.mapMode || "")}">${sketchMapArtwork(state.data.days, source, day.day, { labelScale: 2 }).replace(/sketch-/g, `${id}-sketch-`)}</div>
+    <div class="handbook-sketch-map" data-map-mode="${escapeHtml(source.mapMode || "")}">${sketchMapArtwork(state.data.days, source, day.day, { labelScale: 2, dayTitle: false }).replace(/sketch-/g, `${id}-sketch-`)}</div>
     ${source.disclaimer ? `<p class="handbook-map-note" data-authored>${escapeHtml(source.disclaimer)}</p>` : ""}
     <div class="handbook-map-places" aria-label="${tr("当天地点")}">${points.map(p=>`<div><button type="button" data-handbook-place="${escapeHtml(p.id)}" aria-pressed="${p.id===options.selected}"><span data-authored>${escapeHtml(p.label)}</span></button>${window.TravelMaps.button(p.id,window.TravelI18n?.text("地图") || "地图",p.place)}</div>`).join('')}</div>
     ${!points.length?`<p class="detail-note">${tr("当天地点坐标待补充。")}</p>`:''}`;

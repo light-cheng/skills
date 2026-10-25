@@ -407,3 +407,32 @@ test("validated undated draft initializes itinerary and map and switches its dai
   assert.equal(w.document.querySelectorAll("#route-explorer .map-place-dot").length,0);
   assert.deepEqual(errors,[]);
 });
+
+test("without to-do the overview map keeps a tab-less chapter that #route opens, and with to-do it is never the fallback", async t => {
+  const noTodo = realNavigationPage(t, { itinerary:true, flights:false, accommodations:false, overview:true, ledger:false, todo:false, driving:false });
+  noTodo.location.hash = "#route";
+  noTodo.dispatchEvent(new noTodo.HashChangeEvent("hashchange"));
+  await new Promise(resolve => noTodo.setTimeout(resolve, 50));
+  assert.equal(noTodo.document.body.dataset.chapter, "overview");
+  assert.equal(noTodo.document.querySelector("#route").hidden, false);
+  assert.equal(noTodo.document.querySelector("#itinerary").hidden, true);
+  const todoOnly = realNavigationPage(t, { itinerary:false, flights:false, accommodations:false, overview:true, ledger:false, todo:true, driving:false });
+  assert.equal(todoOnly.document.body.dataset.chapter, "todo");
+  assert.equal(todoOnly.document.querySelector("#route").hidden, false);
+  assert.equal(todoOnly.document.querySelector("#prep").hidden, false);
+});
+
+test("pocket lists every stay by date and shows only each to-do's instruction label", t => {
+  const w = new Window({ url: "http://localhost/" });
+  t.after(() => w.happyDOM.abort());
+  w.document.body.innerHTML = '<a id="bookings-navigation-link"></a><aside id="handbook-pocket"></aside><div id="handbook-materials"></div>';
+  w.TRAVEL_PLAN_CONFIG = { modules: { accommodations: true, flights: false, ledger: false, todo: true } };
+  w.TRAVEL_PLAN_DATA = { config: w.TRAVEL_PLAN_CONFIG, metadata: { timeZone: "UTC" },
+    accommodations: [{ id: "late", name: "Late Inn", checkIn: "2099-02-03", checkOut: "2099-02-05" }, { id: "early", name: "Early Inn", checkIn: "2099-01-01", checkOut: "2099-01-03" }],
+    preTrip: { packingItems: [{ id: "card", text: "Ask the front desk\n\nこんにちは", completed: false }, { id: "cash", text: "现金：先换钱。", completed: false }] }, ticketPlanning: { items: [] } };
+  w.eval(read("handbook.js"));
+  w.dispatchEvent(new w.Event("travel-config:ready"));
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-stay span[data-authored]")].map(e => e.textContent), ["Early Inn", "Late Inn"]);
+  assert.equal(w.document.querySelectorAll(".pocket-stay.is-tonight").length, 0);
+  assert.deepEqual([...w.document.querySelectorAll(".pocket-todo li")].map(e => e.textContent), ["Ask the front desk", "现金"]);
+});
