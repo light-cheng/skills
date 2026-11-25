@@ -1,0 +1,7 @@
+interface:
+  display_name: "Redirect"
+  short_description: "Halt on broken plan assumptions and draft a Change proposal for human approval"
+  default_prompt: "Use redirect: classify whether this finding is a direction change or a local fix, publish a Change proposal per docs/agents/issue-tracker.md (or .scratch/<feature>/changes/), ask the user to approve it, and route approved revisions."
+
+policy:
+  allow_implicit_invocation: true
