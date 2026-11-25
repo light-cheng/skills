@@ -1,0 +1,145 @@
+"""Data models for agent-config with abstract task profiling and topology selection."""
+
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
+
+
+@dataclass
+class HostCapabilities:
+    """Deterministic host capability evidence."""
+
+    harness: str = "generic"
+    has_model_selector: bool = False
+    selector_scopes: List[str] = field(default_factory=list)
+    supported_effort: List[str] = field(default_factory=list)
+    default_effort: Optional[str] = None
+    per_agent_config: bool = False
+    active_model: str = ""
+    available_models: List[str] = field(default_factory=list)
+    companion_status: str = "missing"  # "ready", "missing", "stale"
+    profile_status: str = "missing"  # "persisted", "session-local", "missing"
+    profile_tiers: Dict[str, str] = field(default_factory=dict)
+    profile_mode: str = ""  # canonical Profile mode when validated at the public entry
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> HostCapabilities:
+        valid_keys = set(cls.__annotations__)
+        filtered = {k: v for k, v in data.items() if k in valid_keys}
+        return cls(**filtered)
+
+
+@dataclass
+class TaskCharacteristics:
+    """Task description and requirements."""
+
+    title: str = ""
+    description: str = ""
+    shape: str = "single-pass"  # "single-pass", "decomposed"
+    formal_tickets_exist: bool = True
+    difficulty: str = "standard"  # "routine", "standard", "high", "critical"
+    difficulty_source: str = "unknown"  # "explicit-user", "verified-ticket", "deterministic-policy", "heuristic", "unknown"
+    reasoning_policy: Optional[str] = None  # "highest-supported", "standard", "lowest-supported", "minimal", etc.
+    cost_sensitive: bool = False
+    latency_sensitive: bool = False
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> TaskCharacteristics:
+        valid_keys = set(cls.__annotations__)
+        filtered = {k: v for k, v in data.items() if k in valid_keys}
+        return cls(**filtered)
+
+
+@dataclass
+class DimensionProvenance:
+    """Provenance tracking for an individual semantic task dimension."""
+
+    dimension: str  # "complexity", "reasoning", "tier"
+    value: str
+    confidence: Optional[float] = None
+    source: str = "deterministic-fallback"
+    fallback_used: bool = False
+    fallback_reason: Optional[str] = None
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class AbstractTaskProfile:
+    """Abstract task profile determined semantically without vendor model names."""
+
+    complexity_level: str = "standard"  # "routine", "standard", "high", "critical"
+    complexity_score: Optional[float] = None
+    complexity_confidence: Optional[float] = None
+    reasoning_need: str = "medium"  # "low", "medium", "high"
+    reasoning_score: Optional[float] = None
+    reasoning_confidence: Optional[float] = None
+    latency_sensitivity: str = "medium"  # "low", "medium", "high"
+    cost_sensitivity: str = "medium"  # "low", "medium", "high"
+    recommended_tier: str = "standard"  # "routine", "standard", "high", "review"
+    dimension_provenance: Dict[str, DimensionProvenance] = field(default_factory=dict)
+    decisions: List[Dict[str, Any]] = field(default_factory=list)  # normalized decide records
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class ExecutionConfig:
+    """Final resolved execution configuration."""
+
+    model: str
+    resolved_effort: Optional[str] = None
+    topology: str = "Case A"  # "Case A", "Case B", "Case C", "Case D"
+    worker_models: Dict[str, str] = field(default_factory=dict)
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class AgentConfigResult:
+    """Canonical AgentConfigResult envelope."""
+
+    readiness: str  # "READY", "NEED_INPUT", "NEED_PROJECT_TICKETS", "BLOCKED", "UNSUPPORTED"
+    mode: str = "plan-only"  # "persisted", "session-local", "plan-only"
+    approval: str = "unknown"  # "unknown", "approved", "declined"
+    setup_state: Dict[str, str] = field(
+        default_factory=lambda: {"companion": "missing", "profile": "missing"}
+    )
+    handoff: Optional[str] = None
+    execution_config: Optional[ExecutionConfig] = None
+    justification: str = ""
+    abstract_profile: Optional[AbstractTaskProfile] = None
+    decision_confidence: Optional[float] = None
+    fallback_used: bool = False
+    fallback_reason: Optional[str] = None
+
+    def model_dump(self) -> Dict[str, Any]:
+        return asdict(self)
+
+    def dict(self) -> Dict[str, Any]:
+        return asdict(self)
