@@ -1,0 +1,7 @@
+interface:
+  display_name: "Learn Anything"
+  short_description: "Distill repeatable methods into portable agent skills"
+  default_prompt: "Use $learn-anything to evaluate this source against the Method Contract gate and author a reusable skill package if eligible."
+
+policy:
+  allow_implicit_invocation: false
