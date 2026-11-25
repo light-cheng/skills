@@ -54,18 +54,18 @@ npx skills add light-cheng/skills --skill acceptance
 
 ## 插件与技能概览
 
-### 核心插件：`light`（`skills/core/`）
+### 核心插件：`light`（`skills/{workflow,knowledge,writing}/`）
 
-| 技能 | 触发方式 | 核心职责 |
-| :--- | :--- | :--- |
-| [`light-setup`](./skills/core/light-setup/SKILL.md) | 用户调用（`/light-setup`） | 幂等写入 `CLAUDE.md` / `AGENTS.md` 的 3 行 `## Light workflow` 桥接规则（`redirect` + `acceptance`），生成 `docs/agents/light-project.md`（配置 `Decision data` 隐私边界），并提供 **Base workflow + Light** 路由与 `~150k` Smart Zone 上下文边界指南。 |
-| [`redirect`](./skills/core/redirect/SKILL.md) | 模型自动 + `/redirect` | 当既定规格、任务图或验收章程在实施中失效时立即暂停修改，依据 `docs/agents/issue-tracker.md` 在 `.scratch/<feature>/changes/` 或 GitHub/GitLab Issues 生成变更提案（**Change proposal**），经人工批准后再衔接 `/to-spec` 或 `/to-tickets`。 |
-| [`acceptance`](./skills/core/acceptance/SKILL.md) | 模型自动 + `/acceptance` | 统一收敛与签收模块：**Inline 模式**在内存中执行最多 3 轮全新上下文审查与修复闭环；**Charter 模式**（`init` / `run` / `resume`）在 `.scratch/<feature>/acceptance/` 冻结验收章程，并派发独立全新上下文 Evaluator 核验证据后出具 `PASS`、`FAIL` 或 `BLOCKED`。 |
-| [`agent-config`](./skills/core/agent-config/SKILL.md) | 模型自动 + `/agent-config` | 评估任务形态、复杂度档位（`routine`、`standard`、`high`、`review`）与执行拓扑（单会话 vs 主控-工作子代理），支持归一化 `decide` 评分输入（保守降档裕度 `DOWNGRADE_MARGIN = 0.15`）及可选 `agent-config` 伴生 MCP。 |
-| [`decide`](./skills/core/decide/SKILL.md) | 模型自动 + `/decide` | `light-decision-mcp` 的原生有界判断（**Bounded judgment**）技能前端（`yes_no`、`choose`、`score`、`decide`、`decide_batch`、`status`），强制执行项目 `Decision data` 数据出境边界（默认 `on-device`）、校准阈值门控与 `.scratch/<feature>/decisions.md` 审计日志。 |
-| [`humanizer`](./skills/core/humanizer/SKILL.md) | 模型自动 + `/humanizer` | 中英双语去 AI 腔改写技能，保留完整上游开源署名，并新增按语域路由的**技术清晰模式（Technical / Clarity Mode）**（英文技术文档遵循 ASD-STE100 原则，中文技术文档遵循简明技术中文规范，绝不全局套用于散文或叙事写作）。 |
-| [`kb-init`](./skills/core/kb-init/SKILL.md) | 用户调用（`/kb-init`） | 初始化个人或项目知识库，内置事实与代码断言的显式日期 / `repo@commit` 溯源锚点、`superseded` 历史演进标记，以及 `Ingest / Query / Lint` 持续维护机制。 |
-| [`learn-anything`](./skills/core/learn-anything/SKILL.md) | 用户调用（`/learn-anything`） | 去脚本化的技能提炼器：先通过方法契约与一手资料充足性门禁（一次性总结记为 `not_promoted`，证据或占位符缺失记为 `BLOCKED`），再调用 `writing-for-agents` 产出标准技能包。 |
+| 领域分类 | 技能 | 触发方式 | 核心职责 |
+| :--- | :--- | :--- | :--- |
+| `workflow` | [`light-setup`](./skills/workflow/light-setup/SKILL.md) | 用户调用（`/light-setup`） | 幂等写入 `CLAUDE.md` / `AGENTS.md` 的 3 行 `## Light workflow` 桥接规则（`redirect` + `acceptance`），生成 `docs/agents/light-project.md`（配置 `Decision data` 隐私边界），并提供 **Base workflow + Light** 路由与 `~150k` Smart Zone 上下文边界指南。 |
+| `workflow` | [`redirect`](./skills/workflow/redirect/SKILL.md) | 模型自动 + `/redirect` | 当既定规格、任务图或验收章程在实施中失效时立即暂停修改，依据 `docs/agents/issue-tracker.md` 在 `.scratch/<feature>/changes/` 或 GitHub/GitLab Issues 生成变更提案（**Change proposal**），经人工批准后再衔接 `/to-spec` 或 `/to-tickets`。 |
+| `workflow` | [`acceptance`](./skills/workflow/acceptance/SKILL.md) | 模型自动 + `/acceptance` | 统一收敛与签收模块：**Inline 模式**在内存中执行最多 3 轮全新上下文审查与修复闭环；**Charter 模式**（`init` / `run` / `resume`）在 `.scratch/<feature>/acceptance/` 冻结验收章程，并派发独立全新上下文 Evaluator 核验证据后出具 `PASS`、`FAIL` 或 `BLOCKED`。 |
+| `workflow` | [`agent-config`](./skills/workflow/agent-config/SKILL.md) | 模型自动 + `/agent-config` | 评估任务形态、复杂度档位（`routine`、`standard`、`high`、`review`）与执行拓扑（单会话 vs 主控-工作子代理），支持归一化 `decide` 评分输入（保守降档裕度 `DOWNGRADE_MARGIN = 0.15`）及可选 `agent-config` 伴生 MCP。 |
+| `workflow` | [`decide`](./skills/workflow/decide/SKILL.md) | 模型自动 + `/decide` | `light-decision-mcp` 的原生有界判断（**Bounded judgment**）技能前端（`yes_no`、`choose`、`score`、`decide`、`decide_batch`、`status`），强制执行项目 `Decision data` 数据出境边界（默认 `on-device`）、校准阈值门控与 `.scratch/<feature>/decisions.md` 审计日志。 |
+| `knowledge` | [`kb-init`](./skills/knowledge/kb-init/SKILL.md) | 用户调用（`/kb-init`） | 初始化个人或项目知识库，内置事实与代码断言的显式日期 / `repo@commit` 溯源锚点、`superseded` 历史演进标记，以及 `Ingest / Query / Lint` 持续维护机制。 |
+| `knowledge` | [`learn-anything`](./skills/knowledge/learn-anything/SKILL.md) | 用户调用（`/learn-anything`） | 去脚本化的技能提炼器：先通过方法契约与一手资料充足性门禁（一次性总结记为 `not_promoted`，证据或占位符缺失记为 `BLOCKED`），再调用 `writing-for-agents` 产出标准技能包。 |
+| `writing` | [`humanizer`](./skills/writing/humanizer/SKILL.md) | 模型自动 + `/humanizer` | 中英双语去 AI 腔改写技能，保留完整上游开源署名，并新增按语域路由的**技术清晰模式（Technical / Clarity Mode）**（英文技术文档遵循 ASD-STE100 原则，中文技术文档遵循简明技术中文规范，绝不全局套用于散文或叙事写作）。 |
 
 ### 可选插件：`light-manuscript`（`plugins/light-manuscript/`）
 
@@ -97,7 +97,7 @@ claude plugin validate .
 claude plugin validate plugins/light-manuscript
 ```
 
-维护者本地软链接调试（默认仅链接 8 个核心技能 `skills/core/*`，传入 `--with-optional` 额外链接 `manuscript-ops`）：
+维护者本地软链接调试（默认仅链接核心技能 `skills/<category>/*`，传入 `--with-optional` 额外链接 `plugins/` 下的可选插件技能）：
 
 ```bash
 ./scripts/link-skills.sh
@@ -105,4 +105,4 @@ claude plugin validate plugins/light-manuscript
 
 ## 开源协议与致谢
 
-本项目基于 [MIT License](./LICENSE) 开源。`humanizer` 所引用的第三方上游项目与示例署名（`blader/humanizer`、`op7418/Humanizer-zh` 及 Wikipedia CC BY-SA 4.0 引用示例）完整保留于 [`skills/core/humanizer/ATTRIBUTION.md`](./skills/core/humanizer/ATTRIBUTION.md)。
+本项目基于 [MIT License](./LICENSE) 开源。`humanizer` 所引用的第三方上游项目与示例署名（`blader/humanizer`、`op7418/Humanizer-zh` 及 Wikipedia CC BY-SA 4.0 引用示例）完整保留于 [`skills/writing/humanizer/ATTRIBUTION.md`](./skills/writing/humanizer/ATTRIBUTION.md)。

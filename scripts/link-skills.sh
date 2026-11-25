@@ -6,7 +6,7 @@ set -euo pipefail
 #   - ~/.claude/skills  (Claude Code)
 #   - ~/.agents/skills  (Codex and Agent Skills-compatible harnesses)
 #
-# By default, links only the 8 core skills under skills/core/*.
+# By default, links only the core plugin skills under skills/<category>/*.
 # Pass --all or --with-optional to also link optional plugins under plugins/*/skills/*.
 
 INCLUDE_OPTIONAL=0
@@ -57,7 +57,7 @@ collect_from_root() {
   done < <(find "$search_root" -mindepth 2 -maxdepth 4 -name SKILL.md -not -path '*/node_modules/*' -print0 | sort -z)
 }
 
-collect_from_root "$REPO/skills/core"
+collect_from_root "$REPO/skills"
 if [ "$INCLUDE_OPTIONAL" -eq 1 ]; then
   collect_from_root "$REPO/plugins"
 fi

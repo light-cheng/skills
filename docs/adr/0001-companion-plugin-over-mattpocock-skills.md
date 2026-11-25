@@ -16,7 +16,7 @@ The legacy `light-cheng/skills` repository (archived locally at `../light-skills
 
 1. Start a clean `v1.0.0` Git history for `https://github.com/light-cheng/skills` with **zero copied `mattpocock/skills` files**. Delegate general software engineering flows directly to `mattpocock/skills` as the **Base workflow**.
 2. Ship two pure-skills `.claude-plugin` bundles from `.claude-plugin/marketplace.json` (no auto-started `mcpServers` entries in `plugin.json`; supporting Claude Code, Codex 0.161+, and GitHub Copilot auto-updates alongside `npx skills add`):
-   - **`light` (Core plugin, 8 skills under `skills/core/`)**: `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide`, `humanizer`, `kb-init`, `learn-anything`.
+   - **`light` (Core plugin, 8 skills grouped by target artifact under `skills/{workflow,knowledge,writing}/`)**: `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide` (`workflow/`); `kb-init`, `learn-anything` (`knowledge/`); and `humanizer` (`writing/`).
    - **`light-manuscript` (Optional plugin, 1 skill at `plugins/light-manuscript/skills/manuscript-ops/`)**: `manuscript-ops` (placed inside the sub-plugin folder so `claude plugin validate` passes containment checks).
 3. Merge `generic-review`, `review-loop`, and `project-review` into a single deep module named **`acceptance`** (zero naming collision or confusion with upstream `code-review`): inline 3-round convergence for routine slices, and frozen-charter independent-Evaluator sign-off under `.scratch/<feature>/acceptance/` for full specs, milestones, and manuscripts.
 4. Drop the `light-` name prefix everywhere except `light-setup` (`redirect`, `decide`). Retire `light-html-plan` and `project-retro`.

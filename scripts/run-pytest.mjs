@@ -1,18 +1,56 @@
 #!/usr/bin/env node
 // Cross-platform pytest runner used by `npm test` and CI.
-// Discovers active pytest directories in the repository unless explicit paths/args are given.
+// Dynamically discovers root `tests/`, `skills/*/*/tests`, and `plugins/*/skills/*/tests`
+// unless explicit paths/args are passed on the command line.
 
-import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readdirSync, statSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
-const defaultSuites = [
-  "tests",
-  "skills/core/agent-config/tests",
-  "plugins/light-manuscript/skills/manuscript-ops/tests",
-];
+
+function listSubdirs(parentDir) {
+  if (!existsSync(parentDir)) {
+    return [];
+  }
+  return readdirSync(parentDir)
+    .filter((name) => !name.startsWith("."))
+    .map((name) => join(parentDir, name))
+    .filter((fullPath) => statSync(fullPath).isDirectory())
+    .sort();
+}
+
+function discoverPytestSuites() {
+  const suites = [];
+  if (existsSync(join(repoRoot, "tests"))) {
+    suites.push("tests");
+  }
+  for (const categoryOrSkill of listSubdirs(join(repoRoot, "skills"))) {
+    if (existsSync(join(categoryOrSkill, "SKILL.md"))) {
+      const directTests = join(categoryOrSkill, "tests");
+      if (existsSync(directTests)) {
+        suites.push(relative(repoRoot, directTests));
+      }
+      continue;
+    }
+    for (const skillDir of listSubdirs(categoryOrSkill)) {
+      const testsDir = join(skillDir, "tests");
+      if (existsSync(testsDir)) {
+        suites.push(relative(repoRoot, testsDir));
+      }
+    }
+  }
+  for (const pluginDir of listSubdirs(join(repoRoot, "plugins"))) {
+    for (const skillDir of listSubdirs(join(pluginDir, "skills"))) {
+      const testsDir = join(skillDir, "tests");
+      if (existsSync(testsDir)) {
+        suites.push(relative(repoRoot, testsDir));
+      }
+    }
+  }
+  return suites;
+}
 
 function commandWorks(cmd, args) {
   const res = spawnSync(cmd, args, { stdio: "ignore" });
@@ -50,10 +88,7 @@ function resolvePytestRunner() {
 }
 
 const userArgs = process.argv.slice(2);
-const targets =
-  userArgs.length > 0
-    ? userArgs
-    : defaultSuites.filter((rel) => existsSync(join(repoRoot, rel)));
+const targets = userArgs.length > 0 ? userArgs : discoverPytestSuites();
 
 if (targets.length === 0) {
   console.log("No pytest suites found.");

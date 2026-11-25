@@ -20,13 +20,13 @@
     "knowledge-base"
   ],
   "skills": [
-    "./skills/core/light-setup",
-    "./skills/core/redirect",
-    "./skills/core/acceptance",
-    "./skills/core/agent-config",
-    "./skills/core/decide",
-    "./skills/core/humanizer",
-    "./skills/core/kb-init",
-    "./skills/core/learn-anything"
+    "./skills/workflow/light-setup",
+    "./skills/workflow/redirect",
+    "./skills/workflow/acceptance",
+    "./skills/workflow/agent-config",
+    "./skills/workflow/decide",
+    "./skills/writing/humanizer",
+    "./skills/knowledge/kb-init",
+    "./skills/knowledge/learn-anything"
   ]
 }

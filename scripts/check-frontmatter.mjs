@@ -79,9 +79,22 @@ function listSubdirs(parentDir) {
 }
 
 function discoverSkillPackages(repoRoot) {
-  const found = [...listSubdirs(join(repoRoot, "skills", "core"))];
+  const found = [];
+  for (const entryDir of listSubdirs(join(repoRoot, "skills"))) {
+    if (existsSync(join(entryDir, "SKILL.md"))) {
+      found.push(entryDir);
+    } else {
+      found.push(...listSubdirs(entryDir));
+    }
+  }
   for (const pluginDir of listSubdirs(join(repoRoot, "plugins"))) {
-    found.push(...listSubdirs(join(pluginDir, "skills")));
+    for (const skillEntry of listSubdirs(join(pluginDir, "skills"))) {
+      if (existsSync(join(skillEntry, "SKILL.md"))) {
+        found.push(skillEntry);
+      } else {
+        found.push(...listSubdirs(skillEntry));
+      }
+    }
   }
   return found;
 }

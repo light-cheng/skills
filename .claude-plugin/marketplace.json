@@ -25,6 +25,9 @@
       "source": "./plugins/light-manuscript",
       "description": "Optional book and multi-format manuscript production workflow skill (manuscript-ops).",
       "category": "productivity",
+      "skills": [
+        "./skills/manuscript-ops"
+      ],
       "keywords": [
         "manuscript",
         "publishing",

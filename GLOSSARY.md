@@ -9,7 +9,7 @@ The engineering and productivity skill set shipped by `mattpocock/skills` (`/set
 _Avoid_: upstream ports, Matt baseline
 
 **Core plugin (`light`)**:
-The default pure-skills plugin defined in `.claude-plugin/plugin.json`, shipping 8 orthogonal skills under `skills/core/`: `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide`, `humanizer`, `kb-init`, and `learn-anything`.
+The default pure-skills plugin defined in `.claude-plugin/plugin.json`, shipping 8 orthogonal skills grouped by target artifact under `skills/{workflow,knowledge,writing}/`: `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide`, `humanizer`, `kb-init`, and `learn-anything`.
 _Avoid_: first-party full collection
 
 **Manuscript plugin (`light-manuscript`)**:

@@ -54,18 +54,18 @@ npx skills add light-cheng/skills --skill acceptance
 
 ## Plugins & Skills
 
-### Core Plugin: `light` (`skills/core/`)
+### Core Plugin: `light` (`skills/{workflow,knowledge,writing}/`)
 
-| Skill | Invocation | What It Does |
-| :--- | :--- | :--- |
-| [`light-setup`](./skills/core/light-setup/SKILL.md) | User (`/light-setup`) | Idempotently adds a 3-line `## Light workflow` bridge (`redirect` + `acceptance`) to `CLAUDE.md` / `AGENTS.md`, writes `docs/agents/light-project.md` (`Decision data`), and routes Base workflow + Light phase boundaries (`~150k` Smart Zone). |
-| [`redirect`](./skills/core/redirect/SKILL.md) | Model + `/redirect` | Halts implementation when an approved spec, ticket graph, or charter stops holding, writes a **Change proposal** under `.scratch/<feature>/changes/` or GitHub/GitLab Issues, and waits for human approval before updating `/to-spec` or `/to-tickets`. |
-| [`acceptance`](./skills/core/acceptance/SKILL.md) | Model + `/acceptance` | Unified convergence and sign-off module: **Inline scale** runs up to 3 fresh-context review-and-repair rounds in memory; **Charter scale** (`init` / `run` / `resume`) freezes an Acceptance charter under `.scratch/<feature>/acceptance/` and dispatches an independent Evaluator. |
-| [`agent-config`](./skills/core/agent-config/SKILL.md) | Model + `/agent-config` | Profiles task difficulty, capability tiers (`routine`, `standard`, `high`, `review`), and execution topology (`single session` vs `controller-workers`), integrating optional `decide` scores (`DOWNGRADE_MARGIN = 0.15`) and the `agent-config` companion MCP. |
-| [`decide`](./skills/core/decide/SKILL.md) | Model + `/decide` | **Bounded judgment** frontend (`yes_no`, `choose`, `score`, `decide`, `decide_batch`, `status`) for `light-decision-mcp`, enforcing `Decision data` privacy boundaries (`on-device` default), calibration thresholds, and `.scratch/<feature>/decisions.md` audit logs. |
-| [`humanizer`](./skills/core/humanizer/SKILL.md) | Model + `/humanizer` | Bilingual English/Chinese anti-AI-writing rewriter with register-routed **Technical / Clarity Mode** (ASD-STE100 for English technical docs and concise verb-first Chinese rules, never forced onto essays or narratives). |
-| [`kb-init`](./skills/core/kb-init/SKILL.md) | User (`/kb-init`) | Initializes personal or project knowledge bases with explicit date/`repo@commit` claim provenance, `superseded` history markers, and `Ingest / Query / Lint` maintenance loops. |
-| [`learn-anything`](./skills/core/learn-anything/SKILL.md) | User (`/learn-anything`) | Distills primary sources into reusable skills behind the **Method Contract & Source-Sufficiency Gate** (`not_promoted` for one-off summaries, `BLOCKED` for missing evidence) before authoring via `writing-for-agents`. |
+| Category | Skill | Invocation | What It Does |
+| :--- | :--- | :--- | :--- |
+| `workflow` | [`light-setup`](./skills/workflow/light-setup/SKILL.md) | User (`/light-setup`) | Idempotently adds a 3-line `## Light workflow` bridge (`redirect` + `acceptance`) to `CLAUDE.md` / `AGENTS.md`, writes `docs/agents/light-project.md` (`Decision data`), and routes Base workflow + Light phase boundaries (`~150k` Smart Zone). |
+| `workflow` | [`redirect`](./skills/workflow/redirect/SKILL.md) | Model + `/redirect` | Halts implementation when an approved spec, ticket graph, or charter stops holding, writes a **Change proposal** under `.scratch/<feature>/changes/` or GitHub/GitLab Issues, and waits for human approval before updating `/to-spec` or `/to-tickets`. |
+| `workflow` | [`acceptance`](./skills/workflow/acceptance/SKILL.md) | Model + `/acceptance` | Unified convergence and sign-off module: **Inline scale** runs up to 3 fresh-context review-and-repair rounds in memory; **Charter scale** (`init` / `run` / `resume`) freezes an Acceptance charter under `.scratch/<feature>/acceptance/` and dispatches an independent Evaluator. |
+| `workflow` | [`agent-config`](./skills/workflow/agent-config/SKILL.md) | Model + `/agent-config` | Profiles task difficulty, capability tiers (`routine`, `standard`, `high`, `review`), and execution topology (`single session` vs `controller-workers`), integrating optional `decide` scores (`DOWNGRADE_MARGIN = 0.15`) and the `agent-config` companion MCP. |
+| `workflow` | [`decide`](./skills/workflow/decide/SKILL.md) | Model + `/decide` | **Bounded judgment** frontend (`yes_no`, `choose`, `score`, `decide`, `decide_batch`, `status`) for `light-decision-mcp`, enforcing `Decision data` privacy boundaries (`on-device` default), calibration thresholds, and `.scratch/<feature>/decisions.md` audit logs. |
+| `knowledge` | [`kb-init`](./skills/knowledge/kb-init/SKILL.md) | User (`/kb-init`) | Initializes personal or project knowledge bases with explicit date/`repo@commit` claim provenance, `superseded` history markers, and `Ingest / Query / Lint` maintenance loops. |
+| `knowledge` | [`learn-anything`](./skills/knowledge/learn-anything/SKILL.md) | User (`/learn-anything`) | Distills primary sources into reusable skills behind the **Method Contract & Source-Sufficiency Gate** (`not_promoted` for one-off summaries, `BLOCKED` for missing evidence) before authoring via `writing-for-agents`. |
+| `writing` | [`humanizer`](./skills/writing/humanizer/SKILL.md) | Model + `/humanizer` | Bilingual English/Chinese anti-AI-writing rewriter with register-routed **Technical / Clarity Mode** (ASD-STE100 for English technical docs and concise verb-first Chinese rules, never forced onto essays or narratives). |
 
 ### Optional Plugin: `light-manuscript` (`plugins/light-manuscript/`)
 
@@ -99,7 +99,7 @@ claude plugin validate .
 claude plugin validate plugins/light-manuscript
 ```
 
-For local maintainer symlink development (`skills/core/*` by default, add `--with-optional` to include `manuscript-ops`):
+For local maintainer symlink development (`skills/<category>/*` by default, add `--with-optional` to include optional plugins under `plugins/`):
 
 ```bash
 ./scripts/link-skills.sh
@@ -107,4 +107,4 @@ For local maintainer symlink development (`skills/core/*` by default, add `--wit
 
 ## Attribution & License
 
-Released under the [MIT License](./LICENSE). Third-party upstream notices for `humanizer` (`blader/humanizer`, `op7418/Humanizer-zh`, and Wikipedia CC BY-SA 4.0 examples) are preserved in [`skills/core/humanizer/ATTRIBUTION.md`](./skills/core/humanizer/ATTRIBUTION.md).
+Released under the [MIT License](./LICENSE). Third-party upstream notices for `humanizer` (`blader/humanizer`, `op7418/Humanizer-zh`, and Wikipedia CC BY-SA 4.0 examples) are preserved in [`skills/writing/humanizer/ATTRIBUTION.md`](./skills/writing/humanizer/ATTRIBUTION.md).

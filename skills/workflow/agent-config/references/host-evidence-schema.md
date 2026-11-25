@@ -78,7 +78,7 @@ Supply a fresh, structured host observation (as returned by companion `inspect_h
 `scripts/agent_config.py` validates canonical Host and Profile evidence and optionally consumes normalized `decide` (`light-decision-mcp`) score envelopes:
 
 ```bash
-python3 skills/core/agent-config/scripts/agent_config.py \
+python3 skills/workflow/agent-config/scripts/agent_config.py \
   --host-json '<HostCapabilities JSON>' \
   --profile-json '<Profile JSON>' \
   --task-json '{"shape":"decomposed","formal_tickets_exist":true,"difficulty":"standard","difficulty_source":"unknown"}' \

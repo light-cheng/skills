@@ -4,10 +4,13 @@ Orthogonal agent skill plugins at `https://github.com/light-cheng/skills`, built
 
 ## Layout
 
-Skills live in two promoted plugin buckets:
+Skills live along two orthogonal scaling axes (artifact-based categories for core skills, and self-contained optional plugins for domain-heavy suites):
 
-- `skills/core/<name>/`: the 8 skills shipped by the root plugin `light` (`.claude-plugin/plugin.json`): `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide`, `humanizer`, `kb-init`, `learn-anything`.
-- `plugins/light-manuscript/skills/manuscript-ops/`: shipped separately as the optional plugin `light-manuscript` (`plugins/light-manuscript/.claude-plugin/plugin.json`) and registered in `.claude-plugin/marketplace.json`.
+- `skills/<category>/<name>/`: cross-project skills shipped by the root plugin `light` (`.claude-plugin/plugin.json`), grouped into three target-artifact categories:
+  - `skills/workflow/`: execution control, configuration, bounded judgment, redirection, and acceptance (`light-setup`, `redirect`, `acceptance`, `agent-config`, `decide`).
+  - `skills/knowledge/`: provenance-backed knowledge bases and method-gated skill distillation (`kb-init`, `learn-anything`).
+  - `skills/writing/`: bilingual prose and technical clarity rewriting (`humanizer`).
+- `plugins/light-<domain>/skills/<name>/`: heavy or vertical domain suites shipped as optional plugins and registered in `.claude-plugin/marketplace.json` so they never spend default coding context tokens (currently `plugins/light-manuscript/skills/manuscript-ops/` as `light-manuscript`). Keep skills flat at depth 1 inside each sub-plugin's `skills/` directory.
 - `.claude/skills/`: private maintainer-only skills for this repository (never listed in public plugin manifests).
 
 Public documentation at the repository root consists strictly of `README.md`, `README.zh-CN.md`, and `LICENSE` (MIT). Do not add separate `CATALOG.md` or governance policy matrices.

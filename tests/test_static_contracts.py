@@ -362,6 +362,14 @@ def test_live_repository_contracts_and_minimal_root_docs() -> None:
     res_ver = _run_node(SYNC_PLUGIN_VERSION, "--check", "--require-manifests")
     assert res_ver.returncode == 0, res_ver.stderr
 
+    for manifest_rel, base_dir in (
+        (".claude-plugin/plugin.json", REPO_ROOT),
+        ("plugins/light-manuscript/.claude-plugin/plugin.json", REPO_ROOT / "plugins" / "light-manuscript"),
+    ):
+        manifest = json.loads((REPO_ROOT / manifest_rel).read_text(encoding="utf-8"))
+        for rel_skill in manifest["skills"]:
+            assert (base_dir / rel_skill / "SKILL.md").is_file(), f"Missing {rel_skill} in {manifest_rel}"
+
     root_md = {p.name for p in REPO_ROOT.glob("*.md")}
     forbidden_docs = {
         "CATALOG.md",
