@@ -1,0 +1,7 @@
+interface:
+  display_name: "Light Setup"
+  short_description: "Configure Light workflow bridge and route skills or phase boundaries"
+  default_prompt: "Use $light-setup to configure this repository's Light workflow bridge or route to the next Base workflow or Light skill."
+
+policy:
+  allow_implicit_invocation: false
