@@ -85,6 +85,7 @@ npx skills add light-cheng/skills --skill acceptance
 强绑定特定产品或重静态资产的垂直技能维护在各自独立仓库中，避免膨胀主仓体积与默认上下文：
 
 - **[Light Kanban](https://github.com/light-cheng/light-kanban)**（`kanban-worker`）：面向 Light Kanban 看板的任务认领、隔离执行与状态同步技能（`npx skills add light-cheng/light-kanban --skill kanban-worker`）。
+- **[TravelPage](https://github.com/light-cheng/travelpage)**（`travelpage`）：受访问码保护的移动端旅行手册生成与维护技能，基于 GitHub 与 Cloudflare Pages + D1 实现多人行程、分账、to-do 与 PDF 票据预览同步（`npx skills add light-cheng/travelpage --skill travelpage`）。
 
 ## 快速上手
 

@@ -85,6 +85,7 @@ Both skills below run standalone in session-local / self-judgment mode by defaul
 Product-bound and asset-heavy vertical skills live in their own repositories so this repository stays focused on cross-project workflows:
 
 - **[Light Kanban](https://github.com/light-cheng/light-kanban)** (`kanban-worker`): Board task claiming, isolated execution, and status synchronization for Light Kanban (`npx skills add light-cheng/light-kanban --skill kanban-worker`).
+- **[TravelPage](https://github.com/light-cheng/travelpage)** (`travelpage`): Protected mobile travel handbook generator with shared expenses, checklists, and PDF ticket previews on GitHub and Cloudflare Pages + D1 (`npx skills add light-cheng/travelpage --skill travelpage`).
 
 ## Quick Workflow Setup
 
