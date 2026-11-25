@@ -1,0 +1,38 @@
+{
+  "name": "light-cheng",
+  "owner": {
+    "name": "Light Cheng",
+    "url": "https://github.com/light-cheng"
+  },
+  "description": "Orthogonal companion skill plugins (light and light-manuscript) built to layer cleanly over mattpocock/skills or run standalone across Claude Code, Codex, GitHub Copilot, and Agent Skills harnesses.",
+  "plugins": [
+    {
+      "name": "light",
+      "source": "./",
+      "description": "Core orthogonal workflow, acceptance, decision, configuration, bilingual writing, and knowledge skills.",
+      "category": "productivity",
+      "keywords": [
+        "skills",
+        "acceptance",
+        "decide",
+        "agent-config",
+        "humanizer",
+        "redirect"
+      ]
+    },
+    {
+      "name": "light-manuscript",
+      "source": "./plugins/light-manuscript",
+      "description": "Optional book and multi-format manuscript production workflow skill (manuscript-ops).",
+      "category": "productivity",
+      "keywords": [
+        "manuscript",
+        "publishing",
+        "writing",
+        "epub",
+        "docx",
+        "pdf"
+      ]
+    }
+  ]
+}

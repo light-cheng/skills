@@ -1,0 +1,42 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  check:
+    name: Static Contracts & Script Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          python -m pip install --upgrade pip pytest
+
+      - name: Validate frontmatter, invocation sync, and links
+        run: npm run check:frontmatter
+
+      - name: Validate plugin manifest versions and MCP guardrails
+        run: npm run check:plugin-version
+
+      - name: Run pytest suites
+        run: npm test

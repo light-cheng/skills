@@ -10,8 +10,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "check:frontmatter": "node scripts/check-frontmatter.mjs",
-    "check:plugin-version": "node scripts/sync-plugin-version.mjs --check",
+    "check:frontmatter": "node scripts/check-frontmatter.mjs --require-skills",
+    "check:plugin-version": "node scripts/sync-plugin-version.mjs --check --require-manifests",
     "sync:plugin-version": "node scripts/sync-plugin-version.mjs",
     "test": "node scripts/run-pytest.mjs",
     "changeset": "changeset",

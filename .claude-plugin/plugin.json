@@ -1,0 +1,32 @@
+{
+  "name": "light",
+  "version": "1.0.0",
+  "description": "Orthogonal agent skills for direction changes, bounded acceptance convergence, calibrated System One decisions, cross-harness execution tiering, bilingual prose clarity, historical knowledge bases, and method-gated skill distillation.",
+  "author": {
+    "name": "Light Cheng",
+    "url": "https://github.com/light-cheng"
+  },
+  "homepage": "https://github.com/light-cheng/skills",
+  "repository": "https://github.com/light-cheng/skills",
+  "license": "MIT",
+  "icon": "./assets/icon.png",
+  "keywords": [
+    "skills",
+    "acceptance",
+    "decide",
+    "agent-config",
+    "humanizer",
+    "redirect",
+    "knowledge-base"
+  ],
+  "skills": [
+    "./skills/core/light-setup",
+    "./skills/core/redirect",
+    "./skills/core/acceptance",
+    "./skills/core/agent-config",
+    "./skills/core/decide",
+    "./skills/core/humanizer",
+    "./skills/core/kb-init",
+    "./skills/core/learn-anything"
+  ]
+}

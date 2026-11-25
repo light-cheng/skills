@@ -291,3 +291,24 @@ def test_link_skills_links_core_by_default_and_optional_with_flag(tmp_path: Path
     assert res_opt.returncode == 0, res_opt.stderr
     assert (dest_claude / "manuscript-ops").is_symlink()
     assert (dest_agents / "manuscript-ops").is_symlink()
+
+
+def test_live_repository_contracts_and_minimal_root_docs() -> None:
+    res_fm = _run_node(CHECK_FRONTMATTER, "--require-skills")
+    assert res_fm.returncode == 0, res_fm.stderr
+    assert "validated 9 skill package(s)" in res_fm.stdout
+
+    res_ver = _run_node(SYNC_PLUGIN_VERSION, "--check", "--require-manifests")
+    assert res_ver.returncode == 0, res_ver.stderr
+
+    root_md = {p.name for p in REPO_ROOT.glob("*.md")}
+    forbidden_docs = {
+        "CATALOG.md",
+        "INSTALLATION.md",
+        "MAINTENANCE.md",
+        "REVIEW_POLICY.md",
+        "SKILL_ADMISSION.md",
+    }
+    assert root_md.isdisjoint(forbidden_docs)
+    assert {"README.md", "README.zh-CN.md", "CLAUDE.md", "AGENTS.md", "GLOSSARY.md"}.issubset(root_md)
+    assert (REPO_ROOT / "LICENSE").is_file()

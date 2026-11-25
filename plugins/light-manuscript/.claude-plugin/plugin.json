@@ -1,0 +1,24 @@
+{
+  "name": "light-manuscript",
+  "version": "1.0.0",
+  "description": "Optional publishing and long-form manuscript lifecycle skill (manuscript-ops) with source lineage, format QA, Concept Grounding, and gated multi-format delivery.",
+  "author": {
+    "name": "Light Cheng",
+    "url": "https://github.com/light-cheng"
+  },
+  "homepage": "https://github.com/light-cheng/skills",
+  "repository": "https://github.com/light-cheng/skills",
+  "license": "MIT",
+  "keywords": [
+    "manuscript",
+    "publishing",
+    "writing",
+    "epub",
+    "docx",
+    "pdf",
+    "lineage"
+  ],
+  "skills": [
+    "./skills/manuscript-ops"
+  ]
+}
