@@ -373,12 +373,8 @@ def _validate_score_envelope(
     if not isinstance(raw_dest, str) or raw_dest not in DESTINATIONS:
         return None, "malformed"
 
-    if envelope.get("fallback_used") is False:
-        effective_backend = envelope.get("backend")
-        effective_model = envelope.get("model")
-    else:
-        effective_backend = envelope.get("backend")
-        effective_model = envelope.get("model")
+    effective_backend = envelope.get("backend")
+    effective_model = envelope.get("model")
 
     backend = str(effective_backend).strip() if isinstance(effective_backend, str) and effective_backend.strip() else None
     model = str(effective_model).strip() if isinstance(effective_model, str) and effective_model.strip() else None
