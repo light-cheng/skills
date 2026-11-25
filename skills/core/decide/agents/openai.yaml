@@ -1,0 +1,7 @@
+interface:
+  display_name: "Decide"
+  short_description: "Bounded judgment via light-decision-mcp with privacy, calibration, and fallback"
+  default_prompt: "Use decide to evaluate this bounded judgment within the project's Decision data boundary, apply calibration policy or self-judgment fallback, log to .scratch, and return the normalized result."
+
+policy:
+  allow_implicit_invocation: true
