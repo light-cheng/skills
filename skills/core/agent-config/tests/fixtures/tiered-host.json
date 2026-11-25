@@ -1,0 +1,87 @@
+{
+  "host_id": "fixture-host",
+  "adapter_id": "test-adapter",
+  "observed_at": "2026-08-24T00:00:00Z",
+  "available_models": [
+    {
+      "id": "model-alpha",
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "selector",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    {
+      "id": "model-beta",
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "selector",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    {
+      "id": "model-gamma",
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "selector",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
+  ],
+  "supported_effort_values": ["low", "medium", "high"],
+  "capabilities": {
+    "model_selection": {
+      "state": "available",
+      "scopes": ["current-session", "new-session", "per-agent"],
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "subagents": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "threads": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "parallelism": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "concurrency": {
+      "state": "available",
+      "max_concurrency": 3,
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    },
+    "reasoning": {
+      "state": "available",
+      "evidence": {
+        "kind": "host-runtime",
+        "locator": "agent API",
+        "observed_at": "2026-08-24T00:00:00Z"
+      }
+    }
+  }
+}

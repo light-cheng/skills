@@ -1,0 +1,6 @@
+interface:
+  display_name: "Agent Config"
+  short_description: "Right-size execution topology, user-confirmed capability tier, and reasoning effort across agent harnesses"
+  default_prompt: "Use agent-config to inspect host capabilities and confirmed profile tiers, assess task shape and difficulty, resolve host-supported effort, and select a safe execution topology."
+policy:
+  allow_implicit_invocation: true

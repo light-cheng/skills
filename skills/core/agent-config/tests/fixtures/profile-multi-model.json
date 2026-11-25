@@ -1,0 +1,48 @@
+{
+  "profile_version": 1,
+  "host": {
+    "id": "fixture-host",
+    "adapter": "test-adapter"
+  },
+  "scope": {
+    "type": "project",
+    "workspace": "/path/to/project"
+  },
+  "model_mode": "multi",
+  "tiers": {
+    "routine": {
+      "model": "model-alpha",
+      "source": "user-confirmed",
+      "effort": {
+        "value": "low"
+      }
+    },
+    "standard": {
+      "model": "model-beta",
+      "source": "user-confirmed",
+      "effort": {
+        "value": "medium"
+      }
+    },
+    "high": {
+      "model": "model-gamma",
+      "source": "user-confirmed",
+      "effort": {
+        "policy": "highest-supported"
+      }
+    },
+    "review": {
+      "model": "model-gamma",
+      "source": "user-confirmed",
+      "effort": {
+        "policy": "highest-supported"
+      }
+    }
+  },
+  "capabilities": {
+    "subagents": "available",
+    "threads": "available",
+    "parallelism": "available",
+    "concurrency": 3
+  }
+}

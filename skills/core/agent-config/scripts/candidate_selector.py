@@ -1,0 +1,219 @@
+"""Candidate configuration selector and gatekeeper for agent-config.
+
+Combines host capabilities, task shape, and abstract profile into canonical AgentConfigResult.
+"""
+
+from __future__ import annotations
+
+from typing import Optional, Union
+
+try:
+    from .agent_config_models import (
+        AbstractTaskProfile,
+        AgentConfigResult,
+        ExecutionConfig,
+        HostCapabilities,
+        TaskCharacteristics,
+    )
+    from .harness_adapter import discover_valid_candidates, resolve_reasoning_effort
+except ImportError:
+    from agent_config_models import (
+        AbstractTaskProfile,
+        AgentConfigResult,
+        ExecutionConfig,
+        HostCapabilities,
+        TaskCharacteristics,
+    )
+    from harness_adapter import discover_valid_candidates, resolve_reasoning_effort
+
+
+def _ready_handoff(shape: str) -> str:
+    return "/implement-spec" if shape == "decomposed" else "/implement"
+
+
+def select_configuration(
+    host: HostCapabilities,
+    task: TaskCharacteristics,
+    profile: AbstractTaskProfile,
+    approval: Optional[Union[str, bool]] = None,
+    approved_preview: Optional[bool] = None,
+    setup_intent: bool = False,
+    decision_confidence: Optional[float] = None,
+    fallback_used: bool = False,
+    fallback_reason: Optional[str] = None,
+) -> AgentConfigResult:
+    """Combine host capabilities, task shape, and abstract profile into AgentConfigResult."""
+    if approval is not None:
+        norm_approval = (
+            ("approved" if approval else "declined")
+            if isinstance(approval, bool)
+            else str(approval).lower()
+        )
+    elif approved_preview is not None:
+        norm_approval = "approved" if approved_preview else "declined"
+    else:
+        norm_approval = "unknown"
+
+    if setup_intent:
+        return AgentConfigResult(
+            readiness="NEED_INPUT",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            handoff="setup",
+            execution_config=None,
+            justification="Setup intent detected; preparing host environment without task planning.",
+            abstract_profile=profile,
+        )
+
+    if task.shape == "decomposed" and not task.formal_tickets_exist:
+        return AgentConfigResult(
+            readiness="NEED_PROJECT_TICKETS",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            handoff="/to-tickets",
+            execution_config=None,
+            justification="Task classified as decomposed without formal tickets; create tickets via /to-tickets first.",
+            abstract_profile=profile,
+        )
+
+    if not host.has_model_selector:
+        if not host.active_model or host.active_model not in host.available_models:
+            return AgentConfigResult(
+                readiness="NEED_INPUT",
+                mode="plan-only",
+                approval=norm_approval,
+                setup_state={"companion": host.companion_status, "profile": host.profile_status},
+                justification="Fixed Host active model has no confirmed availability evidence.",
+                abstract_profile=profile,
+            )
+        topology = "Case B" if task.shape == "decomposed" else "Case A"
+        effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
+        return AgentConfigResult(
+            readiness="READY",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            handoff=_ready_handoff(task.shape),
+            execution_config=ExecutionConfig(
+                model=host.active_model,
+                resolved_effort=effort,
+                topology=topology,
+            ),
+            justification=(
+                f"Harness lacks dynamic model selector; preserved active model {host.active_model} ({topology})."
+            ),
+            abstract_profile=profile,
+            decision_confidence=decision_confidence,
+            fallback_used=fallback_used,
+            fallback_reason=fallback_reason,
+        )
+
+    if norm_approval == "declined":
+        if not host.active_model or host.active_model not in host.available_models:
+            return AgentConfigResult(
+                readiness="NEED_INPUT",
+                mode="plan-only",
+                approval="declined",
+                setup_state={"companion": host.companion_status, "profile": host.profile_status},
+                justification="Current active model is not evidenced; cannot fall back after preview rejection.",
+                abstract_profile=profile,
+            )
+        topology = "Case B" if task.shape == "decomposed" else "Case A"
+        return AgentConfigResult(
+            readiness="READY",
+            mode="plan-only",
+            approval="declined",
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            handoff=_ready_handoff(task.shape),
+            execution_config=ExecutionConfig(
+                model=host.active_model,
+                resolved_effort=None,
+                topology=topology,
+            ),
+            justification="User declined configuration mutation; falling back safely to active model in main session.",
+            abstract_profile=profile,
+            decision_confidence=decision_confidence,
+            fallback_used=True,
+            fallback_reason="User rejected configuration change preview.",
+        )
+
+    valid_candidates = discover_valid_candidates(host)
+    tier = profile.recommended_tier
+    target_model = host.profile_tiers.get(tier)
+
+    if not target_model or target_model not in valid_candidates:
+        return AgentConfigResult(
+            readiness="NEED_INPUT",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            justification=f"No confirmed, available model for {tier} tier; refresh Host evidence or confirm the Profile.",
+            abstract_profile=profile,
+        )
+
+    if (
+        target_model != host.active_model
+        and "current-session" not in host.selector_scopes
+        and host.profile_mode
+    ):
+        return AgentConfigResult(
+            readiness="NEED_INPUT",
+            mode="plan-only",
+            approval=norm_approval,
+            setup_state={"companion": host.companion_status, "profile": host.profile_status},
+            justification=(
+                "Host cannot select the target model in the current session, and the current model is unverified or different."
+            ),
+            abstract_profile=profile,
+        )
+
+    effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
+
+    if task.shape == "decomposed":
+        topology = (
+            "Case B"
+            if host.profile_mode == "single"
+            else ("Case D" if (host.per_agent_config and len(valid_candidates) > 1) else "Case B")
+        )
+    else:
+        topology = (
+            "Case A"
+            if host.profile_mode == "single"
+            else (
+                "Case C"
+                if host.profile_mode == "multi"
+                or (target_model != host.active_model and host.has_model_selector)
+                else "Case A"
+            )
+        )
+
+    cost_note = (
+        " (Cost sensitivity recorded; no host cost metadata available for tie-breaking within valid candidates)"
+        if task.cost_sensitive
+        else ""
+    )
+    justification_msg = (
+        f"Selected {target_model} for {tier} tier (topology: {topology}, effort: {effort or 'default'}).{cost_note}"
+    )
+    if fallback_used:
+        justification_msg += f" (Fallback: {fallback_reason})"
+
+    return AgentConfigResult(
+        readiness="READY",
+        mode="plan-only",
+        approval=norm_approval,
+        setup_state={"companion": host.companion_status, "profile": host.profile_status},
+        handoff=_ready_handoff(task.shape),
+        execution_config=ExecutionConfig(
+            model=target_model,
+            resolved_effort=effort,
+            topology=topology,
+        ),
+        justification=justification_msg,
+        abstract_profile=profile,
+        decision_confidence=decision_confidence,
+        fallback_used=fallback_used,
+        fallback_reason=fallback_reason,
+    )
