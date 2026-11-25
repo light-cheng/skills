@@ -187,13 +187,13 @@ def test_decide_semantic_route_applies_when_calibrated_and_falls_back_safely(tmp
     assert applied_snap["semantic_judgment"]["applied"] is True
     assert applied_snap["semantic_judgment"]["fallback_reason"] is None
 
-    # Direct light-decision-mcp choose envelope with calibrated semantic_policy also works.
+    # Direct light-decision-mcp choose envelope ('choice' field) with calibrated semantic_policy works.
     answers["semantic_result"] = {
         "backend": "local-opendecider",
         "model": "opendecider-small",
         "data_destination": "on-device",
         "fallback_used": False,
-        "label": "Quick",
+        "choice": "Quick",
         "probabilities": {"Quick": 0.92, "Structured": 0.06, "Project": 0.02},
         "confidence": 0.92,
         "provider_confidence": 0.90,
@@ -205,6 +205,17 @@ def test_decide_semantic_route_applies_when_calibrated_and_falls_back_safely(tmp
     mcp_snap = json.loads(run_assessor(root, answers).stdout)
     assert mcp_snap["route"] == "Quick"
     assert mcp_snap["semantic_judgment"]["applied"] is True
+    assert mcp_snap["semantic_judgment"]["choice"] == "Quick"
+
+    # Legacy/alias 'label' field on direct choose payload also works.
+    answers["semantic_result"] = {
+        **answers["semantic_result"],
+        "label": "Quick",
+    }
+    del answers["semantic_result"]["choice"]
+    mcp_label_snap = json.loads(run_assessor(root, answers).stdout)
+    assert mcp_label_snap["route"] == "Quick"
+    assert mcp_label_snap["semantic_judgment"]["applied"] is True
 
     # Fallback cases: model cannot force Project, waive safety review, or apply uncalibrated/malformed results.
     safety_answers = base_structured_answers()

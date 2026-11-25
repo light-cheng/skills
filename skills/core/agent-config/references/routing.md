@@ -19,7 +19,7 @@ Single-model mode is a first-class peer topology, not a degraded fallback. Both 
 - Use a helper subagent (started with a **fresh context window**) only when isolating heavy read-only source reading protects the main context window.
 
 ### Case B: Single-model + Decomposed (P0)
-- Require formal tickets first; if missing, stop with `readiness: NEED_PROJECT_TICKETS` and `handoff: "/to-tickets"`.
+- Require formal tickets first; if missing, stop with `readiness: NEED_PROJECT_TICKETS` and `handoff: "/to-tickets"` (**Graceful fallback** without `mattpocock/skills`: slice tickets directly into `.scratch/<feature>/issues/<NN>-<slug>.md` or tracker issues per `docs/agents/issue-tracker.md`).
 - Keep the current session as Controller (ticket scheduling, integration review, git state).
 - Dispatch each unblocked ticket to a worker subagent started with a **fresh context window** (never fork the Controller's conversation history), throttled to `concurrency`. If the host lacks subagents/threads, execute tickets serially.
 - Use the single confirmed model throughout without inventing synthetic tier labels.
@@ -30,7 +30,7 @@ Single-model mode is a first-class peer topology, not a degraded fallback. Both 
 - When independent verification is needed, run `acceptance` in a **fresh context window** using the `review` tier.
 
 ### Case D: Multi-model + Decomposed (P0)
-- Require formal tickets first; if missing, emit `readiness: NEED_PROJECT_TICKETS` and `handoff: "/to-tickets"`.
+- Require formal tickets first; if missing, emit `readiness: NEED_PROJECT_TICKETS` and `handoff: "/to-tickets"` (**Graceful fallback** without `mattpocock/skills`: slice tickets directly into `.scratch/<feature>/issues/<NN>-<slug>.md` or tracker issues per `docs/agents/issue-tracker.md`).
 - Run the Controller in the current session on the confirmed `review` or `high` tier.
 - Launch each ready ticket on the unblocked frontier in a worker subagent started with a **fresh context window** (up to `concurrency`), assigning:
   - `routine` ticket -> `routine` tier model + resolved effort
@@ -41,9 +41,9 @@ Single-model mode is a first-class peer topology, not a degraded fallback. Both 
 
 ## 3. Routing handoffs in `AgentConfigResult`
 
-- `readiness: "READY"` + `task_shape: "single-pass"` -> `handoff: "/implement"`, non-null `execution_config`.
-- `readiness: "READY"` + `task_shape: "decomposed"` -> `handoff: "/implement-spec"`, non-null `execution_config`.
-- `readiness: "NEED_PROJECT_TICKETS"` -> `handoff: "/to-tickets"`, `execution_config: null`.
+- `readiness: "READY"` + `task_shape: "single-pass"` -> `handoff: "/implement"` (**Graceful fallback** without `mattpocock/skills`: execute the bounded slice directly in the active session), non-null `execution_config`.
+- `readiness: "READY"` + `task_shape: "decomposed"` -> `handoff: "/implement-spec"` (**Graceful fallback** without `mattpocock/skills`: run the Controller loop over `.scratch/<feature>/issues/`, dispatching **fresh-context** worker subagents across the unblocked frontier), non-null `execution_config`.
+- `readiness: "NEED_PROJECT_TICKETS"` -> `handoff: "/to-tickets"` (**Graceful fallback**: write `.scratch/<feature>/issues/<NN>-<slug>.md` or native tracker issues), `execution_config: null`.
 - `readiness: "NEED_INPUT"` -> `handoff: "setup"`, `execution_config: null`.
 - `readiness: "BLOCKED" | "UNSUPPORTED"` -> `handoff: null`, `execution_config: null`.
 

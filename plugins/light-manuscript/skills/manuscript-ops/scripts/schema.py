@@ -824,10 +824,9 @@ def validate_routing(
                 "ROUTING_DERIVED_TRIGGER",
                 "risk score 2 requires high_risk_facts=true",
             )
-        total, route, _, _ = select_route(
+        total, route, _ = select_route(
             normalized_dimensions,
             hard_triggers,
-            unknowns,
             policy=policy,
         )
         route, judgment = resolve_semantic_route(

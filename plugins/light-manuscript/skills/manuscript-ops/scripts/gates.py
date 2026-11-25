@@ -207,10 +207,8 @@ def _validate_manuscript_evidence(
 def validate_acceptance_report(
     path_value: Any,
     report: Report,
-    _visited: set[str] | None = None,
 ) -> dict[str, Any] | None:
     """Validate the manuscript integration envelope emitted by `acceptance`."""
-    _ = _visited
     if not isinstance(path_value, str):
         return None
     try:

@@ -46,7 +46,7 @@ Each batch declares its `kind` (`outline`, `content`, `candidate`, `source-lock`
 
 ## Writer and reviewer boundaries
 
-The assigned writer (main session or delegated writer subagent) is the sole prose author for the manuscript. Reviewers and the independent Evaluator inside `acceptance` are strictly read-only, run in **fresh context windows** against frozen hash-bound snapshots, and return findings or verdicts without editing manuscript files.
+The assigned writer (main session or a delegated writer subagent started with a **fresh context window**) is the sole prose author for the manuscript. Reviewers and the independent Evaluator inside `acceptance` are strictly read-only, also run in **fresh context windows** against frozen hash-bound snapshots, and return findings or verdicts without editing manuscript files.
 
 ## Reproducible generation
 

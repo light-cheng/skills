@@ -439,3 +439,97 @@ def test_exact_downgrade_margin_boundary_on_high_to_standard_shift() -> None:
     assert fb_acc is False
     assert prof_acc.recommended_tier == "standard"
 
+
+
+def test_model_calibration_matching_behind_gateway_and_self_judgment_fallback() -> None:
+    from abstract_profiler import (
+        COMPLEXITY_LEVELS,
+        REASONING_LEVELS,
+        extract_abstract_task_profile,
+    )
+    from agent_config_models import TaskCharacteristics
+
+    gateway_policy = {
+        "version": 1,
+        "backends": {
+            "gemini-decision": {
+                "names": ["google/gemini-decision-1", "gemini-decision-1"],
+                "data": "third-party",
+                "questions": {
+                    "agent-config/task-complexity": {
+                        "min_confidence": 0.60,
+                        "calibration": "gateway model calibration v1",
+                    },
+                    "agent-config/reasoning-need": {
+                        "min_confidence": 0.60,
+                        "calibration": "gateway model calibration v1",
+                    },
+                },
+            }
+        },
+    }
+    task = TaskCharacteristics(difficulty="routine", difficulty_source="unknown")
+    gateway_scores = {
+        "backend": "magpie",
+        "model": "google/gemini-decision-1",
+        "data_destination": "third-party",
+        "answers": {
+            "agent-config/task-complexity": _make_mcp_score(
+                COMPLEXITY_LEVELS,
+                [0.05, 0.15, 0.80, 0.00],
+                backend="magpie",
+                model="google/gemini-decision-1",
+                data_destination="third-party",
+            ),
+            "agent-config/reasoning-need": _make_mcp_score(
+                REASONING_LEVELS,
+                [0.05, 0.15, 0.80],
+                backend="magpie",
+                model="google/gemini-decision-1",
+                data_destination="third-party",
+            ),
+        },
+    }
+    prof, conf, fb, _ = extract_abstract_task_profile(
+        task,
+        decide_scores=gateway_scores,
+        policy=gateway_policy,
+        max_data_destination="third-party",
+    )
+    assert fb is False
+    assert conf == pytest.approx(0.80)
+    assert prof.recommended_tier == "high"
+    assert all(d["data_destination"] == "third-party" for d in prof.decisions)
+
+    # Self-judgment caller envelope falls back cleanly without 'malformed' misclassification
+    self_judgment_scores = {
+        "agent-config/task-complexity": {
+            "question_id": "agent-config/task-complexity",
+            "kind": "score",
+            "method": "self-judgment",
+            "probabilities": {},
+            "score": None,
+            "applied": True,
+            "fallback_reason": "none",
+            "final": "high",
+        },
+        "agent-config/reasoning-need": {
+            "question_id": "agent-config/reasoning-need",
+            "kind": "score",
+            "method": "self-judgment",
+            "probabilities": {},
+            "score": None,
+            "applied": True,
+            "fallback_reason": "unavailable",
+            "final": "high",
+        },
+    }
+    prof_self, _, fb_self, _ = extract_abstract_task_profile(
+        task, decide_scores=self_judgment_scores, policy=gateway_policy
+    )
+    assert fb_self is True
+    assert prof_self.recommended_tier == "routine"
+    reasons = {d["question_id"]: d["fallback_reason"] for d in prof_self.decisions}
+    assert reasons["agent-config/task-complexity"] == "self-judgment"
+    assert reasons["agent-config/reasoning-need"] == "unavailable"
+    assert all(d["data_destination"] == "in-session" for d in prof_self.decisions)

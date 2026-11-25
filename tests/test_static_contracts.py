@@ -160,6 +160,25 @@ policy:
     assert res_model.returncode != 0
     assert "allow_implicit_invocation" in res_model.stderr
 
+    explicit_false_skill = _write_skill(
+        tmp_path / "skills" / "core" / "explicit-false",
+        frontmatter="""
+name: explicit-false
+description: Model skill should omit disable-model-invocation instead of setting false.
+disable-model-invocation: false
+""",
+        openai_yaml="""
+interface:
+  display_name: "Explicit False"
+  short_description: "Explicit false check"
+policy:
+  allow_implicit_invocation: true
+""",
+    )
+    res_explicit_false = _run_node(CHECK_FRONTMATTER, str(explicit_false_skill))
+    assert res_explicit_false.returncode != 0
+    assert "omit 'disable-model-invocation'" in res_explicit_false.stderr
+
 
 def test_check_frontmatter_checks_internal_links_and_ignores_fenced_code(tmp_path: Path) -> None:
     good_code_fence = _write_skill(
@@ -199,6 +218,29 @@ policy:
     assert "does-not-exist.md" in res_broken.stderr
 
 
+def _resolve_repo_node_modules() -> Path:
+    direct = REPO_ROOT / "node_modules"
+    if direct.is_dir():
+        return direct
+    git_common = subprocess.run(
+        ["git", "rev-parse", "--git-common-dir"],
+        cwd=str(REPO_ROOT),
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if git_common.returncode == 0 and git_common.stdout.strip():
+        common_dir = (REPO_ROOT / git_common.stdout.strip()).resolve()
+        candidate = common_dir.parent / "node_modules"
+        if candidate.is_dir():
+            return candidate
+    if os.environ.get("NODE_PATH"):
+        for entry in os.environ["NODE_PATH"].split(os.pathsep):
+            if entry and Path(entry).is_dir():
+                return Path(entry)
+    return direct
+
+
 def test_check_frontmatter_resolves_yaml_via_node_path_outside_repo(tmp_path: Path) -> None:
     copied_script = tmp_path / "isolated-worktree" / "scripts" / "check-frontmatter.mjs"
     copied_script.parent.mkdir(parents=True)
@@ -221,12 +263,31 @@ policy:
     res = subprocess.run(
         ["node", str(copied_script), str(skill)],
         cwd=str(tmp_path / "isolated-worktree"),
-        env={**os.environ, "NODE_PATH": str(REPO_ROOT / "node_modules")},
+        env={**os.environ, "NODE_PATH": str(_resolve_repo_node_modules())},
         capture_output=True,
         text=True,
         check=False,
     )
     assert res.returncode == 0, res.stderr
+
+
+def test_check_frontmatter_enforces_root_readme_word_floor(tmp_path: Path) -> None:
+    _write_skill(
+        tmp_path / "skills" / "core" / "sample",
+        frontmatter="name: sample\ndescription: Sample skill.\n",
+        openai_yaml="""
+interface:
+  display_name: "Sample"
+  short_description: "Sample skill"
+policy:
+  allow_implicit_invocation: true
+""",
+    )
+    (tmp_path / "README.md").write_text("# Too short\nOnly a few words.\n", encoding="utf-8")
+    res_short = _run_node(CHECK_FRONTMATTER, "--repo", str(tmp_path))
+    assert res_short.returncode != 0
+    assert "README.md" in res_short.stderr
+    assert "40" in res_short.stderr
 
 
 def test_sync_plugin_version_syncs_dual_manifests_and_forbids_mcp_servers(tmp_path: Path) -> None:

@@ -10,7 +10,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 try:
-    from .abstract_profiler import LIMITS, extract_abstract_task_profile, load_decision_policy
+    from .abstract_profiler import (
+        add_decide_cli_arguments,
+        extract_abstract_task_profile,
+        resolve_decide_cli_inputs,
+    )
     from .agent_config_models import (
         AgentConfigResult,
         HostCapabilities,
@@ -21,7 +25,11 @@ except ImportError:
     _scripts_dir = str(Path(__file__).resolve().parent)
     if _scripts_dir not in sys.path:
         sys.path.insert(0, _scripts_dir)
-    from abstract_profiler import LIMITS, extract_abstract_task_profile, load_decision_policy
+    from abstract_profiler import (
+        add_decide_cli_arguments,
+        extract_abstract_task_profile,
+        resolve_decide_cli_inputs,
+    )
     from agent_config_models import (
         AgentConfigResult,
         HostCapabilities,
@@ -342,15 +350,7 @@ def main() -> int:
     parser.add_argument(
         "--active-session-json", default="null", help="Optional fresh current-session model evidence JSON"
     )
-    parser.add_argument("--decide-scores-json", default=None, help="Normalized decide score payload JSON")
-    parser.add_argument("--decide-scores-file", type=Path, default=None, help="Path to decide score JSON file")
-    parser.add_argument("--decision-policy-json", default=None, help="Calibration policy JSON object")
-    parser.add_argument("--decision-policy-file", type=Path, default=None, help="Path to decision-policy.json")
-    parser.add_argument(
-        "--calibration-thresholds-json",
-        default=None,
-        help="Direct per-question min_confidence JSON mapping",
-    )
+    add_decide_cli_arguments(parser)
     parser.add_argument("--setup", action="store_true", help="Explicit setup intent")
     parser.add_argument(
         "--approval",
@@ -359,19 +359,6 @@ def main() -> int:
         help="Explicit preview approval state",
     )
     parser.add_argument("--no-preview-approval", action="store_true", help="Simulate user declining preview")
-    parser.add_argument("--no-typed-decisions", action="store_true", help="Do not apply typed decide scores")
-    parser.add_argument(
-        "--project-root",
-        type=Path,
-        default=None,
-        help="Project root whose Decision data line limits typed decide inputs",
-    )
-    parser.add_argument(
-        "--max-data-destination",
-        choices=list(LIMITS),
-        default=None,
-        help="Explicit maximum data destination override",
-    )
 
     args = parser.parse_args()
     host_data = json.loads(args.host_json)
@@ -381,25 +368,7 @@ def main() -> int:
     if approval_arg is None and args.no_preview_approval:
         approval_arg = "declined"
 
-    scores_input: Optional[Union[Dict[str, Any], List[Any], Path, str]] = None
-    if args.decide_scores_json is not None:
-        scores_input = args.decide_scores_json
-    elif args.decide_scores_file is not None:
-        scores_input = args.decide_scores_file
-
-    policy_input: Optional[Dict[str, Any]] = None
-    if args.decision_policy_json is not None:
-        policy_input = json.loads(args.decision_policy_json)
-    elif args.decision_policy_file is not None:
-        policy_input = load_decision_policy(args.decision_policy_file)
-    elif args.calibration_thresholds_json is None and scores_input is not None:
-        policy_input = load_decision_policy()
-
-    thresholds_input: Optional[Dict[str, float]] = (
-        json.loads(args.calibration_thresholds_json)
-        if args.calibration_thresholds_json is not None
-        else None
-    )
+    scores_input, policy_input, thresholds_input = resolve_decide_cli_inputs(args)
 
     result = agent_config_recommend(
         host=host_data,

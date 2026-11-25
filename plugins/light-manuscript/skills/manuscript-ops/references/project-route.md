@@ -47,7 +47,7 @@ Construct `review-matrix.json` using [review.md](review.md). All eight non-image
 
 At `outline`, accepted `batch`, `candidate`, `source-lock`, and `final` milestones, invoke `acceptance` at **Charter scale** (`init`, `run`, `resume`) with `Profile: manuscript` ([handoffs.md](handoffs.md)):
 
-- Store the frozen Acceptance charter and JSON verdict envelope (`provider: "acceptance"`, `profile: "manuscript"`) under `.scratch/<feature>/acceptance/` (or `.scratch/acceptance/<slug>/` or `.manuscript-ops/reviews/`).
+- Store the frozen **Acceptance charter** and durable acceptance state strictly under `.scratch/<feature>/acceptance/` (or `.scratch/acceptance/<slug>/`), and record the JSON milestone result (`provider: "acceptance"`, `profile: "manuscript"`) under `.scratch/<feature>/acceptance/` or `.manuscript-ops/reviews/` referencing that `.scratch/` charter.
 - Ensure both convergence reviewers and the independent Evaluator run in **fresh context windows**.
 - If `acceptance` returns `FAIL` with `Cause: direction`, invoke `redirect` to draft a Change proposal under `.scratch/<feature>/changes/` and wait for human Brief/charter approval before resuming.
 

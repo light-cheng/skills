@@ -14,7 +14,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 try:
     from .agent_config_models import AbstractTaskProfile, DimensionProvenance, TaskCharacteristics
@@ -69,6 +69,14 @@ def _bin_level(score: float, count: int) -> int:
     return max(0, min(count - 1, int(score + 0.5)))
 
 
+def _complexity_to_tier(level: str) -> str:
+    if level in ("high", "critical"):
+        return "high"
+    if level == "routine":
+        return "routine"
+    return "standard"
+
+
 def _find_project_config(start: Path, explicit_root: bool) -> Optional[Path]:
     here = start.resolve()
     direct = here / PROJECT_CONFIG_REL
@@ -86,13 +94,7 @@ def _find_project_config(start: Path, explicit_root: bool) -> Optional[Path]:
 
 
 def read_decision_data_limit(project_root: Optional[Path]) -> Optional[str]:
-    """Read Decision data limit from docs/agents/light-project.md.
-
-    When project_root is explicitly provided and lacks docs/agents/light-project.md,
-    defaults to 'on-device'. When project_root is None and no project file exists
-    upward to the git root, returns None (no repo-level override detected).
-    Unrecognized values resolve to 'off'.
-    """
+    """Read Decision data limit from docs/agents/light-project.md."""
     explicit_root = project_root is not None
     path = _find_project_config(project_root or Path.cwd(), explicit_root=explicit_root)
     if path is None:
@@ -169,10 +171,16 @@ def load_decision_policy(path: Optional[Path] = None) -> Dict[str, Any]:
 def _resolve_question_calibration(
     question_id: str,
     backend: Optional[str],
+    model: Optional[str],
     policy: Optional[Dict[str, Any]],
     calibration_thresholds: Optional[Dict[str, float]],
 ) -> Tuple[Optional[float], Optional[str]]:
-    """Return (min_confidence_threshold, declared_backend_data_destination)."""
+    """Return (min_confidence_threshold, declared_backend_data_destination).
+
+    Matches answering backend/model against policy.backends keys and names lists,
+    checking compound 'backend/model' and 'model' before 'backend' so per-model
+    calibrations behind gateways (such as Magpie) resolve accurately.
+    """
     short_key = question_id.split("/")[-1]
 
     if isinstance(calibration_thresholds, dict):
@@ -187,17 +195,28 @@ def _resolve_question_calibration(
 
     backends = policy.get("backends")
     if isinstance(backends, dict):
+        tokens: List[str] = []
+        if backend and model:
+            tokens.append(f"{backend}/{model}")
+        if model and model not in tokens:
+            tokens.append(model)
+        if backend and backend not in tokens:
+            tokens.append(backend)
+
         matched_entry: Optional[Dict[str, Any]] = None
-        if backend:
+        for token in tokens:
             for key, entry in backends.items():
                 if not isinstance(entry, dict):
                     continue
                 names = entry.get("names")
-                if backend == key or (isinstance(names, list) and backend in names):
+                if token == key or (isinstance(names, list) and token in names):
                     matched_entry = entry
                     break
+            if matched_entry is not None:
+                break
+
         if matched_entry is not None:
-            declared_data = matched_entry.get("data")
+            declared_data = matched_entry.get("data_destination") or matched_entry.get("data")
             norm_data = declared_data if declared_data in DESTINATIONS else None
             questions = matched_entry.get("questions")
             q_entry = questions.get(question_id) if isinstance(questions, dict) else None
@@ -226,10 +245,7 @@ def _resolve_question_calibration(
 def _unpack_decide_scores(
     decide_scores: Union[Dict[str, Any], List[Any], Path, str],
 ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
-    """Normalize decide score container into a flat dict keyed by question id or alias.
-
-    Returns (mapping, container_error_reason).
-    """
+    """Normalize decide score container into a flat dict keyed by question id or alias."""
     raw: Any = decide_scores
     if isinstance(decide_scores, Path):
         try:
@@ -270,7 +286,7 @@ def _unpack_decide_scores(
                 merged[key] = answer
         return merged, None
 
-    if isinstance(raw.get("question_id"), str) and "probabilities" in raw:
+    if isinstance(raw.get("question_id"), str) and ("probabilities" in raw or "method" in raw):
         return {raw["question_id"]: raw}, None
 
     return dict(raw), None
@@ -280,14 +296,7 @@ def _validate_score_envelope(
     envelope: Any,
     levels: List[str],
 ) -> Tuple[Optional[Dict[str, Any]], str]:
-    """Validate normalized light-decision-mcp score envelope.
-
-    Checks:
-      - Finite probabilities in [0, 1] for every level (keyed by label or 0..N-1 index), summing to 1.0.
-      - Finite score / expected_level in [0, N-1] matching sum(i * p_i) within 0.02.
-      - Valid optional confidence and provider_confidence fields when present.
-    Returns (parsed_dict, error_reason).
-    """
+    """Validate normalized light-decision-mcp or decide score envelope."""
     if not isinstance(envelope, dict):
         return None, "malformed"
 
@@ -295,7 +304,18 @@ def _validate_score_envelope(
         err_text = json.dumps(envelope.get("error", "")).lower()
         return None, "timeout" if "timeout" in err_text else "unavailable"
 
+    if envelope.get("method") == "self-judgment":
+        raw_reason = envelope.get("fallback_reason")
+        if isinstance(raw_reason, str) and raw_reason.strip() and raw_reason != "none":
+            return None, raw_reason.strip()
+        return None, "self-judgment"
+
     raw_probs = envelope.get("probabilities")
+    if not raw_probs and envelope.get("applied") is False:
+        raw_reason = envelope.get("fallback_reason")
+        if isinstance(raw_reason, str) and raw_reason.strip() and raw_reason != "none":
+            return None, raw_reason.strip()
+
     if not isinstance(raw_probs, dict) or len(raw_probs) != len(levels):
         return None, "malformed"
 
@@ -353,10 +373,15 @@ def _validate_score_envelope(
     if not isinstance(raw_dest, str) or raw_dest not in DESTINATIONS:
         return None, "malformed"
 
-    raw_backend = envelope.get("backend")
-    backend = str(raw_backend).strip() if isinstance(raw_backend, str) and raw_backend.strip() else None
-    raw_model = envelope.get("model")
-    model = str(raw_model).strip() if isinstance(raw_model, str) and raw_model.strip() else None
+    if envelope.get("fallback_used") is False:
+        effective_backend = envelope.get("backend")
+        effective_model = envelope.get("model")
+    else:
+        effective_backend = envelope.get("backend")
+        effective_model = envelope.get("model")
+
+    backend = str(effective_backend).strip() if isinstance(effective_backend, str) and effective_backend.strip() else None
+    model = str(effective_model).strip() if isinstance(effective_model, str) and effective_model.strip() else None
 
     bin_idx = _bin_level(reported_score, len(levels))
     bin_label = levels[bin_idx]
@@ -381,10 +406,7 @@ def _accept_shift(
     threshold: Optional[float],
     margin: float,
 ) -> Tuple[bool, str, str]:
-    """Evaluate threshold and downgrade margin.
-
-    Returns (accepted, record_fallback_reason, detail_reason).
-    """
+    """Evaluate threshold and downgrade margin."""
     if threshold is None:
         return False, "uncalibrated", "uncalibrated"
     if conf < threshold:
@@ -416,8 +438,9 @@ def _own_decision_record(
         "confidence": None,
         "provider_confidence": None,
         "method": "self-judgment",
-        "data": "in-session",
+        "data_destination": "in-session",
         "backend": "agent",
+        "model": None,
         "calibrated": False,
         "applied": True,
         "fallback_reason": reason,
@@ -437,7 +460,7 @@ def _typed_decision_record(
     baseline_answer: str,
 ) -> Dict[str, Any]:
     answer = parsed["bin_label"]
-    record: Dict[str, Any] = {
+    return {
         "question_id": question_id,
         "question": question,
         "kind": "score",
@@ -448,35 +471,20 @@ def _typed_decision_record(
         "confidence": round(parsed["bin_conf"], 4),
         "provider_confidence": parsed["provider_confidence"],
         "method": "typed-decision",
-        "data": data_destination,
+        "data_destination": data_destination,
         "backend": parsed["backend"] or "decide",
+        "model": parsed.get("model"),
         "calibrated": calibrated,
         "applied": accepted,
         "fallback_reason": "none" if accepted else record_reason,
         "final": answer if accepted else baseline_answer,
     }
-    if parsed.get("model"):
-        record["model"] = parsed["model"]
-    return record
 
 
 def build_deterministic_profile(task: TaskCharacteristics) -> AbstractTaskProfile:
-    """Deterministic fallback mapping of task characteristics to abstract profile.
-
-    Separates capability requirement from cost preference:
-    Difficulty maps directly to capability tier and reasoning need;
-    cost sensitivity does NOT downgrade capability tier or reasoning need.
-    Preserves authoritative provenance for explicit user, verified ticket, or policy inputs.
-    """
-    if task.difficulty in ("high", "critical"):
-        rec_tier = "high"
-        reasoning = "high"
-    elif task.difficulty == "routine":
-        rec_tier = "routine"
-        reasoning = "low"
-    else:
-        rec_tier = "standard"
-        reasoning = "medium"
+    """Deterministic fallback mapping of task characteristics to abstract profile."""
+    rec_tier = _complexity_to_tier(task.difficulty)
+    reasoning = "high" if rec_tier == "high" else ("low" if rec_tier == "routine" else "medium")
 
     lat_sens = "high" if task.latency_sensitive else "medium"
     cost_sens = "high" if task.cost_sensitive else "medium"
@@ -566,6 +574,145 @@ def _fallback_with_own_records(
     return det_prof, None, True, summary_reason
 
 
+def _evaluate_score_dimension(
+    *,
+    dim_name: str,
+    question_id: str,
+    alias_key: str,
+    question_text: str,
+    levels: List[str],
+    baseline_value: str,
+    rank_of: Callable[[str], int],
+    unpacked: Dict[str, Any],
+    policy: Optional[Dict[str, Any]],
+    calibration_thresholds: Optional[Dict[str, float]],
+    active_limit: Optional[str],
+) -> Tuple[str, Optional[float], Optional[float], bool, DimensionProvenance, Dict[str, Any]]:
+    """Shared validation, calibration, data-boundary, and DOWNGRADE_MARGIN pipeline for one score question."""
+    raw_item = unpacked.get(question_id)
+    if raw_item is None:
+        raw_item = unpacked.get(alias_key)
+
+    if raw_item is None:
+        msg = f"unavailable: {dim_name} score absent"
+        return (
+            baseline_value,
+            None,
+            None,
+            True,
+            DimensionProvenance(
+                dimension=dim_name,
+                value=baseline_value,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=msg,
+            ),
+            _own_decision_record(question_id, question_text, levels, baseline_value, "unavailable"),
+        )
+
+    parsed, err = _validate_score_envelope(raw_item, levels)
+    if parsed is None:
+        msg = f"{err}: {dim_name} score not applied"
+        return (
+            baseline_value,
+            None,
+            None,
+            True,
+            DimensionProvenance(
+                dimension=dim_name,
+                value=baseline_value,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=msg,
+            ),
+            _own_decision_record(question_id, question_text, levels, baseline_value, err),
+        )
+
+    threshold, policy_data = _resolve_question_calibration(
+        question_id,
+        parsed["backend"],
+        parsed.get("model"),
+        policy,
+        calibration_thresholds,
+    )
+    eff_data = (
+        _farther_destination(parsed["data_destination"], policy_data)
+        if policy_data
+        else parsed["data_destination"]
+    )
+    if not _within_data_limit(eff_data, active_limit):
+        msg = f"unavailable: data_destination '{eff_data}' exceeds limit '{active_limit}'"
+        return (
+            baseline_value,
+            None,
+            None,
+            True,
+            DimensionProvenance(
+                dimension=dim_name,
+                value=baseline_value,
+                source="deterministic-fallback",
+                fallback_used=True,
+                fallback_reason=msg,
+            ),
+            _own_decision_record(question_id, question_text, levels, baseline_value, "unavailable"),
+        )
+
+    score_val = parsed["score"]
+    conf_val = parsed["bin_conf"]
+    cand_value = parsed["bin_label"]
+    cand_rank = rank_of(cand_value)
+    base_rank = rank_of(baseline_value)
+    direction = "upgrade" if cand_rank > base_rank else ("hold" if cand_rank == base_rank else "downgrade")
+    margin = (parsed["bin_idx"] + 0.5) - score_val
+    accepted, rec_reason, detail_why = _accept_shift(direction, conf_val, threshold, margin)
+    record = _typed_decision_record(
+        question_id,
+        question_text,
+        levels,
+        parsed,
+        eff_data,
+        threshold is not None,
+        accepted,
+        rec_reason,
+        baseline_value,
+    )
+    if accepted:
+        return (
+            cand_value,
+            score_val,
+            conf_val,
+            False,
+            DimensionProvenance(
+                dimension=dim_name,
+                value=cand_value,
+                confidence=conf_val,
+                source="typed-decision",
+                fallback_used=False,
+            ),
+            record,
+        )
+
+    rej = (
+        f"{direction.capitalize()} {dim_name} from {baseline_value} to {cand_value} not applied: "
+        f"{detail_why} (confidence {conf_val:.2f})"
+    )
+    return (
+        baseline_value,
+        score_val,
+        conf_val,
+        True,
+        DimensionProvenance(
+            dimension=dim_name,
+            value=baseline_value,
+            confidence=conf_val,
+            source="deterministic-fallback",
+            fallback_used=True,
+            fallback_reason=rej,
+        ),
+        record,
+    )
+
+
 def extract_abstract_task_profile(
     task: TaskCharacteristics,
     decide_scores: Optional[Union[Dict[str, Any], List[Any], Path, str]] = None,
@@ -575,17 +722,7 @@ def extract_abstract_task_profile(
     calibration_thresholds: Optional[Dict[str, float]] = None,
     max_data_destination: Optional[str] = None,
 ) -> Tuple[AbstractTaskProfile, Optional[float], bool, Optional[str]]:
-    """Extract abstract configuration intent from task traits and optional decide score payloads.
-
-    Applies normalized decide (light-decision-mcp) score results for
-    agent-config/task-complexity and agent-config/reasoning-need only when:
-      1. The dimension is not already owned by authoritative code/policy inputs.
-      2. The score payload stays within the active Decision data boundary.
-      3. Probability distribution and expected-value checks pass.
-      4. Calibration threshold is met, and any downward shift clears DOWNGRADE_MARGIN = 0.15.
-
-    Otherwise falls back deterministically per dimension via build_deterministic_profile.
-    """
+    """Extract abstract configuration intent from task traits and optional decide score payloads."""
     is_complexity_authoritative = (
         task.difficulty_source not in ("unknown", "heuristic") and bool(task.difficulty)
     )
@@ -644,15 +781,10 @@ def extract_abstract_task_profile(
     reas_score_val: Optional[float] = None
     reas_conf: Optional[float] = None
 
-    # 1. Complexity dimension
-    comp_fallback = False
     if is_complexity_authoritative:
+        comp_fallback = False
         comp_level = task.difficulty
-        rec_tier = (
-            "high"
-            if comp_level in ("high", "critical")
-            else ("routine" if comp_level == "routine" else "standard")
-        )
+        rec_tier = _complexity_to_tier(comp_level)
         prov["complexity"] = DimensionProvenance(
             dimension="complexity",
             value=comp_level,
@@ -668,190 +800,38 @@ def extract_abstract_task_profile(
             fallback_used=False,
         )
     else:
-        baseline_tier = det_base.recommended_tier
-        baseline_level = det_base.complexity_level
-        raw_comp = unpacked.get(COMPLEXITY_QUESTION)
-        if raw_comp is None:
-            raw_comp = unpacked.get("task_complexity")
-
-        if raw_comp is None:
-            comp_fallback = True
+        comp_level, comp_score_val, comp_conf, comp_fallback, comp_prov, comp_rec = _evaluate_score_dimension(
+            dim_name="complexity",
+            question_id=COMPLEXITY_QUESTION,
+            alias_key="task_complexity",
+            question_text=COMPLEXITY_TEXT,
+            levels=COMPLEXITY_LEVELS,
+            baseline_value=det_base.complexity_level,
+            rank_of=lambda lvl: TIER_RANKS[_complexity_to_tier(lvl)],
+            unpacked=unpacked,
+            policy=policy,
+            calibration_thresholds=calibration_thresholds,
+            active_limit=active_limit,
+        )
+        rec_tier = _complexity_to_tier(comp_level)
+        decisions.append(comp_rec)
+        prov["complexity"] = comp_prov
+        prov["tier"] = DimensionProvenance(
+            dimension="tier",
+            value=rec_tier,
+            confidence=comp_prov.confidence,
+            source=comp_prov.source,
+            fallback_used=comp_prov.fallback_used,
+            fallback_reason=comp_prov.fallback_reason,
+        )
+        if comp_fallback:
             fallback_dims.append("complexity")
-            comp_level = baseline_level
-            rec_tier = baseline_tier
-            msg = "unavailable: complexity score absent"
-            decisions.append(
-                _own_decision_record(
-                    COMPLEXITY_QUESTION, COMPLEXITY_TEXT, COMPLEXITY_LEVELS, baseline_level, "unavailable"
-                )
-            )
-            prov["complexity"] = DimensionProvenance(
-                dimension="complexity",
-                value=comp_level,
-                source="deterministic-fallback",
-                fallback_used=True,
-                fallback_reason=msg,
-            )
-            prov["tier"] = DimensionProvenance(
-                dimension="tier",
-                value=rec_tier,
-                source="deterministic-fallback",
-                fallback_used=True,
-                fallback_reason=msg,
-            )
-        else:
-            parsed_comp, err_comp = _validate_score_envelope(raw_comp, COMPLEXITY_LEVELS)
-            if parsed_comp is None:
-                comp_fallback = True
-                fallback_dims.append("complexity")
-                comp_level = baseline_level
-                rec_tier = baseline_tier
-                msg = f"{err_comp}: invalid complexity score or probability distribution"
-                decisions.append(
-                    _own_decision_record(
-                        COMPLEXITY_QUESTION, COMPLEXITY_TEXT, COMPLEXITY_LEVELS, baseline_level, err_comp
-                    )
-                )
-                prov["complexity"] = DimensionProvenance(
-                    dimension="complexity",
-                    value=comp_level,
-                    source="deterministic-fallback",
-                    fallback_used=True,
-                    fallback_reason=msg,
-                )
-                prov["tier"] = DimensionProvenance(
-                    dimension="tier",
-                    value=rec_tier,
-                    source="deterministic-fallback",
-                    fallback_used=True,
-                    fallback_reason=msg,
-                )
-            else:
-                threshold_comp, policy_data_comp = _resolve_question_calibration(
-                    COMPLEXITY_QUESTION, parsed_comp["backend"], policy, calibration_thresholds
-                )
-                eff_data_comp = (
-                    _farther_destination(parsed_comp["data_destination"], policy_data_comp)
-                    if policy_data_comp
-                    else parsed_comp["data_destination"]
-                )
-                if not _within_data_limit(eff_data_comp, active_limit):
-                    comp_fallback = True
-                    fallback_dims.append("complexity")
-                    comp_level = baseline_level
-                    rec_tier = baseline_tier
-                    msg = (
-                        f"unavailable: data_destination '{eff_data_comp}' exceeds limit '{active_limit}'"
-                    )
-                    decisions.append(
-                        _own_decision_record(
-                            COMPLEXITY_QUESTION,
-                            COMPLEXITY_TEXT,
-                            COMPLEXITY_LEVELS,
-                            baseline_level,
-                            "unavailable",
-                        )
-                    )
-                    prov["complexity"] = DimensionProvenance(
-                        dimension="complexity",
-                        value=comp_level,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=msg,
-                    )
-                    prov["tier"] = DimensionProvenance(
-                        dimension="tier",
-                        value=rec_tier,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=msg,
-                    )
-                else:
-                    comp_score_val = parsed_comp["score"]
-                    comp_conf = parsed_comp["bin_conf"]
-                    cand_level = parsed_comp["bin_label"]
-                    cand_tier = (
-                        "high"
-                        if cand_level in ("high", "critical")
-                        else ("routine" if cand_level == "routine" else "standard")
-                    )
-                    cand_rank = TIER_RANKS[cand_tier]
-                    base_rank = TIER_RANKS[baseline_tier]
-                    direction = (
-                        "upgrade"
-                        if cand_rank > base_rank
-                        else ("hold" if cand_rank == base_rank else "downgrade")
-                    )
-                    margin = (parsed_comp["bin_idx"] + 0.5) - comp_score_val
-                    accepted, rec_reason, detail_why = _accept_shift(
-                        direction, comp_conf, threshold_comp, margin
-                    )
-                    decisions.append(
-                        _typed_decision_record(
-                            COMPLEXITY_QUESTION,
-                            COMPLEXITY_TEXT,
-                            COMPLEXITY_LEVELS,
-                            parsed_comp,
-                            eff_data_comp,
-                            threshold_comp is not None,
-                            accepted,
-                            rec_reason,
-                            baseline_level,
-                        )
-                    )
-                    if accepted:
-                        reported_confs.append(comp_conf)
-                        comp_level = cand_level
-                        rec_tier = cand_tier
-                        prov["complexity"] = DimensionProvenance(
-                            dimension="complexity",
-                            value=comp_level,
-                            confidence=comp_conf,
-                            source="typed-decision",
-                            fallback_used=False,
-                        )
-                        prov["tier"] = DimensionProvenance(
-                            dimension="tier",
-                            value=rec_tier,
-                            confidence=comp_conf,
-                            source="typed-decision",
-                            fallback_used=False,
-                        )
-                    else:
-                        comp_fallback = True
-                        fallback_dims.append("complexity")
-                        comp_level = baseline_level
-                        rec_tier = baseline_tier
-                        rej = (
-                            f"{direction.capitalize()} from {baseline_tier} to {cand_tier} not applied: "
-                            f"{detail_why} (confidence {comp_conf:.2f})"
-                        )
-                        prov["complexity"] = DimensionProvenance(
-                            dimension="complexity",
-                            value=comp_level,
-                            confidence=comp_conf,
-                            source="deterministic-fallback",
-                            fallback_used=True,
-                            fallback_reason=rej,
-                        )
-                        prov["tier"] = DimensionProvenance(
-                            dimension="tier",
-                            value=rec_tier,
-                            confidence=comp_conf,
-                            source="deterministic-fallback",
-                            fallback_used=True,
-                            fallback_reason=rej,
-                        )
+        elif comp_conf is not None:
+            reported_confs.append(comp_conf)
 
-    # 2. Reasoning dimension
-    reas_fallback = False
     if is_reasoning_authoritative:
-        if task.reasoning_policy in ("highest-supported", "high"):
-            reasoning_need = "high"
-        elif task.reasoning_policy in ("lowest-supported", "minimal", "low"):
-            reasoning_need = "low"
-        else:
-            reasoning_need = "medium"
+        reas_fallback = False
+        reasoning_need = det_base.reasoning_need
         prov["reasoning"] = DimensionProvenance(
             dimension="reasoning",
             value=reasoning_need,
@@ -860,133 +840,27 @@ def extract_abstract_task_profile(
             fallback_used=False,
         )
     else:
-        baseline_reas = det_base.reasoning_need
-        raw_reas = unpacked.get(REASONING_QUESTION)
-        if raw_reas is None:
-            raw_reas = unpacked.get("reasoning_need")
-
-        if raw_reas is None:
-            reas_fallback = True
+        reasoning_need, reas_score_val, reas_conf, reas_fallback, reas_prov, reas_rec = (
+            _evaluate_score_dimension(
+                dim_name="reasoning",
+                question_id=REASONING_QUESTION,
+                alias_key="reasoning_need",
+                question_text=REASONING_TEXT,
+                levels=REASONING_LEVELS,
+                baseline_value=det_base.reasoning_need,
+                rank_of=lambda lvl: REASONING_RANKS[lvl],
+                unpacked=unpacked,
+                policy=policy,
+                calibration_thresholds=calibration_thresholds,
+                active_limit=active_limit,
+            )
+        )
+        decisions.append(reas_rec)
+        prov["reasoning"] = reas_prov
+        if reas_fallback:
             fallback_dims.append("reasoning")
-            reasoning_need = baseline_reas
-            msg = "unavailable: reasoning score absent"
-            decisions.append(
-                _own_decision_record(
-                    REASONING_QUESTION, REASONING_TEXT, REASONING_LEVELS, baseline_reas, "unavailable"
-                )
-            )
-            prov["reasoning"] = DimensionProvenance(
-                dimension="reasoning",
-                value=reasoning_need,
-                source="deterministic-fallback",
-                fallback_used=True,
-                fallback_reason=msg,
-            )
-        else:
-            parsed_reas, err_reas = _validate_score_envelope(raw_reas, REASONING_LEVELS)
-            if parsed_reas is None:
-                reas_fallback = True
-                fallback_dims.append("reasoning")
-                reasoning_need = baseline_reas
-                msg = f"{err_reas}: invalid reasoning score or probability distribution"
-                decisions.append(
-                    _own_decision_record(
-                        REASONING_QUESTION, REASONING_TEXT, REASONING_LEVELS, baseline_reas, err_reas
-                    )
-                )
-                prov["reasoning"] = DimensionProvenance(
-                    dimension="reasoning",
-                    value=reasoning_need,
-                    source="deterministic-fallback",
-                    fallback_used=True,
-                    fallback_reason=msg,
-                )
-            else:
-                threshold_reas, policy_data_reas = _resolve_question_calibration(
-                    REASONING_QUESTION, parsed_reas["backend"], policy, calibration_thresholds
-                )
-                eff_data_reas = (
-                    _farther_destination(parsed_reas["data_destination"], policy_data_reas)
-                    if policy_data_reas
-                    else parsed_reas["data_destination"]
-                )
-                if not _within_data_limit(eff_data_reas, active_limit):
-                    reas_fallback = True
-                    fallback_dims.append("reasoning")
-                    reasoning_need = baseline_reas
-                    msg = (
-                        f"unavailable: data_destination '{eff_data_reas}' exceeds limit '{active_limit}'"
-                    )
-                    decisions.append(
-                        _own_decision_record(
-                            REASONING_QUESTION,
-                            REASONING_TEXT,
-                            REASONING_LEVELS,
-                            baseline_reas,
-                            "unavailable",
-                        )
-                    )
-                    prov["reasoning"] = DimensionProvenance(
-                        dimension="reasoning",
-                        value=reasoning_need,
-                        source="deterministic-fallback",
-                        fallback_used=True,
-                        fallback_reason=msg,
-                    )
-                else:
-                    reas_score_val = parsed_reas["score"]
-                    reas_conf = parsed_reas["bin_conf"]
-                    cand_reas = parsed_reas["bin_label"]
-                    cand_rank_reas = REASONING_RANKS[cand_reas]
-                    base_rank_reas = REASONING_RANKS[baseline_reas]
-                    direction_reas = (
-                        "upgrade"
-                        if cand_rank_reas > base_rank_reas
-                        else ("hold" if cand_rank_reas == base_rank_reas else "downgrade")
-                    )
-                    margin_reas = (parsed_reas["bin_idx"] + 0.5) - reas_score_val
-                    accepted_reas, rec_reason_reas, detail_why_reas = _accept_shift(
-                        direction_reas, reas_conf, threshold_reas, margin_reas
-                    )
-                    decisions.append(
-                        _typed_decision_record(
-                            REASONING_QUESTION,
-                            REASONING_TEXT,
-                            REASONING_LEVELS,
-                            parsed_reas,
-                            eff_data_reas,
-                            threshold_reas is not None,
-                            accepted_reas,
-                            rec_reason_reas,
-                            baseline_reas,
-                        )
-                    )
-                    if accepted_reas:
-                        reported_confs.append(reas_conf)
-                        reasoning_need = cand_reas
-                        prov["reasoning"] = DimensionProvenance(
-                            dimension="reasoning",
-                            value=reasoning_need,
-                            confidence=reas_conf,
-                            source="typed-decision",
-                            fallback_used=False,
-                        )
-                    else:
-                        reas_fallback = True
-                        fallback_dims.append("reasoning")
-                        reasoning_need = baseline_reas
-                        rej_reas = (
-                            f"{direction_reas.capitalize()} reasoning from {baseline_reas} to {cand_reas} "
-                            f"not applied: {detail_why_reas} (confidence {reas_conf:.2f})"
-                        )
-                        prov["reasoning"] = DimensionProvenance(
-                            dimension="reasoning",
-                            value=reasoning_need,
-                            confidence=reas_conf,
-                            source="deterministic-fallback",
-                            fallback_used=True,
-                            fallback_reason=rej_reas,
-                        )
+        elif reas_conf is not None:
+            reported_confs.append(reas_conf)
 
     any_fallback = comp_fallback or reas_fallback
     fallback_reason = f"Per-dimension fallback on: {', '.join(fallback_dims)}" if any_fallback else None
@@ -1008,9 +882,8 @@ def extract_abstract_task_profile(
     return profile, overall_conf, any_fallback, fallback_reason
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Abstract task profiler with normalized decide intake")
-    parser.add_argument("--task-json", default="{}", help="TaskCharacteristics JSON object")
+def add_decide_cli_arguments(parser: argparse.ArgumentParser) -> None:
+    """Register shared CLI arguments for normalized decide score intake and policy loading."""
     parser.add_argument("--decide-scores-json", default=None, help="Normalized decide score payload JSON")
     parser.add_argument("--decide-scores-file", type=Path, default=None, help="Path to decide score JSON file")
     parser.add_argument("--decision-policy-json", default=None, help="Calibration policy JSON object")
@@ -1020,18 +893,29 @@ def main() -> int:
         default=None,
         help="Direct per-question min_confidence JSON mapping",
     )
-    parser.add_argument("--project-root", type=Path, default=None, help="Project root for Decision data boundary")
+    parser.add_argument(
+        "--project-root",
+        type=Path,
+        default=None,
+        help="Project root whose Decision data line limits typed decide inputs",
+    )
     parser.add_argument(
         "--max-data-destination",
         choices=list(LIMITS),
         default=None,
         help="Explicit maximum data destination override",
     )
-    parser.add_argument("--no-typed-decisions", action="store_true", help="Force deterministic baseline")
+    parser.add_argument("--no-typed-decisions", action="store_true", help="Do not apply typed decide scores")
 
-    args = parser.parse_args()
-    task_obj = TaskCharacteristics.from_dict(json.loads(args.task_json))
 
+def resolve_decide_cli_inputs(
+    args: argparse.Namespace,
+) -> Tuple[
+    Optional[Union[Dict[str, Any], List[Any], Path, str]],
+    Optional[Dict[str, Any]],
+    Optional[Dict[str, float]],
+]:
+    """Extract (scores_input, policy_input, thresholds_input) from parsed CLI arguments."""
     scores_input: Optional[Union[Dict[str, Any], List[Any], Path, str]] = None
     if args.decide_scores_json is not None:
         scores_input = args.decide_scores_json
@@ -1051,6 +935,17 @@ def main() -> int:
         if args.calibration_thresholds_json is not None
         else None
     )
+    return scores_input, policy_input, thresholds_input
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Abstract task profiler with normalized decide intake")
+    parser.add_argument("--task-json", default="{}", help="TaskCharacteristics JSON object")
+    add_decide_cli_arguments(parser)
+
+    args = parser.parse_args()
+    task_obj = TaskCharacteristics.from_dict(json.loads(args.task_json))
+    scores_input, policy_input, thresholds_input = resolve_decide_cli_inputs(args)
 
     profile, confidence, fallback_used, fallback_reason = extract_abstract_task_profile(
         task=task_obj,

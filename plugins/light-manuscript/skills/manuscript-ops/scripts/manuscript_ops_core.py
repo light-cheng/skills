@@ -169,16 +169,14 @@ def _normalize_dimension(name: str, raw: Any, fallback: dict[str, Any]) -> dict[
 def select_route(
     dimensions: dict[str, dict[str, Any]],
     hard_triggers: dict[str, bool | None],
-    unknowns: Iterable[str],
     *,
     policy: str = ROUTING_POLICY,
-) -> tuple[int, str, list[str], bool]:
+) -> tuple[int, str, list[str]]:
     """Select Quick, Structured, or Project under needs-v2 workflow rules."""
     if policy != ROUTING_POLICY:
         raise ContractError(
             f"unsupported routing policy: {policy!r}; expected {ROUTING_POLICY!r}"
         )
-    _ = unknowns
     total = sum(int(item["effective_score"]) for item in dimensions.values())
     active_triggers = [name for name, value in hard_triggers.items() if value is True]
     unresolved_triggers = [name for name, value in hard_triggers.items() if value is None]
@@ -196,7 +194,7 @@ def select_route(
         route = "Structured"
     else:
         route = "Quick"
-    return total, route, active_triggers, False
+    return total, route, active_triggers
 
 
 def valid_probability(value: Any) -> bool:
@@ -236,6 +234,27 @@ def _apply_route_constraints(
     return choice, observation
 
 
+def _validate_choice_distribution(
+    probabilities: Any,
+    choice: Any,
+    confidence: Any,
+    expected_keys: set[str] | None = None,
+) -> None:
+    if (
+        not isinstance(probabilities, dict)
+        or not ROUTE_OPTIONS.issubset(probabilities)
+        or set(probabilities) - ROUTE_OPTIONS - {"InsufficientInfo"}
+        or (expected_keys is not None and set(probabilities) != expected_keys)
+        or not isinstance(choice, str)
+        or choice not in probabilities
+        or not all(valid_probability(value) for value in probabilities.values())
+        or not valid_probability(confidence)
+        or abs(sum(probabilities.values()) - 1) > 0.001
+        or abs(probabilities[choice] - confidence) > 0.001
+    ):
+        raise ValueError("invalid decision distribution")
+
+
 def _resolve_mcp_choose_payload(
     baseline: str,
     dimensions: dict[str, dict[str, Any]],
@@ -246,20 +265,10 @@ def _resolve_mcp_choose_payload(
     """Consume a direct light-decision-mcp `choose` response gated by semantic_policy."""
     observation: dict[str, Any] = {"applied": False, "fallback_reason": "not_provided"}
     try:
-        choice = result["label"]
+        choice = result.get("choice") if result.get("choice") is not None else result.get("label")
         probabilities = result["probabilities"]
         confidence = result["confidence"]
-        if (
-            not isinstance(probabilities, dict)
-            or not ROUTE_OPTIONS.issubset(probabilities)
-            or set(probabilities) - ROUTE_OPTIONS - {"InsufficientInfo"}
-            or choice not in probabilities
-            or not all(valid_probability(value) for value in probabilities.values())
-            or not valid_probability(confidence)
-            or abs(sum(probabilities.values()) - 1) > 0.001
-            or abs(probabilities[choice] - confidence) > 0.001
-        ):
-            raise ValueError("invalid decision distribution")
+        _validate_choice_distribution(probabilities, choice, confidence)
         observation.update(
             {
                 "model": result.get("model") or result.get("backend"),
@@ -308,7 +317,7 @@ def resolve_semantic_route(
     if result.get("method") == "self-judgment":
         observation["fallback_reason"] = "self_judgment"
         return baseline, observation
-    if "label" in result and "method" not in result and "kind" not in result:
+    if ("choice" in result or "label" in result) and "method" not in result and "kind" not in result:
         return _resolve_mcp_choose_payload(
             baseline, dimensions, hard_triggers, result, policy
         )
@@ -318,7 +327,11 @@ def resolve_semantic_route(
         if question_id is not None and question_id != "manuscript-ops/route":
             raise ValueError("unexpected question_id")
         options = result["options"]
-        choice = result.get("answer") if "answer" in result else result["label"]
+        raw_choice = (
+            result["answer"]
+            if result.get("answer") is not None
+            else (result["choice"] if result.get("choice") is not None else result.get("label"))
+        )
         probabilities = result["probabilities"]
         confidence = result["confidence"]
         if (
@@ -327,18 +340,11 @@ def resolve_semantic_route(
             or not isinstance(options, list)
             or not ROUTE_OPTIONS.issubset(options)
             or set(options) - ROUTE_OPTIONS - {"InsufficientInfo"}
-            or choice not in options
+            or raw_choice not in options
         ):
             raise ValueError("not a manuscript route judgment")
-        if (
-            not isinstance(probabilities, dict)
-            or set(probabilities) != set(options)
-            or not all(valid_probability(value) for value in probabilities.values())
-            or not valid_probability(confidence)
-            or abs(sum(probabilities.values()) - 1) > 0.001
-            or abs(probabilities[choice] - confidence) > 0.001
-        ):
-            raise ValueError("invalid decision distribution")
+        _validate_choice_distribution(probabilities, raw_choice, confidence, expected_keys=set(options))
+        choice = str(raw_choice)
         observation.update(
             {
                 "model": result.get("model") or result.get("backend"),
@@ -499,10 +505,9 @@ def build_routing_snapshot(
         if value is None and f"hard_trigger:{name}" not in unknowns:
             unknowns.append(f"hard_trigger:{name}")
 
-    total, route, active_triggers, _ = select_route(
+    total, route, active_triggers = select_route(
         dimensions,
         hard_triggers,
-        unknowns,
         policy=policy,
     )
     semantic_result = answers.get("semantic_result")

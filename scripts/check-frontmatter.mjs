@@ -211,6 +211,29 @@ function collectMarkdownFiles(dirPath) {
   return results;
 }
 
+function countMeaningfulWords(markdown) {
+  const stripped = stripCodeAndComments(markdown)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1");
+  const cjkChars = stripped.match(/[\u3400-\u9fff\uf900-\ufaff]/g) ?? [];
+  const nonCjkTokens = stripped
+    .replace(/[\u3400-\u9fff\uf900-\ufaff]/g, " ")
+    .split(/\s+/)
+    .map((tok) => tok.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""))
+    .filter(Boolean);
+  return nonCjkTokens.length + cjkChars.length;
+}
+
+function checkRootReadmeWordFloor(mdPath, displayBase, errors, minWords = 40) {
+  const content = readFileSync(mdPath, "utf8");
+  const label = relative(displayBase, mdPath) || basename(mdPath);
+  const count = countMeaningfulWords(content);
+  if (count < minWords) {
+    errors.push(`${label}: word count is ${count}, expected at least ${minWords} words`);
+  }
+}
+
 function checkMarkdownLinks(mdPath, displayBase, errors) {
   const content = readFileSync(mdPath, "utf8");
   const label = relative(displayBase, mdPath) || basename(mdPath);
@@ -270,8 +293,12 @@ function validateSkillPackage(pkgDir, displayBase, errors) {
     errors.push(`${pkgLabel}/SKILL.md: 'description' must be a non-empty string`);
   }
 
-  if ("disable-model-invocation" in fm && typeof fm["disable-model-invocation"] !== "boolean") {
-    errors.push(`${pkgLabel}/SKILL.md: 'disable-model-invocation' must be a boolean`);
+  if ("disable-model-invocation" in fm) {
+    if (fm["disable-model-invocation"] !== true) {
+      errors.push(
+        `${pkgLabel}/SKILL.md: omit 'disable-model-invocation' on model-invoked skills (only 'disable-model-invocation: true' is permitted)`,
+      );
+    }
   }
 
   if ("argument-hint" in fm && (typeof fm["argument-hint"] !== "string" || fm["argument-hint"].trim() === "")) {
@@ -345,6 +372,7 @@ function main() {
       const docPath = join(repoRoot, rootDoc);
       if (existsSync(docPath)) {
         checkMarkdownLinks(docPath, repoRoot, errors);
+        checkRootReadmeWordFloor(docPath, repoRoot, errors);
       }
     }
   }

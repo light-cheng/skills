@@ -99,13 +99,22 @@ def discover_valid_candidates(host: HostCapabilities) -> List[str]:
 def determine_topology(
     host: HostCapabilities,
     task: TaskCharacteristics,
-    is_multi_model: bool,
+    valid_candidates: Optional[List[str]] = None,
+    target_model: Optional[str] = None,
 ) -> str:
     """Determine one of the 4 peer execution modes (Cases A, B, C, D)."""
+    candidates = valid_candidates if valid_candidates is not None else discover_valid_candidates(host)
     if task.shape == "decomposed":
-        if is_multi_model and host.per_agent_config:
+        if host.profile_mode == "single" or not host.has_model_selector:
+            return "Case B"
+        if host.per_agent_config and len(candidates) > 1:
             return "Case D"
         return "Case B"
-    if is_multi_model and host.has_model_selector and len(host.profile_tiers) > 1:
+
+    if host.profile_mode == "single" or not host.has_model_selector:
+        return "Case A"
+    if host.profile_mode == "multi" or (
+        target_model is not None and target_model != host.active_model and host.has_model_selector
+    ):
         return "Case C"
     return "Case A"

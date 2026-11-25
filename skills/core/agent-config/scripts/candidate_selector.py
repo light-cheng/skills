@@ -15,7 +15,7 @@ try:
         HostCapabilities,
         TaskCharacteristics,
     )
-    from .harness_adapter import discover_valid_candidates, resolve_reasoning_effort
+    from .harness_adapter import determine_topology, discover_valid_candidates, resolve_reasoning_effort
 except ImportError:
     from agent_config_models import (
         AbstractTaskProfile,
@@ -24,7 +24,7 @@ except ImportError:
         HostCapabilities,
         TaskCharacteristics,
     )
-    from harness_adapter import discover_valid_candidates, resolve_reasoning_effort
+    from harness_adapter import determine_topology, discover_valid_candidates, resolve_reasoning_effort
 
 
 def _ready_handoff(shape: str) -> str:
@@ -170,24 +170,12 @@ def select_configuration(
         )
 
     effort = resolve_reasoning_effort(host, task.reasoning_policy, profile.reasoning_need)
-
-    if task.shape == "decomposed":
-        topology = (
-            "Case B"
-            if host.profile_mode == "single"
-            else ("Case D" if (host.per_agent_config and len(valid_candidates) > 1) else "Case B")
-        )
-    else:
-        topology = (
-            "Case A"
-            if host.profile_mode == "single"
-            else (
-                "Case C"
-                if host.profile_mode == "multi"
-                or (target_model != host.active_model and host.has_model_selector)
-                else "Case A"
-            )
-        )
+    topology = determine_topology(
+        host=host,
+        task=task,
+        valid_candidates=valid_candidates,
+        target_model=target_model,
+    )
 
     cost_note = (
         " (Cost sensitivity recorded; no host cost metadata available for tie-breaking within valid candidates)"

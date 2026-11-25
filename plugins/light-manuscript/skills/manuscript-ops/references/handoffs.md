@@ -4,7 +4,7 @@
 
 ## Host-neutral invocation
 
-Render logical skill calls using the active harness syntax (`/skill-name` in Claude Code and slash-command hosts, `$skill-name` in Codex, or explicit skill activation in other Agent Skills clients). Every subagent dispatched during manuscript work (reviewer, independent Evaluator, or primary-source researcher) must start with a **fresh context window**, never a fork of the active writer conversation.
+Render logical skill calls using the active harness syntax (`/skill-name` in Claude Code and slash-command hosts, `$skill-name` in Codex, or explicit skill activation in other Agent Skills clients). Every subagent dispatched during manuscript work (delegated writer, reviewer, independent Evaluator, or primary-source researcher) must start with a **fresh context window**, never a fork of the active writer conversation.
 
 ## Brief intake and optional discovery
 
@@ -17,7 +17,7 @@ Accept any user-approved `ManuscriptBrief` directly without gating on upstream d
 ## Milestone convergence and sign-off (`acceptance`)
 
 - **Structured route**: invoke `acceptance` at **Inline scale** for bounded review-and-repair convergence (up to 3 rounds via a **fresh-context** reviewer subagent).
-- **Project route**: invoke `acceptance` at **Charter scale** (`init`, `run`, `resume`) with `Profile: manuscript`, storing the frozen Acceptance charter and JSON verdict envelope (`provider: "acceptance"`, `profile: "manuscript"`) under `.scratch/<feature>/acceptance/` (or `.scratch/acceptance/<slug>/` or `.manuscript-ops/reviews/`). After convergence, `acceptance` dispatches an independent Evaluator in a **fresh context window** to verify `manuscript_evidence` across all applicable axes and issue `PASS`, `FAIL`, or `BLOCKED`.
+- **Project route**: invoke `acceptance` at **Charter scale** (`init`, `run`, `resume`) with `Profile: manuscript`, storing the frozen **Acceptance charter** and durable acceptance records strictly under `.scratch/<feature>/acceptance/` (or `.scratch/acceptance/<slug>/`; `.manuscript-ops/reviews/` may store or mirror only the machine JSON milestone receipt referencing that `.scratch/` charter). After convergence, `acceptance` dispatches an independent Evaluator in a **fresh context window** to verify `manuscript_evidence` across all applicable axes and issue `PASS`, `FAIL`, or `BLOCKED`.
 - **Graceful fallback when `acceptance` is absent**: freeze the manuscript review packet (`ReviewMatrix`, artifact SHA-256 snapshot, Concept Grounding rules, and format-QA records) and run bounded review plus independent evaluation in separate **fresh context windows** (or ask the user to run the Evaluator packet in a new session, recording `independence: "fresh_session"`). If no independent fresh context is available, record `independence: "degraded"` and return `BLOCKED`.
 
 ## Direction changes (`redirect`)
