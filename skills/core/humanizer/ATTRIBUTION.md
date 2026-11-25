@@ -1,0 +1,118 @@
+# Attribution: humanizer
+
+This package is a Light capability adapted from upstream Skills
+(ownership gate: substantially transformed into a distinct, owned capability).
+
+- **Source repository:** [https://github.com/blader/humanizer](https://github.com/blader/humanizer)
+- **Original Skill path:** `SKILL.md` (pattern book, voice calibration, detection guidance, rewrite process, output modes)
+- **Pinned revision:** `e2e92e7b4b8229253ed5c8e81dc65463fdeddda5` (upstream `main`, 2026-08; `SKILL.md` self-reports `metadata.version: 2.11.2`; nearest tag `v2.11.1` plus 2 commits)
+- **License:** MIT, Copyright (c) 2025 Siqi Chen (see upstream `LICENSE`). The MIT notice is preserved below; no original authorship is claimed for the upstream material.
+- **Chinese vocabulary reference:** [op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh) (MIT, Copyright (c) 2026 歸藏), pinned `91f3d394db8419c20d67ebe22a96cf8fee0a404b`. Its Chinese AI-vocabulary list and pattern mappings informed `references/zh-adaptation.md`. That translation is based on an upstream generation (~2.8.x) whose worked examples modeled invented specifics; this package follows the upstream 2.9+ anti-fabrication guidance instead and keeps none of those examples.
+- **Ultimate source:** Wikipedia ["Signs of AI writing"](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup (CC BY-SA; used as the documented conceptual source via both repositories above).
+
+## Transformation summary
+
+ADAPT: upstream pattern content is preserved; the following Light changes
+were applied:
+
+1. Frontmatter aligned to collection conventions: bilingual trigger
+   description; the upstream `license` and `metadata.version` fields are
+   recorded here instead of in `SKILL.md`.
+2. Added the concise **Language routing** section (English / Chinese / mixed
+   input) ahead of the pattern book.
+3. Added `references/zh-adaptation.md`, a thin Chinese adaptation layer:
+   rule overrides for §14/§17/§19/§26, Chinese pattern mappings for the
+   remaining patterns, a Chinese AI-vocabulary list, an explicit
+   anti-fabrication rule for Chinese rewrites, and Chinese-specific
+   false-positive exemptions.
+4. Adapted upstream `agents/openai.yaml` for Light host discovery: updated
+   `short_description`/`default_prompt` for the bilingual scope and set
+   `policy.allow_implicit_invocation: true` (model-invoked).
+5. Added this `ATTRIBUTION.md`.
+6. Progressive disclosure (2026-10-10): the numbered pattern book (§1–§35)
+   and the false-positive checks moved unchanged from `SKILL.md` to
+   `references/patterns.md`; `SKILL.md` keeps the rewrite rules, voice
+   guidance, output modes, and rewrite process.
+7. No runtime dependency on `https://github.com/blader/humanizer` or
+   `https://github.com/op7418/Humanizer-zh` remains; the package is
+   self-contained.
+8. Added register-routed **Technical / Clarity Mode** (`v1.0.0`,
+   [references/technical-clarity.md](references/technical-clarity.md)) and
+   **Register routing** in `SKILL.md`: activates ASD-STE100 simplified
+   technical English principles and 简明技术中文 rules strictly for technical
+   documentation, specifications, SOPs, runbooks, and engineering
+   explanations, leaving essays, narratives, blog posts, and creative prose in
+   General Mode.
+
+Verification: `SKILL.md` frontmatter `name: humanizer` matches the package
+directory; `agents/openai.yaml` is valid; all pattern sections and examples
+(now in `references/patterns.md`) outside the numbered changes above are carried from the pinned upstream
+revision unchanged.
+
+## Wikipedia text check (2026-10-15)
+
+`references/patterns.md` was compared with "Wikipedia:Signs of AI writing"
+revisions `1319759909` (2025-10-31) and `1380244576` (2026-10-14) using
+shared 8-word sequences. About 2–3% of its words match, and every match sits
+inside a quoted example: the "before" passages that Wikipedia quotes as
+AI-generated text, and a few rewrites that reuse their wording. The pattern
+names, descriptions, word lists and rewrite rules do not match Wikipedia text.
+
+The matching examples are in the patterns about the Statistical Institute of
+Catalonia, the temple colors (Texas bluebonnets), Alamata Raya Kobo, the
+Haolai River, Korattur, "Our journey through the universe", the
+"Netherlands, Europe" passage, and the "maintains a low profile" passage.
+These quoted examples come from Wikipedia and are available under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); attribution:
+"Wikipedia:Signs of AI writing", Wikipedia contributors,
+<https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing>. The rest of
+the package stays under the MIT terms below. This is a record of the check,
+not legal advice.
+
+## MIT notice (blader/humanizer)
+
+MIT License
+
+Copyright (c) 2025 Siqi Chen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## MIT notice (op7418/Humanizer-zh, Chinese vocabulary reference)
+
+MIT License
+
+Copyright (c) 2026 歸藏
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
