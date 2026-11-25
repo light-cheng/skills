@@ -1,0 +1,7 @@
+interface:
+  display_name: "KB Init"
+  short_description: "Design and initialize a durable knowledge base"
+  default_prompt: "Use $kb-init to design and initialize a durable knowledge base from your real workflow."
+
+policy:
+  allow_implicit_invocation: false
