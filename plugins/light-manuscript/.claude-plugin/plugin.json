@@ -1,6 +1,6 @@
 {
   "name": "light-manuscript",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Optional publishing and long-form manuscript lifecycle skill (manuscript-ops) with source lineage, format QA, Concept Grounding, and gated multi-format delivery.",
   "author": {
     "name": "Light Cheng",

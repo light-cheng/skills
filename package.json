@@ -1,6 +1,6 @@
 {
   "name": "light-skills",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Orthogonal agent skill plugins for Claude Code, Codex, and Agent Skills harnesses",

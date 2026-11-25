@@ -36,7 +36,7 @@ were applied:
 7. No runtime dependency on `https://github.com/blader/humanizer` or
    `https://github.com/op7418/Humanizer-zh` remains; the package is
    self-contained.
-8. Added register-routed **Technical / Clarity Mode** (`v1.0.0`,
+8. Added register-routed **Technical / Clarity Mode** (`v0.1.0`,
    [references/technical-clarity.md](references/technical-clarity.md)) and
    **Register routing** in `SKILL.md`: activates ASD-STE100 simplified
    technical English principles and 简明技术中文 rules strictly for technical

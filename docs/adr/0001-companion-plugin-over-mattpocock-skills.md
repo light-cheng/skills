@@ -14,7 +14,7 @@ The legacy `light-cheng/skills` repository (archived locally at `../light-skills
 
 ## Decision
 
-1. Start a clean `v1.0.0` Git history for `https://github.com/light-cheng/skills` with **zero copied `mattpocock/skills` files**. Delegate general software engineering flows directly to `mattpocock/skills` as the **Base workflow**.
+1. Start a clean `v0.1.0` Git history for `https://github.com/light-cheng/skills` with **zero copied `mattpocock/skills` files**. Delegate general software engineering flows directly to `mattpocock/skills` as the **Base workflow**.
 2. Ship two pure-skills `.claude-plugin` bundles from `.claude-plugin/marketplace.json` (no auto-started `mcpServers` entries in `plugin.json`; supporting Claude Code, Codex 0.161+, and GitHub Copilot auto-updates alongside `npx skills add`):
    - **`light` (Core plugin, 8 skills grouped by target artifact under `skills/{workflow,knowledge,writing}/`)**: `light-setup`, `redirect`, `acceptance`, `agent-config`, `decide` (`workflow/`); `kb-init`, `learn-anything` (`knowledge/`); and `humanizer` (`writing/`).
    - **`light-manuscript` (Optional plugin, 1 skill at `plugins/light-manuscript/skills/manuscript-ops/`)**: `manuscript-ops` (placed inside the sub-plugin folder so `claude plugin validate` passes containment checks).
