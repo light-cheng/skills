@@ -1,0 +1,7 @@
+interface:
+  display_name: "Acceptance"
+  short_description: "Bounded review-and-repair convergence and independent charter sign-off"
+  default_prompt: "Run acceptance to converge findings through fresh-context review, verify execution or render evidence, and return PASS, FAIL, or BLOCKED."
+
+policy:
+  allow_implicit_invocation: true
