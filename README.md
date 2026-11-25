@@ -80,6 +80,12 @@ Both skills below run standalone in session-local / self-judgment mode by defaul
 - **[Light Decision MCP](https://github.com/light-cheng/Light-Decision-MCP)** (`light-decision-mcp`): Multi-backend System One decision router (Magpie gateway, Gemini Decision, TypeSafe Jev, Perplexity Decisions, OpenAI Decisions, and on-device OpenDecider / Ollama / MLX) with `doctor`, `recommend`, `setup`, and loopback web `ui`.
 - **[Agent Config MCP](https://github.com/light-cheng/agent-config)** (`agent-config`): Cross-harness host capability inspector, profile store, and preview-before-apply configuration adapter across 10 native agent harnesses.
 
+## Companion Domain Skills (Separate Repositories)
+
+Product-bound and asset-heavy vertical skills live in their own repositories so this repository stays focused on cross-project workflows:
+
+- **[Light Kanban](https://github.com/light-cheng/light-kanban)** (`kanban-worker`): Board task claiming, isolated execution, and status synchronization for Light Kanban (`npx skills add light-cheng/light-kanban --skill kanban-worker`).
+
 ## Quick Workflow Setup
 
 In a project using `mattpocock/skills` (or standalone):

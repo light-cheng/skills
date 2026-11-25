@@ -80,6 +80,12 @@ npx skills add light-cheng/skills --skill acceptance
 - **[Light Decision MCP](https://github.com/light-cheng/Light-Decision-MCP)**（`light-decision-mcp`）：多后端 System One 决策路由服务（支持 Magpie 网关、Gemini Decision、TypeSafe Jev、Perplexity Decisions、OpenAI Decisions 以及本地 OpenDecider / Ollama / MLX），内置 `doctor`、`recommend`、`setup` 与本地 Web 管理台 `ui`。
 - **[Agent Config MCP](https://github.com/light-cheng/agent-config)**（`agent-config`）：跨宿主能力探测、配置档案持久化与先预览后应用（preview-before-apply）的宿主配置适配器，原生支持 10 类主流智能体宿主。
 
+## 独立仓库伴生技能（垂直应用）
+
+强绑定特定产品或重静态资产的垂直技能维护在各自独立仓库中，避免膨胀主仓体积与默认上下文：
+
+- **[Light Kanban](https://github.com/light-cheng/light-kanban)**（`kanban-worker`）：面向 Light Kanban 看板的任务认领、隔离执行与状态同步技能（`npx skills add light-cheng/light-kanban --skill kanban-worker`）。
+
 ## 快速上手
 
 1. *（可选）* 运行 `/setup-matt-pocock-skills` 配置项目的 `docs/agents/issue-tracker.md` 与 `triage-labels.md`。
