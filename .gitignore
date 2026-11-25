@@ -1,0 +1,7 @@
+.DS_Store
+.scratch/
+.claude/.cc-writes
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
