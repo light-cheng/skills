@@ -1,0 +1,49 @@
+{
+  "dimensions": {
+    "scale": {
+      "score": null,
+      "evidence": []
+    },
+    "source_complexity": {
+      "score": null,
+      "evidence": []
+    },
+    "risk": {
+      "score": null,
+      "evidence": []
+    },
+    "output_complexity": {
+      "score": null,
+      "evidence": []
+    },
+    "collaboration": {
+      "score": null,
+      "evidence": []
+    },
+    "reproducibility": {
+      "score": null,
+      "evidence": []
+    }
+  },
+  "hard_triggers": {
+    "explicit_project": null,
+    "cross_session": null,
+    "large_volume": null,
+    "high_risk_facts": null,
+    "locked_derivatives": null,
+    "reproducible_multi_format": null,
+    "independent_multi_thread_acceptance": null
+  },
+  "unknowns": [],
+  "routing_policy": "needs-v2",
+  "task": {
+    "scope": "unknown",
+    "operation": "rewrite",
+    "lifecycle_required": null,
+    "risk_axes": [],
+    "image_count": 0,
+    "deliverables": [],
+    "evidence": []
+  },
+  "semantic_result": null
+}
